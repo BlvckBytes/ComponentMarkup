@@ -203,7 +203,7 @@ public class XmlEventParserTests {
     TextWithAnchors text = new TextWithAnchors(
       "@<tag-outer",
       "  @attr-1={",
-      "    @<red@>@Hello@</red>",
+      "    @<red@>@Hello curly \\} bracket@</red>",
       "  @}",
       "@>"
     );
@@ -219,7 +219,7 @@ public class XmlEventParserTests {
       text.getAnchor(3),
       new TagOpenEndEvent("red", false),
       text.getAnchor(4),
-      new TextEvent("Hello"),
+      new TextEvent("Hello curly } bracket"),
       text.getAnchor(5),
       new TagCloseEvent("red"),
       text.getAnchor(6),

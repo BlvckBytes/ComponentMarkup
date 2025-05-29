@@ -28,8 +28,10 @@ public class XmlEventParser {
     char priorChar = 0;
 
     while (cursor.hasRemainingChars()) {
-      if (isWithinCurlyBrackets && cursor.peekChar() == '}')
-        break;
+      if (isWithinCurlyBrackets) {
+        if (cursor.peekChar() == '}' && priorChar != '\\')
+          break;
+      }
 
       if (tryParseOpeningOrClosingTag(beginIndex -> {
         if (!substringBuilder.hasStartSet())
@@ -59,10 +61,7 @@ public class XmlEventParser {
         cursor.pushState();
       }
 
-      if (priorChar == '\\' && nextChar == '>')
-        substringBuilder.addIndexToBeRemoved(nextCharIndex - 1);
-
-      if (nextChar == '\\' && cursor.peekChar() == '<') {
+      if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}')) {
         substringBuilder.addIndexToBeRemoved(nextCharIndex);
         nextChar = cursor.nextChar();
       }
