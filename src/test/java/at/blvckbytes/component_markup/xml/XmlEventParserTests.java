@@ -258,6 +258,23 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldParseInterpolationWithCurlyBracketsInStrings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red@>@Hello, @{{user.name + \"}}\" + '}}'}}@!"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("Hello, "),
+      new InterpolationEvent("user.name + \"}}\" + '}}'"),
+      new TextEvent("!"),
+      new InputEndEvent()
+    );
+  }
+
   private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
     XmlEventParser.parse(input.text, actualEventsJoiner);

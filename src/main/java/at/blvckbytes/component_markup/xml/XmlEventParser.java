@@ -72,6 +72,8 @@ public class XmlEventParser {
           if (!substringBuilder.hasEndSet())
             throw new IllegalStateException("Interpolation has not been terminated");
 
+          inStringDetector.reset();
+
           String expression = substringBuilder.build(false);
 
           cursor.applyState(beginState, false, true);
