@@ -284,16 +284,20 @@ public class XmlEventParser {
       case '{':
         cursor.nextChar();
 
+        long openingCurlyState = cursor.getState();
+
         consumer.onTagAttributeBegin(attributeName);
 
         parseInput(true);
 
         char nextChar = cursor.nextChar();
 
-        cursor.emitCurrentState();
-
-        if (nextChar != '}')
+        if (nextChar != '}') {
+          cursor.emitState(openingCurlyState);
           throw new XmlParseException(ParseError.UNTERMINATED_SUBTREE);
+        }
+
+        cursor.emitCurrentState();
 
         consumer.onTagAttributeEnd(attributeName);
         return true;

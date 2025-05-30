@@ -311,9 +311,9 @@ public class XmlEventParserTests {
   public void shouldThrowOnUnterminatedSubtree() {
     TextWithAnchors text = new TextWithAnchors(
       "@<red",
-      "  @my-attr={",
+      "  @my-attr=#{",
       "    @<green@>@Hello, \\} world!",
-      "@>"
+      ">"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -324,9 +324,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("green"),
       new TagOpenEndEvent("green", false),
       new TextEvent("Hello, } world! >"),
-      // TODO: Honestly, from a user-perspective, I kind of dislike the fact that this
-      //       will always lie far beyond the origin-point; maybe emit the attr-cursor here?
-      text.getAnchor(5)
+      text.getAuxAnchor(0)
     );
   }
 

@@ -9,10 +9,13 @@ import java.util.List;
 public class TextWithAnchors {
 
   private final List<BeforeEventCursorEvent> anchors;
+  private final List<BeforeEventCursorEvent> auxAnchors;
+
   public final String text;
 
   public TextWithAnchors(String... lines) {
     this.anchors = new ArrayList<>();
+    this.auxAnchors = new ArrayList<>();
 
     StringBuilder result = new StringBuilder();
     int lineNumber = 1, columnNumber = 1, charIndex = 0;
@@ -23,8 +26,15 @@ public class TextWithAnchors {
       for (int lineCharIndex = 0; lineCharIndex < line.length(); ++lineCharIndex) {
         char currentChar = line.charAt(lineCharIndex);
 
+        BeforeEventCursorEvent event = new BeforeEventCursorEvent(charIndex, lineNumber, columnNumber);
+
         if (currentChar == '@') {
-          this.anchors.add(new BeforeEventCursorEvent(charIndex, lineNumber, columnNumber));
+          this.anchors.add(event);
+          continue;
+        }
+
+        if (currentChar == '#') {
+          this.auxAnchors.add(event);
           continue;
         }
 
@@ -62,5 +72,12 @@ public class TextWithAnchors {
       return null;
 
     return anchors.get(index);
+  }
+
+  public @Nullable BeforeEventCursorEvent getAuxAnchor(int index) {
+    if (index < 0 || index >= auxAnchors.size())
+      return null;
+
+    return auxAnchors.get(index);
   }
 }
