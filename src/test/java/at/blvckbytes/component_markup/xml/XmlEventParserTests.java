@@ -328,6 +328,94 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldEscapeCharactersInAttributeValues() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red @a=\"hello \\\" quote\"@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new StringAttributeEvent("a", "hello \" quote"),
+      new TagOpenEndEvent("red", false),
+      new InputEndEvent()
+    );
+
+    text = new TextWithAnchors(
+      "@<red @a=\"these > should < not require escaping\"@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new StringAttributeEvent("a", "these > should < not require escaping"),
+      new TagOpenEndEvent("red", false),
+      new InputEndEvent()
+    );
+
+    text = new TextWithAnchors(
+      "@<red @a={",
+      "  @<green @b=\"neither } should { these\"@>",
+      "@}@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new TagAttributeBeginEvent("a"),
+      new TagOpenBeginEvent("green"),
+      new StringAttributeEvent("b", "neither } should { these"),
+      new TagOpenEndEvent("green", false),
+      new TagAttributeEndEvent("a"),
+      new TagOpenEndEvent("red", false),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldEscapeCharactersInText() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red@>@escaping closing \\> opening \\<; closing \\} opening \\{@</red>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      // Within text-content, there's no need to escape quotes, as strings only occur
+      // at values of attributes; also, there's no need to escape closing pointy-brackets,
+      // as the predecessor tag (if any) is already closed; also, there's no need to
+      // escape opening curly-brackets, as entering subtrees only happens for attributes.
+      // I am >not< looking for general "consistency" here, but rather want to keep it as
+      // syntactically terse as possible, while maintaining readability - thus, only escape
+      // what's absolutely required as to avoid ambiguity while parsing.
+      new TextEvent("escaping closing \\> opening <; closing } opening \\{"),
+      new TagCloseEvent("red"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldPreserveNonEscapingBackslashes() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red @a=\"a \\ backslash\"@>@another \\ backslash"
+    );
+
+    // Because why not? :) There's absolutely no reason to treat backslashes which do not
+    // actually escape critical characters any differently. I do not care about being "compatible"
+    // with some general syntax out there, because I'm building a DSL!
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new StringAttributeEvent("a", "a \\ backslash"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("another \\ backslash"),
+      new InputEndEvent()
+    );
+  }
+
   // ================================================================================
   // Exception tests
   // ================================================================================
