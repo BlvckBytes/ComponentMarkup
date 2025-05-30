@@ -47,7 +47,7 @@ public class XmlEventParser {
 
           if (substringBuilder.hasStartSet()) {
             substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-            cursor.applyState(textContentBeginState, false, true);
+            cursor.emitState(textContentBeginState);
             consumer.onText(substringBuilder.build(true));
           }
 
@@ -76,12 +76,12 @@ public class XmlEventParser {
 
           String expression = substringBuilder.build(false);
 
-          cursor.applyState(beginState, false, true);
+          cursor.emitState(beginState);
           consumer.onInterpolation(expression);
           continue;
         }
 
-        cursor.applyState(preConsumeState, true, false);
+        cursor.restoreState(preConsumeState);
       }
 
       cursor.consumeWhitespace();
@@ -89,7 +89,7 @@ public class XmlEventParser {
       if (cursor.peekChar() == '<') {
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-          cursor.applyState(textContentBeginState, false, true);
+          cursor.emitState(textContentBeginState);
           consumer.onText(substringBuilder.build(true));
         }
 
@@ -98,7 +98,7 @@ public class XmlEventParser {
         continue;
       }
 
-      cursor.applyState(preConsumeState, true, false);
+      cursor.restoreState(preConsumeState);
 
       int nextCharIndex = cursor.getNextCharIndex();
 
@@ -132,7 +132,7 @@ public class XmlEventParser {
       String trailingText = substringBuilder.build(true);
 
       if (!trailingText.trim().isEmpty()) {
-        cursor.applyState(textContentBeginState, false, true);
+        cursor.emitState(textContentBeginState);
         consumer.onText(trailingText);
       }
     }
@@ -339,7 +339,7 @@ public class XmlEventParser {
     if (tagName == null)
       throw new IllegalStateException("Expected tag-name");
 
-    cursor.applyState(savedState, false, true);
+    cursor.emitState(savedState);
 
     if (wasClosingTag) {
       if (cursor.nextChar() != '>')

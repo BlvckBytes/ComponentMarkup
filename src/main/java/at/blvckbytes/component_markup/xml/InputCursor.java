@@ -57,19 +57,18 @@ public class InputCursor {
     );
   }
 
-  public void applyState(long state, boolean restore, boolean emit) {
+  public void emitState(long state) {
     int _nextCharIndex = (int) ((state >> (28 + 8)) & 0xFFFFFFF);
     int _lineNumber = (int) ((state >> 28) & 0xFF);
     int _columnNumber = (int) (state & 0xFFFFFFF);
 
-    if (restore) {
-      this.nextCharIndex = _nextCharIndex;
-      this.lineNumber = _lineNumber;
-      this.columnNumber = _columnNumber;
-    }
+    this.consumer.onBeforeEventCursor(_nextCharIndex == 0 ? 0 : _nextCharIndex - 1, _lineNumber, _columnNumber);
+  }
 
-    if (emit)
-      this.consumer.onBeforeEventCursor(_nextCharIndex == 0 ? 0 : _nextCharIndex - 1, _lineNumber, _columnNumber);
+  public void restoreState(long state) {
+    this.nextCharIndex = (int) ((state >> (28 + 8)) & 0xFFFFFFF);
+    this.lineNumber = (int) ((state >> 28) & 0xFF);
+    this.columnNumber = (int) (state & 0xFFFFFFF);
   }
 
   public void emitCurrentState() {
