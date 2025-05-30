@@ -2,8 +2,6 @@ package at.blvckbytes.component_markup.xml;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.IntConsumer;
-
 public class XmlEventParser {
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
@@ -13,8 +11,6 @@ public class XmlEventParser {
   private final XmlEventConsumer consumer;
   private final SubstringBuilder substringBuilder;
   private final InputCursor cursor;
-
-  private long textContentBeginState;
 
   private XmlEventParser(String input, XmlEventConsumer consumer) {
     this.consumer = consumer;
@@ -28,6 +24,7 @@ public class XmlEventParser {
 
   private void parseInput(boolean isWithinCurlyBrackets) {
     char priorChar = 0;
+    long textContentBeginState = -1;
 
     while (cursor.hasRemainingChars()) {
       if (isWithinCurlyBrackets) {
@@ -35,17 +32,24 @@ public class XmlEventParser {
           break;
       }
 
-      if (tryParseOpeningOrClosingTag(beginIndex -> {
-        if (!substringBuilder.hasStartSet())
-          return;
+      int possibleTagBeginIndex = cursor.getNextCharIndex();
+      long preConsumeWhitespaceState = cursor.getState();
 
-        substringBuilder.setEndExclusive(beginIndex);
-        cursor.applyState(textContentBeginState, false, true);
-        consumer.onText(substringBuilder.build(true));
-      })) {
+      cursor.consumeWhitespace();
+
+      if (cursor.peekChar() == '<') {
+        if (substringBuilder.hasStartSet()) {
+          substringBuilder.setEndExclusive(possibleTagBeginIndex);
+          cursor.applyState(textContentBeginState, false, true);
+          consumer.onText(substringBuilder.build(true));
+        }
+
+        parseOpeningOrClosingTag();
         priorChar = 0;
         continue;
       }
+
+      cursor.applyState(preConsumeWhitespaceState, true, false);
 
       int nextCharIndex = cursor.getNextCharIndex();
 
@@ -266,21 +270,11 @@ public class XmlEventParser {
     }
   }
 
-  private boolean tryParseOpeningOrClosingTag(IntConsumer afterLockIn) {
-    int beginIndex = cursor.getNextCharIndex();
+  private void parseOpeningOrClosingTag() {
+    if (cursor.nextChar() != '<')
+      throw new IllegalStateException("Expected an opening pointy-bracket!");
 
     long savedState = cursor.getState();
-
-    cursor.consumeWhitespace();
-
-    if (cursor.nextChar() != '<') {
-      cursor.applyState(savedState, true, false);
-      return false;
-    }
-
-    afterLockIn.accept(beginIndex);
-
-    savedState = cursor.getState();
 
     cursor.consumeWhitespace();
 
@@ -303,8 +297,7 @@ public class XmlEventParser {
         throw new IllegalStateException("Expected tag-close char '>'");
 
       consumer.onTagClose(tagName);
-
-      return true;
+      return;
     }
 
     consumer.onTagOpenBegin(tagName);
@@ -328,7 +321,6 @@ public class XmlEventParser {
 
     cursor.emitCurrentState();
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
-    return true;
   }
 
   private boolean isIdentifierChar(char c) {
