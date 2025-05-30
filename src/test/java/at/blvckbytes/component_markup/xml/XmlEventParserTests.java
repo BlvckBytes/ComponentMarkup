@@ -1,14 +1,16 @@
 package at.blvckbytes.component_markup.xml;
 
 import at.blvckbytes.component_markup.xml.event.*;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class XmlEventParserTests {
 
-  // TODO: Test that cursors are emitted when errors are being thrown too, as proper
-  //       error-messages couldn't be generated otherwise
+  // ================================================================================
+  // Event-sequence tests
+  // ================================================================================
 
   @Test
   public void shouldParseNoAttributesOpeningWithContent() {
@@ -275,9 +277,187 @@ public class XmlEventParserTests {
     );
   }
 
+  // ================================================================================
+  // Exception tests
+  // ================================================================================
+
+  @Test
+  public void shouldThrowOnUnterminatedOpeningTag() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.UNTERMINATED_TAG,
+      new TagOpenBeginEvent("red")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnterminatedClosingTag() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@</red"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.UNTERMINATED_TAG,
+      text.getAnchor(0)
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnterminatedSubtree() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red",
+      "  @my-attr={",
+      "    @<green@>@Hello, \\} world!",
+      "@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.UNTERMINATED_SUBTREE,
+      new TagOpenBeginEvent("red"),
+      new TagAttributeBeginEvent("my-attr"),
+      new TagOpenBeginEvent("green"),
+      new TagOpenEndEvent("green", false),
+      new TextEvent("Hello, } world! >"),
+      // TODO: Honestly, from a user-perspective, I kind of dislike the fact that this
+      //       will always lie far beyond the origin-point; maybe emit the attr-cursor here?
+      text.getAnchor(5)
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnterminatedString() {
+    makeMalformedAttributeValueCase(ParseError.UNTERMINATED_STRING, "\"hello world");
+  }
+
+  @Test
+  public void shouldThrowOnUnterminatedInterpolation() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red@>@{{user.name + \"}}\" + '}}'"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.UNTERMINATED_INTERPOLATION,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      text.getAnchor(2)
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedNumbers() {
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, ".");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "-");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "--");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, ".5.5");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "5AB");
+  }
+
+  @Test
+  public void shouldThrowOnMalformedLiterals() {
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "t");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "tr");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "tru");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "truea");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "f");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fa");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fal");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fals");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "falsea");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "n");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nu");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nul");
+    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nulla");
+  }
+
+  @Test
+  public void shouldThrowOnUnsupportedAttributeValues() {
+    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
+    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "`test`");
+    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "<red>");
+    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "'test'");
+  }
+
+  @Test
+  public void shouldThrowOnMissingTagName() {
+    TextWithAnchors text = new TextWithAnchors("@<>");
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.MISSING_TAG_NAME,
+      text.getAnchor(0)
+    );
+
+    text = new TextWithAnchors("@</>");
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.MISSING_TAG_NAME,
+      text.getAnchor(0)
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMissingAttributeEquals() {
+    TextWithAnchors text = new TextWithAnchors("@<red @my-attr true");
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.MISSING_ATTRIBUTE_EQUALS,
+      new TagOpenBeginEvent("red"),
+      text.getAnchor(1)
+    );
+
+    text = new TextWithAnchors("@<red @my-attr>");
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.MISSING_ATTRIBUTE_EQUALS,
+      new TagOpenBeginEvent("red"),
+      text.getAnchor(1)
+    );
+  }
+
+  private void makeMalformedAttributeValueCase(ParseError expectedError, String valueExpression) {
+    TextWithAnchors text = new TextWithAnchors("@<red @a=" + valueExpression);
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      expectedError,
+      new TagOpenBeginEvent("red"),
+      text.getAnchor(1)
+    );
+  }
+
   private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, XmlEvent... expectedEvents) {
+    makeCaseWithInterleavedAnchors(input, null, expectedEvents);
+  }
+
+  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, @Nullable ParseError expectedError, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
-    XmlEventParser.parse(input.text, actualEventsJoiner);
+
+    XmlParseException thrownException = null;
+
+    try {
+      XmlEventParser.parse(input.text, actualEventsJoiner);
+    } catch (XmlParseException exception) {
+      thrownException = exception;
+    }
+
+    if (expectedError == null && thrownException != null)
+      throw new IllegalStateException("Expected there to be no exception thrown, but encountered " + thrownException.error);
+
+    if (expectedError != null && thrownException == null)
+      throw new IllegalStateException("Expected there to be an error of " + expectedError + ", but encountered none");
+
+    if (expectedError != null)
+      assertEquals(expectedError, thrownException.error, "Encountered mismatch on thrown error-types");
 
     StringBuilder expectedEventsString = new StringBuilder();
 
@@ -287,7 +467,7 @@ public class XmlEventParserTests {
 
       XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
 
-      if (!(expectedEvent instanceof InputEndEvent)) {
+      if (!((expectedEvent instanceof InputEndEvent) || expectedEvent instanceof BeforeEventCursorEvent)) {
         XmlEvent anchorEvent = input.getAnchor(expectedEventIndex);
 
         if (anchorEvent == null)

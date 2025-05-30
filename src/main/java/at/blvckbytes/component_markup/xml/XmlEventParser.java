@@ -69,14 +69,15 @@ public class XmlEventParser {
             }
           }
 
+          cursor.emitState(beginState);
+
           if (!substringBuilder.hasEndSet())
-            throw new IllegalStateException("Interpolation has not been terminated");
+            throw new XmlParseException(ParseError.UNTERMINATED_INTERPOLATION);
 
           inStringDetector.reset();
 
           String expression = substringBuilder.build(false);
 
-          cursor.emitState(beginState);
           consumer.onInterpolation(expression);
           continue;
         }
@@ -186,12 +187,24 @@ public class XmlEventParser {
     }
 
     if (!encounteredEnd)
-      throw new IllegalStateException("Encountered unterminated string");
+      throw new XmlParseException(ParseError.UNTERMINATED_STRING);
 
     return substringBuilder.build(false);
   }
 
-  private boolean tryParseNumericAttributeValue(String attributeName) {
+  private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
+    if (!cursor.hasRemainingChars())
+      return true;
+
+    char peekedChar = cursor.peekChar();
+
+    if (Character.isWhitespace(peekedChar))
+      return true;
+
+    return peekedChar == '>';
+  }
+
+  private void parseNumericAttributeValue(String attributeName) {
     substringBuilder.setStartInclusive(cursor.getNextCharIndex());
 
     if (cursor.peekChar() == '-')
@@ -213,7 +226,7 @@ public class XmlEventParser {
 
       if (peekedChar == '.') {
         if (encounteredDecimalPoint)
-          throw new IllegalStateException("Numeric value contained multiple decimal-points");
+          throw new XmlParseException(ParseError.MALFORMED_NUMBER);
 
         cursor.nextChar();
         encounteredDecimalPoint = true;
@@ -224,7 +237,10 @@ public class XmlEventParser {
     }
 
     if (!encounteredDigit)
-      throw new IllegalStateException("A numeric value must contain at least one digit");
+      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+
+    if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
+      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
     String numberString = substringBuilder.build(false);
@@ -232,17 +248,16 @@ public class XmlEventParser {
     if (encounteredDecimalPoint) {
       try {
         consumer.onDoubleAttribute(attributeName, Double.parseDouble(numberString));
-        return true;
       } catch (NumberFormatException e) {
-        return false;
+        throw new XmlParseException(ParseError.MALFORMED_NUMBER);
       }
+      return;
     }
 
     try {
       consumer.onLongAttribute(attributeName, Long.parseLong(numberString));
-      return true;
     } catch (NumberFormatException e) {
-      return false;
+      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
     }
   }
 
@@ -257,7 +272,7 @@ public class XmlEventParser {
     cursor.consumeWhitespace();
 
     if (cursor.nextChar() != '=')
-      throw new IllegalStateException("Expected equals-sign to pair key and value of an attribute");
+      throw new XmlParseException(ParseError.MISSING_ATTRIBUTE_EQUALS);
 
     cursor.consumeWhitespace();
 
@@ -273,20 +288,25 @@ public class XmlEventParser {
 
         parseInput(true);
 
-        if (cursor.nextChar() != '}')
-          throw new IllegalStateException("Expected closing }");
+        char nextChar = cursor.nextChar();
 
         cursor.emitCurrentState();
-        consumer.onTagAttributeEnd(attributeName);
 
+        if (nextChar != '}')
+          throw new XmlParseException(ParseError.UNTERMINATED_SUBTREE);
+
+        consumer.onTagAttributeEnd(attributeName);
         return true;
 
       case 'T':
       case 't':
         for (char c : TRUE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new IllegalStateException("Expected true literal value");
+            throw new XmlParseException(ParseError.MALFORMED_LITERAL_TRUE);
         }
+
+        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
+          throw new XmlParseException(ParseError.MALFORMED_LITERAL_TRUE);
 
         consumer.onBooleanAttribute(attributeName, true);
         return true;
@@ -295,8 +315,11 @@ public class XmlEventParser {
       case 'f':
         for (char c : FALSE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new IllegalStateException("Expected false literal value");
+            throw new XmlParseException(ParseError.MALFORMED_LITERAL_FALSE);
         }
+
+        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
+          throw new XmlParseException(ParseError.MALFORMED_LITERAL_FALSE);
 
         consumer.onBooleanAttribute(attributeName, false);
         return true;
@@ -305,17 +328,32 @@ public class XmlEventParser {
       case 'n':
         for (char c : NULL_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new IllegalStateException("Expected null literal value");
+            throw new XmlParseException(ParseError.MALFORMED_LITERAL_NULL);
         }
+
+        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
+          throw new XmlParseException(ParseError.MALFORMED_LITERAL_NULL);
 
         consumer.onNullAttribute(attributeName);
         return true;
 
-      default:
-        if (!tryParseNumericAttributeValue(attributeName))
-          throw new IllegalStateException("Expected numeric attribute value");
-
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case '.':
+      case '-':
+        parseNumericAttributeValue(attributeName);
         return true;
+
+      default:
+        throw new XmlParseException(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE);
     }
   }
 
@@ -336,14 +374,14 @@ public class XmlEventParser {
 
     String tagName = tryParseIdentifier(false);
 
-    if (tagName == null)
-      throw new IllegalStateException("Expected tag-name");
-
     cursor.emitState(savedState);
+
+    if (tagName == null)
+      throw new XmlParseException(ParseError.MISSING_TAG_NAME);
 
     if (wasClosingTag) {
       if (cursor.nextChar() != '>')
-        throw new IllegalStateException("Expected tag-close char '>'");
+        throw new XmlParseException(ParseError.UNTERMINATED_TAG);
 
       consumer.onTagClose(tagName);
       return;
@@ -366,7 +404,7 @@ public class XmlEventParser {
     cursor.consumeWhitespace();
 
     if (cursor.nextChar() != '>')
-      throw new IllegalStateException("Expected tag-close char '>'");
+      throw new XmlParseException(ParseError.UNTERMINATED_TAG);
 
     cursor.emitCurrentState();
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
