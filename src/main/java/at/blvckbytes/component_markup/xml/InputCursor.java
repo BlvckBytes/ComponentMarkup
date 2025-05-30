@@ -5,15 +5,11 @@ public class InputCursor {
   private final String input;
   private final XmlEventConsumer consumer;
 
-  private final long[] stateStack;
-  private int nextStateStackIndex;
-
   private int nextCharIndex, lineNumber, columnNumber;
 
   public InputCursor(String input, XmlEventConsumer consumer) {
     this.input = input;
     this.consumer = consumer;
-    this.stateStack = new long[32];
     this.lineNumber = 1;
   }
 
@@ -53,26 +49,18 @@ public class InputCursor {
       nextChar();
   }
 
-  public void pushState() {
-    if (nextStateStackIndex == stateStack.length)
-      throw new IllegalStateException("Exhausted capacity of the state-stack");
-
-    stateStack[nextStateStackIndex++] = (
+  public long getState() {
+    return (
       (((long) nextCharIndex & 0xFFFFFFF) << (28 + 8)) |
       (((long) lineNumber & 0xFF) << 28) |
       ((columnNumber & 0xFFFFFFF))
     );
   }
 
-  public void popState(boolean restore, boolean emit) {
-    if (nextStateStackIndex == 0)
-      throw new IllegalStateException("Cannot pop off on an empty stack");
-
-    long stateValue = stateStack[--nextStateStackIndex];
-
-    int _nextCharIndex = (int) ((stateValue >> (28 + 8)) & 0xFFFFFFF);
-    int _lineNumber = (int) ((stateValue >> 28) & 0xFF);
-    int _columnNumber = (int) (stateValue & 0xFFFFFFF);
+  public void applyState(long state, boolean restore, boolean emit) {
+    int _nextCharIndex = (int) ((state >> (28 + 8)) & 0xFFFFFFF);
+    int _lineNumber = (int) ((state >> 28) & 0xFF);
+    int _columnNumber = (int) (state & 0xFFFFFFF);
 
     if (restore) {
       this.nextCharIndex = _nextCharIndex;
@@ -84,7 +72,7 @@ public class InputCursor {
       this.consumer.onBeforeEventCursor(_nextCharIndex == 0 ? 0 : _nextCharIndex - 1, _lineNumber, _columnNumber);
   }
 
-  public void emitState() {
+  public void emitCurrentState() {
     this.consumer.onBeforeEventCursor(nextCharIndex == 0 ? 0 : nextCharIndex - 1, lineNumber, columnNumber);
   }
 }

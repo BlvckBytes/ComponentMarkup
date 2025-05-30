@@ -11,7 +11,7 @@ public class XmlEventParserTests {
     Just a little sketch-board:
 
     <show-item
-      name=<red>My item!</red>
+      name={<red>My item!</red>}
       lore={<blue>First line<br/>
            <green>Second line<br/>
            <gray
@@ -19,7 +19,7 @@ public class XmlEventParserTests {
              limit=5
              separator={<br/>}
              empty={<red>No items found!}
-           >- <yellow>{member.item}</gray><br/>
+           >- <yellow>{{ member.item }}</gray><br/>
            <gray>Last line! :)
       }
     >hover over me! :)

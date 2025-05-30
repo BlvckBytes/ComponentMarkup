@@ -14,6 +14,8 @@ public class XmlEventParser {
   private final SubstringBuilder substringBuilder;
   private final InputCursor cursor;
 
+  private long textContentBeginState;
+
   private XmlEventParser(String input, XmlEventConsumer consumer) {
     this.consumer = consumer;
     this.substringBuilder = new SubstringBuilder(input);
@@ -38,7 +40,7 @@ public class XmlEventParser {
           return;
 
         substringBuilder.setEndExclusive(beginIndex);
-        cursor.popState(false, true);
+        cursor.applyState(textContentBeginState, false, true);
         consumer.onText(substringBuilder.build(true));
       })) {
         priorChar = 0;
@@ -58,7 +60,7 @@ public class XmlEventParser {
         }
 
         substringBuilder.setStartInclusive(nextCharIndex);
-        cursor.pushState();
+        textContentBeginState = cursor.getState();
       }
 
       if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}')) {
@@ -76,10 +78,8 @@ public class XmlEventParser {
 
       String trailingText = substringBuilder.build(true);
 
-      if (trailingText.trim().isEmpty())
-        cursor.popState(false, false);
-      else {
-        cursor.popState(false, true);
+      if (!trailingText.trim().isEmpty()) {
+        cursor.applyState(textContentBeginState, false, true);
         consumer.onText(trailingText);
       }
     }
@@ -97,7 +97,7 @@ public class XmlEventParser {
     cursor.nextChar();
 
     if (emitState)
-      cursor.emitState();
+      cursor.emitCurrentState();
 
     while (isIdentifierChar(cursor.peekChar()))
       cursor.nextChar();
@@ -223,7 +223,7 @@ public class XmlEventParser {
         if (cursor.nextChar() != '}')
           throw new IllegalStateException("Expected closing }");
 
-        cursor.emitState();
+        cursor.emitCurrentState();
         consumer.onTagAttributeEnd(attributeName);
 
         return true;
@@ -269,20 +269,18 @@ public class XmlEventParser {
   private boolean tryParseOpeningOrClosingTag(IntConsumer afterLockIn) {
     int beginIndex = cursor.getNextCharIndex();
 
-    cursor.pushState();
+    long savedState = cursor.getState();
 
     cursor.consumeWhitespace();
 
     if (cursor.nextChar() != '<') {
-      cursor.popState(true, false);
+      cursor.applyState(savedState, true, false);
       return false;
     }
 
-    cursor.popState(false, false);
-
     afterLockIn.accept(beginIndex);
 
-    cursor.pushState();
+    savedState = cursor.getState();
 
     cursor.consumeWhitespace();
 
@@ -298,7 +296,7 @@ public class XmlEventParser {
     if (tagName == null)
       throw new IllegalStateException("Expected tag-name");
 
-    cursor.popState(false, true);
+    cursor.applyState(savedState, false, true);
 
     if (wasClosingTag) {
       if (cursor.nextChar() != '>')
@@ -328,7 +326,7 @@ public class XmlEventParser {
     if (cursor.nextChar() != '>')
       throw new IllegalStateException("Expected tag-close char '>'");
 
-    cursor.emitState();
+    cursor.emitCurrentState();
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
     return true;
   }
