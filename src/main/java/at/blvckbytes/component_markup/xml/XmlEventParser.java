@@ -22,6 +22,8 @@ public class XmlEventParser {
     new XmlEventParser(input, consumer).parseInput(false);
   }
 
+  private final InStringDetector inStringDetector = new InStringDetector();
+
   private void parseInput(boolean isWithinCurlyBrackets) {
     char priorChar = 0;
     long textContentBeginState = -1;
@@ -32,14 +34,59 @@ public class XmlEventParser {
           break;
       }
 
-      int possibleTagBeginIndex = cursor.getNextCharIndex();
-      long preConsumeWhitespaceState = cursor.getState();
+      long preConsumeState = cursor.getState();
+      int possibleNonTextBeginIndex = cursor.getNextCharIndex();
+
+      if (cursor.peekChar() == '{') {
+        cursor.nextChar();
+
+        long beginState = cursor.getState();
+
+        if (cursor.peekChar() == '{') {
+          cursor.nextChar();
+
+          if (substringBuilder.hasStartSet()) {
+            substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
+            cursor.applyState(textContentBeginState, false, true);
+            consumer.onText(substringBuilder.build(true));
+          }
+
+          substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+
+          while (cursor.hasRemainingChars()) {
+            int possiblePreTerminationIndex = cursor.getNextCharIndex();
+            char c = cursor.nextChar();
+
+            inStringDetector.onEncounter(c);
+
+            if (inStringDetector.isInString())
+              continue;
+
+            if (c == '}' && cursor.peekChar() == '}') {
+              cursor.nextChar();
+              substringBuilder.setEndExclusive(possiblePreTerminationIndex);
+              break;
+            }
+          }
+
+          if (!substringBuilder.hasEndSet())
+            throw new IllegalStateException("Interpolation has not been terminated");
+
+          String expression = substringBuilder.build(false);
+
+          cursor.applyState(beginState, false, true);
+          consumer.onInterpolation(expression);
+          continue;
+        }
+
+        cursor.applyState(preConsumeState, true, false);
+      }
 
       cursor.consumeWhitespace();
 
       if (cursor.peekChar() == '<') {
         if (substringBuilder.hasStartSet()) {
-          substringBuilder.setEndExclusive(possibleTagBeginIndex);
+          substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
           cursor.applyState(textContentBeginState, false, true);
           consumer.onText(substringBuilder.build(true));
         }
@@ -49,7 +96,7 @@ public class XmlEventParser {
         continue;
       }
 
-      cursor.applyState(preConsumeWhitespaceState, true, false);
+      cursor.applyState(preConsumeState, true, false);
 
       int nextCharIndex = cursor.getNextCharIndex();
 

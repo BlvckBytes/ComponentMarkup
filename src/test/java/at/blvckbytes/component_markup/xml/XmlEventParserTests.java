@@ -7,23 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class XmlEventParserTests {
 
-  /*
-    Just a little sketch-board:
-
-    <show-item
-      name={<red>My item!</red>}
-      lore={<blue>First line<br/>
-           <green>Second line<br/>
-           <gray
-             *for-member="members"
-             limit=5
-             separator={<br/>}
-             empty={<red>No items found!}
-           >- <yellow>{{ member.item }}</gray><br/>
-           <gray>Last line! :)
-      }
-    >hover over me! :)
-   */
+  // TODO: Test that cursors are emitted when errors are being thrown too, as proper
+  //       error-messages couldn't be generated otherwise
 
   @Test
   public void shouldParseNoAttributesOpeningWithContent() {
@@ -186,6 +171,93 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldParseInterpolationExpressions() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red@>@Hello, @{{user.name}}@!"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("Hello, "),
+      new InterpolationEvent("user.name"),
+      new TextEvent("!"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldParseFairlyComplexExpression() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<show-item",
+      "  @name={@<red@>@My item!@</red>@}",
+      "  @lore={@<blue@>@First line@<br/@>",
+      "       @<green@>@Second line@<br/@>",
+      "       @<gray",
+      "         @*for-member=\"members\"",
+      "         @limit=5",
+      "         @separator={@<br/@>@}",
+      "         @empty={@<red@>@No items found!@}",
+      "       @>@- @<yellow@>@{{ member.item }}@</gray>@<br/@>",
+      "       @<gray@>@Last line! :)",
+      "  @}",
+      "@>@hover over @{{\"me\"}}@! :)"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("show-item"),
+      new TagAttributeBeginEvent("name"),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("My item!"),
+      new TagCloseEvent("red"),
+      new TagAttributeEndEvent("name"),
+      new TagAttributeBeginEvent("lore"),
+      new TagOpenBeginEvent("blue"),
+      new TagOpenEndEvent("blue", false),
+      new TextEvent("First line"),
+      new TagOpenBeginEvent("br"),
+      new TagOpenEndEvent("br", true),
+      new TagOpenBeginEvent("green"),
+      new TagOpenEndEvent("green", false),
+      new TextEvent("Second line"),
+      new TagOpenBeginEvent("br"),
+      new TagOpenEndEvent("br", true),
+      new TagOpenBeginEvent("gray"),
+      new StringAttributeEvent("*for-member", "members"),
+      new LongAttributeEvent("limit", 5),
+      new TagAttributeBeginEvent("separator"),
+      new TagOpenBeginEvent("br"),
+      new TagOpenEndEvent("br", true),
+      new TagAttributeEndEvent("separator"),
+      new TagAttributeBeginEvent("empty"),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("No items found!"),
+      new TagAttributeEndEvent("empty"),
+      new TagOpenEndEvent("gray", false),
+      new TextEvent("- "),
+      new TagOpenBeginEvent("yellow"),
+      new TagOpenEndEvent("yellow", false),
+      new InterpolationEvent(" member.item "),
+      new TagCloseEvent("gray"),
+      new TagOpenBeginEvent("br"),
+      new TagOpenEndEvent("br", true),
+      new TagOpenBeginEvent("gray"),
+      new TagOpenEndEvent("gray", false),
+      new TextEvent("Last line! :)"),
+      new TagAttributeEndEvent("lore"),
+      new TagOpenEndEvent("show-item", false),
+      new TextEvent("hover over "),
+      new InterpolationEvent("\"me\""),
+      new TextEvent("! :)"),
+      new InputEndEvent()
+    );
+  }
+
   private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
     XmlEventParser.parse(input.text, actualEventsJoiner);
@@ -199,7 +271,12 @@ public class XmlEventParserTests {
       XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
 
       if (!(expectedEvent instanceof InputEndEvent)) {
-        expectedEventsString.append(input.getAnchor(expectedEventIndex));
+        XmlEvent anchorEvent = input.getAnchor(expectedEventIndex);
+
+        if (anchorEvent == null)
+          throw new IllegalStateException("Required " + (expectedEvents.length - 1) + " anchors, but only got " + input.getAnchorCount());
+
+        expectedEventsString.append(anchorEvent);
         expectedEventsString.append('\n');
       }
 

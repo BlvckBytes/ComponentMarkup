@@ -25,6 +25,10 @@ public class SubstringBuilder {
     return this.startInclusive >= 0;
   }
 
+  public boolean hasEndSet() {
+    return this.endExclusive > 0;
+  }
+
   public void setStartInclusive(int index) {
     this.resetIndices();
     this.startInclusive = index;

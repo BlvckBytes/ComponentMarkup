@@ -62,6 +62,11 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
+  public void onInterpolation(String expression) {
+    appendEvent(new InterpolationEvent(expression));
+  }
+
+  @Override
   public void onTagClose(String tagName) {
     appendEvent(new TagCloseEvent(tagName));
   }

@@ -24,6 +24,8 @@ public interface XmlEventConsumer {
 
   void onText(String text);
 
+  void onInterpolation(String expression);
+
   void onTagClose(String tagName);
 
   void onInputEnd();

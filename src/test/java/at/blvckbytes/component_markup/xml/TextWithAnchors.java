@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.xml;
 
 import at.blvckbytes.component_markup.xml.event.BeforeEventCursorEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +53,13 @@ public class TextWithAnchors {
     this.text = result.toString();
   }
 
-  public BeforeEventCursorEvent getAnchor(int index) {
+  public int getAnchorCount() {
+    return anchors.size();
+  }
+
+  public @Nullable BeforeEventCursorEvent getAnchor(int index) {
     if (index < 0 || index >= anchors.size())
-      throw new IllegalStateException("Anchor-index " + index + " out of range for size " + anchors.size());
+      return null;
 
     return anchors.get(index);
   }
