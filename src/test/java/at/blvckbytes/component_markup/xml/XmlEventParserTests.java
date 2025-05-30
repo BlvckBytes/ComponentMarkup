@@ -277,6 +277,57 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldCollapseNewlineTrailingSpaces() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@  hello",
+      "    world",
+      "   test"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TextEvent("  hello world test"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldPreserveSurroundingContentSpaces() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<bold@>",
+      "  @<red@>@  surrounding spaces  @</red>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("bold"),
+      new TagOpenEndEvent("bold", false),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("  surrounding spaces  "),
+      new TagCloseEvent("red"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldPreserveSurroundingInterpolationSpaces() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red@>@Hello @{{user.name}}@ world!"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("Hello "),
+      new InterpolationEvent("user.name"),
+      new TextEvent(" world!"),
+      new InputEndEvent()
+    );
+  }
+
   // ================================================================================
   // Exception tests
   // ================================================================================
