@@ -31,13 +31,10 @@ public class XmlEventParserTests {
       "@<red@>@Hello, world! :)"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(2),
       new TextEvent("Hello, world! :)"),
       new InputEndEvent()
     );
@@ -49,25 +46,16 @@ public class XmlEventParserTests {
       "  @<red @attr-1=\"string\" @attr-2=true @attr-3=false @attr-4=null @attr-5=.3 @attr-6=-3@>@ my content"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new StringAttributeEvent("attr-1", "string"),
-      text.getAnchor(2),
       new BooleanAttributeEvent("attr-2", true),
-      text.getAnchor(3),
       new BooleanAttributeEvent("attr-3", false),
-      text.getAnchor(4),
       new NullAttributeEvent("attr-4"),
-      text.getAnchor(5),
       new DoubleAttributeEvent("attr-5", .3),
-      text.getAnchor(6),
       new LongAttributeEvent("attr-6", -3),
-      text.getAnchor(7),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(8),
       new TextEvent(" my content"),
       new InputEndEvent()
     );
@@ -83,17 +71,12 @@ public class XmlEventParserTests {
       "@>"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new StringAttributeEvent("attr-1", "value 1"),
-      text.getAnchor(2),
       new StringAttributeEvent("attr-2", "value 2"),
-      text.getAnchor(3),
       new StringAttributeEvent("attr-3", "value 3"),
-      text.getAnchor(4),
       new TagOpenEndEvent("red", false),
       new InputEndEvent()
     );
@@ -105,11 +88,9 @@ public class XmlEventParserTests {
       "@<br /@>"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("br"),
-      text.getAnchor(1),
       new TagOpenEndEvent("br", true),
       new InputEndEvent()
     );
@@ -118,11 +99,9 @@ public class XmlEventParserTests {
       "@<br/@>"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("br"),
-      text.getAnchor(1),
       new TagOpenEndEvent("br", true),
       new InputEndEvent()
     );
@@ -134,15 +113,11 @@ public class XmlEventParserTests {
       "@<red@>@Hello@</red>"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(2),
       new TextEvent("Hello"),
-      text.getAnchor(3),
       new TagCloseEvent("red"),
       new InputEndEvent()
     );
@@ -155,17 +130,12 @@ public class XmlEventParserTests {
       "  @<bold@>@hi"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(2),
       new TagOpenBeginEvent("bold"),
-      text.getAnchor(3),
       new TagOpenEndEvent("bold", false),
-      text.getAnchor(4),
       new TextEvent("hi"),
       new InputEndEvent()
     );
@@ -180,19 +150,13 @@ public class XmlEventParserTests {
       "@test2"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(2),
       new TextEvent("Hello world test"),
-      text.getAnchor(3),
       new TagOpenBeginEvent("bold"),
-      text.getAnchor(4),
       new TagOpenEndEvent("bold", false),
-      text.getAnchor(5),
       new TextEvent("test2"),
       new InputEndEvent()
     );
@@ -208,37 +172,36 @@ public class XmlEventParserTests {
       "@>"
     );
 
-    makeCase(
+    makeCaseWithInterleavedAnchors(
       text,
-      text.getAnchor(0),
       new TagOpenBeginEvent("tag-outer"),
-      text.getAnchor(1),
       new TagAttributeBeginEvent("attr-1"),
-      text.getAnchor(2),
       new TagOpenBeginEvent("red"),
-      text.getAnchor(3),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(4),
       new TextEvent("Hello curly } bracket"),
-      text.getAnchor(5),
       new TagCloseEvent("red"),
-      text.getAnchor(6),
       new TagAttributeEndEvent("attr-1"),
-      text.getAnchor(7),
       new TagOpenEndEvent("tag-outer", false),
       new InputEndEvent()
     );
   }
 
-  private static void makeCase(TextWithAnchors input, XmlEvent... expectedEvents) {
+  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
     XmlEventParser.parse(input.text, actualEventsJoiner);
 
     StringBuilder expectedEventsString = new StringBuilder();
 
-    for (XmlEvent expectedEvent : expectedEvents) {
-      if (expectedEventsString.length() > 0)
+    for (int expectedEventIndex = 0; expectedEventIndex < expectedEvents.length; ++expectedEventIndex) {
+      if (expectedEventIndex != 0)
         expectedEventsString.append('\n');
+
+      XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
+
+      if (!(expectedEvent instanceof InputEndEvent)) {
+        expectedEventsString.append(input.getAnchor(expectedEventIndex));
+        expectedEventsString.append('\n');
+      }
 
       expectedEventsString.append(expectedEvent);
     }
