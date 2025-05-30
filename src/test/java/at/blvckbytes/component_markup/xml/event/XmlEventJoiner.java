@@ -7,8 +7,8 @@ public class XmlEventJoiner implements XmlEventConsumer {
   private final StringBuilder eventsString = new StringBuilder();
 
   @Override
-  public void onBeforeEventCursor(int offset, int line, int column) {
-    appendEvent(new BeforeEventCursorEvent(offset, line, column));
+  public void onBeforeEventCursor(int charIndex, int line, int column) {
+    appendEvent(new BeforeEventCursorEvent(charIndex, line, column));
   }
 
   @Override
