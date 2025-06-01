@@ -431,6 +431,36 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldConsumeComments() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<!-- My comment! :) -->"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new InputEndEvent()
+    );
+
+    text = new TextWithAnchors(
+      "<!-- A shiny new container! -->",
+      "@<container@>",
+      "  <!-- An indented comment, :) -->",
+      "  @<red@>@Hello, world! <!-- Trailing comment -->",
+      "<!-- Trailing comment -->"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("container"),
+      new TagOpenEndEvent("container", false),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("Hello, world! "),
+      new InputEndEvent()
+    );
+  }
+
   // ================================================================================
   // Exception tests
   // ================================================================================

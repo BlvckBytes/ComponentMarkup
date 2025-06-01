@@ -369,6 +369,28 @@ public class XmlEventParser {
     }
   }
 
+  private boolean tryConsumeCommentTag(String tagName) {
+    if (!tagName.equalsIgnoreCase("!--"))
+      return false;
+
+    long savedState = cursor.getState();
+
+    while (cursor.peekChar() != '-')
+      cursor.nextChar();
+
+    if (cursor.nextChar() != '-' || cursor.nextChar() != '-') {
+      cursor.restoreState(savedState);
+      return false;
+    }
+
+    if (cursor.nextChar() != '>') {
+      cursor.restoreState(savedState);
+      return false;
+    }
+
+    return true;
+  }
+
   private void parseOpeningOrClosingTag() {
     if (cursor.nextChar() != '<')
       throw new IllegalStateException("Expected an opening pointy-bracket!");
@@ -386,18 +408,25 @@ public class XmlEventParser {
 
     String tagName = tryParseIdentifier(false);
 
-    cursor.emitState(savedState);
-
-    if (tagName == null)
+    if (tagName == null) {
+      cursor.emitState(savedState);
       throw new XmlParseException(ParseError.MISSING_TAG_NAME);
+    }
 
     if (wasClosingTag) {
+      cursor.emitState(savedState);
+
       if (cursor.nextChar() != '>')
         throw new XmlParseException(ParseError.UNTERMINATED_TAG);
 
       consumer.onTagClose(tagName);
       return;
     }
+
+    if (tryConsumeCommentTag(tagName))
+      return;
+
+    cursor.emitState(savedState);
 
     consumer.onTagOpenBegin(tagName);
 
