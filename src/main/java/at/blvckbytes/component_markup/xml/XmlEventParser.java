@@ -267,13 +267,33 @@ public class XmlEventParser {
 
     String attributeName = tryParseIdentifier(true);
 
-    if (attributeName == null)
+    if (attributeName == null) {
+      if (cursor.peekChar() == '"') {
+        cursor.nextChar();
+        cursor.emitCurrentState();
+        throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
+      }
+
       return false;
+    }
+
+    // Attribute-identifiers do not support leading digits, as this constraint allows for
+    // proper detection of malformed input; example: my-attr 53 (missing an equals-sign).
+    if (Character.isDigit(attributeName.charAt(0)))
+      throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
 
     cursor.consumeWhitespace();
 
-    if (cursor.nextChar() != '=')
-      throw new XmlParseException(ParseError.MISSING_ATTRIBUTE_EQUALS);
+    if (cursor.peekChar() != '=') {
+      // These "keywords" are reserved; again - for proper detection of malformed input.
+      if (attributeName.equalsIgnoreCase("true") || attributeName.equalsIgnoreCase("false"))
+        throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
+
+      consumer.onFlagAttribute(attributeName);
+      return true;
+    }
+
+    cursor.nextChar();
 
     cursor.consumeWhitespace();
 

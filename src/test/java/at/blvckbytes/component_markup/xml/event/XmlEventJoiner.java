@@ -52,6 +52,11 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
+  public void onFlagAttribute(String name) {
+    appendEvent(new FlagAttributeEvent(name));
+  }
+
+  @Override
   public void onText(String text) {
     appendEvent(new TextEvent(text));
   }

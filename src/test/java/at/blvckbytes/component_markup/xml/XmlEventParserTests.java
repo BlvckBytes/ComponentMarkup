@@ -415,6 +415,22 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldParseFlagAttributes() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<red @a @b@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("red"),
+      new FlagAttributeEvent("a"),
+      new FlagAttributeEvent("b"),
+      new TagOpenEndEvent("red", false),
+      new InputEndEvent()
+    );
+  }
+
   // ================================================================================
   // Exception tests
   // ================================================================================
@@ -536,23 +552,35 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldThrowOnMissingAttributeEquals() {
-    TextWithAnchors text = new TextWithAnchors("@<red @my-attr true");
+  public void shouldThrowOnMalformedAttributeKeys() {
+    TextWithAnchors text = new TextWithAnchors("@<red @my-attr @true>");
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.MISSING_ATTRIBUTE_EQUALS,
+      ParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1)
+      new FlagAttributeEvent("my-attr"),
+      text.getAnchor(2)
     );
 
-    text = new TextWithAnchors("@<red @my-attr>");
+    text = new TextWithAnchors("@<red @my-attr @5var>");
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.MISSING_ATTRIBUTE_EQUALS,
+      ParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1)
+      new FlagAttributeEvent("my-attr"),
+      text.getAnchor(2)
+    );
+
+    text = new TextWithAnchors("@<red @my-attr @\"my-string\">");
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      ParseError.EXPECTED_ATTRIBUTE_KEY,
+      new TagOpenBeginEvent("red"),
+      new FlagAttributeEvent("my-attr"),
+      text.getAnchor(2)
     );
   }
 

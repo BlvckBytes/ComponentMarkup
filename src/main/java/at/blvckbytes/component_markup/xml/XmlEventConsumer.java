@@ -18,6 +18,8 @@ public interface XmlEventConsumer {
 
   void onTagAttributeEnd(String name);
 
+  void onFlagAttribute(String name);
+
   void onTagOpenEnd(String name, boolean wasSelfClosing);
 
   void onText(String text);
