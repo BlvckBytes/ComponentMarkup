@@ -12,6 +12,8 @@ These structural attributes are grouped by layer, avoiding bloated syntax like `
 
 ```
 <gold *if="user">Hello, {{user.name}}
+
+<!-- New if after prior: entering a new group -->
 <container *if="user.isAdmin">
   <red *if="settings.showToolsA">Tool A
   <green *else-if="settings.showToolsB">Tool B
@@ -22,12 +24,14 @@ These structural attributes are grouped by layer, avoiding bloated syntax like `
 ### For Loops
 
 ```
+<!-- The trailing identifier after *for- makes for the iteration-variable -->
 <container *for-member="members">
   <red>{{member}} at index {{loop.index}}
 </container>
 ```
 
 ```
+<!-- The loop-variable is always specific to the current scope and *will* be shadowed by design -->
 <container *for-member="members" let-memberIndex="loop.index">
     <container *for-post="member.posts" let-postIndex="loop.index">
       <red>{{member}} at index {{memberIndex}} wrote {{post}} at index {{postIndex}}
