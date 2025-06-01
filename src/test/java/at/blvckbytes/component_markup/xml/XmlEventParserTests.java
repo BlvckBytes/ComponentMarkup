@@ -561,6 +561,14 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnUnescapedCurlyBrackets() {
+    makeCaseWithInterleavedAnchors(
+      new TextWithAnchors("hello } world"),
+      ParseError.UNESCAPED_CLOSING_CURLY
+    );
+  }
+
   private void makeMalformedAttributeValueCase(ParseError expectedError, String valueExpression) {
     TextWithAnchors text = new TextWithAnchors("@<red @a=" + valueExpression);
 

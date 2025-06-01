@@ -29,9 +29,11 @@ public class XmlEventParser {
     long textContentBeginState = -1;
 
     while (cursor.hasRemainingChars()) {
-      if (isWithinCurlyBrackets) {
-        if (cursor.peekChar() == '}' && priorChar != '\\')
+      if (cursor.peekChar() == '}' && priorChar != '\\') {
+        if (isWithinCurlyBrackets)
           break;
+
+        throw new XmlParseException(ParseError.UNESCAPED_CLOSING_CURLY);
       }
 
       long preConsumeState = cursor.getState();
