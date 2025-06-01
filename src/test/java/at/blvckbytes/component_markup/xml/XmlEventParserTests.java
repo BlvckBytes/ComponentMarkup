@@ -30,7 +30,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "  @<red @attr-1=\"string\" @attr-2=true @attr-3=false @attr-4=null @attr-5=.3 @attr-6=-3@>@ my content"
+      "  @<red @attr-1=\"string\" @attr-2=true @attr-3=false @attr-4=.3 @attr-5=-3@>@ my content"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -39,9 +39,8 @@ public class XmlEventParserTests {
       new StringAttributeEvent("attr-1", "string"),
       new BooleanAttributeEvent("attr-2", true),
       new BooleanAttributeEvent("attr-3", false),
-      new NullAttributeEvent("attr-4"),
-      new DoubleAttributeEvent("attr-5", .3),
-      new LongAttributeEvent("attr-6", -3),
+      new DoubleAttributeEvent("attr-4", .3),
+      new LongAttributeEvent("attr-5", -3),
       new TagOpenEndEvent("red", false),
       new TextEvent(" my content"),
       new InputEndEvent()
@@ -507,10 +506,6 @@ public class XmlEventParserTests {
     makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fal");
     makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fals");
     makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "falsea");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "n");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nu");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nul");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_NULL, "nulla");
   }
 
   @Test

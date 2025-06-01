@@ -37,11 +37,6 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onNullAttribute(String name) {
-    appendEvent(new NullAttributeEvent(name));
-  }
-
-  @Override
   public void onTagOpenEnd(String name, boolean wasSelfClosing) {
     appendEvent(new TagOpenEndEvent(name, wasSelfClosing));
   }

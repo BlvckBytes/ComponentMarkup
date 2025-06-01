@@ -14,8 +14,6 @@ public interface XmlEventConsumer {
 
   void onBooleanAttribute(String name, boolean value);
 
-  void onNullAttribute(String name);
-
   void onTagAttributeBegin(String name);
 
   void onTagAttributeEnd(String name);

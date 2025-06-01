@@ -6,7 +6,6 @@ public class XmlEventParser {
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
   private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
-  private static final char[] NULL_LITERAL_CHARS  = { 'n', 'u', 'l', 'l' };
 
   private final XmlEventConsumer consumer;
   private final SubstringBuilder substringBuilder;
@@ -328,19 +327,6 @@ public class XmlEventParser {
           throw new XmlParseException(ParseError.MALFORMED_LITERAL_FALSE);
 
         consumer.onBooleanAttribute(attributeName, false);
-        return true;
-
-      case 'N':
-      case 'n':
-        for (char c : NULL_LITERAL_CHARS) {
-          if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new XmlParseException(ParseError.MALFORMED_LITERAL_NULL);
-        }
-
-        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-          throw new XmlParseException(ParseError.MALFORMED_LITERAL_NULL);
-
-        consumer.onNullAttribute(attributeName);
         return true;
 
       case '0':
