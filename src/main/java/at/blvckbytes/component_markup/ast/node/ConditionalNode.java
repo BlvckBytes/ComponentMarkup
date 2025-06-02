@@ -1,10 +1,10 @@
 package at.blvckbytes.component_markup.ast.node;
 
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
-import java.util.Map;
 
 public class ConditionalNode extends ContentNode {
 
@@ -14,10 +14,9 @@ public class ConditionalNode extends ContentNode {
   public ConditionalNode(
     AExpression conditionExpression,
     AstNode body,
-    List<AstNode> children,
-    Map<String, AExpression> letBindings
+    List<LetBinding> letBindings
   ) {
-    super(children, letBindings);
+    super(null, letBindings);
 
     this.conditionExpression = conditionExpression;
     this.body = body;

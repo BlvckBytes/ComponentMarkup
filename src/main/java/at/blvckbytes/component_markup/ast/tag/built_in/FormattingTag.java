@@ -71,7 +71,7 @@ public class FormattingTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return TagDefinition.NO_ATTRIBUTES;
+    return NO_ATTRIBUTES;
   }
 
   @Override

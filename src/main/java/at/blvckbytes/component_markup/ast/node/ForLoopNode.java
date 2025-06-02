@@ -1,10 +1,10 @@
 package at.blvckbytes.component_markup.ast.node;
 
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
-import java.util.Map;
 
 public class ForLoopNode extends ContentNode {
 
@@ -16,10 +16,9 @@ public class ForLoopNode extends ContentNode {
     AExpression iterableExpression,
     String iterationVariableName,
     AstNode body,
-    List<AstNode> children,
-    Map<String, AExpression> letBindings
+    List<LetBinding> letBindings
   ) {
-    super(children, letBindings);
+    super(null, letBindings);
 
     this.body = body;
     this.iterableExpression = iterableExpression;
