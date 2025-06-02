@@ -1,19 +1,33 @@
 package at.blvckbytes.component_markup.ast.node;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 public class IfThenElseNode extends AstNode {
 
   public final List<ConditionalNode> conditions;
-  public final ConditionalNode fallback;
+  public final @Nullable ConditionalNode fallback;
 
   public IfThenElseNode(
     List<ConditionalNode> conditions,
-    ConditionalNode fallback
+    @Nullable ConditionalNode fallback
   ) {
     super(conditions.get(0).position);
 
     this.conditions = conditions;
     this.fallback = fallback;
+  }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "IfThenElseNode{\n" +
+      indent(indentLevel) + "conditions=[" +
+      stringifyList(conditions, item -> item.stringify(indentLevel + 1)) +
+      indent(indentLevel) + "],\n" +
+      stringifySubtree(fallback, "fallback", indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
   }
 }

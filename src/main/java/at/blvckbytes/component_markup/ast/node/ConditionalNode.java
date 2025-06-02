@@ -8,17 +8,28 @@ import java.util.List;
 
 public class ConditionalNode extends ContentNode {
 
-  public final AExpression conditionExpression;
+  public final AExpression condition;
   public final AstNode body;
 
   public ConditionalNode(
-    AExpression conditionExpression,
+    AExpression condition,
     AstNode body,
     List<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
 
-    this.conditionExpression = conditionExpression;
+    this.condition = condition;
     this.body = body;
+  }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "ConditionalNode{\n" +
+      indent(indentLevel + 1) + "condition='" + condition.expressionify() + "',\n" +
+      stringifySubtree(body, "body", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
   }
 }

@@ -34,4 +34,18 @@ public class NbtNode extends ContentNode {
     this.interpret = interpret;
     this.separator = separator;
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "NbtNode{\n" +
+      indent(indentLevel + 1) + "source=" + source.name() + ",\n" +
+      indent(indentLevel + 1) + "identifier='" + identifier + "',\n" +
+      indent(indentLevel + 1) + "path='" + path + "',\n" +
+      indent(indentLevel + 1) + "interpret=" + interpret + ",\n" +
+      stringifySubtree(separator, "separator", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class ContentNode extends AstNode {
 
@@ -31,5 +32,20 @@ public abstract class ContentNode extends AstNode {
   public ContentNode getStyle(Consumer<NodeStyle> handler) {
     handler.accept(this.style);
     return this;
+  }
+
+  protected String stringifyBaseMembers(int indentLevel) {
+    return (
+      indent(indentLevel) + "position=" + position + ",\n" +
+        indent(indentLevel) + "children=[" +
+        stringifyList(children, item -> item.stringify(indentLevel + 1)) +
+        indent(indentLevel) + "],\n" +
+        indent(indentLevel) + "letBindings=[" +
+        stringifyList(letBindings, item -> item.stringify(indentLevel + 1)) +
+        indent(indentLevel) + "],\n" +
+        indent(indentLevel) + "style=(\n" +
+        style.stringify(indentLevel + 1) +
+        indent(indentLevel) + "\n)"
+    );
   }
 }

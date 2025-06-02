@@ -11,4 +11,13 @@ public class ContainerNode extends ContentNode {
   public ContainerNode(CursorPosition position, List<AstNode> children, List<LetBinding> letBindings) {
     super(position, children, letBindings);
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "ContainerNode{\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

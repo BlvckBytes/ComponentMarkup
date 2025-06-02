@@ -24,4 +24,15 @@ public class SelectorNode extends ContentNode {
     this.selector = selector;
     this.separator = separator;
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "SelectorNode{\n" +
+      indent(indentLevel + 1) + "selector='" + selector + "',\n" +
+      stringifySubtree(separator, "separator", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

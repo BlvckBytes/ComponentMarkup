@@ -27,4 +27,16 @@ public class EntityTooltipNode extends ContentNode {
     this.id = id;
     this.name = name;
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "EntityTooltipNode{\n" +
+      indent(indentLevel + 1) + "type='" + type + "',\n" +
+      indent(indentLevel + 1) + "id='" + id + "',\n" +
+      stringifySubtree(name, "name", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

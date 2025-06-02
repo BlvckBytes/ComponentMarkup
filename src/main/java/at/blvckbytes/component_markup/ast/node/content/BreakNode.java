@@ -11,4 +11,13 @@ public class BreakNode extends ContentNode {
   public BreakNode(CursorPosition position, List<AstNode> children, List<LetBinding> letBindings) {
     super(position, children, letBindings);
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "BreakNode{\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

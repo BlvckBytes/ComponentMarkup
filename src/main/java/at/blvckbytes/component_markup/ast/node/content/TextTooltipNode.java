@@ -20,4 +20,14 @@ public class TextTooltipNode extends ContentNode {
 
     this.value = value;
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "TextTooltipNode{\n" +
+      stringifySubtree(value, "value", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

@@ -8,20 +8,32 @@ import java.util.List;
 
 public class ForLoopNode extends ContentNode {
 
-  public final AExpression iterableExpression;
-  public final String iterationVariableName;
+  public final AExpression iterable;
+  public final String iterationVariable;
   public final AstNode body;
 
   public ForLoopNode(
-    AExpression iterableExpression,
-    String iterationVariableName,
+    AExpression iterable,
+    String iterationVariable,
     AstNode body,
     List<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
 
     this.body = body;
-    this.iterableExpression = iterableExpression;
-    this.iterationVariableName = iterationVariableName;
+    this.iterable = iterable;
+    this.iterationVariable = iterationVariable;
+  }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "ForLoopNode{\n" +
+      indent(indentLevel + 1) + "iterable='" + iterable.expressionify() + "',\n" +
+      indent(indentLevel + 1) + "iterationVariable='" + iterationVariable + "',\n" +
+      stringifySubtree(body, "body", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
   }
 }

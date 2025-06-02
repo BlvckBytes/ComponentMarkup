@@ -30,7 +30,7 @@ public class ItemTooltipTag extends HoverTag {
     return new AttributeDefinition[] {
       new AttributeDefinition("material", AttributeType.STRING, false, false),
       new AttributeDefinition("amount", AttributeType.LONG, false, false),
-      new AttributeDefinition("name", AttributeType.SUBTREE, false, true),
+      new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
       new AttributeDefinition("lore", AttributeType.SUBTREE, false, false)
     };
   }
@@ -48,7 +48,7 @@ public class ItemTooltipTag extends HoverTag {
     return new ItemTooltipNode(
       getStringAttribute("material", attributes),
       amount == null ? 1 : amount,
-      getSubtreeAttribute("name", attributes),
+      tryGetSubtreeAttribute("name", attributes),
       tryGetSubtreeAttribute("lore", attributes),
       position,
       children,

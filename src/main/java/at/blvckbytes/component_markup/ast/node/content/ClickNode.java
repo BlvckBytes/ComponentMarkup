@@ -18,4 +18,15 @@ public class ClickNode extends ContentNode {
     this.action = action;
     this.value = value;
   }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "ClickNode{\n" +
+      indent(indentLevel + 1) + "action=" + action.name() + ",\n" +
+      indent(indentLevel + 1) + "value='" + value + "',\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
+  }
 }

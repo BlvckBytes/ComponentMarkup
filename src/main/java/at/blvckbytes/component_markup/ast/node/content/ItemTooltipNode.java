@@ -11,13 +11,13 @@ public class ItemTooltipNode extends ContentNode {
 
   public final String material;
   public final long amount;
-  public final AstNode name;
+  public final @Nullable AstNode name;
   public final @Nullable AstNode lore;
 
   public ItemTooltipNode(
     String material,
     long amount,
-    AstNode name,
+    @Nullable AstNode name,
     @Nullable AstNode lore,
     CursorPosition position,
     List<AstNode> children,
@@ -29,5 +29,18 @@ public class ItemTooltipNode extends ContentNode {
     this.amount = amount;
     this.name = name;
     this.lore = lore;
+  }
+
+  @Override
+  public String stringify(int indentLevel) {
+    return (
+      indent(indentLevel) + "ItemTooltipNode{\n" +
+      indent(indentLevel + 1) + "material='" + material + "',\n" +
+      indent(indentLevel + 1) + "amount=" + amount + ",\n" +
+      stringifySubtree(name, "name", indentLevel + 1) + ",\n" +
+      stringifySubtree(lore, "lore", indentLevel + 1) + ",\n" +
+      stringifyBaseMembers(indentLevel + 1) + "\n" +
+      indent(indentLevel) + "}"
+    );
   }
 }
