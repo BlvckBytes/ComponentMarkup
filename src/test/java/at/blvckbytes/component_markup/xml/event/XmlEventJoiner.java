@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.xml.event;
 
+import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.XmlEventConsumer;
 
 public class XmlEventJoiner implements XmlEventConsumer {
@@ -7,8 +8,8 @@ public class XmlEventJoiner implements XmlEventConsumer {
   private final StringBuilder eventsString = new StringBuilder();
 
   @Override
-  public void onBeforeEventCursor(int charIndex, int line, int column) {
-    appendEvent(new BeforeEventCursorEvent(charIndex, line, column));
+  public void onCursorPosition(CursorPosition position) {
+    appendEvent(new CursorPositionEvent(position));
   }
 
   @Override

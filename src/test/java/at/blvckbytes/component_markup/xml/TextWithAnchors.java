@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.xml;
 
-import at.blvckbytes.component_markup.xml.event.BeforeEventCursorEvent;
+import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -8,8 +8,8 @@ import java.util.List;
 
 public class TextWithAnchors {
 
-  private final List<BeforeEventCursorEvent> anchors;
-  private final List<BeforeEventCursorEvent> auxAnchors;
+  private final List<CursorPositionEvent> anchors;
+  private final List<CursorPositionEvent> auxAnchors;
 
   public final String text;
 
@@ -26,7 +26,7 @@ public class TextWithAnchors {
       for (int lineCharIndex = 0; lineCharIndex < line.length(); ++lineCharIndex) {
         char currentChar = line.charAt(lineCharIndex);
 
-        BeforeEventCursorEvent event = new BeforeEventCursorEvent(charIndex, lineNumber, columnNumber);
+        CursorPositionEvent event = new CursorPositionEvent(new CursorPosition(charIndex + 1, lineNumber, columnNumber));
 
         if (currentChar == '@') {
           this.anchors.add(event);
@@ -67,14 +67,14 @@ public class TextWithAnchors {
     return anchors.size();
   }
 
-  public @Nullable BeforeEventCursorEvent getAnchor(int index) {
+  public @Nullable CursorPositionEvent getAnchor(int index) {
     if (index < 0 || index >= anchors.size())
       return null;
 
     return anchors.get(index);
   }
 
-  public @Nullable BeforeEventCursorEvent getAuxAnchor(int index) {
+  public @Nullable CursorPositionEvent getAuxAnchor(int index) {
     if (index < 0 || index >= auxAnchors.size())
       return null;
 

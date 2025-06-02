@@ -14,7 +14,7 @@ public class XmlEventParser {
   private XmlEventParser(String input, XmlEventConsumer consumer) {
     this.consumer = consumer;
     this.substringBuilder = new SubstringBuilder(input);
-    this.cursor = new InputCursor(input, consumer);
+    this.cursor = new InputCursor(input);
   }
 
   public static void parse(String input, XmlEventConsumer consumer) {
@@ -25,7 +25,7 @@ public class XmlEventParser {
 
   private void parseInput(boolean isWithinCurlyBrackets) {
     char priorChar = 0;
-    long textContentBeginState = -1;
+    CursorPosition textContentBeginPosition = null;
 
     while (cursor.hasRemainingChars()) {
       if (cursor.peekChar() == '}' && priorChar != '\\') {
@@ -35,20 +35,20 @@ public class XmlEventParser {
         throw new XmlParseException(ParseError.UNESCAPED_CLOSING_CURLY);
       }
 
-      long preConsumeState = cursor.getState();
+      CursorPosition preConsumePosition = cursor.getPosition();
       int possibleNonTextBeginIndex = cursor.getNextCharIndex();
 
       if (cursor.peekChar() == '{') {
         cursor.nextChar();
 
-        long beginState = cursor.getState();
+        CursorPosition beginPosition = cursor.getPosition();
 
         if (cursor.peekChar() == '{') {
           cursor.nextChar();
 
           if (substringBuilder.hasStartSet()) {
             substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-            cursor.emitState(textContentBeginState);
+            consumer.onCursorPosition(textContentBeginPosition);
             consumer.onText(substringBuilder.build(true));
           }
 
@@ -70,7 +70,7 @@ public class XmlEventParser {
             }
           }
 
-          cursor.emitState(beginState);
+          consumer.onCursorPosition(beginPosition);
 
           if (!substringBuilder.hasEndSet())
             throw new XmlParseException(ParseError.UNTERMINATED_INTERPOLATION);
@@ -83,7 +83,7 @@ public class XmlEventParser {
           continue;
         }
 
-        cursor.restoreState(preConsumeState);
+        cursor.restoreState(preConsumePosition);
       }
 
       cursor.consumeWhitespace();
@@ -91,7 +91,7 @@ public class XmlEventParser {
       if (cursor.peekChar() == '<') {
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-          cursor.emitState(textContentBeginState);
+          consumer.onCursorPosition(textContentBeginPosition);
           consumer.onText(substringBuilder.build(true));
         }
 
@@ -100,7 +100,7 @@ public class XmlEventParser {
         continue;
       }
 
-      cursor.restoreState(preConsumeState);
+      cursor.restoreState(preConsumePosition);
 
       int nextCharIndex = cursor.getNextCharIndex();
 
@@ -115,7 +115,7 @@ public class XmlEventParser {
         }
 
         substringBuilder.setStartInclusive(nextCharIndex);
-        textContentBeginState = cursor.getState();
+        textContentBeginPosition = cursor.getPosition();
       }
 
       if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}')) {
@@ -134,7 +134,7 @@ public class XmlEventParser {
       String trailingText = substringBuilder.build(true);
 
       if (!trailingText.trim().isEmpty()) {
-        cursor.emitState(textContentBeginState);
+        consumer.onCursorPosition(textContentBeginPosition);
         consumer.onText(trailingText);
       }
     }
@@ -152,7 +152,7 @@ public class XmlEventParser {
     cursor.nextChar();
 
     if (emitState)
-      cursor.emitCurrentState();
+      consumer.onCursorPosition(cursor.getPosition());
 
     while (isIdentifierChar(cursor.peekChar()))
       cursor.nextChar();
@@ -270,7 +270,7 @@ public class XmlEventParser {
     if (attributeName == null) {
       if (cursor.peekChar() == '"') {
         cursor.nextChar();
-        cursor.emitCurrentState();
+        consumer.onCursorPosition(cursor.getPosition());
         throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
       }
 
@@ -305,7 +305,7 @@ public class XmlEventParser {
       case '{':
         cursor.nextChar();
 
-        long openingCurlyState = cursor.getState();
+        CursorPosition openingCurlyPosition = cursor.getPosition();
 
         consumer.onTagAttributeBegin(attributeName);
 
@@ -314,12 +314,11 @@ public class XmlEventParser {
         char nextChar = cursor.nextChar();
 
         if (nextChar != '}') {
-          cursor.emitState(openingCurlyState);
+          consumer.onCursorPosition(openingCurlyPosition);
           throw new XmlParseException(ParseError.UNTERMINATED_SUBTREE);
         }
 
-        cursor.emitCurrentState();
-
+        consumer.onCursorPosition(cursor.getPosition());
         consumer.onTagAttributeEnd(attributeName);
         return true;
 
@@ -373,18 +372,18 @@ public class XmlEventParser {
     if (!tagName.equalsIgnoreCase("!--"))
       return false;
 
-    long savedState = cursor.getState();
+    CursorPosition savedPosition = cursor.getPosition();
 
     while (cursor.peekChar() != '-')
       cursor.nextChar();
 
     if (cursor.nextChar() != '-' || cursor.nextChar() != '-') {
-      cursor.restoreState(savedState);
+      cursor.restoreState(savedPosition);
       return false;
     }
 
     if (cursor.nextChar() != '>') {
-      cursor.restoreState(savedState);
+      cursor.restoreState(savedPosition);
       return false;
     }
 
@@ -395,7 +394,7 @@ public class XmlEventParser {
     if (cursor.nextChar() != '<')
       throw new IllegalStateException("Expected an opening pointy-bracket!");
 
-    long savedState = cursor.getState();
+    CursorPosition savedPosition = cursor.getPosition();
 
     cursor.consumeWhitespace();
 
@@ -409,12 +408,12 @@ public class XmlEventParser {
     String tagName = tryParseIdentifier(false);
 
     if (tagName == null) {
-      cursor.emitState(savedState);
+      consumer.onCursorPosition(savedPosition);
       throw new XmlParseException(ParseError.MISSING_TAG_NAME);
     }
 
     if (wasClosingTag) {
-      cursor.emitState(savedState);
+      consumer.onCursorPosition(savedPosition);
 
       if (cursor.nextChar() != '>')
         throw new XmlParseException(ParseError.UNTERMINATED_TAG);
@@ -426,7 +425,7 @@ public class XmlEventParser {
     if (tryConsumeCommentTag(tagName))
       return;
 
-    cursor.emitState(savedState);
+    consumer.onCursorPosition(savedPosition);
 
     consumer.onTagOpenBegin(tagName);
 
@@ -447,7 +446,7 @@ public class XmlEventParser {
     if (cursor.nextChar() != '>')
       throw new XmlParseException(ParseError.UNTERMINATED_TAG);
 
-    cursor.emitCurrentState();
+    consumer.onCursorPosition(cursor.getPosition());
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
   }
 

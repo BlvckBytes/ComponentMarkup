@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.xml;
 
 public interface XmlEventConsumer {
 
-  void onBeforeEventCursor(int charIndex, int line, int column);
+  void onCursorPosition(CursorPosition position);
 
   void onTagOpenBegin(String tagName);
 
