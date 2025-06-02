@@ -24,7 +24,7 @@ public abstract class InterpolationNode extends ContentNode {
   public String stringify(int indentLevel) {
     return (
       indent(indentLevel) + "InterpolationNode{\n" +
-      indent(indentLevel + 1) + "expression='" + expression.expressionify() + "',\n" +
+      indent(indentLevel + 1) + "expression=" + expression.expressionify() + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
     );

@@ -28,7 +28,7 @@ public class KeyTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("key", AttributeType.STRING, false, true)
+      new AttributeDefinition("key", AttributeType.EXPRESSION, false, true)
     };
   }
 
@@ -36,10 +36,13 @@ public class KeyTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new KeyNode(getStringAttribute("key", attributes), position, letBindings);
+    return new KeyNode(
+      findExpressionAttribute("key", attributes),
+      position, letBindings
+    );
   }
 }

@@ -28,7 +28,7 @@ public class SelectorTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("selector", AttributeType.STRING, false, true),
+      new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
       new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
     };
   }
@@ -37,16 +37,14 @@ public class SelectorTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new SelectorNode(
-      getStringAttribute("selector", attributes),
-      tryGetSubtreeAttribute("separator", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("selector", attributes),
+      tryFindSubtreeAttribute("separator", attributes),
+      position, children, letBindings
     );
   }
 }

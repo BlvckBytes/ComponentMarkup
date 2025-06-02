@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.ast.tag.attribute;
 
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
-public abstract class Attribute<T> {
+public abstract class Attribute {
 
   public final String name;
   public final CursorPosition position;
@@ -11,6 +11,4 @@ public abstract class Attribute<T> {
     this.name = name;
     this.position = position;
   }
-
-  public abstract T getValue();
 }

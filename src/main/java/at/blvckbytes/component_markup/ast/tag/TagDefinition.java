@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.ast.tag;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.attribute.*;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -23,122 +24,89 @@ public abstract class TagDefinition {
   public abstract AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   );
 
-  protected @Nullable String tryGetStringAttribute(String name, List<Attribute<?>> attributes) {
-    return tryGetAttribute(name, StringAttribute.class, attributes);
+  protected static AstNode findSubtreeAttribute(String name, List<Attribute> attributes) {
+    AstNode value = tryFindSubtreeAttribute(name, attributes);
+
+    if (value == null)
+      throw new IllegalStateException("Required attribute '" + name + "' to be present");
+
+    return value;
   }
 
-  protected String getStringAttribute(String name, List<Attribute<?>> attributes) {
-    return getAttribute(name, StringAttribute.class, attributes);
-  }
+  protected static @Nullable AstNode tryFindSubtreeAttribute(String name, List<Attribute> attributes) {
+    Attribute attribute = tryFindAttribute(name, attributes);
 
-  protected @Nullable Long tryGetLongAttribute(String name, List<Attribute<?>> attributes) {
-    return tryGetAttribute(name, LongAttribute.class, attributes);
-  }
-
-  protected Long getLongAttribute(String name, List<Attribute<?>> attributes) {
-    return getAttribute(name, LongAttribute.class, attributes);
-  }
-
-  protected @Nullable Double tryGetDoubleAttribute(String name, List<Attribute<?>> attributes) {
-    return tryGetAttribute(name, DoubleAttribute.class, attributes);
-  }
-
-  protected Double getDoubleAttribute(String name, List<Attribute<?>> attributes) {
-    return getAttribute(name, DoubleAttribute.class, attributes);
-  }
-
-  protected @Nullable Boolean tryGetBooleanAttribute(String name, List<Attribute<?>> attributes) {
-    return tryGetAttribute(name, BooleanAttribute.class, attributes);
-  }
-
-  protected Boolean getBooleanAttribute(String name, List<Attribute<?>> attributes) {
-    return getAttribute(name, BooleanAttribute.class, attributes);
-  }
-
-  protected @Nullable AstNode tryGetSubtreeAttribute(String name, List<Attribute<?>> attributes) {
-    return tryGetAttribute(name, SubtreeAttribute.class, attributes);
-  }
-
-  protected AstNode getSubtreeAttribute(String name, List<Attribute<?>> attributes) {
-    return getAttribute(name, SubtreeAttribute.class, attributes);
-  }
-
-  protected <T> @Nullable T tryGetAttribute(String name, Class<? extends Attribute<T>> type, List<Attribute<?>> attributes) {
-    Attribute<?> result = null;
-
-    for (Attribute<?> attribute : attributes) {
-      if (!attribute.name.equalsIgnoreCase(name))
-        continue;
-
-      result = attribute;
-      break;
-    }
-
-    if (result == null)
+    if (attribute == null)
       return null;
 
-    if (!type.isInstance(result))
-      throw new IllegalStateException("Expected attribute \"" + name + "\" to be a " + type.getSimpleName());
+    if (attribute instanceof SubtreeAttribute)
+      return ((SubtreeAttribute) attribute).value;
 
-    return type.cast(result).getValue();
+    throw new IllegalStateException("Required attribute '" + name + "' to be of type subtree");
   }
 
-  protected <T> T getAttribute(String name, Class<? extends Attribute<T>> type, List<Attribute<?>> attributes) {
-    Attribute<?> result = null;
+  protected static AExpression findExpressionAttribute(String name, List<Attribute> attributes) {
+    AExpression value = tryFindExpressionAttribute(name, attributes);
 
-    for (Attribute<?> attribute : attributes) {
-      if (!attribute.name.equalsIgnoreCase(name))
-        continue;
+    if (value == null)
+      throw new IllegalStateException("Required attribute '" + name + "' to be present");
 
-      result = attribute;
-      break;
+    return value;
+  }
+
+  protected static @Nullable AExpression tryFindExpressionAttribute(String name, List<Attribute> attributes) {
+    Attribute attribute = tryFindAttribute(name, attributes);
+
+    if (attribute == null)
+      return null;
+
+    if (attribute instanceof ExpressionAttribute)
+      return ((ExpressionAttribute) attribute).value;
+
+    throw new IllegalStateException("Required attribute '" + name + "' to be of type expression");
+  }
+
+  private static @Nullable Attribute tryFindAttribute(String name, List<Attribute> attributes) {
+    for (Attribute attribute : attributes) {
+      if (attribute.name.equalsIgnoreCase(name))
+        return attribute;
     }
 
-    if (result == null)
-      throw new IllegalStateException("Required absent attribute \"" + name + "\"");
-
-    if (!type.isInstance(result))
-      throw new IllegalStateException("Expected attribute \"" + name + "\" to be a " + type.getSimpleName());
-
-    return type.cast(result).getValue();
+    return null;
   }
 
-  protected List<String> getStringAttributes(String name, List<Attribute<?>> attributes) {
-    return getAttributes(name, StringAttribute.class, attributes);
-  }
+  protected static List<AExpression> findExpressionAttributes(String name, List<Attribute> attributes) {
+    List<AExpression> result = new ArrayList<>();
 
-  protected List<Long> getLongAttributes(String name, List<Attribute<?>> attributes) {
-    return getAttributes(name, LongAttribute.class, attributes);
-  }
-
-  protected List<Double> getDoubleAttributes(String name, List<Attribute<?>> attributes) {
-    return getAttributes(name, DoubleAttribute.class, attributes);
-  }
-
-  protected List<Boolean> getBooleanAttributes(String name, List<Attribute<?>> attributes) {
-    return getAttributes(name, BooleanAttribute.class, attributes);
-  }
-
-  protected List<AstNode> getSubtreeAttributes(String name, List<Attribute<?>> attributes) {
-    return getAttributes(name, SubtreeAttribute.class, attributes);
-  }
-
-  protected <T> List<T> getAttributes(String name, Class<? extends Attribute<T>> type, List<Attribute<?>> attributes) {
-    List<T> result = new ArrayList<>();
-
-    for (Attribute<?> attribute : attributes) {
+    for (Attribute attribute : attributes) {
       if (!attribute.name.equalsIgnoreCase(name))
         continue;
 
-      if (!type.isInstance(attribute))
-        throw new IllegalStateException("Expected attribute \"" + name + "\" to be a " + type.getSimpleName());
+      if (!(attribute instanceof ExpressionAttribute))
+        throw new IllegalStateException("Required attribute '" + name + "' to be of type expression");
 
-      result.add(type.cast(attribute).getValue());
+      result.add(((ExpressionAttribute) attribute).value);
+    }
+
+    return result;
+  }
+
+  protected static List<AstNode> findSubtreeAttributes(String name, List<Attribute> attributes) {
+    List<AstNode> result = new ArrayList<>();
+
+    for (Attribute attribute : attributes) {
+      if (!attribute.name.equalsIgnoreCase(name))
+        continue;
+
+      if (!(attribute instanceof SubtreeAttribute))
+        throw new IllegalStateException("Required attribute '" + name + "' to be of type subtree");
+
+      result.add(((SubtreeAttribute) attribute).value);
     }
 
     return result;

@@ -28,9 +28,9 @@ public class ScoreTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("name", AttributeType.STRING, false, true),
-      new AttributeDefinition("objective", AttributeType.STRING, false, true),
-      new AttributeDefinition("value", AttributeType.STRING, false, false)
+      new AttributeDefinition("name", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("objective", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, false)
     };
   }
 
@@ -38,17 +38,15 @@ public class ScoreTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new ScoreNode(
-      getStringAttribute("name", attributes),
-      getStringAttribute("objective", attributes),
-      tryGetStringAttribute("value", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("name", attributes),
+      findExpressionAttribute("objective", attributes),
+      tryFindExpressionAttribute("value", attributes),
+      position, children, letBindings
     );
   }
 }

@@ -1,9 +1,9 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.ContainerNode;
-import at.blvckbytes.component_markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.ast.node.style.Formatting;
+import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
@@ -11,7 +11,15 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class FormattingTag extends TagDefinition {
+public class ImmediateFormatTag extends TagDefinition {
+
+  private boolean isFormatChar(char c, boolean allowReset) {
+    return (
+      (c >= 'k' && c <= 'o') ||
+      (c >= 'K' && c <= 'O') ||
+      (allowReset && (c == 'r' || c == 'R'))
+    );
+  }
 
   @Override
   public boolean matchName(String tagName) {
@@ -22,16 +30,11 @@ public class FormattingTag extends TagDefinition {
 
     char firstChar = tagName.charAt(0);
 
-    if (nameLength == 2 && firstChar == '&') {
-      char secondChar = tagName.charAt(1);
+    if (nameLength == 2 && firstChar == '&')
+      return isFormatChar(tagName.charAt(1), true);
 
-      return (
-        (secondChar >= 'k' && secondChar <= 'o') ||
-        (secondChar >= 'K' && secondChar <= 'O') ||
-        secondChar == 'r' ||
-        secondChar == 'R'
-      );
-    }
+    if (nameLength == 3 && firstChar == '&' && tagName.charAt(1) == '!')
+      return isFormatChar(tagName.charAt(2), false);
 
     switch (tagName) {
       case "b":
@@ -80,56 +83,67 @@ public class FormattingTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    applyFormatting(tagName, wrapper.style);
+    applyFormat(tagName, wrapper.style);
     return wrapper;
   }
 
-  private void applyFormatting(String tagName, NodeStyle style) {
-    boolean isNegative = tagName.charAt(0) == '!';
+  private void applyFormat(String tagName, NodeStyle style) {
+    boolean isNegative = tagName.charAt(0) == '!' || tagName.charAt(1) == '!';
 
-    Formatting formatting;
+    Format format;
 
     switch (tagName) {
+      case "&l":
+      case "&!l":
       case "b":
       case "bold":
       case "!b":
       case "!bold":
-        formatting = Formatting.BOLD;
+        format = Format.BOLD;
         break;
 
+      case "&o":
+      case "&!o":
       case "i":
       case "italic":
       case "!i":
       case "!italic":
-        formatting = Formatting.ITALIC;
+        format = Format.ITALIC;
         break;
 
+      case "&n":
+      case "&!n":
       case "u":
       case "underlined":
       case "!u":
       case "!underlined":
-        formatting = Formatting.UNDERLINE;
+        format = Format.UNDERLINED;
         break;
 
+      case "&m":
+      case "&!m":
       case "st":
       case "strikethrough":
       case "!st":
       case "!strikethrough":
-        formatting = Formatting.STRIKETHROUGH;
+        format = Format.STRIKETHROUGH;
         break;
 
+      case "&k":
+      case "&!k":
       case "obf":
       case "obfuscated":
       case "!obf":
       case "!obfuscated":
-        formatting = Formatting.MAGIC;
+        format = Format.MAGIC;
         break;
 
+      case "&r":
       case "reset":
         style.reset();
         return;
@@ -138,11 +152,6 @@ public class FormattingTag extends TagDefinition {
         return;
     }
 
-    if (isNegative) {
-      style.disableFormatting(formatting);
-      return;
-    }
-
-    style.enableFormatting(formatting);
+    style.formatStates[format.ordinal()] = ImmediateExpression.of(!isNegative);
   }
 }

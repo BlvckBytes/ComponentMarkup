@@ -29,9 +29,9 @@ public abstract class NbtTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition(source.attributeName, AttributeType.STRING, false, true),
-      new AttributeDefinition("path", AttributeType.STRING, false, true),
-      new AttributeDefinition("interpret", AttributeType.BOOLEAN, false, false),
+      new AttributeDefinition(source.attributeName, AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("path", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
       new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
     };
   }
@@ -40,21 +40,17 @@ public abstract class NbtTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    Boolean interpret = tryGetBooleanAttribute("interpret", attributes);
-
     return new NbtNode(
       source,
-      getStringAttribute(source.attributeName, attributes),
-      getStringAttribute("path", attributes),
-      interpret != null && interpret,
-      tryGetSubtreeAttribute("separator", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute(source.attributeName, attributes),
+      findExpressionAttribute("path", attributes),
+      tryFindExpressionAttribute("interpret", attributes),
+      tryFindSubtreeAttribute("separator", attributes),
+      position, children, letBindings
     );
   }
 }

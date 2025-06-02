@@ -2,15 +2,16 @@ package at.blvckbytes.component_markup.ast.node.content;
 
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
 public class TextNode extends ContentNode {
 
-  public final String text;
+  public final AExpression text;
 
   public TextNode(
-    String text,
+    AExpression text,
     CursorPosition position,
     List<LetBinding> letBindings
   ) {
@@ -23,7 +24,7 @@ public class TextNode extends ContentNode {
   public String stringify(int indentLevel) {
     return (
       indent(indentLevel) + "TextNode{\n" +
-      indent(indentLevel + 1) + "text='" + text + "',\n" +
+      indent(indentLevel + 1) + "text=" + text.expressionify() + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
     );

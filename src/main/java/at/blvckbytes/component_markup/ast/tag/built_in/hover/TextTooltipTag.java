@@ -36,15 +36,13 @@ public class TextTooltipTag extends HoverTag {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new TextTooltipNode(
-      getSubtreeAttribute("value", attributes),
-      position,
-      children,
-      letBindings
+      findSubtreeAttribute("value", attributes),
+      position, children, letBindings
     );
   }
 }

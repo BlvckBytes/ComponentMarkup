@@ -28,8 +28,8 @@ public class EntityTooltipTag extends HoverTag {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("type", AttributeType.STRING, false, true),
-      new AttributeDefinition("id", AttributeType.STRING, false, true),
+      new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
       new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
     };
   }
@@ -38,17 +38,15 @@ public class EntityTooltipTag extends HoverTag {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new EntityTooltipNode(
-      getStringAttribute("type", attributes),
-      getStringAttribute("id", attributes),
-      tryGetSubtreeAttribute("name", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("type", attributes),
+      findExpressionAttribute("id", attributes),
+      tryFindSubtreeAttribute("name", attributes),
+      position, children, letBindings
     );
   }
 }

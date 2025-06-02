@@ -28,7 +28,7 @@ public class FontTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("name", AttributeType.STRING, false, true)
+      new AttributeDefinition("name", AttributeType.EXPRESSION, false, true)
     };
   }
 
@@ -36,12 +36,12 @@ public class FontTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.style.font = getStringAttribute("name", attributes);
+    wrapper.style.font = findExpressionAttribute("name", attributes);
     return wrapper;
   }
 }

@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -11,16 +12,16 @@ import java.util.List;
 public class NbtNode extends ContentNode {
 
   public final NbtSource source;
-  public final String identifier;
-  public final String path;
-  public final boolean interpret;
+  public final AExpression identifier;
+  public final AExpression path;
+  public final @Nullable AExpression interpret;
   public final @Nullable AstNode separator;
 
   public NbtNode(
     NbtSource source,
-    String identifier,
-    String path,
-    boolean interpret,
+    AExpression identifier,
+    AExpression path,
+    @Nullable AExpression interpret,
     @Nullable AstNode separator,
     CursorPosition position,
     List<AstNode> children,
@@ -40,9 +41,9 @@ public class NbtNode extends ContentNode {
     return (
       indent(indentLevel) + "NbtNode{\n" +
       indent(indentLevel + 1) + "source=" + source.name() + ",\n" +
-      indent(indentLevel + 1) + "identifier='" + identifier + "',\n" +
-      indent(indentLevel + 1) + "path='" + path + "',\n" +
-      indent(indentLevel + 1) + "interpret=" + interpret + ",\n" +
+      indent(indentLevel + 1) + "identifier=" + identifier.expressionify() + ",\n" +
+      indent(indentLevel + 1) + "path=" + path.expressionify() + ",\n" +
+      indent(indentLevel + 1) + "interpret=" + (interpret == null ? "null" : interpret.expressionify()) + ",\n" +
       stringifySubtree(separator, "separator", indentLevel + 1) + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"

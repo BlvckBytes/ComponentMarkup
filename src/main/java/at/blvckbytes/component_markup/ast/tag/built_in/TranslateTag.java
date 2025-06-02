@@ -28,7 +28,7 @@ public class TranslateTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("key", AttributeType.STRING, false, true),
+      new AttributeDefinition("key", AttributeType.EXPRESSION, false, true),
       new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
       new AttributeDefinition("fallback", AttributeType.SUBTREE, false, false)
     };
@@ -38,17 +38,15 @@ public class TranslateTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new TranslateNode(
-      getStringAttribute("key", attributes),
-      getSubtreeAttributes("with", attributes),
-      tryGetSubtreeAttribute("fallback", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("key", attributes),
+      findSubtreeAttributes("with", attributes),
+      tryFindSubtreeAttribute("fallback", attributes),
+      position, children, letBindings
     );
   }
 }

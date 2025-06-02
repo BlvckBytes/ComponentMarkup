@@ -28,7 +28,7 @@ public class InsertTag extends TagDefinition {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.STRING, false, true)
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
     };
   }
 
@@ -36,12 +36,12 @@ public class InsertTag extends TagDefinition {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new InsertNode(
-      getStringAttribute("value", attributes),
+      findExpressionAttribute("value", attributes),
       position, children, letBindings
     );
   }

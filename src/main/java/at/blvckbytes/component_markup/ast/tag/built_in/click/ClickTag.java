@@ -29,7 +29,7 @@ public abstract class ClickTag extends TagDefinition  {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.STRING, false, true)
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
     };
   }
 
@@ -37,16 +37,14 @@ public abstract class ClickTag extends TagDefinition  {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new ClickNode(
       action,
-      getStringAttribute("value", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("value", attributes),
+      position, children, letBindings
     );
   }
 }

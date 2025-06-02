@@ -1,62 +1,55 @@
 package at.blvckbytes.component_markup.ast.node.style;
 
+import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 public class NodeStyle {
 
-  private final Boolean[] formattingStates;
-
-  public @Nullable String color;
-  public @Nullable String font;
+  public final AExpression[] formatStates;
+  public @Nullable AExpression color;
+  public @Nullable AExpression font;
 
   public NodeStyle() {
-    this.formattingStates = new Boolean[Formatting.VALUES.size()];
+    this.formatStates = new AExpression[Format.VALUES.size()];
+    Arrays.fill(formatStates, ImmediateExpression.ofNull());
   }
 
-  public NodeStyle enableFormatting(Formatting formatting) {
-    formattingStates[formatting.ordinal()] = true;
+  public NodeStyle enableFormat(Format formatting) {
+    formatStates[formatting.ordinal()] = ImmediateExpression.of(true);
     return this;
   }
 
-  public NodeStyle disableFormatting(Formatting formatting) {
-    formattingStates[formatting.ordinal()] = false;
+  public NodeStyle disableFormat(Format formatting) {
+    formatStates[formatting.ordinal()] = ImmediateExpression.of(false);
     return this;
   }
 
-  public NodeStyle clearFormatting(Formatting formatting) {
-    formattingStates[formatting.ordinal()] = null;
+  public NodeStyle clearFormat(Format formatting) {
+    formatStates[formatting.ordinal()] = ImmediateExpression.ofNull();
     return this;
   }
 
   public NodeStyle reset() {
-    Arrays.fill(formattingStates, null);
+    Arrays.fill(formatStates, ImmediateExpression.ofNull());
     this.color = null;
     this.font = null;
     return this;
   }
 
-  public @Nullable Boolean getFormatting(Formatting formatting) {
-    return formattingStates[formatting.ordinal()];
-  }
-
-  private String makeFormattingExpression() {
+  private String makeFormatExpression() {
     StringBuilder result = new StringBuilder();
 
-    for (Formatting formatting : Formatting.VALUES) {
-      Boolean state = formattingStates[formatting.ordinal()];
-
-      if (state == null)
-        continue;
+    for (int formatIndex = 0; formatIndex < Format.VALUES.size(); ++formatIndex) {
+      Format format = Format.VALUES.get(formatIndex);
+      AExpression state = formatStates[format.ordinal()];
 
       result.append('&');
 
-      if (!state)
-        result.append('!');
-
-      switch (formatting) {
+      switch (format) {
         case MAGIC:
           result.append('k');
           break;
@@ -69,7 +62,7 @@ public class NodeStyle {
           result.append('m');
           break;
 
-        case UNDERLINE:
+        case UNDERLINED:
           result.append('n');
           break;
 
@@ -77,6 +70,11 @@ public class NodeStyle {
           result.append('o');
           break;
       }
+
+      result.append('=').append(state.expressionify());
+
+      if (formatIndex != 0)
+        result.append(';');
     }
 
     return result.toString();
@@ -85,9 +83,9 @@ public class NodeStyle {
   public String stringify(int indentLevel) {
     return(
       AstNode.indent(indentLevel) + "NodeStyle{\n" +
-      AstNode.indent(indentLevel + 1) + "color=" + (color == null ? "null" : "'" + color + "'") + ",\n" +
-      AstNode.indent(indentLevel + 1) + "font=" + (font == null ? "null" : "'" + font + "'") + ",\n" +
-      AstNode.indent(indentLevel + 1) + "formatting=" + makeFormattingExpression() + "\n" +
+      AstNode.indent(indentLevel + 1) + "color=" + (color == null ? "null" : color.expressionify()) + ",\n" +
+      AstNode.indent(indentLevel + 1) + "font=" + (font == null ? "null" : font.expressionify()) + ",\n" +
+      AstNode.indent(indentLevel + 1) + "format=" + makeFormatExpression() + "\n" +
       AstNode.indent(indentLevel) + "}"
     );
   }

@@ -28,7 +28,7 @@ public class AchievementTooltipTag extends HoverTag {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.STRING, false, true)
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
     };
   }
 
@@ -36,15 +36,13 @@ public class AchievementTooltipTag extends HoverTag {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new AchievementTooltipNode(
-      getStringAttribute("value", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("value", attributes),
+      position, children, letBindings
     );
   }
 }

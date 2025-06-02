@@ -28,8 +28,8 @@ public class ItemTooltipTag extends HoverTag {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("material", AttributeType.STRING, false, false),
-      new AttributeDefinition("amount", AttributeType.LONG, false, false),
+      new AttributeDefinition("material", AttributeType.EXPRESSION, false, false),
+      new AttributeDefinition("amount", AttributeType.EXPRESSION, false, false),
       new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
       new AttributeDefinition("lore", AttributeType.SUBTREE, false, false)
     };
@@ -39,20 +39,16 @@ public class ItemTooltipTag extends HoverTag {
   public AstNode construct(
     String tagName,
     CursorPosition position,
-    List<Attribute<?>> attributes,
+    List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    Long amount = tryGetLongAttribute("amount", attributes);
-
     return new ItemTooltipNode(
-      getStringAttribute("material", attributes),
-      amount == null ? 1 : amount,
-      tryGetSubtreeAttribute("name", attributes),
-      tryGetSubtreeAttribute("lore", attributes),
-      position,
-      children,
-      letBindings
+      findExpressionAttribute("material", attributes),
+      tryFindExpressionAttribute("amount", attributes),
+      tryFindSubtreeAttribute("name", attributes),
+      tryFindSubtreeAttribute("lore", attributes),
+      position, children, letBindings
     );
   }
 }

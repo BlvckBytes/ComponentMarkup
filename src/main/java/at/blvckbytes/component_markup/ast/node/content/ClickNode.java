@@ -4,15 +4,22 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
 public class ClickNode extends ContentNode {
 
   public final ClickAction action;
-  public final String value;
+  public final AExpression value;
 
-  public ClickNode(ClickAction action, String value, CursorPosition position, List<AstNode> children, List<LetBinding> letBindings) {
+  public ClickNode(
+    ClickAction action,
+    AExpression value,
+    CursorPosition position,
+    List<AstNode> children,
+    List<LetBinding> letBindings
+  ) {
     super(position, children, letBindings);
 
     this.action = action;
@@ -24,7 +31,7 @@ public class ClickNode extends ContentNode {
     return (
       indent(indentLevel) + "ClickNode{\n" +
       indent(indentLevel + 1) + "action=" + action.name() + ",\n" +
-      indent(indentLevel + 1) + "value='" + value + "',\n" +
+      indent(indentLevel + 1) + "value=" + value.expressionify() + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
     );
