@@ -40,9 +40,6 @@ public class KeyTag extends TagDefinition {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new KeyNode(
-      findExpressionAttribute("key", attributes),
-      position, letBindings
-    );
+    return new KeyNode(findExpressionAttribute("key", attributes), position, letBindings);
   }
 }

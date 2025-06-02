@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast.node.content;
+package at.blvckbytes.component_markup.ast.node.click;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;

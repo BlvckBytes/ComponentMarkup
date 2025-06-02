@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SelectorNode extends AstNode {
+public class SelectorNode extends ContentNode {
 
   public final AExpression selector;
   public final @Nullable AstNode separator;
@@ -17,10 +17,9 @@ public class SelectorNode extends AstNode {
     AExpression selector,
     @Nullable AstNode separator,
     CursorPosition position,
-    List<AstNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(position, letBindings);
 
     this.selector = selector;
     this.separator = separator;

@@ -50,7 +50,7 @@ public abstract class NbtTag extends TagDefinition {
       findExpressionAttribute("path", attributes),
       tryFindExpressionAttribute("interpret", attributes),
       tryFindSubtreeAttribute("separator", attributes),
-      position, children, letBindings
+      position, letBindings
     );
   }
 }

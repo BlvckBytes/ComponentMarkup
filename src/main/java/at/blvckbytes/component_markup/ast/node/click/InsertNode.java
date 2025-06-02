@@ -1,21 +1,22 @@
-package at.blvckbytes.component_markup.ast.node.content;
+package at.blvckbytes.component_markup.ast.node.click;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class AchievementTooltipNode extends AstNode {
+public class InsertNode extends AstNode {
 
   public final AExpression value;
 
-  public AchievementTooltipNode(
+  public InsertNode(
     AExpression value,
     CursorPosition position,
     List<AstNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 
@@ -25,7 +26,7 @@ public class AchievementTooltipNode extends AstNode {
   @Override
   public String stringify(int indentLevel) {
     return (
-      indent(indentLevel) + "AchievementTooltipNode{\n" +
+      indent(indentLevel) + "InsertNode{\n" +
       indent(indentLevel + 1) + "value=" + value.expressionify() + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"

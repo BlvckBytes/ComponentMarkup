@@ -1,5 +1,6 @@
-package at.blvckbytes.component_markup.ast.node;
+package at.blvckbytes.component_markup.ast.node.control;
 
+import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 

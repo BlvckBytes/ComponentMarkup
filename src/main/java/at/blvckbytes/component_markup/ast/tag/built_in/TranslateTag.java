@@ -46,7 +46,7 @@ public class TranslateTag extends TagDefinition {
       findExpressionAttribute("key", attributes),
       findSubtreeAttributes("with", attributes),
       tryFindSubtreeAttribute("fallback", attributes),
-      position, children, letBindings
+      position, letBindings
     );
   }
 }

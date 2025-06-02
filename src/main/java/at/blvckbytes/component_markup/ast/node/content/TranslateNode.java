@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TranslateNode extends AstNode {
+public class TranslateNode extends ContentNode {
 
   public final AExpression key;
   public final List<AstNode> with;
@@ -19,10 +19,9 @@ public class TranslateNode extends AstNode {
     List<AstNode> with,
     @Nullable AstNode fallback,
     CursorPosition position,
-    List<AstNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(position, letBindings);
 
     this.key = key;
     this.with = with;

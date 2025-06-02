@@ -46,7 +46,7 @@ public class ScoreTag extends TagDefinition {
       findExpressionAttribute("name", attributes),
       findExpressionAttribute("objective", attributes),
       tryFindExpressionAttribute("value", attributes),
-      position, children, letBindings
+      position, letBindings
     );
   }
 }

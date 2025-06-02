@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.content.TextTooltipNode;
+import at.blvckbytes.component_markup.ast.node.tooltip.TextTooltipNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;

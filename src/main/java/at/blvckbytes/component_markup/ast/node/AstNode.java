@@ -15,12 +15,12 @@ public abstract class AstNode {
   public final CursorPosition position;
   public final NodeStyle style;
   public final @Nullable List<AstNode> children;
-  public final List<LetBinding> letBindings;
+  public final @Nullable List<LetBinding> letBindings;
 
   public AstNode(
     CursorPosition position,
     @Nullable List<AstNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
     this.position = position;
     this.style = new NodeStyle();

@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast.node.content;
+package at.blvckbytes.component_markup.ast.node.tooltip;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class TextTooltipNode extends AstNode {
+public class TextTooltipNode extends TooltipNode {
 
   public final AstNode value;
 

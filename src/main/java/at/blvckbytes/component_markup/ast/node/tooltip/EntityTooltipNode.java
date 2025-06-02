@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast.node.content;
+package at.blvckbytes.component_markup.ast.node.tooltip;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityTooltipNode extends AstNode {
+public class EntityTooltipNode extends TooltipNode {
 
   public final AExpression type;
   public final AExpression id;

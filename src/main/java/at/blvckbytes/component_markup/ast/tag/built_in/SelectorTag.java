@@ -44,7 +44,7 @@ public class SelectorTag extends TagDefinition {
     return new SelectorNode(
       findExpressionAttribute("selector", attributes),
       tryFindSubtreeAttribute("separator", attributes),
-      position, children, letBindings
+      position, letBindings
     );
   }
 }

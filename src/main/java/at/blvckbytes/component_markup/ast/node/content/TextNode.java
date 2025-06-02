@@ -1,22 +1,17 @@
 package at.blvckbytes.component_markup.ast.node.content;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
-import java.util.List;
-
-public class TextNode extends AstNode {
+public class TextNode extends ContentNode {
 
   public final AExpression text;
 
   public TextNode(
     AExpression text,
-    CursorPosition position,
-    List<LetBinding> letBindings
+    CursorPosition position
   ) {
-    super(position, null, letBindings);
+    super(position, null);
 
     this.text = text;
   }

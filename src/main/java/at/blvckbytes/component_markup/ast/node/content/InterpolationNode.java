@@ -1,22 +1,22 @@
 package at.blvckbytes.component_markup.ast.node.content;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class InterpolationNode extends AstNode {
+public abstract class InterpolationNode extends ContentNode {
 
   public final AExpression expression;
 
   public InterpolationNode(
     AExpression expression,
     CursorPosition position,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
-    super(position, null, letBindings);
+    super(position, letBindings);
 
     this.expression = expression;
   }

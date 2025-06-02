@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class NbtNode extends AstNode {
+public class NbtNode extends ContentNode {
 
   public final NbtSource source;
   public final AExpression identifier;
@@ -24,10 +24,9 @@ public class NbtNode extends AstNode {
     @Nullable AExpression interpret,
     @Nullable AstNode separator,
     CursorPosition position,
-    List<AstNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(position, letBindings);
 
     this.source = source;
     this.identifier = identifier;
