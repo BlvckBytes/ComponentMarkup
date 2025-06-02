@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class BreakNode extends ContentNode {
+public class BreakNode extends AstNode {
 
   public BreakNode(CursorPosition position, List<AstNode> children, List<LetBinding> letBindings) {
     super(position, children, letBindings);

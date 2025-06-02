@@ -7,7 +7,7 @@ import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
-public class InsertNode extends ContentNode {
+public class InsertNode extends AstNode {
 
   public final AExpression value;
 

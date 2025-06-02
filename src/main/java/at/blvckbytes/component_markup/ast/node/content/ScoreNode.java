@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ScoreNode extends ContentNode {
+public class ScoreNode extends AstNode {
 
   public final AExpression name;
   public final AExpression object;

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ItemTooltipNode extends ContentNode {
+public class ItemTooltipNode extends AstNode {
 
   public final AExpression material;
   public final @Nullable AExpression amount;

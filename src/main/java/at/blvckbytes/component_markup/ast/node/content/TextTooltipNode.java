@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class TextTooltipNode extends ContentNode {
+public class TextTooltipNode extends AstNode {
 
   public final AstNode value;
 

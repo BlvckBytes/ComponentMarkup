@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TranslateNode extends ContentNode {
+public class TranslateNode extends AstNode {
 
   public final AExpression key;
   public final List<AstNode> with;

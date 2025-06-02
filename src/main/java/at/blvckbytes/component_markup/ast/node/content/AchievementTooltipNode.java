@@ -7,7 +7,7 @@ import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
-public class AchievementTooltipNode extends ContentNode {
+public class AchievementTooltipNode extends AstNode {
 
   public final AExpression value;
 

@@ -8,7 +8,7 @@ import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
-public class ClickNode extends ContentNode {
+public class ClickNode extends AstNode {
 
   public final ClickAction action;
   public final AExpression value;

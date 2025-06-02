@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityTooltipNode extends ContentNode {
+public class EntityTooltipNode extends AstNode {
 
   public final AExpression type;
   public final AExpression id;

@@ -1,12 +1,11 @@
 package at.blvckbytes.component_markup.ast.node;
 
-import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 import java.util.List;
 
-public class ForLoopNode extends ContentNode {
+public class ForLoopNode extends AstNode {
 
   public final AExpression iterable;
   public final String iterationVariable;
