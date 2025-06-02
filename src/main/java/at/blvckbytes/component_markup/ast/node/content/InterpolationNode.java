@@ -5,17 +5,14 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class TextNode extends ContentNode {
+public abstract class InterpolationNode extends ContentNode {
 
-  public final String text;
-
-  public TextNode(
-    String text,
+  public InterpolationNode(
     CursorPosition position,
     List<LetBinding> letBindings
   ) {
     super(position, null, letBindings);
-
-    this.text = text;
   }
+
+  public abstract String getText();
 }

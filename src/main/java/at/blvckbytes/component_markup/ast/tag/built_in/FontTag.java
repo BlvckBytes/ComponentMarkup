@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.ast.node.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
@@ -40,7 +40,7 @@ public class FontTag extends TagDefinition {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    ContentNode wrapper = new ContentNode(position, children, letBindings);
+    ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     wrapper.style.font = getStringAttribute("name", attributes);
     return wrapper;
   }

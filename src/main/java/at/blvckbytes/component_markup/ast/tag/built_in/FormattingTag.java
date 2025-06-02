@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.style.Formatting;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
@@ -83,7 +84,7 @@ public class FormattingTag extends TagDefinition {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    ContentNode wrapper = new ContentNode(position, children, letBindings);
+    ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     applyFormatting(tagName, wrapper.style);
     return wrapper;
   }

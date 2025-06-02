@@ -15,22 +15,26 @@ public class NodeStyle {
     this.formattingStates = new Boolean[Formatting.VALUES.size()];
   }
 
-  public void enableFormatting(Formatting formatting) {
+  public NodeStyle enableFormatting(Formatting formatting) {
     formattingStates[formatting.ordinal()] = true;
+    return this;
   }
 
-  public void disableFormatting(Formatting formatting) {
+  public NodeStyle disableFormatting(Formatting formatting) {
     formattingStates[formatting.ordinal()] = false;
+    return this;
   }
 
-  public void clearFormatting(Formatting formatting) {
+  public NodeStyle clearFormatting(Formatting formatting) {
     formattingStates[formatting.ordinal()] = null;
+    return this;
   }
 
-  public void reset() {
+  public NodeStyle reset() {
     Arrays.fill(formattingStates, null);
     this.color = null;
     this.font = null;
+    return this;
   }
 
   public @Nullable Boolean getFormatting(Formatting formatting) {
