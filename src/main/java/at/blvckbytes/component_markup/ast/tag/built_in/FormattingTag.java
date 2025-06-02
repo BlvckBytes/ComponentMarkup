@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.ast.node.style.Formatting;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
@@ -77,11 +78,12 @@ public class FormattingTag extends TagDefinition {
   @Override
   public AstNode construct(
     String tagName,
+    CursorPosition position,
     List<Attribute<?>> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    ContentNode wrapper = new ContentNode(children, letBindings);
+    ContentNode wrapper = new ContentNode(position, children, letBindings);
     applyFormatting(tagName, wrapper.style);
     return wrapper;
   }

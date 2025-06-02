@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.ast.node.content;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,10 +22,11 @@ public class NbtNode extends ContentNode {
     String path,
     boolean interpret,
     @Nullable AstNode separator,
+    CursorPosition position,
     List<AstNode> children,
     List<LetBinding> letBindings
   ) {
-    super(children, letBindings);
+    super(position, children, letBindings);
 
     this.source = source;
     this.identifier = identifier;

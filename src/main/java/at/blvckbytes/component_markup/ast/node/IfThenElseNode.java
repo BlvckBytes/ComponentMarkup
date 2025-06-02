@@ -11,6 +11,8 @@ public class IfThenElseNode extends AstNode {
     List<ConditionalNode> conditions,
     ConditionalNode fallback
   ) {
+    super(conditions.get(0).position);
+
     this.conditions = conditions;
     this.fallback = fallback;
   }

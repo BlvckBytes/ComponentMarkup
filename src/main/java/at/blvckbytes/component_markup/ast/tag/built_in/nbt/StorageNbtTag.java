@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.ast.tag.built_in.nbt;
 
 public class StorageNbtTag extends NbtTag {
 
-  protected StorageNbtTag() {
+  public StorageNbtTag() {
     super(NbtSource.STORAGE);
   }
 

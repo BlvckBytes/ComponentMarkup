@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.ast.tag.built_in.nbt;
 
 public class EntityNbtTag extends NbtTag {
 
-  protected EntityNbtTag() {
+  public EntityNbtTag() {
     super(NbtSource.ENTITY);
   }
 

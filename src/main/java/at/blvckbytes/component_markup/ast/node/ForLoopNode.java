@@ -18,7 +18,7 @@ public class ForLoopNode extends ContentNode {
     AstNode body,
     List<LetBinding> letBindings
   ) {
-    super(null, letBindings);
+    super(body.position, null, letBindings);
 
     this.body = body;
     this.iterableExpression = iterableExpression;

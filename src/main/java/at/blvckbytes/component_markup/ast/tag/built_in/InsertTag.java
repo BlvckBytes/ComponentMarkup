@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.InsertNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
@@ -34,13 +35,14 @@ public class InsertTag extends TagDefinition {
   @Override
   public AstNode construct(
     String tagName,
+    CursorPosition position,
     List<Attribute<?>> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     return new InsertNode(
       getStringAttribute("value", attributes),
-      children, letBindings
+      position, children, letBindings
     );
   }
 }

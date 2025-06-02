@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.KeyNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
@@ -34,10 +35,11 @@ public class KeyTag extends TagDefinition {
   @Override
   public AstNode construct(
     String tagName,
+    CursorPosition position,
     List<Attribute<?>> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new KeyNode(getStringAttribute("key", attributes), letBindings);
+    return new KeyNode(getStringAttribute("key", attributes), position, letBindings);
   }
 }

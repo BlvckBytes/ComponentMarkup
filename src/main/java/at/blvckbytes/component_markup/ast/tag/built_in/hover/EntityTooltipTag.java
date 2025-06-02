@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.EntityTooltipNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class EntityTooltipTag extends HoverTag {
   @Override
   public AstNode construct(
     String tagName,
+    CursorPosition position,
     List<Attribute<?>> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
@@ -44,6 +46,7 @@ public class EntityTooltipTag extends HoverTag {
       getStringAttribute("type", attributes),
       getStringAttribute("id", attributes),
       tryGetSubtreeAttribute("name", attributes),
+      position,
       children,
       letBindings
     );

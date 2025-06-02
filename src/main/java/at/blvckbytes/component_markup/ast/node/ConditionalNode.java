@@ -16,7 +16,7 @@ public class ConditionalNode extends ContentNode {
     AstNode body,
     List<LetBinding> letBindings
   ) {
-    super(null, letBindings);
+    super(body.position, null, letBindings);
 
     this.conditionExpression = conditionExpression;
     this.body = body;

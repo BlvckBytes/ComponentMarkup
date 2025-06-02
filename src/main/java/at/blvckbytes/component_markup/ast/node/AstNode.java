@@ -1,3 +1,12 @@
 package at.blvckbytes.component_markup.ast.node;
 
-public abstract class AstNode {}
+import at.blvckbytes.component_markup.xml.CursorPosition;
+
+public abstract class AstNode {
+
+  public final CursorPosition position;
+
+  protected AstNode(CursorPosition position) {
+    this.position = position;
+  }
+}
