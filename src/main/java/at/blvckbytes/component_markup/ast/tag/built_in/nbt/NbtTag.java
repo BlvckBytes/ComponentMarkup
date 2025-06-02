@@ -46,6 +46,7 @@ public abstract class NbtTag extends TagDefinition {
 
     return new NbtNode(
       source,
+      getStringAttribute(source.attributeName, attributes),
       getStringAttribute("path", attributes),
       interpret != null && interpret,
       tryGetSubtreeAttribute("separator", attributes),

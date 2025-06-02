@@ -10,12 +10,14 @@ import java.util.List;
 public class NbtNode extends ContentNode {
 
   public final NbtSource source;
+  public final String identifier;
   public final String path;
   public final boolean interpret;
   public final @Nullable AstNode separator;
 
   public NbtNode(
     NbtSource source,
+    String identifier,
     String path,
     boolean interpret,
     @Nullable AstNode separator,
@@ -25,6 +27,7 @@ public class NbtNode extends ContentNode {
     super(children, letBindings);
 
     this.source = source;
+    this.identifier = identifier;
     this.path = path;
     this.interpret = interpret;
     this.separator = separator;
