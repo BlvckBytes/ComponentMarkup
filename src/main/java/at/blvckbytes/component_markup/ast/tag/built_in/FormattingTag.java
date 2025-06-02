@@ -1,15 +1,15 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.tag.AttributeDefinition;
-import at.blvckbytes.component_markup.ast.tag.TagClosing;
-import at.blvckbytes.component_markup.ast.tag.TagDefinition;
-import at.blvckbytes.component_markup.ast.tag.TagPriority;
+import at.blvckbytes.component_markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.ast.node.style.Formatting;
+import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 
 import java.util.List;
 
-public class FormattingTag implements TagDefinition {
+public class FormattingTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagName) {
@@ -34,14 +34,24 @@ public class FormattingTag implements TagDefinition {
     switch (tagName) {
       case "b":
       case "bold":
+      case "!b":
+      case "!bold":
       case "i":
       case "italic":
+      case "!i":
+      case "!italic":
       case "u":
       case "underlined":
+      case "!u":
+      case "!underlined":
       case "st":
       case "strikethrough":
+      case "!st":
+      case "!strikethrough":
       case "obf":
       case "obfuscated":
+      case "!obf":
+      case "!obfuscated":
       case "reset":
         return true;
     }
@@ -65,7 +75,71 @@ public class FormattingTag implements TagDefinition {
   }
 
   @Override
-  public AstNode construct(String tagName, List<Attribute> attributes, List<AstNode> members) {
-    throw new UnsupportedOperationException();
+  public AstNode construct(
+    String tagName,
+    List<Attribute<?>> attributes,
+    List<LetBinding> letBindings,
+    List<AstNode> children
+  ) {
+    ContentNode wrapper = new ContentNode(children, letBindings);
+    applyFormatting(tagName, wrapper.style);
+    return wrapper;
+  }
+
+  private void applyFormatting(String tagName, NodeStyle style) {
+    boolean isNegative = tagName.charAt(0) == '!';
+
+    Formatting formatting;
+
+    switch (tagName) {
+      case "b":
+      case "bold":
+      case "!b":
+      case "!bold":
+        formatting = Formatting.BOLD;
+        break;
+
+      case "i":
+      case "italic":
+      case "!i":
+      case "!italic":
+        formatting = Formatting.ITALIC;
+        break;
+
+      case "u":
+      case "underlined":
+      case "!u":
+      case "!underlined":
+        formatting = Formatting.UNDERLINE;
+        break;
+
+      case "st":
+      case "strikethrough":
+      case "!st":
+      case "!strikethrough":
+        formatting = Formatting.STRIKETHROUGH;
+        break;
+
+      case "obf":
+      case "obfuscated":
+      case "!obf":
+      case "!obfuscated":
+        formatting = Formatting.MAGIC;
+        break;
+
+      case "reset":
+        style.reset();
+        return;
+
+      default:
+        return;
+    }
+
+    if (isNegative) {
+      style.disableFormatting(formatting);
+      return;
+    }
+
+    style.enableFormatting(formatting);
   }
 }

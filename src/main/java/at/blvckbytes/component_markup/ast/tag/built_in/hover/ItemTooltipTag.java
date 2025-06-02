@@ -1,12 +1,13 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.content.ItemTooltipNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 
 import java.util.List;
 
-public class ItemTooltipTag implements HoverTag {
+public class ItemTooltipTag extends HoverTag {
 
   @Override
   public boolean matchName(String tagName) {
@@ -34,7 +35,21 @@ public class ItemTooltipTag implements HoverTag {
   }
 
   @Override
-  public AstNode construct(String tagName, List<Attribute> attributes, List<AstNode> members) {
-    throw new UnsupportedOperationException();
+  public AstNode construct(
+    String tagName,
+    List<Attribute<?>> attributes,
+    List<LetBinding> letBindings,
+    List<AstNode> children
+  ) {
+    Long amount = tryGetLongAttribute("amount", attributes);
+
+    return new ItemTooltipNode(
+      getStringAttribute("material", attributes),
+      amount == null ? 1 : amount,
+      getSubtreeAttribute("name", attributes),
+      tryGetSubtreeAttribute("lore", attributes),
+      children,
+      letBindings
+    );
   }
 }

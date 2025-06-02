@@ -1,12 +1,13 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.click;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.content.ClickNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 
 import java.util.List;
 
-public abstract class ClickTag implements TagDefinition  {
+public abstract class ClickTag extends TagDefinition  {
 
   private final ClickAction action;
 
@@ -32,7 +33,12 @@ public abstract class ClickTag implements TagDefinition  {
   }
 
   @Override
-  public AstNode construct(String tagName, List<Attribute> attributes, List<AstNode> members) {
-    throw new UnsupportedOperationException();
+  public AstNode construct(
+    String tagName,
+    List<Attribute<?>> attributes,
+    List<LetBinding> letBindings,
+    List<AstNode> children
+  ) {
+    return new ClickNode(action, getStringAttribute("value", attributes), children, letBindings);
   }
 }

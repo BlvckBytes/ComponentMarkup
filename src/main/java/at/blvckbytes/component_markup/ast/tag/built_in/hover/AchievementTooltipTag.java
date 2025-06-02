@@ -1,12 +1,13 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.content.AchievementTooltipNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 
 import java.util.List;
 
-public class AchievementTooltipTag implements HoverTag {
+public class AchievementTooltipTag extends HoverTag {
 
   @Override
   public boolean matchName(String tagName) {
@@ -31,7 +32,12 @@ public class AchievementTooltipTag implements HoverTag {
   }
 
   @Override
-  public AstNode construct(String tagName, List<Attribute> attributes, List<AstNode> members) {
-    throw new UnsupportedOperationException();
+  public AstNode construct(
+    String tagName,
+    List<Attribute<?>> attributes,
+    List<LetBinding> letBindings,
+    List<AstNode> children
+  ) {
+    return new AchievementTooltipNode(getStringAttribute("value", attributes), children, letBindings);
   }
 }
