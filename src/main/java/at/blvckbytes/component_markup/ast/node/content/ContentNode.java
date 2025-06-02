@@ -37,15 +37,11 @@ public abstract class ContentNode extends AstNode {
   protected String stringifyBaseMembers(int indentLevel) {
     return (
       indent(indentLevel) + "position=" + position + ",\n" +
-        indent(indentLevel) + "children=[" +
-        stringifyList(children, item -> item.stringify(indentLevel + 1)) +
-        indent(indentLevel) + "],\n" +
-        indent(indentLevel) + "letBindings=[" +
-        stringifyList(letBindings, item -> item.stringify(indentLevel + 1)) +
-        indent(indentLevel) + "],\n" +
-        indent(indentLevel) + "style=(\n" +
-        style.stringify(indentLevel + 1) +
-        indent(indentLevel) + "\n)"
+      indent(indentLevel) + "children=" + stringifyList(children, indentLevel) + ",\n" +
+      indent(indentLevel) + "letBindings=" + stringifyList(letBindings, indentLevel) + ",\n" +
+      indent(indentLevel) + "style=(\n" +
+      style.stringify(indentLevel + 1) + "\n" +
+      indent(indentLevel) + ")"
     );
   }
 }

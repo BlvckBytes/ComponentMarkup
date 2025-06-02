@@ -23,9 +23,7 @@ public class IfThenElseNode extends AstNode {
   public String stringify(int indentLevel) {
     return (
       indent(indentLevel) + "IfThenElseNode{\n" +
-      indent(indentLevel) + "conditions=[" +
-      stringifyList(conditions, item -> item.stringify(indentLevel + 1)) +
-      indent(indentLevel) + "],\n" +
+      indent(indentLevel) + "conditions=" + stringifyList(conditions, indentLevel) + ",\n" +
       stringifySubtree(fallback, "fallback", indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
     );

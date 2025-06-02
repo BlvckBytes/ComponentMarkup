@@ -33,9 +33,7 @@ public class TranslateNode extends ContentNode {
     return (
       indent(indentLevel) + "TranslateNode{\n" +
       indent(indentLevel + 1) + "key='" + key + "',\n" +
-      indent(indentLevel + 1) + "with=[" +
-      stringifyList(with, item -> item.stringify(indentLevel + 2)) +
-      indent(indentLevel + 1) + "],\n" +
+      indent(indentLevel + 1) + "with=" + stringifyList(with, indentLevel) + ",\n" +
       stringifySubtree(fallback, "fallback", indentLevel + 1) + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
