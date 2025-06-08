@@ -8,11 +8,11 @@ import java.util.List;
 public class IfThenElseNode extends AstNode {
 
   public final List<ConditionalNode> conditions;
-  public final @Nullable ConditionalNode fallback;
+  public final @Nullable AstNode fallback;
 
   public IfThenElseNode(
     List<ConditionalNode> conditions,
-    @Nullable ConditionalNode fallback
+    @Nullable AstNode fallback
   ) {
     super(conditions.get(0).position, null, null);
 

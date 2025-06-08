@@ -89,4 +89,10 @@ public class NodeStyle {
       AstNode.indent(indentLevel) + "}"
     );
   }
+
+  public void copyFrom(NodeStyle other) {
+    this.font = other.font;
+    this.color = other.color;
+    System.arraycopy(other.formatStates, 0, this.formatStates, 0, formatStates.length);
+  }
 }

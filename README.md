@@ -38,3 +38,23 @@ These structural attributes are grouped by layer, avoiding bloated syntax like `
     </container>
 </container>
 ```
+
+## Attribute Binding
+
+All attributes can be bound to the result of expressions via the notation of surrounding their names with square brackets, as in `[name]="..."`; one surrounded, they may only be of type string, which will then be interpreted as a compute-expression. Structural attributes, like `*for-`, as well as `*if`/`*else-if` do not accept this syntax, as they are forced to be expressions, for obvious reasons.
+
+### Immediate vs. Value Color- and Formatting-Tags
+
+Color and formatting may be applied to content immediately, meaning in a hard-coded fashion, like
+
+```
+<red>Hello, <bold>world!
+```
+
+But what if the color is to be assigned dynamically, and formatting is to be toggled according to flags, all provided by the data to be rendered? That's when the corresponding value-tags come into play.
+
+```
+<color [value]="my_color_variable">Hello, <format [bold]="my_bold_flag">world!
+```
+
+This notation opens up a whole new realm of dynamic rendering.
