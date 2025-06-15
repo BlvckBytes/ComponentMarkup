@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
@@ -8,6 +9,7 @@ import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -36,13 +38,29 @@ public class FormatTag extends TagDefinition {
   }
 
   @Override
-  public AstNode construct(
+  public boolean modifyContainer(
     String tagNameLower,
+    CursorPosition position,
+    List<Attribute> attributes,
+    List<LetBinding> letBindings,
+    ContainerNode container
+  ) {
+    applyFormat(attributes, container.style);
+    return true;
+  }
+
+  @Override
+  public @Nullable AstNode construct(
+    String tagNameLower,
+    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
+    if (didModifyContainer)
+      return null;
+
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     applyFormat(attributes, wrapper.style);
     return wrapper;

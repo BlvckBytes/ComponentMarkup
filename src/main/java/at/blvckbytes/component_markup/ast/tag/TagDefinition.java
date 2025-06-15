@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.attribute.*;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
@@ -43,8 +44,19 @@ public abstract class TagDefinition {
 
   public abstract boolean matchName(String tagNameLower);
 
-  public abstract AstNode construct(
+  public boolean modifyContainer(
     String tagNameLower,
+    CursorPosition position,
+    List<Attribute> attributes,
+    List<LetBinding> letBindings,
+    ContainerNode container
+  ) {
+    return false;
+  }
+
+  public abstract @Nullable AstNode construct(
+    String tagNameLower,
+    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

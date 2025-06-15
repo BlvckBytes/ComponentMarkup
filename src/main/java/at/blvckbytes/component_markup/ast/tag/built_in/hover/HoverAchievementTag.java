@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -20,8 +21,9 @@ public class HoverAchievementTag extends HoverTag {
   }
 
   @Override
-  public AstNode construct(
+  public @Nullable AstNode construct(
     String tagNameLower,
+    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

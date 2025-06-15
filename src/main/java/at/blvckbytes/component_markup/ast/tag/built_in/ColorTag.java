@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -29,13 +30,29 @@ public class ColorTag extends TagDefinition {
   }
 
   @Override
-  public AstNode construct(
+  public boolean modifyContainer(
     String tagNameLower,
+    CursorPosition position,
+    List<Attribute> attributes,
+    List<LetBinding> letBindings,
+    ContainerNode container
+  ) {
+    container.style.color = findExpressionAttribute("value", attributes);
+    return true;
+  }
+
+  @Override
+  public @Nullable AstNode construct(
+    String tagNameLower,
+    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
+    if (didModifyContainer)
+      return null;
+
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     wrapper.style.color = findExpressionAttribute("value", attributes);
     return wrapper;
