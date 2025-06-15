@@ -10,19 +10,22 @@ import java.util.List;
 
 public class TranslateTag extends TagDefinition {
 
+  private static final String TAG_NAME = "translate";
+
   public TranslateTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("key", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
         new AttributeDefinition("fallback", AttributeType.SUBTREE, false, false)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("translate");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

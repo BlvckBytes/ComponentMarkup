@@ -10,18 +10,21 @@ import java.util.List;
 
 public class SelectorTag extends TagDefinition {
 
+  private static final String TAG_NAME = "selector";
+
   public SelectorTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("selector");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

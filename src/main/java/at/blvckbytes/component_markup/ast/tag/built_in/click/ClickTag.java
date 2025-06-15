@@ -11,15 +11,23 @@ import java.util.List;
 public abstract class ClickTag extends TagDefinition  {
 
   private final ClickAction action;
+  private final String tagName;
 
-  protected ClickTag(ClickAction action) {
+  protected ClickTag(ClickAction action, String tagName) {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-      }
+      },
+      new String[] { tagName }
     );
 
+    this.tagName = tagName;
     this.action = action;
+  }
+
+  @Override
+  public boolean matchName(String tagName) {
+    return tagName.equals(this.tagName);
   }
 
   @Override

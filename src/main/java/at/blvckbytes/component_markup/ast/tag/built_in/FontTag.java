@@ -10,17 +10,20 @@ import java.util.List;
 
 public class FontTag extends TagDefinition {
 
+  private static final String TAG_NAME = "font";
+
   public FontTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("name", AttributeType.EXPRESSION, false, true)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("font");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

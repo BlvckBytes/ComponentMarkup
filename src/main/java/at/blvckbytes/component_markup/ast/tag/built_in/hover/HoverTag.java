@@ -5,7 +5,16 @@ import at.blvckbytes.component_markup.ast.tag.TagDefinition;
 
 public abstract class HoverTag extends TagDefinition {
 
-  protected HoverTag(AttributeDefinition[] attributes) {
-    super(attributes);
+  private final String tagName;
+
+  protected HoverTag(AttributeDefinition[] attributes, String tagName) {
+    super(attributes, new String[] { tagName });
+
+    this.tagName = tagName;
+  }
+
+  @Override
+  public boolean matchName(String tagName) {
+    return tagName.equals(this.tagName);
   }
 }

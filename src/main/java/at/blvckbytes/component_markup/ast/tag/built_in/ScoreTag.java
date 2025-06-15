@@ -10,19 +10,22 @@ import java.util.List;
 
 public class ScoreTag extends TagDefinition {
 
+  private static final String TAG_NAME = "score";
+
   public ScoreTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("name", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("objective", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, false)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("score");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

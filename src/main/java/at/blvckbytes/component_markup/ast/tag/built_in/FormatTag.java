@@ -13,6 +13,8 @@ import java.util.List;
 
 public class FormatTag extends TagDefinition {
 
+  private static final String TAG_NAME = "format";
+
   public FormatTag() {
     super(
       new AttributeDefinition[] {
@@ -21,13 +23,14 @@ public class FormatTag extends TagDefinition {
         new AttributeDefinition("underlined", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("italic", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("bold", AttributeType.EXPRESSION, false, false)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("format");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

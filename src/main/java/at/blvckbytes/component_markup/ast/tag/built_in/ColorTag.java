@@ -10,17 +10,20 @@ import java.util.List;
 
 public class ColorTag extends TagDefinition {
 
+  private static final String TAG_NAME = "color";
+
   public ColorTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("color");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

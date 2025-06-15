@@ -17,13 +17,9 @@ public class HoverItemTag extends HoverTag {
         new AttributeDefinition("amount", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
         new AttributeDefinition("lore", AttributeType.SUBTREE, false, false)
-      }
+      },
+      "hover-item"
     );
-  }
-
-  @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals("hover-item");
   }
 
   @Override

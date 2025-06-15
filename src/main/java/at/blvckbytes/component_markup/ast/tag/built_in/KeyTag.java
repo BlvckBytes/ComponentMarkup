@@ -10,17 +10,20 @@ import java.util.List;
 
 public class KeyTag extends TagDefinition {
 
+  private static final String TAG_NAME = "key";
+
   public KeyTag() {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("key", AttributeType.EXPRESSION, false, true)
-      }
+      },
+      new String[] { TAG_NAME }
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("key");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

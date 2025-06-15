@@ -10,13 +10,15 @@ import java.util.List;
 
 public class ContainerTag extends TagDefinition {
 
+  private static final String TAG_NAME = "container";
+
   public ContainerTag() {
-    super(NO_ATTRIBUTES);
+    super(NO_ATTRIBUTES, new String[] { TAG_NAME });
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equals("container");
+    return tagName.equals(TAG_NAME);
   }
 
   @Override

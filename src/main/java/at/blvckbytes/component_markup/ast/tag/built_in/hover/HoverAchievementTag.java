@@ -14,13 +14,9 @@ public class HoverAchievementTag extends HoverTag {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-      }
+      },
+      "hover-achievement"
     );
-  }
-
-  @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals("hover-achievement");
   }
 
   @Override

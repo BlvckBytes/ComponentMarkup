@@ -14,13 +14,9 @@ public class HoverTextTag extends HoverTag {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition("value", AttributeType.SUBTREE, false, true)
-      }
+      },
+      "hover-text"
     );
-  }
-
-  @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals("hover-text");
   }
 
   @Override

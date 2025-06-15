@@ -11,18 +11,26 @@ import java.util.List;
 public abstract class NbtTag extends TagDefinition {
 
   private final NbtSource source;
+  private final String tagName;
 
-  protected NbtTag(NbtSource source) {
+  protected NbtTag(NbtSource source, String tagName) {
     super(
       new AttributeDefinition[] {
         new AttributeDefinition(source.attributeName, AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("path", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
-      }
+      },
+      new String[] { tagName }
     );
 
     this.source = source;
+    this.tagName = tagName;
+  }
+
+  @Override
+  public boolean matchName(String tagName) {
+    return tagName.equals(this.tagName);
   }
 
   @Override

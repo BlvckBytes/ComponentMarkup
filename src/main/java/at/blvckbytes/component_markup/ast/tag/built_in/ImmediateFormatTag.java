@@ -9,12 +9,51 @@ import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ImmediateFormatTag extends TagDefinition {
 
+  private static final Set<String> namedFormats;
+  private static final String[] staticPrefixes;
+
+  static {
+    namedFormats = new HashSet<>();
+    namedFormats.add("b");
+    namedFormats.add("bold");
+    namedFormats.add("!b");
+    namedFormats.add("!bold");
+    namedFormats.add("i");
+    namedFormats.add("italic");
+    namedFormats.add("!i");
+    namedFormats.add("!italic");
+    namedFormats.add("u");
+    namedFormats.add("underlined");
+    namedFormats.add("!u");
+    namedFormats.add("!underlined");
+    namedFormats.add("st");
+    namedFormats.add("strikethrough");
+    namedFormats.add("!st");
+    namedFormats.add("!strikethrough");
+    namedFormats.add("obf");
+    namedFormats.add("obfuscated");
+    namedFormats.add("!obf");
+    namedFormats.add("!obfuscated");
+    namedFormats.add("reset");
+
+    staticPrefixes = new String[namedFormats.size() + 1];
+
+    int prefixIndex = 0;
+
+    for (String namedFormat : namedFormats)
+      staticPrefixes[prefixIndex++] = namedFormat;
+
+    staticPrefixes[prefixIndex] = "&";
+  }
+
   public ImmediateFormatTag() {
-    super(NO_ATTRIBUTES);
+    super(NO_ATTRIBUTES, staticPrefixes);
   }
 
   private boolean isFormatChar(char c, boolean allowReset) {
@@ -40,32 +79,7 @@ public class ImmediateFormatTag extends TagDefinition {
     if (nameLength == 3 && firstChar == '&' && tagName.charAt(1) == '!')
       return isFormatChar(tagName.charAt(2), false);
 
-    switch (tagName) {
-      case "b":
-      case "bold":
-      case "!b":
-      case "!bold":
-      case "i":
-      case "italic":
-      case "!i":
-      case "!italic":
-      case "u":
-      case "underlined":
-      case "!u":
-      case "!underlined":
-      case "st":
-      case "strikethrough":
-      case "!st":
-      case "!strikethrough":
-      case "obf":
-      case "obfuscated":
-      case "!obf":
-      case "!obfuscated":
-      case "reset":
-        return true;
-    }
-
-    return false;
+    return namedFormats.contains(tagName);
   }
 
   @Override

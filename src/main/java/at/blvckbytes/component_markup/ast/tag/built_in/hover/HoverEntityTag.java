@@ -16,13 +16,9 @@ public class HoverEntityTag extends HoverTag {
         new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
-      }
+      },
+      "hover-entity"
     );
-  }
-
-  @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals("hover-entity");
   }
 
   @Override

@@ -7,6 +7,8 @@ import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class TagDefinition {
@@ -14,9 +16,11 @@ public abstract class TagDefinition {
   public static final AttributeDefinition[] NO_ATTRIBUTES = new AttributeDefinition[0];
 
   private final AttributeDefinition[] attributes;
+  public final Collection<String> staticPrefixes;
 
-  protected TagDefinition(AttributeDefinition[] attributes) {
+  protected TagDefinition(AttributeDefinition[] attributes, String[] staticPrefixes) {
     this.attributes = attributes;
+    this.staticPrefixes = Arrays.asList(staticPrefixes);
   }
 
   public @Nullable AttributeDefinition getAttribute(String attributeName) {
@@ -28,12 +32,16 @@ public abstract class TagDefinition {
     return null;
   }
 
+  // TODO: tagName should be called tagNameLower
   public abstract boolean matchName(String tagName);
+
+  // TODO: These really don't need to be methods, do they? Have them as public final properties.
 
   public abstract TagClosing getClosing();
 
   public abstract TagPriority getPriority();
 
+  // TODO: tagName should be called tagNameLower
   public abstract AstNode construct(
     String tagName,
     CursorPosition position,

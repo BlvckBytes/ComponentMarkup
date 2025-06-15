@@ -7,12 +7,49 @@ import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ImmediateColorTag extends TagDefinition {
 
+  private static final Set<String> namedColors;
+  private static final String[] staticPrefixes;
+
+  static {
+    namedColors = new HashSet<>();
+    namedColors.add("black");
+    namedColors.add("dark_blue");
+    namedColors.add("dark_green");
+    namedColors.add("dark_aqua");
+    namedColors.add("dark_red");
+    namedColors.add("dark_purple");
+    namedColors.add("gold");
+    namedColors.add("gray");
+    namedColors.add("grey");
+    namedColors.add("dark_gray");
+    namedColors.add("dark_grey");
+    namedColors.add("blue");
+    namedColors.add("green");
+    namedColors.add("aqua");
+    namedColors.add("red");
+    namedColors.add("light_purple");
+    namedColors.add("yellow");
+    namedColors.add("white");
+
+    staticPrefixes = new String[namedColors.size() + 2];
+
+    int prefixIndex = 0;
+
+    for (String namedColor : namedColors)
+      staticPrefixes[prefixIndex++] = namedColor;
+
+    staticPrefixes[prefixIndex++] = "&";
+    staticPrefixes[prefixIndex] = "#";
+  }
+
   public ImmediateColorTag() {
-    super(NO_ATTRIBUTES);
+    super(NO_ATTRIBUTES, staticPrefixes);
   }
 
   @Override
@@ -27,27 +64,8 @@ public class ImmediateColorTag extends TagDefinition {
     if (nameLength == 2 && firstChar == '&')
       return isHexadecimalChar(tagName.charAt(1));
 
-    switch (tagName) {
-      case "black":
-      case "dark_blue":
-      case "dark_green":
-      case "dark_aqua":
-      case "dark_red":
-      case "dark_purple":
-      case "gold":
-      case "gray":
-      case "grey":
-      case "dark_gray":
-      case "dark_grey":
-      case "blue":
-      case "green":
-      case "aqua":
-      case "red":
-      case "light_purple":
-      case "yellow":
-      case "white":
-        return true;
-    }
+    if (namedColors.contains(tagName))
+      return true;
 
     if (nameLength == 7 && firstChar == '#') {
       for (int charIndex = 1; charIndex < 7; ++charIndex) {
