@@ -18,26 +18,14 @@ public class NodeStyle {
     Arrays.fill(formatStates, ImmediateExpression.ofNull());
   }
 
-  public NodeStyle enableFormat(Format formatting) {
-    formatStates[formatting.ordinal()] = ImmediateExpression.of(true);
-    return this;
+  public void setFormat(Format formatting, AExpression value) {
+    formatStates[formatting.ordinal()] = value;
   }
 
-  public NodeStyle disableFormat(Format formatting) {
-    formatStates[formatting.ordinal()] = ImmediateExpression.of(false);
-    return this;
-  }
-
-  public NodeStyle clearFormat(Format formatting) {
-    formatStates[formatting.ordinal()] = ImmediateExpression.ofNull();
-    return this;
-  }
-
-  public NodeStyle reset() {
+  public void reset() {
     Arrays.fill(formatStates, ImmediateExpression.ofNull());
     this.color = null;
     this.font = null;
-    return this;
   }
 
   private String makeFormatExpression() {
