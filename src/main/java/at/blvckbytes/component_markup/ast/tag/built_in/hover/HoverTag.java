@@ -16,7 +16,7 @@ public abstract class HoverTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals(this.tagName);
+  public boolean matchName(String tagNameLower) {
+    return tagNameLower.equals(this.tagName);
   }
 }

@@ -59,48 +59,47 @@ public class ImmediateFormatTag extends TagDefinition {
   private boolean isFormatChar(char c, boolean allowReset) {
     return (
       (c >= 'k' && c <= 'o') ||
-      (c >= 'K' && c <= 'O') ||
-      (allowReset && (c == 'r' || c == 'R'))
+      (allowReset && c == 'r')
     );
   }
 
   @Override
-  public boolean matchName(String tagName) {
-    int nameLength = tagName.length();
+  public boolean matchName(String tagNameLower) {
+    int nameLength = tagNameLower.length();
 
     if (nameLength == 0)
       return false;
 
-    char firstChar = tagName.charAt(0);
+    char firstChar = tagNameLower.charAt(0);
 
     if (nameLength == 2 && firstChar == '&')
-      return isFormatChar(tagName.charAt(1), true);
+      return isFormatChar(tagNameLower.charAt(1), true);
 
-    if (nameLength == 3 && firstChar == '&' && tagName.charAt(1) == '!')
-      return isFormatChar(tagName.charAt(2), false);
+    if (nameLength == 3 && firstChar == '&' && tagNameLower.charAt(1) == '!')
+      return isFormatChar(tagNameLower.charAt(2), false);
 
-    return namedFormats.contains(tagName);
+    return namedFormats.contains(tagNameLower);
   }
 
   @Override
   public AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    applyFormat(tagName, wrapper.style);
+    applyFormat(tagNameLower, wrapper.style);
     return wrapper;
   }
 
-  private void applyFormat(String tagName, NodeStyle style) {
-    boolean isNegative = tagName.charAt(0) == '!' || tagName.charAt(1) == '!';
+  private void applyFormat(String tagNameLower, NodeStyle style) {
+    boolean isNegative = tagNameLower.charAt(0) == '!' || tagNameLower.charAt(1) == '!';
 
     Format format;
 
-    switch (tagName) {
+    switch (tagNameLower) {
       case "&l":
       case "&!l":
       case "b":

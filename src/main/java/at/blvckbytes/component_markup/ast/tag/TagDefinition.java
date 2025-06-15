@@ -41,12 +41,10 @@ public abstract class TagDefinition {
     return null;
   }
 
-  // TODO: tagName should be called tagNameLower
-  public abstract boolean matchName(String tagName);
+  public abstract boolean matchName(String tagNameLower);
 
-  // TODO: tagName should be called tagNameLower
   public abstract AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

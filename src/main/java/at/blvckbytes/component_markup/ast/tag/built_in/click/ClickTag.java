@@ -28,13 +28,13 @@ public abstract class ClickTag extends TagDefinition  {
   }
 
   @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals(this.tagName);
+  public boolean matchName(String tagNameLower) {
+    return tagNameLower.equals(this.tagName);
   }
 
   @Override
   public AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

@@ -26,13 +26,13 @@ public class ScoreTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(String tagName) {
-    return tagName.equals(TAG_NAME);
+  public boolean matchName(String tagNameLower) {
+    return tagNameLower.equals(TAG_NAME);
   }
 
   @Override
   public AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

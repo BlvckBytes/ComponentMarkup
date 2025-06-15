@@ -53,23 +53,23 @@ public class ImmediateColorTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(String tagName) {
-    int nameLength = tagName.length();
+  public boolean matchName(String tagNameLower) {
+    int nameLength = tagNameLower.length();
 
     if (nameLength == 0)
       return false;
 
-    char firstChar = tagName.charAt(0);
+    char firstChar = tagNameLower.charAt(0);
 
     if (nameLength == 2 && firstChar == '&')
-      return isHexadecimalChar(tagName.charAt(1));
+      return isHexadecimalChar(tagNameLower.charAt(1));
 
-    if (namedColors.contains(tagName))
+    if (namedColors.contains(tagNameLower))
       return true;
 
     if (nameLength == 7 && firstChar == '#') {
       for (int charIndex = 1; charIndex < 7; ++charIndex) {
-        if (!isHexadecimalChar(tagName.charAt(charIndex)))
+        if (!isHexadecimalChar(tagNameLower.charAt(charIndex)))
           return false;
       }
 
@@ -81,22 +81,22 @@ public class ImmediateColorTag extends TagDefinition {
 
   @Override
   public AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.style.color = ImmediateExpression.of(tagNameToColor(tagName));
+    wrapper.style.color = ImmediateExpression.of(tagNameToColor(tagNameLower));
     return wrapper;
   }
 
-  private String tagNameToColor(String tagName) {
-    int nameLength = tagName.length();
+  private String tagNameToColor(String tagNameLower) {
+    int nameLength = tagNameLower.length();
 
     if (nameLength > 2) {
-      switch (tagName) {
+      switch (tagNameLower) {
         case "grey":
           return "gray";
 
@@ -104,33 +104,27 @@ public class ImmediateColorTag extends TagDefinition {
           return "dark_gray";
       }
 
-      return tagName;
+      return tagNameLower;
     }
 
     if (nameLength != 2)
-      return tagName;
+      return tagNameLower;
 
-    if (tagName.charAt(0) != '&')
-      return tagName;
+    if (tagNameLower.charAt(0) != '&')
+      return tagNameLower;
 
-    switch (tagName.charAt(1)) {
+    switch (tagNameLower.charAt(1)) {
       case 'a':
-      case 'A':
         return "green";
       case 'b':
-      case 'B':
         return "aqua";
       case 'c':
-      case 'C':
         return "red";
       case 'd':
-      case 'D':
         return "light_purple";
       case 'e':
-      case 'E':
         return "yellow";
       case 'f':
-      case 'F':
         return "white";
       case '0':
         return "black";
@@ -154,13 +148,12 @@ public class ImmediateColorTag extends TagDefinition {
         return "blue";
     }
 
-    return tagName;
+    return tagNameLower;
   }
 
   private boolean isHexadecimalChar(char c) {
     return (
       (c >= 'a' && c <= 'f') ||
-      (c >= 'A' && c <= 'F') ||
       (c >= '0' && c <= '9')
     );
   }

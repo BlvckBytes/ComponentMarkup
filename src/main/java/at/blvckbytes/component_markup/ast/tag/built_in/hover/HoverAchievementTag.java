@@ -21,7 +21,7 @@ public class HoverAchievementTag extends HoverTag {
 
   @Override
   public AstNode construct(
-    String tagName,
+    String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
