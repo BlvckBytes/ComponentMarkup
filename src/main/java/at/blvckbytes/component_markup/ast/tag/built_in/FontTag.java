@@ -10,6 +10,14 @@ import java.util.List;
 
 public class FontTag extends TagDefinition {
 
+  private final AttributeDefinition[] attributes;
+
+  public FontTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("name", AttributeType.EXPRESSION, false, true)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("font");
@@ -27,9 +35,7 @@ public class FontTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("name", AttributeType.EXPRESSION, false, true)
-    };
+    return this.attributes;
   }
 
   @Override

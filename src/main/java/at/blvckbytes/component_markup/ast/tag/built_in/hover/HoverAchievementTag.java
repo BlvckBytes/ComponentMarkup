@@ -10,6 +10,14 @@ import java.util.List;
 
 public class HoverAchievementTag extends HoverTag {
 
+  private final AttributeDefinition[] attributes;
+
+  public HoverAchievementTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("hover-achievement");
@@ -27,9 +35,7 @@ public class HoverAchievementTag extends HoverTag {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-    };
+    return this.attributes;
   }
 
   @Override

@@ -10,6 +10,14 @@ import java.util.List;
 
 public class ColorTag extends TagDefinition {
 
+  private final AttributeDefinition[] attributes;
+
+  public ColorTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("color");
@@ -27,9 +35,7 @@ public class ColorTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-    };
+    return this.attributes;
   }
 
   @Override

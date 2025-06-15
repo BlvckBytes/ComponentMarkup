@@ -10,6 +10,15 @@ import java.util.List;
 
 public class SelectorTag extends TagDefinition {
 
+  private final AttributeDefinition[] attributes;
+
+  public SelectorTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("selector");
@@ -27,10 +36,7 @@ public class SelectorTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
-    };
+    return this.attributes;
   }
 
   @Override

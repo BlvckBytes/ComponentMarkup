@@ -10,6 +10,16 @@ import java.util.List;
 
 public class HoverEntityTag extends HoverTag {
 
+  private final AttributeDefinition[] attributes;
+
+  public HoverEntityTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("hover-entity");
@@ -27,11 +37,7 @@ public class HoverEntityTag extends HoverTag {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
-    };
+    return this.attributes;
   }
 
   @Override

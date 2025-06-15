@@ -10,6 +10,14 @@ import java.util.List;
 
 public class KeyTag extends TagDefinition {
 
+  private final AttributeDefinition[] attributes;
+
+  public KeyTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("key", AttributeType.EXPRESSION, false, true)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("key");
@@ -27,9 +35,7 @@ public class KeyTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("key", AttributeType.EXPRESSION, false, true)
-    };
+    return this.attributes;
   }
 
   @Override

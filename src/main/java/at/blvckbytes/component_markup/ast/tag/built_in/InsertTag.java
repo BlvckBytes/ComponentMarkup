@@ -10,6 +10,14 @@ import java.util.List;
 
 public class InsertTag extends TagDefinition {
 
+  private final AttributeDefinition[] attributes;
+
+  public InsertTag() {
+    this.attributes = new AttributeDefinition[] {
+      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+    };
+  }
+
   @Override
   public boolean matchName(String tagName) {
     return tagName.equalsIgnoreCase("insert");
@@ -27,9 +35,7 @@ public class InsertTag extends TagDefinition {
 
   @Override
   public AttributeDefinition[] getAttributes() {
-    return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-    };
+    return attributes;
   }
 
   @Override
