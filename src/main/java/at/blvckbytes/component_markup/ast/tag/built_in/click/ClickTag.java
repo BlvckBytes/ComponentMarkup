@@ -11,14 +11,15 @@ import java.util.List;
 public abstract class ClickTag extends TagDefinition  {
 
   private final ClickAction action;
-  private final AttributeDefinition[] attributes;
 
   protected ClickTag(ClickAction action) {
-    this.action = action;
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+      }
+    );
 
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-    };
+    this.action = action;
   }
 
   @Override
@@ -29,11 +30,6 @@ public abstract class ClickTag extends TagDefinition  {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

@@ -8,6 +8,6 @@ public class OpenUrlTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("open-url");
+    return tagName.equals("open-url");
   }
 }

@@ -8,6 +8,6 @@ public class SuggestCommandTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("suggest-command");
+    return tagName.equals("suggest-command");
   }
 }

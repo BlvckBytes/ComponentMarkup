@@ -8,6 +8,6 @@ public class StorageNbtTag extends NbtTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("storage-nbt");
+    return tagName.equals("storage-nbt");
   }
 }

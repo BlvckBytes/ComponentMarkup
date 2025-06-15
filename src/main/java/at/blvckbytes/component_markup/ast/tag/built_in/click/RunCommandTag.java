@@ -8,6 +8,6 @@ public class RunCommandTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("run-command");
+    return tagName.equals("run-command");
   }
 }

@@ -13,21 +13,21 @@ import java.util.List;
 
 public class FormatTag extends TagDefinition {
 
-  private final AttributeDefinition[] attributes;
-
   public FormatTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("obfuscated", AttributeType.EXPRESSION, false, false),
-      new AttributeDefinition("strikethrough", AttributeType.EXPRESSION, false, false),
-      new AttributeDefinition("underlined", AttributeType.EXPRESSION, false, false),
-      new AttributeDefinition("italic", AttributeType.EXPRESSION, false, false),
-      new AttributeDefinition("bold", AttributeType.EXPRESSION, false, false)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("obfuscated", AttributeType.EXPRESSION, false, false),
+        new AttributeDefinition("strikethrough", AttributeType.EXPRESSION, false, false),
+        new AttributeDefinition("underlined", AttributeType.EXPRESSION, false, false),
+        new AttributeDefinition("italic", AttributeType.EXPRESSION, false, false),
+        new AttributeDefinition("bold", AttributeType.EXPRESSION, false, false)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("format");
+    return tagName.equals("format");
   }
 
   @Override
@@ -38,11 +38,6 @@ public class FormatTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

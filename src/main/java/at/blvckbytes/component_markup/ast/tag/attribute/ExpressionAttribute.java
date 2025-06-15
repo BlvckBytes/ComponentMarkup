@@ -3,7 +3,7 @@ package at.blvckbytes.component_markup.ast.tag.attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
-public abstract class ExpressionAttribute extends Attribute {
+public class ExpressionAttribute extends Attribute {
 
   public final AExpression value;
 

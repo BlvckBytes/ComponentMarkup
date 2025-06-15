@@ -10,9 +10,13 @@ import java.util.List;
 
 public class ContainerTag extends TagDefinition {
 
+  public ContainerTag() {
+    super(NO_ATTRIBUTES);
+  }
+
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("container");
+    return tagName.equals("container");
   }
 
   @Override
@@ -23,11 +27,6 @@ public class ContainerTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return NO_ATTRIBUTES;
   }
 
   @Override

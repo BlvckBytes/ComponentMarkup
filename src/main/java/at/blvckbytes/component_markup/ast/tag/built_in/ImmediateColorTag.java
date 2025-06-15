@@ -11,6 +11,10 @@ import java.util.List;
 
 public class ImmediateColorTag extends TagDefinition {
 
+  public ImmediateColorTag() {
+    super(NO_ATTRIBUTES);
+  }
+
   @Override
   public boolean matchName(String tagName) {
     int nameLength = tagName.length();
@@ -65,11 +69,6 @@ public class ImmediateColorTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return NO_ATTRIBUTES;
   }
 
   @Override

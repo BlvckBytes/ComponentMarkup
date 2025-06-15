@@ -8,6 +8,6 @@ public class ChangePageTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("change-page");
+    return tagName.equals("change-page");
   }
 }

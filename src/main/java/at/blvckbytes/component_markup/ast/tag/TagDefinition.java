@@ -13,13 +13,26 @@ public abstract class TagDefinition {
 
   public static final AttributeDefinition[] NO_ATTRIBUTES = new AttributeDefinition[0];
 
+  private final AttributeDefinition[] attributes;
+
+  protected TagDefinition(AttributeDefinition[] attributes) {
+    this.attributes = attributes;
+  }
+
+  public @Nullable AttributeDefinition getAttribute(String attributeName) {
+    for (AttributeDefinition attribute : attributes) {
+      if (attribute.name.equalsIgnoreCase(attributeName))
+        return attribute;
+    }
+
+    return null;
+  }
+
   public abstract boolean matchName(String tagName);
 
   public abstract TagClosing getClosing();
 
   public abstract TagPriority getPriority();
-
-  public abstract AttributeDefinition[] getAttributes();
 
   public abstract AstNode construct(
     String tagName,

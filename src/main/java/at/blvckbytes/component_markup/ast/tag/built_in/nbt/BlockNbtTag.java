@@ -8,6 +8,6 @@ public class BlockNbtTag extends NbtTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("block-nbt");
+    return tagName.equals("block-nbt");
   }
 }

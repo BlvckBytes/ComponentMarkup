@@ -10,18 +10,18 @@ import java.util.List;
 
 public class SelectorTag extends TagDefinition {
 
-  private final AttributeDefinition[] attributes;
-
   public SelectorTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("selector");
+    return tagName.equals("selector");
   }
 
   @Override
@@ -32,11 +32,6 @@ public class SelectorTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

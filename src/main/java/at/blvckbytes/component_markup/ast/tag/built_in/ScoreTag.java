@@ -10,19 +10,19 @@ import java.util.List;
 
 public class ScoreTag extends TagDefinition {
 
-  private final AttributeDefinition[] attributes;
-
   public ScoreTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("name", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("objective", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, false)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("name", AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("objective", AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("value", AttributeType.EXPRESSION, false, false)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("score");
+    return tagName.equals("score");
   }
 
   @Override
@@ -33,11 +33,6 @@ public class ScoreTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

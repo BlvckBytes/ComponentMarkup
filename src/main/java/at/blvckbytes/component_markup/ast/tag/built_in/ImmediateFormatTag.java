@@ -13,6 +13,10 @@ import java.util.List;
 
 public class ImmediateFormatTag extends TagDefinition {
 
+  public ImmediateFormatTag() {
+    super(NO_ATTRIBUTES);
+  }
+
   private boolean isFormatChar(char c, boolean allowReset) {
     return (
       (c >= 'k' && c <= 'o') ||
@@ -72,11 +76,6 @@ public class ImmediateFormatTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return NO_ATTRIBUTES;
   }
 
   @Override

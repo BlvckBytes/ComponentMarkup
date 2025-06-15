@@ -8,6 +8,6 @@ public class OpenFileTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("open-file");
+    return tagName.equals("open-file");
   }
 }

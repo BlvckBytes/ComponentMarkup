@@ -11,17 +11,18 @@ import java.util.List;
 public abstract class NbtTag extends TagDefinition {
 
   private final NbtSource source;
-  private final AttributeDefinition[] attributes;
 
   protected NbtTag(NbtSource source) {
-    this.source = source;
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition(source.attributeName, AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("path", AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
+        new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
+      }
+    );
 
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition(source.attributeName, AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("path", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
-      new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
-    };
+    this.source = source;
   }
 
   @Override
@@ -32,11 +33,6 @@ public abstract class NbtTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

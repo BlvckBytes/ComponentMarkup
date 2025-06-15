@@ -10,17 +10,17 @@ import java.util.List;
 
 public class HoverAchievementTag extends HoverTag {
 
-  private final AttributeDefinition[] attributes;
-
   public HoverAchievementTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("hover-achievement");
+    return tagName.equals("hover-achievement");
   }
 
   @Override
@@ -31,11 +31,6 @@ public class HoverAchievementTag extends HoverTag {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

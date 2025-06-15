@@ -8,6 +8,6 @@ public class ToClipboardTag extends ClickTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("to-clipboard");
+    return tagName.equals("to-clipboard");
   }
 }

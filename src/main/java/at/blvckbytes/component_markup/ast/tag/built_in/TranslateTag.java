@@ -10,19 +10,19 @@ import java.util.List;
 
 public class TranslateTag extends TagDefinition {
 
-  private final AttributeDefinition[] attributes;
-
   public TranslateTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("key", AttributeType.EXPRESSION, false, true),
-      new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
-      new AttributeDefinition("fallback", AttributeType.SUBTREE, false, false)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("key", AttributeType.EXPRESSION, false, true),
+        new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
+        new AttributeDefinition("fallback", AttributeType.SUBTREE, false, false)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("translate");
+    return tagName.equals("translate");
   }
 
   @Override
@@ -33,11 +33,6 @@ public class TranslateTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override

@@ -8,6 +8,6 @@ public class EntityNbtTag extends NbtTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("entity-nbt");
+    return tagName.equals("entity-nbt");
   }
 }

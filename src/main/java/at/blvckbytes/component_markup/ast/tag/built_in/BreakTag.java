@@ -10,9 +10,13 @@ import java.util.List;
 
 public class BreakTag extends TagDefinition {
 
+  public BreakTag() {
+    super(NO_ATTRIBUTES);
+  }
+
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("br");
+    return tagName.equals("br");
   }
 
   @Override
@@ -23,11 +27,6 @@ public class BreakTag extends TagDefinition {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return NO_ATTRIBUTES;
   }
 
   @Override

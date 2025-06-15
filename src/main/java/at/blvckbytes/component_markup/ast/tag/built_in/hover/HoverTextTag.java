@@ -10,17 +10,17 @@ import java.util.List;
 
 public class HoverTextTag extends HoverTag {
 
-  private final AttributeDefinition[] attributes;
-
   public HoverTextTag() {
-    this.attributes = new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.SUBTREE, false, true)
-    };
+    super(
+      new AttributeDefinition[] {
+        new AttributeDefinition("value", AttributeType.SUBTREE, false, true)
+      }
+    );
   }
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("hover-text");
+    return tagName.equals("hover-text");
   }
 
   @Override
@@ -31,11 +31,6 @@ public class HoverTextTag extends HoverTag {
   @Override
   public TagPriority getPriority() {
     return TagPriority.NORMAL;
-  }
-
-  @Override
-  public AttributeDefinition[] getAttributes() {
-    return this.attributes;
   }
 
   @Override
