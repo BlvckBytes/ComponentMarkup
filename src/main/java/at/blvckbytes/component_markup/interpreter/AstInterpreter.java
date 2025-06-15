@@ -1,11 +1,8 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.click.ClickNode;
-import at.blvckbytes.component_markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.*;
-import at.blvckbytes.component_markup.ast.node.tooltip.TooltipNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
@@ -16,22 +13,31 @@ import java.util.*;
 
 public class AstInterpreter {
 
+  private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
-  private final TemporaryMemberEnvironment environment;
-  private final OutputBuilder outputBuilder;
+  private final IEvaluationEnvironment baseEnvironment;
+  private final BreakMode breakMode;
 
-  private AstInterpreter(
+  public AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
     IEvaluationEnvironment environment,
     BreakMode breakMode
   ) {
+    this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
-    this.environment = new TemporaryMemberEnvironment(environment);
-    this.outputBuilder = new OutputBuilder(componentConstructor, environment, breakMode);
+    this.baseEnvironment = environment;
+    this.breakMode = breakMode;
   }
 
-  private void interpretIfThenElse(IfThenElseNode node) {
+  public List<Object> interpret(AstNode node) {
+    TemporaryMemberEnvironment environment = new TemporaryMemberEnvironment(baseEnvironment);
+    OutputBuilder builder = new OutputBuilder(componentConstructor, environment, breakMode);
+    _interpret(node, builder, environment);
+    return builder.getResult();
+  }
+
+  private void interpretIfThenElse(IfThenElseNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
     if (node.conditions.isEmpty())
       throw new IllegalStateException("Expecting at least one condition!");
 
@@ -41,14 +47,14 @@ public class AstInterpreter {
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(conditional.body);
+      _interpret(conditional.body, builder, environment);
       return;
     }
 
     if (node.fallback == null)
       return;
 
-    _interpret(node.fallback);
+    _interpret(node.fallback, builder, environment);
   }
 
   private @Nullable Set<String> introduceLetBindings(AstNode node, TemporaryMemberEnvironment environment) {
@@ -70,7 +76,7 @@ public class AstInterpreter {
     return boundVariables.keySet();
   }
 
-  private void interpretForLoop(ForLoopNode node) {
+  private void interpretForLoop(ForLoopNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
     Object iterable = expressionEvaluator.evaluateExpression(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asCollection(iterable);
 
@@ -88,7 +94,7 @@ public class AstInterpreter {
 
       environment.updateVariable(node.iterationVariable, item);
 
-      _interpret(node.body);
+      _interpret(node.body, builder, environment);
     }
 
     if (introducedNames != null)
@@ -98,19 +104,19 @@ public class AstInterpreter {
     environment.popVariable("loop");
   }
 
-  private void _interpret(AstNode node) {
+  private void _interpret(AstNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
     if (node instanceof IfThenElseNode) {
-      interpretIfThenElse((IfThenElseNode) node);
+      interpretIfThenElse((IfThenElseNode) node, builder, environment);
       return;
     }
 
     if (node instanceof ForLoopNode) {
-      interpretForLoop((ForLoopNode) node);
+      interpretForLoop((ForLoopNode) node, builder, environment);
       return;
     }
 
     if (node instanceof BreakNode) {
-      outputBuilder.onBreak();
+      builder.onBreak();
       return;
     }
 
@@ -120,7 +126,7 @@ public class AstInterpreter {
     Set<String> introducedBindings = introduceLetBindings(node, environment);
 
     if (node instanceof ContentNode) {
-      outputBuilder.onContent((ContentNode) node);
+      builder.onContent((ContentNode) node);
 
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);
@@ -128,37 +134,17 @@ public class AstInterpreter {
       return;
     }
 
-    if (node instanceof ContainerNode)
-      outputBuilder.onContainerBegin((ContainerNode) node);
-    else if (node instanceof ClickNode)
-      outputBuilder.onClickBegin((ClickNode) node);
-    else if (node instanceof InsertNode)
-      outputBuilder.onInsertBegin((InsertNode) node);
-    else if (node instanceof TooltipNode)
-      outputBuilder.onTooltipBegin((TooltipNode) node);
-    else
-      throw new IllegalStateException("Unknown AST-node: " + node);
+    builder.onNonTerminalBegin(node);
 
-    assert node.children != null;
+    if (node.children == null || node.children.isEmpty())
+      throw new IllegalStateException("Encountered empty non-terminal tag");
 
     for (AstNode child : node.children)
-      _interpret(child);
+      _interpret(child, builder, environment);
 
-    outputBuilder.onAnyEnd();
+    builder.onNonTerminalEnd();
 
     if (introducedBindings != null)
       environment.popVariables(introducedBindings);
-  }
-
-  public static List<Object> interpret(
-    ComponentConstructor componentConstructor,
-    IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment environment,
-    BreakMode breakMode,
-    AstNode rootNode
-  ) {
-    AstInterpreter interpreter = new AstInterpreter(componentConstructor, expressionEvaluator, environment, breakMode);
-    interpreter._interpret(rootNode);
-    return interpreter.outputBuilder.getResult();
   }
 }

@@ -1,12 +1,7 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.click.ClickNode;
-import at.blvckbytes.component_markup.ast.node.click.InsertNode;
+import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.ast.node.content.TextNode;
-import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
-import at.blvckbytes.component_markup.ast.node.tooltip.TooltipNode;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 
@@ -15,7 +10,7 @@ import java.util.List;
 public class OutputBuilder {
 
   private final ComponentConstructor componentConstructor;
-  private final IEvaluationEnvironment environment;
+  public final IEvaluationEnvironment environment;
   private final BreakMode breakMode;
 
   public OutputBuilder(
@@ -29,32 +24,19 @@ public class OutputBuilder {
   }
 
   public void onBreak() {
-
+    throw new UnsupportedOperationException();
   }
 
-  public void onContainerBegin(ContainerNode containerNode) {
-    ContentNode head = new TextNode(ImmediateExpression.of(""), containerNode.position);
-    head.style.copyFrom(containerNode.style);
+  public void onNonTerminalBegin(AstNode node) {
+    throw new UnsupportedOperationException();
   }
 
-  public void onContent(ContentNode contentNode) {
-    componentConstructor.createContentNode(contentNode, environment);
+  public void onNonTerminalEnd() {
+    throw new UnsupportedOperationException();
   }
 
-  public void onInsertBegin(InsertNode insertNode) {
-
-  }
-
-  public void onTooltipBegin(TooltipNode tooltipNode) {
-
-  }
-
-  public void onClickBegin(ClickNode clickNode) {
-
-  }
-
-  public void onAnyEnd() {
-
+  public void onContent(ContentNode node) {
+    throw new UnsupportedOperationException();
   }
 
   public List<Object> getResult() {

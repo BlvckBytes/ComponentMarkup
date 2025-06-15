@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.ast.node;
 
-import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +12,6 @@ public abstract class AstNode {
   private static final String INDENT_WIDTH = " ";
 
   public final CursorPosition position;
-  public final NodeStyle style;
   public final @Nullable List<AstNode> children;
   public final @Nullable List<LetBinding> letBindings;
 
@@ -23,7 +21,6 @@ public abstract class AstNode {
     @Nullable List<LetBinding> letBindings
   ) {
     this.position = position;
-    this.style = new NodeStyle();
     this.children = children;
     this.letBindings = letBindings;
   }
@@ -34,10 +31,7 @@ public abstract class AstNode {
     return (
       indent(indentLevel) + "position=" + position + ",\n" +
       indent(indentLevel) + "children=" + stringifyList(children, indentLevel) + ",\n" +
-      indent(indentLevel) + "letBindings=" + stringifyList(letBindings, indentLevel) + ",\n" +
-      indent(indentLevel) + "style=(\n" +
-      style.stringify(indentLevel + 1) + "\n" +
-      indent(indentLevel) + ")"
+      indent(indentLevel) + "letBindings=" + stringifyList(letBindings, indentLevel)
     );
   }
 
