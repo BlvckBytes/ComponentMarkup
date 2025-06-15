@@ -38,8 +38,8 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagOpenEnd(String name, boolean wasSelfClosing) {
-    appendEvent(new TagOpenEndEvent(name, wasSelfClosing));
+  public void onTagOpenEnd(String tagName, boolean wasSelfClosing) {
+    appendEvent(new TagOpenEndEvent(tagName, wasSelfClosing));
   }
 
   @Override

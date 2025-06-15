@@ -2,16 +2,16 @@ package at.blvckbytes.component_markup.xml.event;
 
 public class TagOpenEndEvent implements XmlEvent {
 
-  public final String name;
+  public final String tagName;
   public final boolean wasSelfClosing;
 
-  public TagOpenEndEvent(String name, boolean wasSelfClosing) {
-    this.name = name;
+  public TagOpenEndEvent(String tagName, boolean wasSelfClosing) {
+    this.tagName = tagName;
     this.wasSelfClosing = wasSelfClosing;
   }
 
   @Override
   public String toString() {
-    return "TagOpenEndEvent{name='" + name + "', wasSelfClosing=" + wasSelfClosing + "}";
+    return "TagOpenEndEvent{tagName='" + tagName + "', wasSelfClosing=" + wasSelfClosing + "}";
   }
 }

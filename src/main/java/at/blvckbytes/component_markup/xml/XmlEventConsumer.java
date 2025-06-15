@@ -20,7 +20,7 @@ public interface XmlEventConsumer {
 
   void onFlagAttribute(String name);
 
-  void onTagOpenEnd(String name, boolean wasSelfClosing);
+  void onTagOpenEnd(String tagName, boolean wasSelfClosing);
 
   void onText(String text);
 
