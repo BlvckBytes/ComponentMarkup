@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.tooltip.AchievementTooltipNode;
+import at.blvckbytes.component_markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class AchievementTooltipTag extends HoverTag {
+public class HoverAchievementTag extends HoverTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("achievement-tooltip");
+    return tagName.equalsIgnoreCase("hover-achievement");
   }
 
   @Override
@@ -40,7 +40,7 @@ public class AchievementTooltipTag extends HoverTag {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new AchievementTooltipNode(
+    return new AchievementHoverNode(
       findExpressionAttribute("value", attributes),
       position, children, letBindings
     );

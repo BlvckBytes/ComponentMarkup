@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast.node.tooltip;
+package at.blvckbytes.component_markup.ast.node.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class TooltipNode extends AstNode {
+public abstract class HoverNode extends AstNode {
 
-  public TooltipNode(
+  public HoverNode(
     CursorPosition position,
     @Nullable List<AstNode> children,
     List<LetBinding> letBindings

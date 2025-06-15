@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.tooltip.ItemTooltipNode;
+import at.blvckbytes.component_markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class ItemTooltipTag extends HoverTag {
+public class HoverItemTag extends HoverTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("item-tooltip");
+    return tagName.equalsIgnoreCase("hover-item");
   }
 
   @Override
@@ -43,7 +43,7 @@ public class ItemTooltipTag extends HoverTag {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new ItemTooltipNode(
+    return new ItemHoverNode(
       findExpressionAttribute("material", attributes),
       tryFindExpressionAttribute("amount", attributes),
       tryFindSubtreeAttribute("name", attributes),

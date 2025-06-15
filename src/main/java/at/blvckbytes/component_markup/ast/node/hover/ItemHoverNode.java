@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast.node.tooltip;
+package at.blvckbytes.component_markup.ast.node.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -8,34 +8,38 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityTooltipNode extends TooltipNode {
+public class ItemHoverNode extends HoverNode {
 
-  public final AExpression type;
-  public final AExpression id;
+  public final AExpression material;
+  public final @Nullable AExpression amount;
   public final @Nullable AstNode name;
+  public final @Nullable AstNode lore;
 
-  public EntityTooltipNode(
-    AExpression type,
-    AExpression id,
+  public ItemHoverNode(
+    AExpression material,
+    @Nullable AExpression amount,
     @Nullable AstNode name,
+    @Nullable AstNode lore,
     CursorPosition position,
     List<AstNode> children,
     List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 
-    this.type = type;
-    this.id = id;
+    this.material = material;
+    this.amount = amount;
     this.name = name;
+    this.lore = lore;
   }
 
   @Override
   public String stringify(int indentLevel) {
     return (
-      indent(indentLevel) + "EntityTooltipNode{\n" +
-      indent(indentLevel + 1) + "type=" + type.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "id=" + id.expressionify() + ",\n" +
+      indent(indentLevel) + "ItemHoverNode{\n" +
+      indent(indentLevel + 1) + "material=" + material.expressionify() + ",\n" +
+      indent(indentLevel + 1) + "amount=" + (amount == null ? "null" : amount.expressionify()) + ",\n" +
       stringifySubtree(name, "name", indentLevel + 1) + ",\n" +
+      stringifySubtree(lore, "lore", indentLevel + 1) + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
     );

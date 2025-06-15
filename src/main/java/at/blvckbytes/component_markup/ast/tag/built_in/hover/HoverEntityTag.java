@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.tooltip.TextTooltipNode;
+import at.blvckbytes.component_markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 
 import java.util.List;
 
-public class TextTooltipTag extends HoverTag {
+public class HoverEntityTag extends HoverTag {
 
   @Override
   public boolean matchName(String tagName) {
-    return tagName.equalsIgnoreCase("text-tooltip");
+    return tagName.equalsIgnoreCase("hover-entity");
   }
 
   @Override
@@ -28,7 +28,9 @@ public class TextTooltipTag extends HoverTag {
   @Override
   public AttributeDefinition[] getAttributes() {
     return new AttributeDefinition[] {
-      new AttributeDefinition("value", AttributeType.SUBTREE, false, true)
+      new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
+      new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
     };
   }
 
@@ -40,8 +42,10 @@ public class TextTooltipTag extends HoverTag {
     List<LetBinding> letBindings,
     List<AstNode> children
   ) {
-    return new TextTooltipNode(
-      findSubtreeAttribute("value", attributes),
+    return new EntityHoverNode(
+      findExpressionAttribute("type", attributes),
+      findExpressionAttribute("id", attributes),
+      tryFindSubtreeAttribute("name", attributes),
       position, children, letBindings
     );
   }
