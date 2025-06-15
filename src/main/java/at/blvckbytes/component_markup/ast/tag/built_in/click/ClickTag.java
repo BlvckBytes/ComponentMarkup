@@ -18,7 +18,9 @@ public abstract class ClickTag extends TagDefinition  {
       new AttributeDefinition[] {
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
       },
-      new String[] { tagName }
+      new String[] { tagName },
+      TagClosing.OPEN_CLOSE,
+      TagPriority.NORMAL
     );
 
     this.tagName = tagName;
@@ -28,16 +30,6 @@ public abstract class ClickTag extends TagDefinition  {
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(this.tagName);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.OPEN_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

@@ -18,23 +18,15 @@ public class SelectorTag extends TagDefinition {
         new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
       },
-      new String[] { TAG_NAME }
+      new String[] { TAG_NAME },
+      TagClosing.SELF_CLOSE,
+      TagPriority.NORMAL
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(TAG_NAME);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.SELF_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

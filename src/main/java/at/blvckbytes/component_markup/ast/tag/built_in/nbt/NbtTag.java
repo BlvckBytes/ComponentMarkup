@@ -21,7 +21,9 @@ public abstract class NbtTag extends TagDefinition {
         new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
       },
-      new String[] { tagName }
+      new String[] { tagName },
+      TagClosing.SELF_CLOSE,
+      TagPriority.NORMAL
     );
 
     this.source = source;
@@ -31,16 +33,6 @@ public abstract class NbtTag extends TagDefinition {
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(this.tagName);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.SELF_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

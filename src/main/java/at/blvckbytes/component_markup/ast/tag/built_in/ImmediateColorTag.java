@@ -49,7 +49,7 @@ public class ImmediateColorTag extends TagDefinition {
   }
 
   public ImmediateColorTag() {
-    super(NO_ATTRIBUTES, staticPrefixes);
+    super(NO_ATTRIBUTES, staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -77,16 +77,6 @@ public class ImmediateColorTag extends TagDefinition {
     }
 
     return false;
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.OPEN_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

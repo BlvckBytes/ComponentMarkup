@@ -22,16 +22,6 @@ public class HoverEntityTag extends HoverTag {
   }
 
   @Override
-  public TagClosing getClosing() {
-    return TagClosing.OPEN_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
-  }
-
-  @Override
   public AstNode construct(
     String tagName,
     CursorPosition position,

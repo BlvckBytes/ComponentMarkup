@@ -24,23 +24,15 @@ public class FormatTag extends TagDefinition {
         new AttributeDefinition("italic", AttributeType.EXPRESSION, false, false),
         new AttributeDefinition("bold", AttributeType.EXPRESSION, false, false)
       },
-      new String[] { TAG_NAME }
+      new String[] { TAG_NAME },
+      TagClosing.OPEN_CLOSE,
+      TagPriority.NORMAL
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(TAG_NAME);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.OPEN_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

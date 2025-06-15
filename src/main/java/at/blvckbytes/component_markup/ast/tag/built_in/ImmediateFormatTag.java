@@ -53,7 +53,7 @@ public class ImmediateFormatTag extends TagDefinition {
   }
 
   public ImmediateFormatTag() {
-    super(NO_ATTRIBUTES, staticPrefixes);
+    super(NO_ATTRIBUTES, staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   private boolean isFormatChar(char c, boolean allowReset) {
@@ -80,16 +80,6 @@ public class ImmediateFormatTag extends TagDefinition {
       return isFormatChar(tagName.charAt(2), false);
 
     return namedFormats.contains(tagName);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.OPEN_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

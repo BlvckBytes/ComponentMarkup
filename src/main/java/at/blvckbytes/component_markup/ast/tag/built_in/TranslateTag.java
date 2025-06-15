@@ -19,23 +19,15 @@ public class TranslateTag extends TagDefinition {
         new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
         new AttributeDefinition("fallback", AttributeType.SUBTREE, false, false)
       },
-      new String[] { TAG_NAME }
+      new String[] { TAG_NAME },
+      TagClosing.SELF_CLOSE,
+      TagPriority.NORMAL
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(TAG_NAME);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.SELF_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

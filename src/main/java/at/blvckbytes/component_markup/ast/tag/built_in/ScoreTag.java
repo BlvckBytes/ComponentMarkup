@@ -19,23 +19,15 @@ public class ScoreTag extends TagDefinition {
         new AttributeDefinition("objective", AttributeType.EXPRESSION, false, true),
         new AttributeDefinition("value", AttributeType.EXPRESSION, false, false)
       },
-      new String[] { TAG_NAME }
+      new String[] { TAG_NAME },
+      TagClosing.SELF_CLOSE,
+      TagPriority.NORMAL
     );
   }
 
   @Override
   public boolean matchName(String tagName) {
     return tagName.equals(TAG_NAME);
-  }
-
-  @Override
-  public TagClosing getClosing() {
-    return TagClosing.SELF_CLOSE;
-  }
-
-  @Override
-  public TagPriority getPriority() {
-    return TagPriority.NORMAL;
   }
 
   @Override

@@ -17,10 +17,19 @@ public abstract class TagDefinition {
 
   private final AttributeDefinition[] attributes;
   public final Collection<String> staticPrefixes;
+  public final TagClosing tagClosing;
+  public final TagPriority tagPriority;
 
-  protected TagDefinition(AttributeDefinition[] attributes, String[] staticPrefixes) {
+  protected TagDefinition(
+    AttributeDefinition[] attributes,
+    String[] staticPrefixes,
+    TagClosing tagClosing,
+    TagPriority tagPriority
+  ) {
     this.attributes = attributes;
     this.staticPrefixes = Arrays.asList(staticPrefixes);
+    this.tagClosing = tagClosing;
+    this.tagPriority = tagPriority;
   }
 
   public @Nullable AttributeDefinition getAttribute(String attributeName) {
@@ -34,12 +43,6 @@ public abstract class TagDefinition {
 
   // TODO: tagName should be called tagNameLower
   public abstract boolean matchName(String tagName);
-
-  // TODO: These really don't need to be methods, do they? Have them as public final properties.
-
-  public abstract TagClosing getClosing();
-
-  public abstract TagPriority getPriority();
 
   // TODO: tagName should be called tagNameLower
   public abstract AstNode construct(
