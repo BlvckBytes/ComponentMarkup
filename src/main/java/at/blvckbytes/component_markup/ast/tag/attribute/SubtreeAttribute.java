@@ -6,7 +6,7 @@ public class SubtreeAttribute extends Attribute {
 
   public final AstNode value;
 
-  protected SubtreeAttribute(String name, AstNode value) {
+  public SubtreeAttribute(String name, AstNode value) {
     super(name, value.position);
 
     this.value = value;

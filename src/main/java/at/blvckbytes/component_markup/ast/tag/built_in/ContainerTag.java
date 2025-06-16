@@ -11,9 +11,10 @@ import java.util.List;
 
 public class ContainerTag extends TagDefinition {
 
-  private static final String TAG_NAME = "container";
+  public static final String TAG_NAME = "container";
+  public static final ContainerTag INSTANCE = new ContainerTag();
 
-  public ContainerTag() {
+  private ContainerTag() {
     super(NO_ATTRIBUTES, new String[] { TAG_NAME }, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
