@@ -38,10 +38,6 @@ public class InputCursor {
     return input.charAt(this.nextCharIndex);
   }
 
-  public boolean hasRemainingChars() {
-    return nextCharIndex < input.length();
-  }
-
   public void consumeWhitespace() {
     while (Character.isWhitespace(peekChar()))
       nextChar();

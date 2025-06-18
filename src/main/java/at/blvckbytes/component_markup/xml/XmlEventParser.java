@@ -27,7 +27,7 @@ public class XmlEventParser {
     char priorChar = 0;
     CursorPosition textContentBeginPosition = null;
 
-    while (cursor.hasRemainingChars()) {
+    while (cursor.peekChar() != 0) {
       if (cursor.peekChar() == '}' && priorChar != '\\') {
         if (isWithinCurlyBrackets)
           break;
@@ -54,7 +54,7 @@ public class XmlEventParser {
 
           substringBuilder.setStartInclusive(cursor.getNextCharIndex());
 
-          while (cursor.hasRemainingChars()) {
+          while (cursor.peekChar() != 0) {
             int possiblePreTerminationIndex = cursor.getNextCharIndex();
             char c = cursor.nextChar();
 
@@ -171,7 +171,7 @@ public class XmlEventParser {
     boolean encounteredEnd = false;
     char priorChar = 0;
 
-    while (cursor.hasRemainingChars()) {
+    while (cursor.peekChar() != 0) {
       char currentChar = cursor.nextChar();
 
       if (currentChar == '"') {
@@ -194,7 +194,7 @@ public class XmlEventParser {
   }
 
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
-    if (!cursor.hasRemainingChars())
+    if (cursor.peekChar() == 0)
       return true;
 
     char peekedChar = cursor.peekChar();
@@ -216,7 +216,7 @@ public class XmlEventParser {
     boolean encounteredDecimalPoint = false;
     boolean encounteredDigit = false;
 
-    while (cursor.hasRemainingChars()) {
+    while (cursor.peekChar() != 0) {
       char peekedChar = cursor.peekChar();
 
       if (peekedChar >= '0' && peekedChar <= '9') {
@@ -429,7 +429,7 @@ public class XmlEventParser {
 
     consumer.onTagOpenBegin(tagName);
 
-    while (cursor.hasRemainingChars()) {
+    while (cursor.peekChar() != 0) {
       if (!tryParseAttribute())
         break;
     }
