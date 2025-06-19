@@ -15,6 +15,7 @@ public class LoopVariable {
   }
 
   public void setIndex(int index) {
+    this.index = index;
     is_even = index % 2 == 0;
     is_odd = !is_even;
     is_first = index == 0;

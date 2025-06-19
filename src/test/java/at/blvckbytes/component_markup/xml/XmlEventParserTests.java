@@ -373,6 +373,19 @@ public class XmlEventParserTests {
   }
 
   @Test
+  public void shouldEscapeLeadingCharacterInText() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@\\<hello, world!"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TextEvent("<hello, world!"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
   public void shouldEscapeCharactersInText() {
     TextWithAnchors text = new TextWithAnchors(
       "@<red@>@escaping closing \\> opening \\<; closing \\} opening \\{@</red>"
