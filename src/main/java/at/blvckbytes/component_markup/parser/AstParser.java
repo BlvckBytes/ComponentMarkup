@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.parser;
 import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
-import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.ast.tag.attribute.SubtreeAttribute;
@@ -93,8 +92,16 @@ public class AstParser implements XmlEventConsumer {
         throw new IllegalStateException("Use let-<name>; unnamed bindings are not supported");
 
       String bindingName = name.substring(4);
+
+      if (!isValidExpressionIdentifier(bindingName))
+        throw new IllegalStateException("Malformed identifier: " + bindingName);
+
       AExpression bindingExpression = expressionEvaluator.parseString(value);
-      currentLayer.bindings.add(new LetBinding(bindingName, bindingExpression, lastPosition));
+      LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
+
+      if (!currentLayer.addLetBinding(binding))
+        throw new IllegalStateException("Duplicate let-binding: " + bindingName);
+
       return;
     }
 
@@ -367,8 +374,16 @@ public class AstParser implements XmlEventConsumer {
       if (currentLayer.iterable != null)
         throw new IllegalStateException("Cannot bind multiple loops to the same tag");
 
+      String iterationVariable = name.substring(5);
+
+      if (!isValidExpressionIdentifier(iterationVariable))
+        throw new IllegalStateException("Malformed identifier: " + iterationVariable);
+
+      if (currentLayer.hasLetBinding(iterationVariable))
+        throw new IllegalStateException("A binding named " + iterationVariable + " already exists!");
+
       currentLayer.iterable = expressionEvaluator.parseString(value);
-      currentLayer.iterationVariable = name.substring(5);
+      currentLayer.iterationVariable = iterationVariable;
       return;
     }
 
@@ -397,6 +412,29 @@ public class AstParser implements XmlEventConsumer {
       throw new IllegalStateException("The attribute " + name + " expected a tag-value");
 
     currentLayer.attributes.add(new ExpressionAttribute(name, lastPosition, expression));
+  }
+
+  private boolean isValidExpressionIdentifier(String identifier) {
+    int length = identifier.length();
+
+    if (length == 0)
+      return false;
+
+    for (int charIndex = 0; charIndex < length; ++charIndex) {
+      char currentChar = identifier.charAt(charIndex);
+
+      if (charIndex != 0) {
+        if (currentChar == '_' || (currentChar >= '0' && currentChar <= '9'))
+          continue;
+      }
+
+      if (currentChar >= 'a' && currentChar <= 'z')
+        continue;
+
+      return false;
+    }
+
+    return true;
   }
 
   private String lower(String input) {

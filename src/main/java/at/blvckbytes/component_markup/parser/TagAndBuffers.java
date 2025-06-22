@@ -14,7 +14,9 @@ import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TagAndBuffers implements ParserChildItem {
 
@@ -22,7 +24,9 @@ public class TagAndBuffers implements ParserChildItem {
   public final String tagNameLower;
   public final CursorPosition position;
 
-  public final List<LetBinding> bindings;
+  private final List<LetBinding> bindings;
+  private final Set<String> bindingNames;
+
   public final List<Attribute> attributes;
   public final List<ParserChildItem> children;
 
@@ -38,8 +42,21 @@ public class TagAndBuffers implements ParserChildItem {
     this.position = position;
 
     this.bindings = new ArrayList<>();
+    this.bindingNames = new HashSet<>();
     this.attributes = new ArrayList<>();
     this.children = new ArrayList<>();
+  }
+
+  public boolean hasLetBinding(String name) {
+    return this.bindingNames.contains(name);
+  }
+
+  public boolean addLetBinding(LetBinding letBinding) {
+    if (!this.bindingNames.add(letBinding.name))
+      return false;
+
+    this.bindings.add(letBinding);
+    return true;
   }
 
   private List<AstNode> getProcessedChildren() {
