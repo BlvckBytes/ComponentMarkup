@@ -57,6 +57,13 @@ public class AstInterpreter {
     _interpret(node.fallback, builder, environment);
   }
 
+  private void interpretConditional(ConditionalNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
+    Object result = expressionEvaluator.evaluateExpression(node.condition, environment);
+
+    if (environment.getValueInterpreter().asBoolean(result))
+      _interpret(node.body, builder, environment);
+  }
+
   private @Nullable Set<String> introduceLetBindings(AstNode node, TemporaryMemberEnvironment environment) {
     if (node.letBindings == null)
       return null;
@@ -115,13 +122,15 @@ public class AstInterpreter {
       return;
     }
 
+    if (node instanceof ConditionalNode) {
+      interpretConditional((ConditionalNode) node, builder, environment);
+      return;
+    }
+
     if (node instanceof BreakNode) {
       builder.onBreak();
       return;
     }
-
-    if (node instanceof ConditionalNode)
-      throw new IllegalStateException("Conditional nodes are only allowed to exist as members of if-then-else nodes");
 
     Set<String> introducedBindings = introduceLetBindings(node, environment);
 

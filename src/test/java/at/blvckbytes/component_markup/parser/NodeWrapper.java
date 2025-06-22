@@ -11,31 +11,31 @@ import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
-public class NodeWrapper {
+public class NodeWrapper<T extends AstNode> {
 
-  private final AstNode node;
+  private final T node;
 
-  public NodeWrapper(AstNode node) {
+  public NodeWrapper(T node) {
     this.node = node;
   }
 
-  public NodeWrapper child(AstNode child) {
+  public NodeWrapper<T> child(AstNode child) {
     assert node.children != null;
     node.children.add(child);
     return this;
   }
 
-  public NodeWrapper let(String name, AExpression expression, TextWithAnchors text, int anchorIndex) {
+  public NodeWrapper<T> let(String name, AExpression expression, TextWithAnchors text, int anchorIndex) {
     assert node.letBindings != null;
     node.letBindings.add(new LetBinding(name, expression, getAnchorPosition(text, anchorIndex)));
     return this;
   }
 
-  public NodeWrapper color(String color) {
+  public NodeWrapper<T> color(String color) {
     return color(ImmediateExpression.of(color));
   }
 
-  public NodeWrapper color(AExpression color) {
+  public NodeWrapper<T> color(AExpression color) {
     if (!(node instanceof ContainerNode))
       throw new IllegalStateException("Can only style a container-node!");
 
@@ -43,11 +43,11 @@ public class NodeWrapper {
     return this;
   }
 
-  public NodeWrapper font(String font) {
+  public NodeWrapper<T> font(String font) {
     return font(ImmediateExpression.of(font));
   }
 
-  public NodeWrapper font(AExpression font) {
+  public NodeWrapper<T> font(AExpression font) {
     if (!(node instanceof ContainerNode))
       throw new IllegalStateException("Can only style a container-node!");
 
@@ -55,7 +55,7 @@ public class NodeWrapper {
     return this;
   }
 
-  public NodeWrapper format(Format format, AExpression value) {
+  public NodeWrapper<T> format(Format format, AExpression value) {
     if (!(node instanceof ContainerNode))
       throw new IllegalStateException("Can only style a container-node!");
 
@@ -63,7 +63,7 @@ public class NodeWrapper {
     return this;
   }
 
-  public NodeWrapper format(Format format, @Nullable Boolean value) {
+  public NodeWrapper<T> format(Format format, @Nullable Boolean value) {
     if (!(node instanceof ContainerNode))
       throw new IllegalStateException("Can only style a container-node!");
 
@@ -78,7 +78,7 @@ public class NodeWrapper {
     return this;
   }
 
-  public AstNode get() {
+  public T get() {
     return node;
   }
 

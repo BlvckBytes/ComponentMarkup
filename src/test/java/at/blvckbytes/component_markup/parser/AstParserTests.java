@@ -4,7 +4,9 @@ import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.content.TranslateNode;
+import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
+import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
@@ -56,6 +58,54 @@ public class AstParserTests {
     );
   }
 
+  @Test
+  public void shouldParseIfThenElse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@before",
+      "@<container *if=\"a\">@if contents</container>",
+      "@<container *else-if=\"b\">@else-if b contents</container>",
+      "@<container *else-if=\"c\">@else-if c contents</container>",
+      "@<container *else>@else contents</container>",
+      "@after"
+    );
+
+    makeCase(
+      text,
+      container(text, -1)
+        .child(text(imm("before"), text, 0))
+        .child(new IfThenElseNode(
+          Arrays.asList(
+            conditional(
+              expr("a"),
+              container(text, 1)
+                .child(text(imm("if contents"), text, 2))
+                .get()
+            )
+              .get(),
+            conditional(
+              expr("b"),
+              container(text, 3)
+                .child(text(imm("else-if b contents"), text, 4))
+                .get()
+            )
+              .get(),
+            conditional(
+              expr("c"),
+              container(text, 5)
+                .child(text(imm("else-if c contents"), text, 6))
+                .get()
+            )
+              .get()
+          ),
+          container(text, 7)
+            .child(text(imm("else contents"), text, 8))
+            .get()
+        ))
+        .child(text(imm("after"), text, 9))
+        .get()
+    );
+  }
+
   private static AExpression imm(String value) {
     return ImmediateExpression.of(value);
   }
@@ -64,12 +114,16 @@ public class AstParserTests {
     return expressionEvaluator.parseString(expression);
   }
 
-  private static NodeWrapper container(TextWithAnchors text, int anchorIndex) {
-    return new NodeWrapper(new ContainerNode(getAnchorPosition(text, anchorIndex), new ArrayList<>(), new ArrayList<>()));
+  private static NodeWrapper<ConditionalNode> conditional(AExpression condition, AstNode body) {
+    return new NodeWrapper<>(new ConditionalNode(condition, body, new ArrayList<>()));
   }
 
-  private static NodeWrapper translate(AExpression key, TextWithAnchors text, int anchorIndex, @Nullable AstNode fallback, AstNode... with) {
-    return new NodeWrapper(new TranslateNode(key, Arrays.asList(with), fallback, getAnchorPosition(text, anchorIndex), new ArrayList<>()));
+  private static NodeWrapper<ContainerNode> container(TextWithAnchors text, int anchorIndex) {
+    return new NodeWrapper<>(new ContainerNode(getAnchorPosition(text, anchorIndex), new ArrayList<>(), new ArrayList<>()));
+  }
+
+  private static NodeWrapper<TranslateNode> translate(AExpression key, TextWithAnchors text, int anchorIndex, @Nullable AstNode fallback, AstNode... with) {
+    return new NodeWrapper<>(new TranslateNode(key, Arrays.asList(with), fallback, getAnchorPosition(text, anchorIndex), new ArrayList<>()));
   }
 
   private static TextNode text(AExpression value, TextWithAnchors text, int anchorIndex) {

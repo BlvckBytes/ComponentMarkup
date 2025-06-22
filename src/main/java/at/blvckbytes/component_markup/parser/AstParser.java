@@ -235,8 +235,8 @@ public class AstParser implements XmlEventConsumer {
     if (tagClosing == TagClosing.OPEN_CLOSE)
       throw new IllegalStateException("The tag " + tagName + " requires content");
 
-    AstNode node = tagStack.pop().construct();
-    tagStack.peek().children.add(node);
+    tagStack.pop();
+    tagStack.peek().children.add(currentLayer);
   }
 
   @Override
@@ -280,7 +280,7 @@ public class AstParser implements XmlEventConsumer {
         throw new IllegalStateException("The tag " + tagName + " has not been opened before");
 
       openedTag = tagStack.pop();
-      tagStack.peek().children.add(openedTag.construct());
+      tagStack.peek().children.add(openedTag);
     } while(openedTag.tag != closedTag);
   }
 
@@ -290,14 +290,14 @@ public class AstParser implements XmlEventConsumer {
       subtreeParser.onInputEnd();
 
     while (true) {
-      AstNode node = tagStack.pop().construct();
+      TagAndBuffers currentLayer = tagStack.pop();
 
       if (tagStack.isEmpty()) {
-        this.result = node;
+        this.result = currentLayer.construct();
         break;
       }
 
-      tagStack.peek().children.add(node);
+      tagStack.peek().children.add(currentLayer);
     }
   }
 
@@ -314,28 +314,44 @@ public class AstParser implements XmlEventConsumer {
   // ================================================================================
 
   private void handleStructuralAttribute(String name, @Nullable String value) {
+    TagAndBuffers currentLayer = tagStack.peek();
+
     switch (name) {
       case "*if": {
         if (value == null)
           throw new IllegalStateException("The *if attribute requires a value representing the condition");
 
-        AExpression condition = expressionEvaluator.parseString(value);
-        throw new UnsupportedOperationException(); // TODO
+        if (currentLayer.conditionType != ConditionType.NONE)
+          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+
+        currentLayer.condition = expressionEvaluator.parseString(value);
+        currentLayer.conditionType = ConditionType.IF;
+        return;
       }
 
       case "*else-if": {
         if (value == null)
           throw new IllegalStateException("The *else-if attribute requires a value representing the condition");
 
-        AExpression condition = expressionEvaluator.parseString(value);
-        throw new UnsupportedOperationException(); // TODO
+        if (currentLayer.conditionType != ConditionType.NONE)
+          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+
+        currentLayer.condition = expressionEvaluator.parseString(value);
+        currentLayer.conditionType = ConditionType.ELSE_IF;
+        return;
       }
 
-      case "*else":
+      case "*else": {
         if (value != null)
           throw new IllegalStateException("The *else attribute does not support a value");
 
-        throw new UnsupportedOperationException(); // TODO
+        if (currentLayer.conditionType != ConditionType.NONE)
+          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+
+        currentLayer.conditionType = ConditionType.ELSE;
+        return;
+      }
+
       case "*for":
         throw new IllegalStateException("Use *for-<name>; unnamed loops are not supported");
     }
@@ -347,9 +363,12 @@ public class AstParser implements XmlEventConsumer {
       if (value == null)
         throw new IllegalStateException("The *for- attribute requires a value representing the iterable");
 
-      String variableName = name.substring(5);
-      AExpression iterable = expressionEvaluator.parseString(value);
-      throw new UnsupportedOperationException(); // TODO
+      if (currentLayer.iterable != null)
+        throw new IllegalStateException("Cannot bind multiple loops to the same tag");
+
+      currentLayer.iterable = expressionEvaluator.parseString(value);
+      currentLayer.iterationVariable = name.substring(5);
+      return;
     }
 
     throw new IllegalStateException("Unknown structural attribute: " + name);
