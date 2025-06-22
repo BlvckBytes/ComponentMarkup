@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.parser;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
+import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -198,10 +199,30 @@ public class TagAndBuffers implements ParserChildItem {
   }
 
   public AstNode construct() {
-    return tag.construct(
+    AstNode result = tag.construct(
       tagNameLower,
       position,
       attributes, bindings, getProcessedChildren()
     );
+
+    if (!(result instanceof ContainerNode))
+      return result;
+
+    ContainerNode containerNode = (ContainerNode) result;
+
+    if (containerNode.children == null || containerNode.children.size() != 1)
+      return result;
+
+    AstNode onlyChild = containerNode.children.get(0);
+
+    if (!containerNode.style.hasEffect())
+      return onlyChild;
+
+    if (onlyChild instanceof ContainerNode) {
+      ((ContainerNode) onlyChild).style.inheritFrom(containerNode.style);
+      return onlyChild;
+    }
+
+    return result;
   }
 }

@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.parser;
 
+import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
@@ -20,17 +21,14 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
-        .child(
-          translate(
-            expr("my.expr"),
-            text.anchor(0),
-            container(text.anchor(2))
-              .child(text(imm("hello, "), text.anchor(3)))
-              .child(text(expr("user"), text.anchor(4)))
-          )
-          .let("a", expr("b"), text.anchor(1))
-        )
+      translate(
+        expr("my.expr"),
+        text.anchor(0),
+        container(text.anchor(2))
+          .child(text(imm("hello, "), text.anchor(3)))
+          .child(text(expr("user"), text.anchor(4)))
+      )
+      .let("a", expr("b"), text.anchor(1))
     );
   }
 
@@ -38,7 +36,7 @@ public class AstParserTests extends AstParserTestsBase {
   public void shouldParseIf() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
-      "@<container *if=\"a\">@if contents</container>",
+      "<container *if=\"a\">@if contents</container>",
       "@after"
     );
 
@@ -49,11 +47,10 @@ public class AstParserTests extends AstParserTestsBase {
         .child(
           conditional(
             expr("a"),
-            container(text.anchor(1))
-              .child(text(imm("if contents"), text.anchor(2)))
+            text(imm("if contents"), text.anchor(1))
           )
         )
-        .child(text(imm("after"), text.anchor(3)))
+        .child(text(imm("after"), text.anchor(2)))
     );
   }
 
@@ -67,17 +64,14 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
-        .child(
-          forLoop(
-            expr("members"),
-            "member",
-            container(text.anchor(0))
-              .child(text(imm("hello, "), text.anchor(1)))
-              .child(text(expr("member"), text.anchor(2)))
-              .child(text(imm("!"), text.anchor(3)))
-          )
-        )
+      forLoop(
+        expr("members"),
+        "member",
+        container(text.anchor(0))
+          .child(text(imm("hello, "), text.anchor(1)))
+          .child(text(expr("member"), text.anchor(2)))
+          .child(text(imm("!"), text.anchor(3)))
+      )
     );
   }
 
@@ -91,20 +85,17 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
-        .child(
-          forLoop(
-            expr("members"),
-            "member",
-            conditional(
-              expr("member != null"),
-              container(text.anchor(0))
-                .child(text(imm("hello, "), text.anchor(1)))
-                .child(text(expr("member"), text.anchor(2)))
-                .child(text(imm("!"), text.anchor(3)))
-            )
-          )
+      forLoop(
+        expr("members"),
+        "member",
+        conditional(
+          expr("member != null"),
+          container(text.anchor(0))
+            .child(text(imm("hello, "), text.anchor(1)))
+            .child(text(expr("member"), text.anchor(2)))
+            .child(text(imm("!"), text.anchor(3)))
         )
+      )
     );
   }
 
@@ -112,10 +103,10 @@ public class AstParserTests extends AstParserTestsBase {
   public void shouldParseIfThenElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
-      "@<container *if=\"a\">@if contents</container>",
-      "@<container *else-if=\"b\">@else-if b contents</container>",
-      "@<container *else-if=\"c\">@else-if c contents</container>",
-      "@<container *else>@else contents</container>",
+      "<container *if=\"a\">@if contents</container>",
+      "<container *else-if=\"b\">@else-if b contents</container>",
+      "<container *else-if=\"c\">@else-if c contents</container>",
+      "<container *else>@else contents</container>",
       "@after"
     );
 
@@ -125,26 +116,22 @@ public class AstParserTests extends AstParserTestsBase {
         .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
-            container(text.anchor(7))
-              .child(text(imm("else contents"), text.anchor(8))),
+            text(imm("else contents"), text.anchor(4)),
             conditional(
               expr("a"),
-              container(text.anchor(1))
-                .child(text(imm("if contents"), text.anchor(2)))
+              text(imm("if contents"), text.anchor(1))
             ),
             conditional(
               expr("b"),
-              container(text.anchor(3))
-                .child(text(imm("else-if b contents"), text.anchor(4)))
+              text(imm("else-if b contents"), text.anchor(2))
             ),
             conditional(
               expr("c"),
-              container(text.anchor(5))
-                .child(text(imm("else-if c contents"), text.anchor(6)))
+              text(imm("else-if c contents"), text.anchor(3))
             )
           )
         )
-        .child(text(imm("after"), text.anchor(9)))
+        .child(text(imm("after"), text.anchor(5)))
     );
   }
 
@@ -152,14 +139,14 @@ public class AstParserTests extends AstParserTestsBase {
   public void shouldParseNestedIfThenElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
-      "@<container *if=\"a\">",
-      "  @<container *if=\"b\">@if a and b</container>",
-      "  @<container *else-if=\"d\">@if a and d</container>",
-      "  @<container *else>@if a and not b</container>",
+      "<container *if=\"a\">",
+      "  <container *if=\"b\">@if a and b</container>",
+      "  <container *else-if=\"d\">@if a and d</container>",
+      "  <container *else>@if a and not b</container>",
       "</container>",
-      "@<container *else>",
-      "  @<container *if=\"c\">@if not a and c</container>",
-      "  @<container *else>@if not a and not c</container>",
+      "<container *else>",
+      "  <container *if=\"c\">@if not a and c</container>",
+      "  <container *else>@if not a and not c</container>",
       "</container>",
       "@after"
     );
@@ -170,41 +157,46 @@ public class AstParserTests extends AstParserTestsBase {
         .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
-            container(text.anchor(8))
-              .child(
-                ifThenElse(
-                  container(text.anchor(11))
-                    .child(text(imm("if not a and not c"), text.anchor(12))),
-                  conditional(
-                    expr("c"),
-                    container(text.anchor(9))
-                      .child(text(imm("if not a and c"), text.anchor(10)))
-                  )
-                )
-              ),
+            ifThenElse(
+              text(imm("if not a and not c"), text.anchor(5)),
+              conditional(
+                expr("c"),
+                text(imm("if not a and c"), text.anchor(4))
+              )
+            ),
             conditional(
               expr("a"),
-              container(text.anchor(1))
-                .child(
-                  ifThenElse(
-                    container(text.anchor(6))
-                      .child(text(imm("if a and not b"), text.anchor(7))),
-                    conditional(
-                      expr("b"),
-                      container(text.anchor(2))
-                        .child(text(imm("if a and b"), text.anchor(3)))
-                    ),
-                    conditional(
-                      expr("d"),
-                      container(text.anchor(4))
-                        .child(text(imm("if a and d"), text.anchor(5)))
-                    )
-                  )
+              ifThenElse(
+                text(imm("if a and not b"), text.anchor(3)),
+                conditional(
+                  expr("b"),
+                  text(imm("if a and b"), text.anchor(1))
+                ),
+                conditional(
+                  expr("d"),
+                  text(imm("if a and d"), text.anchor(2))
                 )
+              )
             )
           )
         )
-        .child(text(imm("after"), text.anchor(13)))
+        .child(text(imm("after"), text.anchor(6)))
+    );
+  }
+
+  @Test
+  public void shouldCollapseStyleContainers() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red><bold>@<italic>@Hello, world!"
+    );
+
+    makeCase(
+      text,
+      container(text.anchor(0))
+        .color("red")
+        .format(Format.BOLD, true)
+        .format(Format.ITALIC, true)
+        .child(text(imm("Hello, world!"), text.anchor(1)))
     );
   }
 }

@@ -18,6 +18,35 @@ public class NodeStyle {
     Arrays.fill(formatStates, ImmediateExpression.ofNull());
   }
 
+  public void inheritFrom(NodeStyle other) {
+    if (this.color == null)
+      this.color = other.color;
+
+    if (this.font == null)
+      this.font = other.font;
+
+    for (Format format : Format.VALUES) {
+      AExpression thisFormatState = this.formatStates[format.ordinal()];
+
+      if (thisFormatState != ImmediateExpression.ofNull())
+        continue;
+
+      this.formatStates[format.ordinal()] = other.formatStates[format.ordinal()];
+    }
+  }
+
+  public boolean hasEffect() {
+    if (this.font != null || this.color != null)
+      return true;
+
+    for (AExpression formatState : formatStates) {
+      if (formatState != ImmediateExpression.ofNull())
+        return true;
+    }
+
+    return false;
+  }
+
   public void setFormat(Format formatting, AExpression value) {
     formatStates[formatting.ordinal()] = value;
   }
@@ -78,11 +107,5 @@ public class NodeStyle {
       AstNode.indent(indentLevel + 1) + "format=" + makeFormatExpression() + "\n" +
       AstNode.indent(indentLevel) + "}"
     );
-  }
-
-  public void copyFrom(NodeStyle other) {
-    this.font = other.font;
-    this.color = other.color;
-    System.arraycopy(other.formatStates, 0, this.formatStates, 0, formatStates.length);
   }
 }
