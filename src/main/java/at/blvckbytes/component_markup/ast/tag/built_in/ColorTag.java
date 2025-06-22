@@ -38,7 +38,7 @@ public class ColorTag extends TagDefinition {
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.style.color = findExpressionAttribute("value", attributes);
+    wrapper.getOrInstantiateStyle().color = findExpressionAttribute("value", attributes);
     return wrapper;
   }
 }

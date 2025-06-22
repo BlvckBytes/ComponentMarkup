@@ -45,7 +45,7 @@ public class FormatTag extends TagDefinition {
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    applyFormat(attributes, wrapper.style);
+    applyFormat(attributes, wrapper.getOrInstantiateStyle());
     return wrapper;
   }
 

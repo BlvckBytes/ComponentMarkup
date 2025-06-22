@@ -91,7 +91,7 @@ public class ImmediateFormatTag extends TagDefinition {
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    applyFormat(tagNameLower, wrapper.style);
+    applyFormat(tagNameLower, wrapper.getOrInstantiateStyle());
     return wrapper;
   }
 

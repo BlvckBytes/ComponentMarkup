@@ -89,7 +89,7 @@ public class ImmediateColorTag extends TagDefinition {
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.style.color = ImmediateExpression.of(tagNameToColor(tagNameLower));
+    wrapper.getOrInstantiateStyle().color = ImmediateExpression.of(tagNameToColor(tagNameLower));
     return wrapper;
   }
 

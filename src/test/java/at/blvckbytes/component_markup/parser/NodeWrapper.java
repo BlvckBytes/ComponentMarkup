@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
+import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
@@ -34,10 +34,10 @@ public class NodeWrapper<T extends AstNode> {
   }
 
   public NodeWrapper<T> color(AExpression color) {
-    if (!(node instanceof ContainerNode))
-      throw new IllegalStateException("Can only style a container-node!");
+    if (!(node instanceof StyledNode))
+      throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
-    ((ContainerNode) node).style.color = color;
+    ((StyledNode) node).getOrInstantiateStyle().color = color;
     return this;
   }
 
@@ -46,24 +46,24 @@ public class NodeWrapper<T extends AstNode> {
   }
 
   public NodeWrapper<T> font(AExpression font) {
-    if (!(node instanceof ContainerNode))
-      throw new IllegalStateException("Can only style a container-node!");
+    if (!(node instanceof StyledNode))
+      throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
-    ((ContainerNode) node).style.font = font;
+    ((StyledNode) node).getOrInstantiateStyle().font = font;
     return this;
   }
 
   public NodeWrapper<T> format(Format format, AExpression value) {
-    if (!(node instanceof ContainerNode))
-      throw new IllegalStateException("Can only style a container-node!");
+    if (!(node instanceof StyledNode))
+      throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
-    ((ContainerNode) node).style.setFormat(format, value);
+    ((StyledNode) node).getOrInstantiateStyle().setFormat(format, value);
     return this;
   }
 
   public NodeWrapper<T> format(Format format, @Nullable Boolean value) {
-    if (!(node instanceof ContainerNode))
-      throw new IllegalStateException("Can only style a container-node!");
+    if (!(node instanceof StyledNode))
+      throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
     AExpression expressionValue;
 
@@ -72,7 +72,7 @@ public class NodeWrapper<T extends AstNode> {
     else
       expressionValue = ImmediateExpression.of(value);
 
-    ((ContainerNode) node).style.setFormat(format, expressionValue);
+    ((StyledNode) node).getOrInstantiateStyle().setFormat(format, expressionValue);
     return this;
   }
 

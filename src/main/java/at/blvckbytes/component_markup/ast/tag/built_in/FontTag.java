@@ -39,7 +39,7 @@ public class FontTag extends TagDefinition {
     List<AstNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.style.font = findExpressionAttribute("name", attributes);
+    wrapper.getOrInstantiateStyle().font = findExpressionAttribute("name", attributes);
     return wrapper;
   }
 }

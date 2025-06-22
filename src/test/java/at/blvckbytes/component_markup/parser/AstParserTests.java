@@ -187,16 +187,15 @@ public class AstParserTests extends AstParserTestsBase {
   @Test
   public void shouldCollapseStyleContainers() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red><bold>@<italic>@Hello, world!"
+      "<red><bold><italic>@Hello, world!"
     );
 
     makeCase(
       text,
-      container(text.anchor(0))
+      text(imm("Hello, world!"), text.anchor(0))
         .color("red")
         .format(Format.BOLD, true)
         .format(Format.ITALIC, true)
-        .child(text(imm("Hello, world!"), text.anchor(1)))
     );
   }
 }

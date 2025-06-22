@@ -1,11 +1,13 @@
 package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
+import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.TagDefinition;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
@@ -231,13 +233,21 @@ public class TagAndBuffers implements ParserChildItem {
       return result;
 
     AstNode onlyChild = containerNode.children.get(0);
+    NodeStyle containerStyle = containerNode.getStyle();
 
-    if (!containerNode.style.hasEffect())
+    if (containerStyle == null || !containerStyle.hasEffect())
       return onlyChild;
 
-    if (onlyChild instanceof ContainerNode) {
-      ((ContainerNode) onlyChild).style.inheritFrom(containerNode.style);
-      return onlyChild;
+    if (onlyChild instanceof StyledNode) {
+      StyledNode styledNode = (StyledNode) onlyChild;
+      NodeStyle childStyle = styledNode.getStyle();
+
+      if (childStyle == null)
+        styledNode.setStyle(containerStyle);
+      else
+        childStyle.inheritFrom(containerStyle);
+
+      return styledNode;
     }
 
     return result;
