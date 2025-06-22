@@ -58,6 +58,57 @@ public class AstParserTests extends AstParserTestsBase {
   }
 
   @Test
+  public void shouldParseForLoop() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<container *for-member=\"members\">",
+      "  @hello, @{{member}}@!",
+      "</container>"
+    );
+
+    makeCase(
+      text,
+      container(CursorPosition.ZERO)
+        .child(
+          forLoop(
+            expr("members"),
+            "member",
+            container(text.anchor(0))
+              .child(text(imm("hello, "), text.anchor(1)))
+              .child(text(expr("member"), text.anchor(2)))
+              .child(text(imm("!"), text.anchor(3)))
+          )
+        )
+    );
+  }
+
+  @Test
+  public void shouldParseForLoopWithConditional() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<container *for-member=\"members\" *if=\"member != null\">",
+      "  @hello, @{{member}}@!",
+      "</container>"
+    );
+
+    makeCase(
+      text,
+      container(CursorPosition.ZERO)
+        .child(
+          forLoop(
+            expr("members"),
+            "member",
+            conditional(
+              expr("member != null"),
+              container(text.anchor(0))
+                .child(text(imm("hello, "), text.anchor(1)))
+                .child(text(expr("member"), text.anchor(2)))
+                .child(text(imm("!"), text.anchor(3)))
+            )
+          )
+        )
+    );
+  }
+
+  @Test
   public void shouldParseIfThenElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",

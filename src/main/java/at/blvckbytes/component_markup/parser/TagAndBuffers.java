@@ -56,15 +56,7 @@ public class TagAndBuffers implements ParserChildItem {
         TagAndBuffers tagAndBuffers = (TagAndBuffers) child;
 
         currentNode = tagAndBuffers.construct();
-
-        if (tagAndBuffers.iterable != null) {
-          currentNode = new ForLoopNode(
-            tagAndBuffers.iterable,
-            tagAndBuffers.iterationVariable,
-            currentNode,
-            tagAndBuffers.bindings
-          );
-        }
+        currentConditionType = tagAndBuffers.conditionType;
 
         if (tagAndBuffers.condition != null) {
           currentNode = new ConditionalNode(
@@ -74,7 +66,16 @@ public class TagAndBuffers implements ParserChildItem {
           );
         }
 
-        currentConditionType = tagAndBuffers.conditionType;
+        if (tagAndBuffers.iterable != null) {
+          currentNode = new ForLoopNode(
+            tagAndBuffers.iterable,
+            tagAndBuffers.iterationVariable,
+            currentNode,
+            tagAndBuffers.bindings
+          );
+
+          currentConditionType = ConditionType.NONE;
+        }
       }
 
       else if (child instanceof ContentNode)
@@ -179,6 +180,18 @@ public class TagAndBuffers implements ParserChildItem {
       }
 
       priorConditionType = currentConditionType;
+    }
+
+    if (conditions != null) {
+      if (priorConditionType == ConditionType.IF) {
+        assert conditions.size() == 1;
+        result.add(conditions.get(0));
+      }
+
+      else {
+        assert priorConditionType == ConditionType.ELSE_IF;
+        result.add(new IfThenElseNode(conditions, null));
+      }
     }
 
     return result;

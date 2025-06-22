@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.content.TranslateNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
+import at.blvckbytes.component_markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
@@ -24,6 +25,10 @@ import java.util.logging.Logger;
 public abstract class AstParserTestsBase {
 
   private static final IExpressionEvaluator expressionEvaluator = new GPEEE(Logger.getAnonymousLogger());
+
+  protected static NodeWrapper<ForLoopNode> forLoop(AExpression iterable, String iterationVariable, NodeWrapper<?> wrappedBody) {
+    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), new ArrayList<>()));
+  }
 
   @SafeVarargs
   protected static NodeWrapper<IfThenElseNode> ifThenElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<ConditionalNode>... wrappedConditions) {
