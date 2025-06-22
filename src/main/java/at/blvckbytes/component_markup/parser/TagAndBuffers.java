@@ -115,7 +115,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE_IF:
             case ELSE:
-              throw new IllegalStateException("Missing preceding *if sibling");
+              throw new AstParseException(currentNode.position, AstParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }
@@ -191,7 +191,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE:
             case ELSE_IF:
-              throw new IllegalStateException("Missing preceding *if sibling");
+              throw new AstParseException(currentNode.position, AstParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }

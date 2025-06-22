@@ -64,7 +64,7 @@ public class AstParser implements XmlEventConsumer {
     TagDefinition tag = tagRegistry.locateTag(tagNameLower);
 
     if (tag == null)
-      throw new IllegalStateException("Unknown tag: " + tagName);
+      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_TAG);
 
     tagStack.push(new TagAndBuffers(tag, tagNameLower, lastPosition));
   }
@@ -89,18 +89,21 @@ public class AstParser implements XmlEventConsumer {
 
     if (name.startsWith("let-")) {
       if (nameLength == 4)
-        throw new IllegalStateException("Use let-<name>; unnamed bindings are not supported");
+        throw new AstParseException(lastPosition, AstParseError.UNNAMED_LET_BINDING);
 
       String bindingName = name.substring(4);
 
       if (!isValidExpressionIdentifier(bindingName))
-        throw new IllegalStateException("Malformed identifier: " + bindingName);
+        throw new AstParseException(lastPosition, AstParseError.MALFORMED_IDENTIFIER);
+
+      if (bindingName.equals(currentLayer.iterationVariable))
+        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
       AExpression bindingExpression = expressionEvaluator.parseString(value);
       LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
-        throw new IllegalStateException("Duplicate let-binding: " + bindingName);
+        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
       return;
     }
@@ -109,7 +112,7 @@ public class AstParser implements XmlEventConsumer {
 
     if (nameLength > 2 && name.charAt(0) == '[') {
       if (name.charAt(nameLength - 1) != ']')
-        throw new IllegalStateException("Unbalanced attribute-name brackets");
+        throw new AstParseException(lastPosition, AstParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
 
       isExpressionMode = true;
       name = name.substring(1, nameLength - 1);
@@ -118,10 +121,10 @@ public class AstParser implements XmlEventConsumer {
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new IllegalStateException("Unsupported attribute: " + name);
+      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
 
     if (attribute.type == AttributeType.SUBTREE)
-      throw new IllegalStateException("The attribute " + name + " expected a tag-value");
+      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
 
     AExpression expression = isExpressionMode ? expressionEvaluator.parseString(value) : ImmediateExpression.of(value);
     currentLayer.attributes.add(new ExpressionAttribute(name, lastPosition, expression));
@@ -167,19 +170,19 @@ public class AstParser implements XmlEventConsumer {
     name = lower(name);
 
     if (name.charAt(0) == '*')
-      throw new IllegalStateException("Structural attributes only support string-values");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
     if (name.charAt(0) == '[')
-      throw new IllegalStateException("Only string-values support expression-mode");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new IllegalStateException("Unsupported attribute: " + name);
+      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
 
     if (attribute.type != AttributeType.SUBTREE)
-      throw new IllegalStateException("The attribute " + name + " expected a scalar value");
+      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
 
     subtreeParser = new AstParser(tagRegistry, expressionEvaluator, lastPosition);
   }
@@ -218,7 +221,7 @@ public class AstParser implements XmlEventConsumer {
     }
 
     if (name.charAt(0) == '[')
-      throw new IllegalStateException("Only string-values support expression-mode");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     handleScalarNonStringAttribute(name, ImmediateExpression.of(true));
   }
@@ -235,13 +238,13 @@ public class AstParser implements XmlEventConsumer {
 
     if (!wasSelfClosing) {
       if (tagClosing == TagClosing.SELF_CLOSE)
-        throw new IllegalStateException("The tag " + tagName + " requires self-closing");
+        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SELF_CLOSING_TAG);
 
       return;
     }
 
     if (tagClosing == TagClosing.OPEN_CLOSE)
-      throw new IllegalStateException("The tag " + tagName + " requires content");
+      throw new AstParseException(lastPosition, AstParseError.EXPECTED_OPEN_CLOSE_TAG);
 
     tagStack.pop();
     tagStack.peek().children.add(currentLayer);
@@ -279,13 +282,13 @@ public class AstParser implements XmlEventConsumer {
     TagDefinition closedTag = tagRegistry.locateTag(lower(tagName));
 
     if (closedTag == null)
-      throw new IllegalStateException("Unknown tag: " + tagName);
+      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_TAG);
 
     TagAndBuffers openedTag;
 
     do {
       if (tagStack.isEmpty())
-        throw new IllegalStateException("The tag " + tagName + " has not been opened before");
+        throw new AstParseException(lastPosition, AstParseError.UNBALANCED_CLOSING_TAG);
 
       openedTag = tagStack.pop();
       tagStack.peek().children.add(openedTag);
@@ -327,10 +330,10 @@ public class AstParser implements XmlEventConsumer {
     switch (name) {
       case "*if": {
         if (value == null)
-          throw new IllegalStateException("The *if attribute requires a value representing the condition");
+          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.condition = expressionEvaluator.parseString(value);
         currentLayer.conditionType = ConditionType.IF;
@@ -339,10 +342,10 @@ public class AstParser implements XmlEventConsumer {
 
       case "*else-if": {
         if (value == null)
-          throw new IllegalStateException("The *else-if attribute requires a value representing the condition");
+          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.condition = expressionEvaluator.parseString(value);
         currentLayer.conditionType = ConditionType.ELSE_IF;
@@ -351,65 +354,65 @@ public class AstParser implements XmlEventConsumer {
 
       case "*else": {
         if (value != null)
-          throw new IllegalStateException("The *else attribute does not support a value");
+          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new IllegalStateException("Cannot bind multiple conditions to the same tag");
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.conditionType = ConditionType.ELSE;
         return;
       }
 
       case "*for":
-        throw new IllegalStateException("Use *for-<name>; unnamed loops are not supported");
+        throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
     }
 
     if (name.startsWith("*for-")) {
       if (name.length() == 5)
-        throw new IllegalStateException("Use *for-<name>; unnamed loops are not supported");
+        throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
 
       if (value == null)
-        throw new IllegalStateException("The *for- attribute requires a value representing the iterable");
+        throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
 
       if (currentLayer.iterable != null)
-        throw new IllegalStateException("Cannot bind multiple loops to the same tag");
+        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_LOOPS);
 
       String iterationVariable = name.substring(5);
 
       if (!isValidExpressionIdentifier(iterationVariable))
-        throw new IllegalStateException("Malformed identifier: " + iterationVariable);
+        throw new AstParseException(lastPosition, AstParseError.MALFORMED_IDENTIFIER);
 
       if (currentLayer.hasLetBinding(iterationVariable))
-        throw new IllegalStateException("A binding named " + iterationVariable + " already exists!");
+        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
       currentLayer.iterable = expressionEvaluator.parseString(value);
       currentLayer.iterationVariable = iterationVariable;
       return;
     }
 
-    throw new IllegalStateException("Unknown structural attribute: " + name);
+    throw new AstParseException(lastPosition, AstParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE);
   }
 
   private void handleScalarNonStringAttribute(String name, AExpression expression) {
     name = lower(name);
 
     if (name.charAt(0) == '*')
-      throw new IllegalStateException("Structural attributes only support string-values");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
     if (name.charAt(0) == '[')
-      throw new IllegalStateException("Only string-values support expression-mode");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     if (name.startsWith("let-"))
-      throw new IllegalStateException("Only string-values (expressions) support let-binding");
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new IllegalStateException("Unsupported attribute: " + name);
+      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
 
     if (attribute.type == AttributeType.SUBTREE)
-      throw new IllegalStateException("The attribute " + name + " expected a tag-value");
+      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
 
     currentLayer.attributes.add(new ExpressionAttribute(name, lastPosition, expression));
   }
