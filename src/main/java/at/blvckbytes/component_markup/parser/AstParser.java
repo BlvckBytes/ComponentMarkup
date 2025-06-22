@@ -28,7 +28,7 @@ public class AstParser implements XmlEventConsumer {
   private AstNode result;
 
   public AstParser(TagRegistry tagRegistry, IExpressionEvaluator expressionEvaluator) {
-    this(tagRegistry, expressionEvaluator, new CursorPosition(0, 0, 0));
+    this(tagRegistry, expressionEvaluator, CursorPosition.ZERO);
   }
 
   private AstParser(TagRegistry tagRegistry, IExpressionEvaluator expressionEvaluator, CursorPosition initialPosition) {

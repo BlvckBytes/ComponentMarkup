@@ -9,8 +9,6 @@ import java.util.List;
 
 public class TextWithAnchors {
 
-  private static final CursorPositionEvent ZERO_POSITION = new CursorPositionEvent(new CursorPosition(0, 0, 0));
-
   private final List<CursorPositionEvent> anchors;
   private final List<CursorPositionEvent> auxAnchors;
 
@@ -80,9 +78,6 @@ public class TextWithAnchors {
   }
 
   public @Nullable CursorPositionEvent anchorEvent(int index) {
-    if (index == -1)
-      return ZERO_POSITION;
-
     if (index < 0 || index >= anchors.size())
       return null;
 

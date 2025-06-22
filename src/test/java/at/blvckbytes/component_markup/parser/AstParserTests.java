@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.parser;
 
+import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(text.anchor(-1))
+      container(CursorPosition.ZERO)
         .child(
           translate(
             expr("my.expr"),
@@ -43,7 +44,7 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(text.anchor(-1))
+      container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
           conditional(
@@ -69,7 +70,7 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(text.anchor(-1))
+      container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
@@ -114,7 +115,7 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(text.anchor(-1))
+      container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
