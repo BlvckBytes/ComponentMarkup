@@ -19,16 +19,16 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(anchor(text, -1))
+      container(text.anchor(-1))
         .child(
           translate(
             expr("my.expr"),
-            anchor(text, 0),
-            container(anchor(text, 2))
-              .child(text(imm("hello, "), anchor(text, 3)))
-              .child(text(expr("user"), anchor(text, 4)))
+            text.anchor(0),
+            container(text.anchor(2))
+              .child(text(imm("hello, "), text.anchor(3)))
+              .child(text(expr("user"), text.anchor(4)))
           )
-          .let("a", expr("b"), anchor(text, 1))
+          .let("a", expr("b"), text.anchor(1))
         )
     );
   }
@@ -43,16 +43,16 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(anchor(text, -1))
-        .child(text(imm("before"), anchor(text, 0)))
+      container(text.anchor(-1))
+        .child(text(imm("before"), text.anchor(0)))
         .child(
           conditional(
             expr("a"),
-            container(anchor(text, 1))
-              .child(text(imm("if contents"), anchor(text, 2)))
+            container(text.anchor(1))
+              .child(text(imm("if contents"), text.anchor(2)))
           )
         )
-        .child(text(imm("after"), anchor(text, 3)))
+        .child(text(imm("after"), text.anchor(3)))
     );
   }
 
@@ -69,30 +69,30 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(anchor(text, -1))
-        .child(text(imm("before"), anchor(text, 0)))
+      container(text.anchor(-1))
+        .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
-            container(anchor(text, 7))
-              .child(text(imm("else contents"), anchor(text, 8))),
+            container(text.anchor(7))
+              .child(text(imm("else contents"), text.anchor(8))),
             conditional(
               expr("a"),
-              container(anchor(text, 1))
-                .child(text(imm("if contents"), anchor(text, 2)))
+              container(text.anchor(1))
+                .child(text(imm("if contents"), text.anchor(2)))
             ),
             conditional(
               expr("b"),
-              container(anchor(text, 3))
-                .child(text(imm("else-if b contents"), anchor(text, 4)))
+              container(text.anchor(3))
+                .child(text(imm("else-if b contents"), text.anchor(4)))
             ),
             conditional(
               expr("c"),
-              container(anchor(text, 5))
-                .child(text(imm("else-if c contents"), anchor(text, 6)))
+              container(text.anchor(5))
+                .child(text(imm("else-if c contents"), text.anchor(6)))
             )
           )
         )
-        .child(text(imm("after"), anchor(text, 9)))
+        .child(text(imm("after"), text.anchor(9)))
     );
   }
 
@@ -113,40 +113,40 @@ public class AstParserTests extends AstParserTestsBase {
 
     makeCase(
       text,
-      container(anchor(text, -1))
-        .child(text(imm("before"), anchor(text, 0)))
+      container(text.anchor(-1))
+        .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
-            container(anchor(text, 6))
+            container(text.anchor(6))
               .child(
                 ifThenElse(
-                  container(anchor(text, 9))
-                    .child(text(imm("if not a and not c"), anchor(text, 10))),
+                  container(text.anchor(9))
+                    .child(text(imm("if not a and not c"), text.anchor(10))),
                   conditional(
                     expr("c"),
-                    container(anchor(text, 7))
-                      .child(text(imm("if not a and c"), anchor(text, 8)))
+                    container(text.anchor(7))
+                      .child(text(imm("if not a and c"), text.anchor(8)))
                   )
                 )
               ),
             conditional(
               expr("a"),
-              container(anchor(text, 1))
+              container(text.anchor(1))
                 .child(
                   ifThenElse(
-                    container(anchor(text, 4))
-                      .child(text(imm("if a and not b"), anchor(text, 5))),
+                    container(text.anchor(4))
+                      .child(text(imm("if a and not b"), text.anchor(5))),
                     conditional(
                       expr("b"),
-                      container(anchor(text, 2))
-                        .child(text(imm("if a and b"), anchor(text, 3)))
+                      container(text.anchor(2))
+                        .child(text(imm("if a and b"), text.anchor(3)))
                     )
                   )
                 )
             )
           )
         )
-        .child(text(imm("after"), anchor(text, 11)))
+        .child(text(imm("after"), text.anchor(11)))
     );
   }
 }

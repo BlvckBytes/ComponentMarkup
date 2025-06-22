@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.xml;
 
 import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -69,7 +70,16 @@ public class TextWithAnchors {
     return anchors.size();
   }
 
-  public @Nullable CursorPositionEvent getAnchor(int index) {
+  public @NotNull CursorPosition anchor(int index) {
+    CursorPositionEvent positionEvent = anchorEvent(index);
+
+    if (positionEvent == null)
+      throw new IllegalStateException("Required anchor at index " + index);
+
+    return positionEvent.position;
+  }
+
+  public @Nullable CursorPositionEvent anchorEvent(int index) {
     if (index == -1)
       return ZERO_POSITION;
 
@@ -79,7 +89,7 @@ public class TextWithAnchors {
     return anchors.get(index);
   }
 
-  public @Nullable CursorPositionEvent getAuxAnchor(int index) {
+  public @Nullable CursorPositionEvent auxAnchorEvent(int index) {
     if (index < 0 || index >= auxAnchors.size())
       return null;
 

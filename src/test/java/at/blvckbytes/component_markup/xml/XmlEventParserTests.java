@@ -500,7 +500,7 @@ public class XmlEventParserTests {
     makeCaseWithInterleavedAnchors(
       text,
       ParseError.UNTERMINATED_TAG,
-      text.getAnchor(0)
+      text.anchorEvent(0)
     );
   }
 
@@ -521,7 +521,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("green"),
       new TagOpenEndEvent("green", false),
       new TextEvent("Hello, } world! >"),
-      text.getAuxAnchor(0)
+      text.auxAnchorEvent(0)
     );
   }
 
@@ -541,7 +541,7 @@ public class XmlEventParserTests {
       ParseError.UNTERMINATED_INTERPOLATION,
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
-      text.getAnchor(2)
+      text.anchorEvent(2)
     );
   }
 
@@ -582,7 +582,7 @@ public class XmlEventParserTests {
     makeCaseWithInterleavedAnchors(
       text,
       ParseError.MISSING_TAG_NAME,
-      text.getAnchor(0)
+      text.anchorEvent(0)
     );
 
     text = new TextWithAnchors("@</>");
@@ -590,7 +590,7 @@ public class XmlEventParserTests {
     makeCaseWithInterleavedAnchors(
       text,
       ParseError.MISSING_TAG_NAME,
-      text.getAnchor(0)
+      text.anchorEvent(0)
     );
   }
 
@@ -603,7 +603,7 @@ public class XmlEventParserTests {
       ParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
-      text.getAnchor(2)
+      text.anchorEvent(2)
     );
 
     text = new TextWithAnchors("@<red @my-attr @5var>");
@@ -613,7 +613,7 @@ public class XmlEventParserTests {
       ParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
-      text.getAnchor(2)
+      text.anchorEvent(2)
     );
 
     text = new TextWithAnchors("@<red @my-attr @\"my-string\">");
@@ -623,7 +623,7 @@ public class XmlEventParserTests {
       ParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
-      text.getAnchor(2)
+      text.anchorEvent(2)
     );
   }
 
@@ -642,7 +642,7 @@ public class XmlEventParserTests {
       text,
       expectedError,
       new TagOpenBeginEvent("red"),
-      text.getAnchor(1)
+      text.anchorEvent(1)
     );
   }
 
@@ -679,7 +679,7 @@ public class XmlEventParserTests {
       XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
 
       if (!((expectedEvent instanceof InputEndEvent) || expectedEvent instanceof CursorPositionEvent)) {
-        XmlEvent anchorEvent = input.getAnchor(expectedEventIndex);
+        XmlEvent anchorEvent = input.anchorEvent(expectedEventIndex);
 
         if (anchorEvent == null)
           throw new IllegalStateException("Required " + (expectedEvents.length - 1) + " anchors, but only got " + input.getAnchorCount());

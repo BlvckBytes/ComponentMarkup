@@ -11,7 +11,6 @@ import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
-import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
@@ -63,15 +62,6 @@ public abstract class AstParserTestsBase {
 
   protected static NodeWrapper<TextNode> text(AExpression value, CursorPosition position) {
     return new NodeWrapper<>(new TextNode(value, position, new ArrayList<>()));
-  }
-
-  protected static CursorPosition anchor(TextWithAnchors text, int anchorIndex) {
-    CursorPositionEvent positionEvent = text.getAnchor(anchorIndex);
-
-    if (positionEvent == null)
-      throw new IllegalStateException("Required anchor at index " + anchorIndex);
-
-    return positionEvent.position;
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
