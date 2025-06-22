@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -23,9 +23,8 @@ public class HoverEntityTag extends HoverTag {
   }
 
   @Override
-  public @Nullable AstNode construct(
+  public @NotNull AstNode construct(
     String tagNameLower,
-    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

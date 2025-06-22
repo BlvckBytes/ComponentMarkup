@@ -1,10 +1,10 @@
 package at.blvckbytes.component_markup.ast.tag;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.attribute.*;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -44,19 +44,8 @@ public abstract class TagDefinition {
 
   public abstract boolean matchName(String tagNameLower);
 
-  public boolean modifyContainer(
+  public abstract @NotNull AstNode construct(
     String tagNameLower,
-    CursorPosition position,
-    List<Attribute> attributes,
-    List<LetBinding> letBindings,
-    ContainerNode container
-  ) {
-    return false;
-  }
-
-  public abstract @Nullable AstNode construct(
-    String tagNameLower,
-    boolean didModifyContainer,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,

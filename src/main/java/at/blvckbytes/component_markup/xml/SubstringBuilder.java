@@ -78,11 +78,13 @@ public class SubstringBuilder {
 
       if (isTextMode) {
         if (currentChar == '\n') {
-          if (result[nextResultIndex - 1] == '\\')
-            --nextResultIndex;
-          else {
-            while (result[nextResultIndex - 1] == ' ')
+          if (nextResultIndex > 0) {
+            if (result[nextResultIndex - 1] == '\\')
               --nextResultIndex;
+            else {
+              while (result[nextResultIndex - 1] == ' ')
+                --nextResultIndex;
+            }
           }
 
           doIgnoreWhitespace = true;

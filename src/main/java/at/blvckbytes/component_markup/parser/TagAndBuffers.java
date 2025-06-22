@@ -200,8 +200,6 @@ public class TagAndBuffers implements ParserChildItem {
   public AstNode construct() {
     return tag.construct(
       tagNameLower,
-      // TODO: Implement
-      false,
       position,
       attributes, bindings, getProcessedChildren()
     );
