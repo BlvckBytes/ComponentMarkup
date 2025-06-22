@@ -6,8 +6,6 @@ import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import at.blvckbytes.component_markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,9 +23,9 @@ public class NodeWrapper<T extends AstNode> {
     return this;
   }
 
-  public NodeWrapper<T> let(String name, AExpression expression, TextWithAnchors text, int anchorIndex) {
+  public NodeWrapper<T> let(String name, AExpression expression, CursorPosition position) {
     assert node.letBindings != null;
-    node.letBindings.add(new LetBinding(name, expression, getAnchorPosition(text, anchorIndex)));
+    node.letBindings.add(new LetBinding(name, expression, position));
     return this;
   }
 
@@ -82,12 +80,4 @@ public class NodeWrapper<T extends AstNode> {
     return node;
   }
 
-  public static CursorPosition getAnchorPosition(TextWithAnchors text, int anchorIndex) {
-    CursorPositionEvent positionEvent = text.getAnchor(anchorIndex);
-
-    if (positionEvent == null)
-      throw new IllegalStateException("Required anchor at index " + anchorIndex);
-
-    return positionEvent.position;
-  }
 }

@@ -8,20 +8,20 @@ import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
+import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
+import at.blvckbytes.component_markup.xml.event.CursorPositionEvent;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import static at.blvckbytes.component_markup.parser.NodeWrapper.getAnchorPosition;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AstParserTests {
 
@@ -41,16 +41,16 @@ public class AstParserTests {
 
     makeCase(
       text,
-      container(text, -1)
+      container(anchor(text, -1))
         .child(
           translate(
             expr("my.expr"),
-            text, 0,
-            container(text, 2)
-              .child(text(imm("hello, "), text, 3))
-              .child(text(expr("user"), text, 4))
+            anchor(text, 0),
+            container(anchor(text, 2))
+              .child(text(imm("hello, "), anchor(text, 3)))
+              .child(text(expr("user"), anchor(text, 4)))
           )
-          .let("a", expr("b"), text, 1)
+          .let("a", expr("b"), anchor(text, 1))
         )
     );
   }
@@ -65,16 +65,16 @@ public class AstParserTests {
 
     makeCase(
       text,
-      container(text, -1)
-        .child(text(imm("before"), text, 0))
+      container(anchor(text, -1))
+        .child(text(imm("before"), anchor(text, 0)))
         .child(
           conditional(
             expr("a"),
-            container(text, 1)
-              .child(text(imm("if contents"), text, 2))
+            container(anchor(text, 1))
+              .child(text(imm("if contents"), anchor(text, 2)))
           )
         )
-        .child(text(imm("after"), text, 3))
+        .child(text(imm("after"), anchor(text, 3)))
     );
   }
 
@@ -91,30 +91,30 @@ public class AstParserTests {
 
     makeCase(
       text,
-      container(text, -1)
-        .child(text(imm("before"), text, 0))
+      container(anchor(text, -1))
+        .child(text(imm("before"), anchor(text, 0)))
         .child(
           ifThenElse(
-            container(text, 7)
-              .child(text(imm("else contents"), text, 8)),
+            container(anchor(text, 7))
+              .child(text(imm("else contents"), anchor(text, 8))),
             conditional(
               expr("a"),
-              container(text, 1)
-                .child(text(imm("if contents"), text, 2))
+              container(anchor(text, 1))
+                .child(text(imm("if contents"), anchor(text, 2)))
             ),
             conditional(
               expr("b"),
-              container(text, 3)
-                .child(text(imm("else-if b contents"), text, 4))
+              container(anchor(text, 3))
+                .child(text(imm("else-if b contents"), anchor(text, 4)))
             ),
             conditional(
               expr("c"),
-              container(text, 5)
-                .child(text(imm("else-if c contents"), text, 6))
+              container(anchor(text, 5))
+                .child(text(imm("else-if c contents"), anchor(text, 6)))
             )
           )
         )
-        .child(text(imm("after"), text, 9))
+        .child(text(imm("after"), anchor(text, 9)))
     );
   }
 
@@ -135,40 +135,40 @@ public class AstParserTests {
 
     makeCase(
       text,
-      container(text, -1)
-        .child(text(imm("before"), text, 0))
+      container(anchor(text, -1))
+        .child(text(imm("before"), anchor(text, 0)))
         .child(
           ifThenElse(
-            container(text, 6)
+            container(anchor(text, 6))
               .child(
                 ifThenElse(
-                  container(text, 9)
-                    .child(text(imm("if not a and not c"), text, 10)),
+                  container(anchor(text, 9))
+                    .child(text(imm("if not a and not c"), anchor(text, 10))),
                   conditional(
                     expr("c"),
-                    container(text, 7)
-                      .child(text(imm("if not a and c"), text, 8))
+                    container(anchor(text, 7))
+                      .child(text(imm("if not a and c"), anchor(text, 8)))
                   )
                 )
               ),
             conditional(
               expr("a"),
-              container(text, 1)
+              container(anchor(text, 1))
                 .child(
                   ifThenElse(
-                    container(text, 4)
-                      .child(text(imm("if a and not b"), text, 5)),
+                    container(anchor(text, 4))
+                      .child(text(imm("if a and not b"), anchor(text, 5))),
                     conditional(
                       expr("b"),
-                      container(text, 2)
-                        .child(text(imm("if a and b"), text, 3))
+                      container(anchor(text, 2))
+                        .child(text(imm("if a and b"), anchor(text, 3)))
                     )
                   )
                 )
             )
           )
         )
-        .child(text(imm("after"), text, 11))
+        .child(text(imm("after"), anchor(text, 11)))
     );
   }
 
@@ -194,27 +194,36 @@ public class AstParserTests {
     return new NodeWrapper<>(new ConditionalNode(condition, wrappedBody.get(), new ArrayList<>()));
   }
 
-  private static NodeWrapper<ContainerNode> container(TextWithAnchors text, int anchorIndex) {
-    return new NodeWrapper<>(new ContainerNode(getAnchorPosition(text, anchorIndex), new ArrayList<>(), new ArrayList<>()));
+  private static NodeWrapper<ContainerNode> container(CursorPosition position) {
+    return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new ArrayList<>()));
   }
 
-  private static NodeWrapper<TranslateNode> translate(AExpression key, TextWithAnchors text, int anchorIndex, @Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<?>... wrappedWiths) {
+  private static NodeWrapper<TranslateNode> translate(AExpression key, CursorPosition position, @Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<?>... wrappedWiths) {
     List<AstNode> withs = new ArrayList<>();
 
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
 
-    return new NodeWrapper<>(new TranslateNode(key, withs, wrappedFallback == null ? null : wrappedFallback.get(), getAnchorPosition(text, anchorIndex), new ArrayList<>()));
+    return new NodeWrapper<>(new TranslateNode(key, withs, wrappedFallback == null ? null : wrappedFallback.get(), position, new ArrayList<>()));
   }
 
-  private static NodeWrapper<TextNode> text(AExpression value, TextWithAnchors text, int anchorIndex) {
-    return new NodeWrapper<>(new TextNode(value, getAnchorPosition(text, anchorIndex), new ArrayList<>()));
+  private static NodeWrapper<TextNode> text(AExpression value, CursorPosition position) {
+    return new NodeWrapper<>(new TextNode(value, position, new ArrayList<>()));
+  }
+
+  private static CursorPosition anchor(TextWithAnchors text, int anchorIndex) {
+    CursorPositionEvent positionEvent = text.getAnchor(anchorIndex);
+
+    if (positionEvent == null)
+      throw new IllegalStateException("Required anchor at index " + anchorIndex);
+
+    return positionEvent.position;
   }
 
   private static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
     AstParser parser = new AstParser(BuiltInTagRegistry.get(), expressionEvaluator);
     XmlEventParser.parse(input.text, parser);
     AstNode actualAst = parser.getResult();
-    assertEquals(wrappedExpectedAst.get().stringify(0), actualAst.stringify(0));
+    Assertions.assertEquals(wrappedExpectedAst.get().stringify(0), actualAst.stringify(0));
   }
 }
