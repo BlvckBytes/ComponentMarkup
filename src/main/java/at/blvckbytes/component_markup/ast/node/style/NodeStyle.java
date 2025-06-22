@@ -29,7 +29,7 @@ public class NodeStyle {
   }
 
   private String makeFormatExpression() {
-    StringBuilder result = new StringBuilder();
+    StringBuilder result = new StringBuilder("{");
 
     for (int formatIndex = 0; formatIndex < Format.VALUES.size(); ++formatIndex) {
       Format format = Format.VALUES.get(formatIndex);
@@ -61,9 +61,11 @@ public class NodeStyle {
 
       result.append('=').append(state.expressionify());
 
-      if (formatIndex != 0)
+      if (formatIndex != Format.VALUES.size() - 1)
         result.append(';');
     }
+
+    result.append('}');
 
     return result.toString();
   }
