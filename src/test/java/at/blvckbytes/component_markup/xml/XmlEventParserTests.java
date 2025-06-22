@@ -277,6 +277,40 @@ public class XmlEventParserTests {
   }
 
   @Test
+  public void shouldStripTrailingTextBackslash() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@Online players: \\",
+      "@<red@>@test"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TextEvent("Online players: "),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("test"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldStripTrailingSpaces() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@Online players:   ",
+      "@<red@>@test"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TextEvent("Online players:"),
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      new TextEvent("test"),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
   public void shouldCollapseNewlineTrailingSpaces() {
     TextWithAnchors text = new TextWithAnchors(
       "@  hello",

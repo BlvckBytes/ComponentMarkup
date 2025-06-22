@@ -48,7 +48,7 @@ public class SubstringBuilder {
     this.endExclusive = index;
   }
 
-  public String build(boolean collapseNewlineTrailingWhitespace) {
+  public String build(boolean isTextMode) {
     if (this.startInclusive < 0)
       throw new IllegalStateException("Cannot build a substring without a determined start");
 
@@ -76,8 +76,15 @@ public class SubstringBuilder {
 
       char currentChar = input.charAt(inputIndex);
 
-      if (collapseNewlineTrailingWhitespace) {
+      if (isTextMode) {
         if (currentChar == '\n') {
+          if (result[nextResultIndex - 1] == '\\')
+            --nextResultIndex;
+          else {
+            while (result[nextResultIndex - 1] == ' ')
+              --nextResultIndex;
+          }
+
           doIgnoreWhitespace = true;
           continue;
         }
