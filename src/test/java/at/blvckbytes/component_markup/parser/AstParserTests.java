@@ -97,11 +97,12 @@ public class AstParserTests extends AstParserTestsBase {
   }
 
   @Test
-  public void shouldParseNestedIfElse() {
+  public void shouldParseNestedIfThenElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
       "@<container *if=\"a\">",
       "  @<container *if=\"b\">@if a and b</container>",
+      "  @<container *else-if=\"d\">@if a and d</container>",
       "  @<container *else>@if a and not b</container>",
       "</container>",
       "@<container *else>",
@@ -117,15 +118,15 @@ public class AstParserTests extends AstParserTestsBase {
         .child(text(imm("before"), text.anchor(0)))
         .child(
           ifThenElse(
-            container(text.anchor(6))
+            container(text.anchor(8))
               .child(
                 ifThenElse(
-                  container(text.anchor(9))
-                    .child(text(imm("if not a and not c"), text.anchor(10))),
+                  container(text.anchor(11))
+                    .child(text(imm("if not a and not c"), text.anchor(12))),
                   conditional(
                     expr("c"),
-                    container(text.anchor(7))
-                      .child(text(imm("if not a and c"), text.anchor(8)))
+                    container(text.anchor(9))
+                      .child(text(imm("if not a and c"), text.anchor(10)))
                   )
                 )
               ),
@@ -134,19 +135,24 @@ public class AstParserTests extends AstParserTestsBase {
               container(text.anchor(1))
                 .child(
                   ifThenElse(
-                    container(text.anchor(4))
-                      .child(text(imm("if a and not b"), text.anchor(5))),
+                    container(text.anchor(6))
+                      .child(text(imm("if a and not b"), text.anchor(7))),
                     conditional(
                       expr("b"),
                       container(text.anchor(2))
                         .child(text(imm("if a and b"), text.anchor(3)))
+                    ),
+                    conditional(
+                      expr("d"),
+                      container(text.anchor(4))
+                        .child(text(imm("if a and d"), text.anchor(5)))
                     )
                   )
                 )
             )
           )
         )
-        .child(text(imm("after"), text.anchor(11)))
+        .child(text(imm("after"), text.anchor(13)))
     );
   }
 }
