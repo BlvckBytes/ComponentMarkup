@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static at.blvckbytes.component_markup.parser.NodeWrapper.getAnchorPosition;
@@ -49,12 +49,32 @@ public class AstParserTests {
             container(text, 2)
               .child(text(imm("hello, "), text, 3))
               .child(text(expr("user"), text, 4))
-              .get()
           )
           .let("a", expr("b"), text, 1)
-          .get()
         )
-        .get()
+    );
+  }
+
+  @Test
+  public void shouldParseIf() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@before",
+      "@<container *if=\"a\">@if contents</container>",
+      "@after"
+    );
+
+    makeCase(
+      text,
+      container(text, -1)
+        .child(text(imm("before"), text, 0))
+        .child(
+          conditional(
+            expr("a"),
+            container(text, 1)
+              .child(text(imm("if contents"), text, 2))
+          )
+        )
+        .child(text(imm("after"), text, 3))
     );
   }
 
@@ -73,37 +93,93 @@ public class AstParserTests {
       text,
       container(text, -1)
         .child(text(imm("before"), text, 0))
-        .child(new IfThenElseNode(
-          Arrays.asList(
+        .child(
+          ifThenElse(
+            container(text, 7)
+              .child(text(imm("else contents"), text, 8)),
             conditional(
               expr("a"),
               container(text, 1)
                 .child(text(imm("if contents"), text, 2))
-                .get()
-            )
-              .get(),
+            ),
             conditional(
               expr("b"),
               container(text, 3)
                 .child(text(imm("else-if b contents"), text, 4))
-                .get()
-            )
-              .get(),
+            ),
             conditional(
               expr("c"),
               container(text, 5)
                 .child(text(imm("else-if c contents"), text, 6))
-                .get()
             )
-              .get()
-          ),
-          container(text, 7)
-            .child(text(imm("else contents"), text, 8))
-            .get()
-        ))
+          )
+        )
         .child(text(imm("after"), text, 9))
-        .get()
     );
+  }
+
+  @Test
+  public void shouldParseNestedIfElse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@before",
+      "@<container *if=\"a\">",
+      "  @<container *if=\"b\">@if a and b</container>",
+      "  @<container *else>@if a and not b</container>",
+      "</container>",
+      "@<container *else>",
+      "  @<container *if=\"c\">@if not a and c</container>",
+      "  @<container *else>@if not a and not c</container>",
+      "</container>",
+      "@after"
+    );
+
+    makeCase(
+      text,
+      container(text, -1)
+        .child(text(imm("before"), text, 0))
+        .child(
+          ifThenElse(
+            container(text, 6)
+              .child(
+                ifThenElse(
+                  container(text, 9)
+                    .child(text(imm("if not a and not c"), text, 10)),
+                  conditional(
+                    expr("c"),
+                    container(text, 7)
+                      .child(text(imm("if not a and c"), text, 8))
+                  )
+                )
+              ),
+            conditional(
+              expr("a"),
+              container(text, 1)
+                .child(
+                  ifThenElse(
+                    container(text, 4)
+                      .child(text(imm("if a and not b"), text, 5)),
+                    conditional(
+                      expr("b"),
+                      container(text, 2)
+                        .child(text(imm("if a and b"), text, 3))
+                    )
+                  )
+                )
+            )
+          )
+        )
+        .child(text(imm("after"), text, 11))
+    );
+  }
+
+  @SafeVarargs
+  private static NodeWrapper<IfThenElseNode> ifThenElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<ConditionalNode>... wrappedConditions) {
+    List<ConditionalNode> conditions = new ArrayList<>();
+
+    for (NodeWrapper<ConditionalNode> wrappedCondition : wrappedConditions)
+      conditions.add(wrappedCondition.get());
+
+    return new NodeWrapper<>(new IfThenElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
   private static AExpression imm(String value) {
@@ -114,26 +190,31 @@ public class AstParserTests {
     return expressionEvaluator.parseString(expression);
   }
 
-  private static NodeWrapper<ConditionalNode> conditional(AExpression condition, AstNode body) {
-    return new NodeWrapper<>(new ConditionalNode(condition, body, new ArrayList<>()));
+  private static NodeWrapper<ConditionalNode> conditional(AExpression condition, NodeWrapper<?> wrappedBody) {
+    return new NodeWrapper<>(new ConditionalNode(condition, wrappedBody.get(), new ArrayList<>()));
   }
 
   private static NodeWrapper<ContainerNode> container(TextWithAnchors text, int anchorIndex) {
     return new NodeWrapper<>(new ContainerNode(getAnchorPosition(text, anchorIndex), new ArrayList<>(), new ArrayList<>()));
   }
 
-  private static NodeWrapper<TranslateNode> translate(AExpression key, TextWithAnchors text, int anchorIndex, @Nullable AstNode fallback, AstNode... with) {
-    return new NodeWrapper<>(new TranslateNode(key, Arrays.asList(with), fallback, getAnchorPosition(text, anchorIndex), new ArrayList<>()));
+  private static NodeWrapper<TranslateNode> translate(AExpression key, TextWithAnchors text, int anchorIndex, @Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<?>... wrappedWiths) {
+    List<AstNode> withs = new ArrayList<>();
+
+    for (NodeWrapper<?> wrappedWith : wrappedWiths)
+      withs.add(wrappedWith.get());
+
+    return new NodeWrapper<>(new TranslateNode(key, withs, wrappedFallback == null ? null : wrappedFallback.get(), getAnchorPosition(text, anchorIndex), new ArrayList<>()));
   }
 
-  private static TextNode text(AExpression value, TextWithAnchors text, int anchorIndex) {
-    return new TextNode(value, getAnchorPosition(text, anchorIndex), new ArrayList<>());
+  private static NodeWrapper<TextNode> text(AExpression value, TextWithAnchors text, int anchorIndex) {
+    return new NodeWrapper<>(new TextNode(value, getAnchorPosition(text, anchorIndex), new ArrayList<>()));
   }
 
-  private static void makeCase(TextWithAnchors input, AstNode expectedAst) {
+  private static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
     AstParser parser = new AstParser(BuiltInTagRegistry.get(), expressionEvaluator);
     XmlEventParser.parse(input.text, parser);
     AstNode actualAst = parser.getResult();
-    assertEquals(expectedAst.stringify(0), actualAst.stringify(0));
+    assertEquals(wrappedExpectedAst.get().stringify(0), actualAst.stringify(0));
   }
 }

@@ -19,9 +19,9 @@ public class NodeWrapper<T extends AstNode> {
     this.node = node;
   }
 
-  public NodeWrapper<T> child(AstNode child) {
+  public NodeWrapper<T> child(NodeWrapper<?> wrappedChild) {
     assert node.children != null;
-    node.children.add(child);
+    node.children.add(wrappedChild.get());
     return this;
   }
 
