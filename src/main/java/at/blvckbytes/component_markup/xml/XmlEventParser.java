@@ -32,7 +32,7 @@ public class XmlEventParser {
         if (isWithinCurlyBrackets)
           break;
 
-        throw new XmlParseException(ParseError.UNESCAPED_CLOSING_CURLY);
+        throw new XmlParseException(XmlParseError.UNESCAPED_CLOSING_CURLY);
       }
 
       CursorPosition preConsumePosition = cursor.getPosition();
@@ -73,7 +73,7 @@ public class XmlEventParser {
           consumer.onCursorPosition(beginPosition);
 
           if (!substringBuilder.hasEndSet())
-            throw new XmlParseException(ParseError.UNTERMINATED_INTERPOLATION);
+            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
 
           inStringDetector.reset();
 
@@ -188,7 +188,7 @@ public class XmlEventParser {
     }
 
     if (!encounteredEnd)
-      throw new XmlParseException(ParseError.UNTERMINATED_STRING);
+      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
     return substringBuilder.build(false);
   }
@@ -227,7 +227,7 @@ public class XmlEventParser {
 
       if (peekedChar == '.') {
         if (encounteredDecimalPoint)
-          throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+          throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
         cursor.nextChar();
         encounteredDecimalPoint = true;
@@ -238,10 +238,10 @@ public class XmlEventParser {
     }
 
     if (!encounteredDigit)
-      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
     String numberString = substringBuilder.build(false);
@@ -250,7 +250,7 @@ public class XmlEventParser {
       try {
         consumer.onDoubleAttribute(attributeName, Double.parseDouble(numberString));
       } catch (NumberFormatException e) {
-        throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+        throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
       }
       return;
     }
@@ -258,7 +258,7 @@ public class XmlEventParser {
     try {
       consumer.onLongAttribute(attributeName, Long.parseLong(numberString));
     } catch (NumberFormatException e) {
-      throw new XmlParseException(ParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
     }
   }
 
@@ -271,7 +271,7 @@ public class XmlEventParser {
       if (cursor.peekChar() == '"') {
         cursor.nextChar();
         consumer.onCursorPosition(cursor.getPosition());
-        throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
+        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
       }
 
       return false;
@@ -280,14 +280,14 @@ public class XmlEventParser {
     // Attribute-identifiers do not support leading digits, as this constraint allows for
     // proper detection of malformed input; example: my-attr 53 (missing an equals-sign).
     if (Character.isDigit(attributeName.charAt(0)))
-      throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
+      throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
 
     cursor.consumeWhitespace();
 
     if (cursor.peekChar() != '=') {
       // These "keywords" are reserved; again - for proper detection of malformed input.
       if (attributeName.equalsIgnoreCase("true") || attributeName.equalsIgnoreCase("false"))
-        throw new XmlParseException(ParseError.EXPECTED_ATTRIBUTE_KEY);
+        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
 
       consumer.onFlagAttribute(attributeName);
       return true;
@@ -315,7 +315,7 @@ public class XmlEventParser {
 
         if (nextChar != '}') {
           consumer.onCursorPosition(openingCurlyPosition);
-          throw new XmlParseException(ParseError.UNTERMINATED_SUBTREE);
+          throw new XmlParseException(XmlParseError.UNTERMINATED_SUBTREE);
         }
 
         consumer.onCursorPosition(cursor.getPosition());
@@ -326,11 +326,11 @@ public class XmlEventParser {
       case 't':
         for (char c : TRUE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new XmlParseException(ParseError.MALFORMED_LITERAL_TRUE);
+            throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
         }
 
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-          throw new XmlParseException(ParseError.MALFORMED_LITERAL_TRUE);
+          throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
 
         consumer.onBooleanAttribute(attributeName, true);
         return true;
@@ -339,11 +339,11 @@ public class XmlEventParser {
       case 'f':
         for (char c : FALSE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new XmlParseException(ParseError.MALFORMED_LITERAL_FALSE);
+            throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
         }
 
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-          throw new XmlParseException(ParseError.MALFORMED_LITERAL_FALSE);
+          throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
 
         consumer.onBooleanAttribute(attributeName, false);
         return true;
@@ -364,7 +364,7 @@ public class XmlEventParser {
         return true;
 
       default:
-        throw new XmlParseException(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE);
+        throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE);
     }
   }
 
@@ -409,14 +409,14 @@ public class XmlEventParser {
 
     if (tagName == null) {
       consumer.onCursorPosition(savedPosition);
-      throw new XmlParseException(ParseError.MISSING_TAG_NAME);
+      throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
     }
 
     if (wasClosingTag) {
       consumer.onCursorPosition(savedPosition);
 
       if (cursor.nextChar() != '>')
-        throw new XmlParseException(ParseError.UNTERMINATED_TAG);
+        throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
       consumer.onTagClose(tagName);
       return;
@@ -444,7 +444,7 @@ public class XmlEventParser {
     cursor.consumeWhitespace();
 
     if (cursor.nextChar() != '>')
-      throw new XmlParseException(ParseError.UNTERMINATED_TAG);
+      throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
     consumer.onCursorPosition(cursor.getPosition());
     consumer.onTagOpenEnd(tagName, wasSelfClosing);

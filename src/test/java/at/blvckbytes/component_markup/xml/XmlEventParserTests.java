@@ -520,7 +520,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.UNTERMINATED_TAG,
+      XmlParseError.UNTERMINATED_TAG,
       new TagOpenBeginEvent("red")
     );
   }
@@ -533,7 +533,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.UNTERMINATED_TAG,
+      XmlParseError.UNTERMINATED_TAG,
       text.anchorEvent(0)
     );
   }
@@ -549,7 +549,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.UNTERMINATED_SUBTREE,
+      XmlParseError.UNTERMINATED_SUBTREE,
       new TagOpenBeginEvent("red"),
       new TagAttributeBeginEvent("my-attr"),
       new TagOpenBeginEvent("green"),
@@ -561,7 +561,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnterminatedString() {
-    makeMalformedAttributeValueCase(ParseError.UNTERMINATED_STRING, "\"hello world");
+    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello world");
   }
 
   @Test
@@ -572,7 +572,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.UNTERMINATED_INTERPOLATION,
+      XmlParseError.UNTERMINATED_INTERPOLATION,
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
       text.anchorEvent(2)
@@ -581,32 +581,32 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedNumbers() {
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, ".");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "-");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "--");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, ".5.5");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_NUMBER, "5AB");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "-");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "--");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".5.5");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "5AB");
   }
 
   @Test
   public void shouldThrowOnMalformedLiterals() {
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "t");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "tr");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "tru");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_TRUE, "truea");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "f");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fa");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fal");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "fals");
-    makeMalformedAttributeValueCase(ParseError.MALFORMED_LITERAL_FALSE, "falsea");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "t");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "tr");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "tru");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "truea");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "f");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fa");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fal");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fals");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "falsea");
   }
 
   @Test
   public void shouldThrowOnUnsupportedAttributeValues() {
-    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
-    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "`test`");
-    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "<red>");
-    makeMalformedAttributeValueCase(ParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "'test'");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "`test`");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "<red>");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "'test'");
   }
 
   @Test
@@ -615,7 +615,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.MISSING_TAG_NAME,
+      XmlParseError.MISSING_TAG_NAME,
       text.anchorEvent(0)
     );
 
@@ -623,7 +623,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.MISSING_TAG_NAME,
+      XmlParseError.MISSING_TAG_NAME,
       text.anchorEvent(0)
     );
   }
@@ -634,7 +634,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.EXPECTED_ATTRIBUTE_KEY,
+      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
       text.anchorEvent(2)
@@ -644,7 +644,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.EXPECTED_ATTRIBUTE_KEY,
+      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
       text.anchorEvent(2)
@@ -654,7 +654,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      ParseError.EXPECTED_ATTRIBUTE_KEY,
+      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
       new TagOpenBeginEvent("red"),
       new FlagAttributeEvent("my-attr"),
       text.anchorEvent(2)
@@ -665,11 +665,11 @@ public class XmlEventParserTests {
   public void shouldThrowOnUnescapedCurlyBrackets() {
     makeCaseWithInterleavedAnchors(
       new TextWithAnchors("hello } world"),
-      ParseError.UNESCAPED_CLOSING_CURLY
+      XmlParseError.UNESCAPED_CLOSING_CURLY
     );
   }
 
-  private void makeMalformedAttributeValueCase(ParseError expectedError, String valueExpression) {
+  private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
     TextWithAnchors text = new TextWithAnchors("@<red @a=" + valueExpression);
 
     makeCaseWithInterleavedAnchors(
@@ -684,7 +684,7 @@ public class XmlEventParserTests {
     makeCaseWithInterleavedAnchors(input, null, expectedEvents);
   }
 
-  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, @Nullable ParseError expectedError, XmlEvent... expectedEvents) {
+  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, @Nullable XmlParseError expectedError, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
 
     XmlParseException thrownException = null;

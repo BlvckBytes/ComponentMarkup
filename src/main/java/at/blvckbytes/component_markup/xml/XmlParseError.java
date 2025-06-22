@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.xml;
 
-public enum ParseError {
+public enum XmlParseError {
   UNTERMINATED_INTERPOLATION,
   UNTERMINATED_STRING,
   UNTERMINATED_SUBTREE,
