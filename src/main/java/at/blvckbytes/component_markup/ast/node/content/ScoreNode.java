@@ -10,12 +10,12 @@ import java.util.List;
 public class ScoreNode extends ContentNode {
 
   public final AExpression name;
-  public final AExpression object;
+  public final AExpression objective;
   public final @Nullable AExpression value;
 
   public ScoreNode(
     AExpression name,
-    AExpression object,
+    AExpression objective,
     @Nullable AExpression value,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
@@ -23,7 +23,7 @@ public class ScoreNode extends ContentNode {
     super(position, letBindings);
 
     this.name = name;
-    this.object = object;
+    this.objective = objective;
     this.value = value;
   }
 
@@ -32,7 +32,7 @@ public class ScoreNode extends ContentNode {
     return (
       indent(indentLevel) + "ScoreNode{\n" +
       indent(indentLevel + 1) + "name=" + name.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "object=" + object.expressionify() + ",\n" +
+      indent(indentLevel + 1) + "objective=" + objective.expressionify() + ",\n" +
       indent(indentLevel + 1) + "value=" + (value == null ? "null" : value.expressionify()) + ",\n" +
       stringifyBaseMembers(indentLevel + 1) + "\n" +
       indent(indentLevel) + "}"
