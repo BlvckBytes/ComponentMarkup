@@ -13,21 +13,46 @@ public class SubstringBuilderTests {
 
     builder.setStartInclusive(0);
     builder.setEndExclusive(input.length());
-    assertEquals("Hello world test", builder.build(true));
+    assertEquals("Hello world test", builder.build(StringBuilderMode.TEXT_MODE));
 
     builder.setStartInclusive(0);
     builder.setEndExclusive(input.length());
-    assertEquals("Hello\n  world\n     test", builder.build(false));
+    assertEquals("Hello\n  world\n     test", builder.build(StringBuilderMode.NORMAL_MODE));
 
     input = "\n test";
     builder = new SubstringBuilder(input);
 
     builder.setStartInclusive(0);
     builder.setEndExclusive(input.length());
-    assertEquals("\n test", builder.build(false));
+    assertEquals("\n test", builder.build(StringBuilderMode.NORMAL_MODE));
 
     builder.setStartInclusive(0);
     builder.setEndExclusive(input.length());
-    assertEquals("test", builder.build(true));
+    assertEquals("test", builder.build(StringBuilderMode.TEXT_MODE));
+  }
+
+  @Test
+  public void shouldTrimTrailingSpaces() {
+    String input = "Hello,  ";
+    SubstringBuilder builder = new SubstringBuilder(input);
+
+    builder.setStartInclusive(0);
+    builder.setEndExclusive(input.length());
+    assertEquals("Hello,  ", builder.build(StringBuilderMode.TEXT_MODE));
+
+    builder.setStartInclusive(0);
+    builder.setEndExclusive(input.length());
+    assertEquals("Hello,", builder.build(StringBuilderMode.TEXT_MODE_TRIM_TRAILING_SPACES));
+
+    input = "Hello,  \\";
+    builder = new SubstringBuilder(input);
+
+    builder.setStartInclusive(0);
+    builder.setEndExclusive(input.length());
+    assertEquals("Hello,  \\", builder.build(StringBuilderMode.TEXT_MODE));
+
+    builder.setStartInclusive(0);
+    builder.setEndExclusive(input.length());
+    assertEquals("Hello,  ", builder.build(StringBuilderMode.TEXT_MODE_TRIM_TRAILING_SPACES));
   }
 }

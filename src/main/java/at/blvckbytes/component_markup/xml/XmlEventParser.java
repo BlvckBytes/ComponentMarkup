@@ -49,7 +49,7 @@ public class XmlEventParser {
           if (substringBuilder.hasStartSet()) {
             substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
             consumer.onCursorPosition(textContentBeginPosition);
-            consumer.onText(substringBuilder.build(true));
+            consumer.onText(substringBuilder.build(StringBuilderMode.TEXT_MODE));
           }
 
           substringBuilder.setStartInclusive(cursor.getNextCharIndex());
@@ -77,7 +77,7 @@ public class XmlEventParser {
 
           inStringDetector.reset();
 
-          String expression = substringBuilder.build(false);
+          String expression = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
 
           consumer.onInterpolation(expression);
           continue;
@@ -92,7 +92,7 @@ public class XmlEventParser {
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
           consumer.onCursorPosition(textContentBeginPosition);
-          consumer.onText(substringBuilder.build(true));
+          consumer.onText(substringBuilder.build(StringBuilderMode.TEXT_MODE));
         }
 
         parseOpeningOrClosingTag();
@@ -131,12 +131,10 @@ public class XmlEventParser {
     if (substringBuilder.hasStartSet()) {
       substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-      String trailingText = substringBuilder.build(true);
+      String trailingText = substringBuilder.build(StringBuilderMode.TEXT_MODE_TRIM_TRAILING_SPACES);
 
-      if (!trailingText.trim().isEmpty()) {
-        consumer.onCursorPosition(textContentBeginPosition);
-        consumer.onText(trailingText);
-      }
+      consumer.onCursorPosition(textContentBeginPosition);
+      consumer.onText(trailingText);
     }
 
     if (!isWithinCurlyBrackets)
@@ -159,7 +157,7 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    return substringBuilder.build(false);
+    return substringBuilder.build(StringBuilderMode.NORMAL_MODE);
   }
 
   private String parseStringAttributeValue() {
@@ -190,7 +188,7 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    return substringBuilder.build(false);
+    return substringBuilder.build(StringBuilderMode.NORMAL_MODE);
   }
 
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
@@ -244,7 +242,7 @@ public class XmlEventParser {
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-    String numberString = substringBuilder.build(false);
+    String numberString = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
 
     if (encounteredDecimalPoint) {
       try {

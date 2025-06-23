@@ -48,7 +48,7 @@ public class SubstringBuilder {
     this.endExclusive = index;
   }
 
-  public String build(boolean isTextMode) {
+  public String build(StringBuilderMode mode) {
     if (this.startInclusive < 0)
       throw new IllegalStateException("Cannot build a substring without a determined start");
 
@@ -76,7 +76,7 @@ public class SubstringBuilder {
 
       char currentChar = input.charAt(inputIndex);
 
-      if (isTextMode) {
+      if (mode.textMode) {
         if (currentChar == '\n') {
           if (nextResultIndex > 0) {
             if (result[nextResultIndex - 1] == '\\')
@@ -108,6 +108,17 @@ public class SubstringBuilder {
       }
 
       result[nextResultIndex++] = currentChar;
+    }
+
+    if (mode.trimTrailingSpaces) {
+      if (nextResultIndex > 0) {
+        if (result[nextResultIndex - 1] == '\\')
+          --nextResultIndex;
+        else {
+          while (result[nextResultIndex - 1] == ' ')
+            --nextResultIndex;
+        }
+      }
     }
 
     this.resetIndices();
