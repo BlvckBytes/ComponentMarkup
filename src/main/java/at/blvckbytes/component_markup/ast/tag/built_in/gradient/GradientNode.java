@@ -18,12 +18,17 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
   private final ThreadLocal<Stack<List<Object>>> threadLocalInjectedComponentsStack = ThreadLocal.withInitial(Stack::new);
 
+  private final boolean deep;
+
   public GradientNode(
     CursorPosition position,
     @Nullable List<AstNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
+
+    // TODO: apply deeply-flag if requested
+    this.deep = false;
   }
 
   @Override
@@ -36,17 +41,20 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public EnumSet<InterceptionFlag> interceptInterpretation(AstNode node, OutputBuilder builder, Interpreter interpreter) {
+  public EnumSet<InterceptionFlag> interceptInterpretation(AstNode node, Interpreter interpreter) {
+    if (!deep && interpreter.isDeep())
+      return EnumSet.noneOf(InterceptionFlag.class);
+
     if (node instanceof GradientNode) {
       threadLocalInjectedComponentsStack.get().push(new ArrayList<>());
 
-      // TODO: apply deeply-flag if requested
       return EnumSet.of(InterceptionFlag.CALL_AFTER);
     }
 
     List<Object> injectedNodes = threadLocalInjectedComponentsStack.get().peek();
 
     if (node instanceof TextNode) {
+      OutputBuilder builder = interpreter.getCurrentBuilder();
       NodeStyle nodeStyle = ((TextNode) node).getStyle();
 
       if (nodeStyle != null && nodeStyle.color != ImmediateExpression.ofNull())
@@ -83,7 +91,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public void afterInterpretation(AstNode node, OutputBuilder builder, Interpreter interpreter) {
+  public void afterInterpretation(AstNode node, Interpreter interpreter) {
     if (node instanceof GradientNode) {
       List<Object> injectedComponents = threadLocalInjectedComponentsStack.get().pop();
 
@@ -96,13 +104,16 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
         double gradientProgression = (injectedComponentsIndex + 1D) / injectedComponentsCount;
         String hexColor = "#000000";
 
-        builder.componentConstructor.setColor(injectedComponent, hexColor);
+        interpreter.getCurrentBuilder().componentConstructor.setColor(injectedComponent, hexColor);
       }
     }
   }
 
   @Override
-  public void onSkippedByOther(AstNode node, OutputBuilder builder, Interpreter interpreter) {
+  public void onSkippedByOther(AstNode node, Interpreter interpreter) {
+    if (!deep && interpreter.isDeep())
+      return;
+
     if (node instanceof GradientNode)
       threadLocalInjectedComponentsStack.get().pop();
   }

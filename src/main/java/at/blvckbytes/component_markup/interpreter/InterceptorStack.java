@@ -16,12 +16,10 @@ public class InterceptorStack {
     }
   }
 
-  private final OutputBuilder builder;
   private final Interpreter interpreter;
   private final Stack<InterceptorEntry> interceptorStack;
 
-  public InterceptorStack(OutputBuilder builder, Interpreter interpreter) {
-    this.builder = builder;
+  public InterceptorStack(Interpreter interpreter) {
     this.interpreter = interpreter;
     this.interceptorStack = new Stack<>();
   }
@@ -37,11 +35,11 @@ public class InterceptorStack {
 
     for (int i = 0; i < interceptorStack.size(); ++i) {
       InterceptorEntry entry = interceptorStack.get(i);
-      EnumSet<InterceptionFlag> flags = entry.interceptor.interceptInterpretation(node, builder, interpreter);
+      EnumSet<InterceptionFlag> flags = entry.interceptor.interceptInterpretation(node, interpreter);
 
       if (flags.contains(InterceptionFlag.SKIP_PROCESSING)) {
         while (interceptorStack.size() > i + 1)
-          interceptorStack.pop().interceptor.onSkippedByOther(node, builder, interpreter);
+          interceptorStack.pop().interceptor.onSkippedByOther(node, interpreter);
 
         skip = true;
         break;
@@ -62,7 +60,7 @@ public class InterceptorStack {
       EnumSet<InterceptionFlag> flags = entry.flagStack.pop();
 
       if (flags.contains(InterceptionFlag.CALL_AFTER))
-        entry.interceptor.afterInterpretation(node, builder, interpreter);
+        entry.interceptor.afterInterpretation(node, interpreter);
 
       if (entry.flagStack.isEmpty())
         iterator.remove();

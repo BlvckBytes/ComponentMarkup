@@ -13,21 +13,22 @@ import java.util.*;
 
 public class AstInterpreter implements Interpreter {
 
+  private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
   private final TemporaryMemberEnvironment environment;
-  private final OutputBuilder builder;
   private final InterceptorStack interceptors;
+  private final Stack<OutputBuilder> builderStack;
 
   private AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment baseEnvironment,
-    char breakChar
+    IEvaluationEnvironment baseEnvironment
   ) {
+    this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
-    this.builder = new OutputBuilder(componentConstructor, environment, breakChar);
-    this.interceptors = new InterceptorStack(builder, this);
+    this.interceptors = new InterceptorStack(this);
+    this.builderStack = new Stack<>();
   }
 
   public static Object interpretSingle(
@@ -40,9 +41,8 @@ public class AstInterpreter implements Interpreter {
     if (breakChar == 0)
       throw new IllegalStateException("Break-char cannot be zero");
 
-    AstInterpreter interpreter = new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, breakChar);
-    interpreter.interpret(node);
-    return interpreter.builder.getResult().get(0);
+    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment)
+      .interpret(node, breakChar).get(0);
   }
 
   public static List<Object> interpretMulti(
@@ -51,20 +51,25 @@ public class AstInterpreter implements Interpreter {
     IEvaluationEnvironment baseEnvironment,
     AstNode node
   ) {
-    AstInterpreter interpreter = new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, (char) 0);
-    interpreter.interpret(node);
-    return interpreter.builder.getResult();
+    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment)
+      .interpret(node, (char) 0);
   }
 
   @Override
-  public List<Object> interpret(AstNode node) {
+  public List<Object> interpret(AstNode node, char breakChar) {
+    builderStack.push(new OutputBuilder(componentConstructor, environment, breakChar));
     _interpret(node);
-    return builder.getResult();
+    return builderStack.pop().getResult();
   }
 
   @Override
-  public Object joinComponents(List<Object> components) {
-    throw new UnsupportedOperationException();
+  public OutputBuilder getCurrentBuilder() {
+    return builderStack.peek();
+  }
+
+  @Override
+  public boolean isDeep() {
+    return builderStack.size() > 1;
   }
 
   // TODO: Catch errors while evaluating and return sane defaults (while also logging!)
@@ -204,6 +209,8 @@ public class AstInterpreter implements Interpreter {
       interceptors.handleAfter(node);
       return;
     }
+
+    OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
       if (interceptors.handleBeforeAndGetIfSkip(node))

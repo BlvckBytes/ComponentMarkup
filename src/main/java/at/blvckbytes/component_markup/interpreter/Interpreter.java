@@ -16,8 +16,10 @@ public interface Interpreter {
 
   @Nullable Boolean evaluateAsBoolean(AExpression expression);
 
-  List<Object> interpret(AstNode astNode);
+  List<Object> interpret(AstNode astNode, char breakChar);
 
-  Object joinComponents(List<Object> components);
+  OutputBuilder getCurrentBuilder();
+
+  boolean isDeep();
 
 }
