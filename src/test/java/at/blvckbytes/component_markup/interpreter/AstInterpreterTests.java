@@ -70,6 +70,36 @@ public class AstInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldRenderInterpolationWithBinding() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red let-my_var=\"my_prefix & my_name & my_suffix\">Hello, {{my_var}}"
+    );
+
+    makeCase(
+      text,
+      new EvaluationEnvironmentBuilder()
+        .withVariable("my_prefix", "prefix ")
+        .withVariable("my_name", "Steve")
+        .withVariable("my_suffix", " suffix")
+        .build(),
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> {
+          extra
+            .object(interpolation -> {
+              interpolation
+                .string("text", "Hello, ");
+            })
+            .object(interpolation -> {
+              interpolation
+                .string("text", "prefix Steve suffix");
+            });
+        })
+        .string("color", "red")
+    );
+  }
+
   private void makeCase(TextWithAnchors input, IEvaluationEnvironment baseEnvironment, JsonBuilder expectedResult) {
     AstParser parser = new AstParser(BuiltInTagRegistry.get(), expressionEvaluator);
     XmlEventParser.parse(input.text, parser);
