@@ -1,10 +1,15 @@
 package at.blvckbytes.component_markup.interpreter;
 
+import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.ast.node.content.*;
 import at.blvckbytes.component_markup.ast.node.hover.*;
+import at.blvckbytes.component_markup.ast.node.style.Format;
+import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -184,10 +189,64 @@ public class OutputBuilder {
       }
     }
 
+    else if (nonTerminalNode instanceof StyledNode)
+      applyStyles(sequenceComponent, (StyledNode) nonTerminalNode);
+
     else
       throw new IllegalStateException("Unknown non-terminal: " + nonTerminalNode.getClass());
 
     return sequenceComponent;
+  }
+
+  private void applyStyles(Object component, StyledNode styleHolder) {
+    NodeStyle style = styleHolder.getStyle();
+
+    if (style == null)
+      return;
+
+    if (style.color != null) {
+      String color = interpreter.evaluateAsString(style.color);
+      componentConstructor.setColor(component, color);
+    }
+
+    if (style.font != null) {
+      String font = interpreter.evaluateAsString(style.font);
+      componentConstructor.setFont(component, font);
+    }
+
+    for (Format format : Format.VALUES) {
+      AExpression formatExpression = style.formatStates[format.ordinal()];
+
+      if (formatExpression == ImmediateExpression.ofNull())
+        continue;
+
+      boolean expression = interpreter.evaluateAsBoolean(formatExpression);
+
+      switch (format) {
+        case BOLD:
+          componentConstructor.setBoldFormat(component, expression);
+          break;
+
+        case ITALIC:
+          componentConstructor.setItalicFormat(component, expression);
+          break;
+
+        case MAGIC:
+          componentConstructor.setObfuscatedFormat(component, expression);
+          break;
+
+        case UNDERLINED:
+          componentConstructor.setUnderlinedFormat(component, expression);
+          break;
+
+        case STRIKETHROUGH:
+          componentConstructor.setStrikethroughFormat(component, expression);
+          break;
+
+        default:
+          throw new IllegalStateException("Unknown format: " + format.name());
+      }
+    }
   }
 
   public Object onContent(ContentNode node) {
@@ -277,6 +336,8 @@ public class OutputBuilder {
 
     else
       throw new IllegalStateException("Unknown content-node: " + node.getClass());
+
+    applyStyles(result, node);
 
     sequencesStack.peek().add(result);
 
