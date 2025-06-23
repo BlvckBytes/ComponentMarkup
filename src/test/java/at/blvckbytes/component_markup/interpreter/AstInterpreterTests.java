@@ -14,6 +14,7 @@ import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class AstInterpreterTests {
@@ -85,18 +86,112 @@ public class AstInterpreterTests {
         .build(),
       new JsonObjectBuilder()
         .string("text", "")
-        .array("extra", extra -> {
+        .array("extra", extra -> (
           extra
-            .object(interpolation -> {
+            .object(interpolation -> (
               interpolation
-                .string("text", "Hello, ");
-            })
-            .object(interpolation -> {
+                .string("text", "Hello, ")
+            ))
+            .object(interpolation -> (
               interpolation
-                .string("text", "prefix Steve suffix");
-            });
-        })
+                .string("text", "prefix Steve suffix")
+            ))
+        ))
         .string("color", "red")
+    );
+  }
+
+  @Test
+  public void shouldRenderForLoop() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red",
+      "  *for-char=\"my_chars\"",
+      "  for-separator={ <aqua>separator }",
+      "  let-index=\"loop.index\"",
+      ">",
+      "  {{char}} at index {{index}}"
+    );
+
+    makeCase(
+      text,
+      new EvaluationEnvironmentBuilder()
+        .withVariable("my_chars", Arrays.asList("A", "S", "T"))
+        .build(),
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(container -> (
+              container
+                .string("text", "")
+                .array("extra", containerExtra -> (
+                  containerExtra
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", "A")
+                    ))
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", " at index ")
+                    ))
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", "0")
+                    ))
+                ))
+                .string("color", "red")
+            ))
+            .object(interpolation -> (
+              interpolation
+                .string("text", "separator")
+                .string("color", "aqua")
+            ))
+            .object(container -> (
+              container
+                .string("text", "")
+                .array("extra", containerExtra -> (
+                  containerExtra
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", "S")
+                    ))
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", " at index ")
+                    ))
+                    .object(interpolation -> (
+                      interpolation
+                        .string("text", "1")
+                    ))
+                ))
+                .string("color", "red")
+            ))
+            .object(interpolation -> (
+              interpolation
+                .string("text", "separator")
+                .string("color", "aqua")
+            ))
+            .object(container -> (
+              container
+                .string("text", "")
+                .array("extra", containerExtra -> (
+                  containerExtra
+                  .object(interpolation -> (
+                    interpolation
+                      .string("text", "T")
+                  ))
+                  .object(interpolation -> (
+                    interpolation
+                      .string("text", " at index ")
+                  ))
+                  .object(interpolation -> (
+                    interpolation
+                      .string("text", "2")
+                  ))
+                ))
+                .string("color", "red")
+            ))
+        ))
     );
   }
 

@@ -3,22 +3,22 @@ package at.blvckbytes.component_markup.interpreter;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class JsonObjectBuilder implements JsonBuilder {
 
   private final JsonObject result = new JsonObject();
 
-  public JsonObjectBuilder object(String key, Consumer<JsonObjectBuilder> handler) {
+  public JsonObjectBuilder object(String key, Function<JsonObjectBuilder, JsonObjectBuilder> handler) {
     JsonObjectBuilder builder = new JsonObjectBuilder();
-    handler.accept(builder);
+    handler.apply(builder);
     result.add(key, builder.build());
     return this;
   }
 
-  public JsonObjectBuilder array(String key, Consumer<JsonArrayBuilder> handler) {
+  public JsonObjectBuilder array(String key, Function<JsonArrayBuilder, JsonArrayBuilder> handler) {
     JsonArrayBuilder builder = new JsonArrayBuilder();
-    handler.accept(builder);
+    handler.apply(builder);
     result.add(key, builder.build());
     return this;
   }

@@ -102,6 +102,25 @@ public class AstParserTests extends AstParserTestsBase {
   }
 
   @Test
+  public void shouldParseForLoopWithSeparator() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *for-member=\"members\" for-separator={ <aqua>@separator }>@Hello, world"
+    );
+
+    makeCase(
+      text,
+      forLoop(
+        expr("members"),
+        "member",
+        text(imm("Hello, world"), text.anchor(1))
+          .color("red"),
+        text(imm("separator"), text.anchor(0))
+          .color("aqua")
+      )
+    );
+  }
+
+  @Test
   public void shouldParseIfThenElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
