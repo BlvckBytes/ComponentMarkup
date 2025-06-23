@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface Interpreter {
 
+  // TODO: Add nullable versions
+
   String evaluateAsString(AExpression expression);
 
   long evaluateAsLong(AExpression expression);
@@ -20,6 +22,8 @@ public interface Interpreter {
 
   OutputBuilder getCurrentBuilder();
 
-  boolean isDeep();
+  ComponentConstructor getComponentConstructor();
+
+  boolean isInSubtree();
 
 }

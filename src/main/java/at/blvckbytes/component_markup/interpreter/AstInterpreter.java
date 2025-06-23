@@ -68,7 +68,12 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public boolean isDeep() {
+  public ComponentConstructor getComponentConstructor() {
+    return componentConstructor;
+  }
+
+  @Override
+  public boolean isInSubtree() {
     return builderStack.size() > 1;
   }
 

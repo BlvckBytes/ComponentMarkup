@@ -8,8 +8,8 @@ import java.util.List;
 
 public class OutputBuilder {
 
-  public final ComponentConstructor componentConstructor;
-  public final IEvaluationEnvironment environment;
+  private final ComponentConstructor componentConstructor;
+  private final IEvaluationEnvironment environment;
   private final char breakChar;
 
   public OutputBuilder(

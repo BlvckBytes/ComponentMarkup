@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.ast.tag.built_in.gradient;
 
 import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -18,7 +19,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
   private final ThreadLocal<Stack<List<Object>>> threadLocalInjectedComponentsStack = ThreadLocal.withInitial(Stack::new);
 
-  private final boolean deep;
+  private final boolean affectSubtrees;
 
   public GradientNode(
     CursorPosition position,
@@ -27,8 +28,8 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   ) {
     super(position, children, letBindings);
 
-    // TODO: apply deeply-flag if requested
-    this.deep = false;
+    // TODO: apply if requested
+    this.affectSubtrees = false;
   }
 
   @Override
@@ -42,7 +43,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
   @Override
   public EnumSet<InterceptionFlag> interceptInterpretation(AstNode node, Interpreter interpreter) {
-    if (!deep && interpreter.isDeep())
+    if (!affectSubtrees && interpreter.isInSubtree())
       return EnumSet.noneOf(InterceptionFlag.class);
 
     if (node instanceof GradientNode) {
@@ -53,36 +54,43 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
     List<Object> injectedNodes = threadLocalInjectedComponentsStack.get().peek();
 
-    if (node instanceof TextNode) {
+    if (node instanceof ContentNode) {
       OutputBuilder builder = interpreter.getCurrentBuilder();
-      NodeStyle nodeStyle = ((TextNode) node).getStyle();
+      NodeStyle nodeStyle = ((ContentNode) node).getStyle();
 
       if (nodeStyle != null && nodeStyle.color != ImmediateExpression.ofNull())
         return EnumSet.noneOf(InterceptionFlag.class);
 
-      String nodeText = interpreter.evaluateAsString(((TextNode) node).text);
-      StringBuilder whitespaceAccumulator = new StringBuilder();
+      if (node instanceof TextNode) {
+        String nodeText = interpreter.evaluateAsString(((TextNode) node).text);
+        StringBuilder whitespaceAccumulator = new StringBuilder();
 
-      for (int charIndex = 0; charIndex < nodeText.length(); ++charIndex) {
-        char currentChar = nodeText.charAt(charIndex);
+        for (int charIndex = 0; charIndex < nodeText.length(); ++charIndex) {
+          char currentChar = nodeText.charAt(charIndex);
 
-        if (Character.isWhitespace(currentChar)) {
-          whitespaceAccumulator.append(currentChar);
-          continue;
+          if (Character.isWhitespace(currentChar)) {
+            whitespaceAccumulator.append(currentChar);
+            continue;
+          }
+
+          if (whitespaceAccumulator.length() > 0) {
+            builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
+            whitespaceAccumulator.setLength(0);
+          }
+
+          TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, null);
+          Object charComponent = builder.onContent(charNode);
+          injectedNodes.add(charComponent);
         }
 
-        if (whitespaceAccumulator.length() > 0) {
+        if (whitespaceAccumulator.length() > 0)
           builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
-          whitespaceAccumulator.setLength(0);
-        }
 
-        TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, null);
-        Object charComponent = builder.onContent(charNode);
-        injectedNodes.add(charComponent);
+        return EnumSet.of(InterceptionFlag.SKIP_PROCESSING);
       }
 
-      if (whitespaceAccumulator.length() > 0)
-        builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
+      Object otherComponent = builder.onContent((ContentNode) node);
+      injectedNodes.add(otherComponent);
 
       return EnumSet.of(InterceptionFlag.SKIP_PROCESSING);
     }
@@ -104,14 +112,14 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
         double gradientProgression = (injectedComponentsIndex + 1D) / injectedComponentsCount;
         String hexColor = "#000000";
 
-        interpreter.getCurrentBuilder().componentConstructor.setColor(injectedComponent, hexColor);
+        interpreter.getComponentConstructor().setColor(injectedComponent, hexColor);
       }
     }
   }
 
   @Override
   public void onSkippedByOther(AstNode node, Interpreter interpreter) {
-    if (!deep && interpreter.isDeep())
+    if (!affectSubtrees && interpreter.isInSubtree())
       return;
 
     if (node instanceof GradientNode)
