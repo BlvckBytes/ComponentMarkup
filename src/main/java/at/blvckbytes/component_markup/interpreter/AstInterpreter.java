@@ -16,6 +16,7 @@ public class AstInterpreter implements Interpreter {
   private final IExpressionEvaluator expressionEvaluator;
   private final TemporaryMemberEnvironment environment;
   private final OutputBuilder builder;
+  private final InterceptorStack interceptors;
 
   private AstInterpreter(
     ComponentConstructor componentConstructor,
@@ -26,6 +27,7 @@ public class AstInterpreter implements Interpreter {
     this.expressionEvaluator = expressionEvaluator;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.builder = new OutputBuilder(componentConstructor, environment, breakChar);
+    this.interceptors = new InterceptorStack(builder, this);
   }
 
   public static Object interpretSingle(
@@ -56,7 +58,7 @@ public class AstInterpreter implements Interpreter {
 
   @Override
   public List<Object> interpret(AstNode node) {
-    _interpret(null, node);
+    _interpret(node);
     return builder.getResult();
   }
 
@@ -95,11 +97,7 @@ public class AstInterpreter implements Interpreter {
     return environment.getValueInterpreter().asBoolean(value);
   }
 
-  private void interpretIfThenElse(
-    @Nullable InterpreterInterceptor interceptor,
-    IfThenElseNode node,
-    TemporaryMemberEnvironment environment
-  ) {
+  private void interpretIfThenElse(IfThenElseNode node, TemporaryMemberEnvironment environment) {
     if (node.conditions.isEmpty())
       throw new IllegalStateException("Expecting at least one condition!");
 
@@ -109,21 +107,21 @@ public class AstInterpreter implements Interpreter {
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(interceptor, conditional.body);
+      _interpret(conditional.body);
       return;
     }
 
     if (node.fallback == null)
       return;
 
-    _interpret(interceptor, node.fallback);
+    _interpret(node.fallback);
   }
 
-  private void interpretConditional(@Nullable InterpreterInterceptor interceptor, ConditionalNode node) {
+  private void interpretConditional(ConditionalNode node) {
     Object result = expressionEvaluator.evaluateExpression(node.condition, environment);
 
     if (environment.getValueInterpreter().asBoolean(result))
-      _interpret(interceptor, node.body);
+      _interpret(node.body);
   }
 
   private @Nullable Set<String> introduceLetBindings(AstNode node) {
@@ -145,7 +143,7 @@ public class AstInterpreter implements Interpreter {
     return boundVariables.keySet();
   }
 
-  private void interpretForLoop(@Nullable InterpreterInterceptor interceptor, ForLoopNode node) {
+  private void interpretForLoop(ForLoopNode node) {
     Object iterable = expressionEvaluator.evaluateExpression(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asCollection(iterable);
 
@@ -163,7 +161,7 @@ public class AstInterpreter implements Interpreter {
 
       environment.updateVariable(node.iterationVariable, item);
 
-      _interpret(interceptor, node.body);
+      _interpret(node.body);
     }
 
     if (introducedNames != null)
@@ -173,58 +171,58 @@ public class AstInterpreter implements Interpreter {
     environment.popVariable("loop");
   }
 
-  private void _interpret(@Nullable InterpreterInterceptor interceptor, AstNode node) {
+  private void _interpret(AstNode node) {
     if (node instanceof InterpreterInterceptor)
-      interceptor = (InterpreterInterceptor) node;
-
-    boolean callInterceptorAfter = false;
-
-    if (interceptor != null) {
-      InterceptionResult interceptionResult = interceptor.interceptInterpretation(node, builder, this);
-
-      if (interceptionResult == InterceptionResult.DO_NOT_PROCESS)
-        return;
-
-      callInterceptorAfter = interceptionResult == InterceptionResult.PROCESS_DO_CALL_AFTER;
-    }
+      interceptors.add((InterpreterInterceptor) node);
 
     if (node instanceof IfThenElseNode) {
-      interpretIfThenElse(interceptor, (IfThenElseNode) node, environment);
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
 
-      if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, this);
+      interpretIfThenElse((IfThenElseNode) node, environment);
 
+      interceptors.handleAfter(node);
       return;
     }
 
     if (node instanceof ForLoopNode) {
-      interpretForLoop(interceptor, (ForLoopNode) node);
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
 
-      if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, this);
+      interpretForLoop((ForLoopNode) node);
 
+      interceptors.handleAfter(node);
       return;
     }
 
     if (node instanceof ConditionalNode) {
-      interpretConditional(interceptor, (ConditionalNode) node);
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
 
-      if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, this);
+      interpretConditional((ConditionalNode) node);
 
+      interceptors.handleAfter(node);
       return;
     }
 
     if (node instanceof BreakNode) {
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
+
       builder.onBreak();
 
-      if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, this);
-
+      interceptors.handleAfter(node);
       return;
     }
 
     Set<String> introducedBindings = introduceLetBindings(node);
+
+    if (interceptors.handleBeforeAndGetIfSkip(node)) {
+      if (introducedBindings != null)
+        environment.popVariables(introducedBindings);
+
+      return;
+    }
 
     if (node instanceof ContentNode) {
       builder.onContent((ContentNode) node);
@@ -232,9 +230,7 @@ public class AstInterpreter implements Interpreter {
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);
 
-      if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, this);
-
+      interceptors.handleAfter(node);
       return;
     }
 
@@ -242,7 +238,7 @@ public class AstInterpreter implements Interpreter {
       builder.onNonTerminalBegin(node);
 
       for (AstNode child : node.children)
-        _interpret(interceptor, child);
+        _interpret(child);
 
       builder.onNonTerminalEnd();
     }
@@ -250,7 +246,6 @@ public class AstInterpreter implements Interpreter {
     if (introducedBindings != null)
       environment.popVariables(introducedBindings);
 
-    if (callInterceptorAfter)
-      interceptor.afterInterpretation(node, builder, this);
+    interceptors.handleAfter(node);
   }
 }

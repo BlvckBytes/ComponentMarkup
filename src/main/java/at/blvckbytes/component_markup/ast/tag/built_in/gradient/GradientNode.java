@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Stack;
 
@@ -35,10 +36,12 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public InterceptionResult interceptInterpretation(AstNode node, OutputBuilder builder, Interpreter interpreter) {
+  public EnumSet<InterceptionFlag> interceptInterpretation(AstNode node, OutputBuilder builder, Interpreter interpreter) {
     if (node instanceof GradientNode) {
       threadLocalInjectedComponentsStack.get().push(new ArrayList<>());
-      return InterceptionResult.PROCESS_DO_CALL_AFTER;
+
+      // TODO: apply deeply-flag if requested
+      return EnumSet.of(InterceptionFlag.CALL_AFTER);
     }
 
     List<Object> injectedNodes = threadLocalInjectedComponentsStack.get().peek();
@@ -47,7 +50,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
       NodeStyle nodeStyle = ((TextNode) node).getStyle();
 
       if (nodeStyle != null && nodeStyle.color != ImmediateExpression.ofNull())
-        return InterceptionResult.PROCESS_DO_NOT_CALL_AFTER;
+        return EnumSet.noneOf(InterceptionFlag.class);
 
       String nodeText = interpreter.evaluateAsString(((TextNode) node).text);
       StringBuilder whitespaceAccumulator = new StringBuilder();
@@ -73,10 +76,10 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
       if (whitespaceAccumulator.length() > 0)
         builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
 
-      return InterceptionResult.DO_NOT_PROCESS;
+      return EnumSet.of(InterceptionFlag.SKIP_PROCESSING);
     }
 
-    return InterceptionResult.PROCESS_DO_NOT_CALL_AFTER;
+    return EnumSet.noneOf(InterceptionFlag.class);
   }
 
   @Override
@@ -96,5 +99,11 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
         builder.componentConstructor.setColor(injectedComponent, hexColor);
       }
     }
+  }
+
+  @Override
+  public void onSkippedByOther(AstNode node, OutputBuilder builder, Interpreter interpreter) {
+    if (node instanceof GradientNode)
+      threadLocalInjectedComponentsStack.get().pop();
   }
 }
