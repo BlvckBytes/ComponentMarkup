@@ -1,14 +1,11 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -234,50 +231,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   // ================================================================================
-  // Properties
+  // Styling
   // ================================================================================
-
-  @Override
-  public void setStyle(Object component, NodeStyle style, boolean add, Interpreter interpreter) {
-    if (style.color != null) {
-      String color = interpreter.evaluateAsString(style.color);
-
-      if (color != null)
-        ((JsonObject) component).addProperty("color", color);
-    }
-    else if (!add)
-      ((JsonObject) component).remove("color");
-
-    if (style.font != null) {
-      String font = interpreter.evaluateAsString(style.font);
-
-      if (font != null)
-        ((JsonObject) component).addProperty("font", font);
-    }
-    else if (!add)
-      ((JsonObject) component).remove("font");
-
-    for (Format format : Format.VALUES) {
-      AExpression value = style.formatStates[format.ordinal()];
-      String propertyName = format.name().toLowerCase();
-
-      if (value == ImmediateExpression.ofNull()) {
-        if (!add)
-          ((JsonObject) component).remove(propertyName);
-
-        continue;
-      }
-
-      Boolean state = interpreter.evaluateAsBoolean(value);
-
-      if (state == null) {
-        ((JsonObject) component).remove(propertyName);
-        continue;
-      }
-
-      ((JsonObject) component).addProperty(propertyName, state);
-    }
-  }
 
   @Override
   public void setColor(Object component, @Nullable String color) {
@@ -288,6 +243,32 @@ public class JsonComponentConstructor implements ComponentConstructor {
 
     ((JsonObject) component).addProperty("color", color);
   }
+
+  @Override
+  public void setFont(Object component, @Nullable String font) {
+    if (font == null) {
+      ((JsonObject) component).remove("font");
+      return;
+    }
+
+    ((JsonObject) component).addProperty("font", font);
+  }
+
+  @Override
+  public void setFormat(Object component, Format format, @Nullable Boolean value) {
+    String propertyName = format.name().toLowerCase();
+
+    if (value == null) {
+      ((JsonObject) component).remove(propertyName);
+      return;
+    }
+
+    ((JsonObject) component).addProperty(propertyName, value);
+  }
+
+  // ================================================================================
+  // Miscellaneous
+  // ================================================================================
 
   @Override
   public void setChildren(Object component, List<Object> children) {

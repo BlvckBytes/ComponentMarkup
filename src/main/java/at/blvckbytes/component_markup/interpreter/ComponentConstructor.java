@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import org.jetbrains.annotations.Nullable;
@@ -50,12 +50,18 @@ public interface ComponentConstructor {
   void setInsertAction(Object component, String value);
 
   // ================================================================================
-  // Properties
+  // Styling
   // ================================================================================
 
-  void setStyle(Object component, NodeStyle style, boolean add, Interpreter interpreter);
-
   void setColor(Object component, @Nullable String color);
+
+  void setFont(Object component, @Nullable String font);
+
+  void setFormat(Object component, Format format, @Nullable Boolean value);
+
+  // ================================================================================
+  // Miscellaneous
+  // ================================================================================
 
   void setChildren(Object component, List<Object> children);
 
