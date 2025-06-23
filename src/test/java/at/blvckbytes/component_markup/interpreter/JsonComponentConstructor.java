@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.style.Format;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -258,15 +257,37 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setFormat(Object component, Format format, @Nullable Boolean value) {
-    String propertyName = format.name().toLowerCase();
+  public void setObfuscatedFormat(Object component, @Nullable Boolean value) {
+    setFormat(component, "obfuscated", value);
+  }
 
+  @Override
+  public void setBoldFormat(Object component, @Nullable Boolean value) {
+    setFormat(component, "bold", value);
+  }
+
+  @Override
+  public void setStrikethroughFormat(Object component, @Nullable Boolean value) {
+    setFormat(component, "strikethrough", value);
+  }
+
+  @Override
+  public void setUnderlinedFormat(Object component, @Nullable Boolean value) {
+    setFormat(component, "underlined", value);
+  }
+
+  @Override
+  public void setItalicFormat(Object component, @Nullable Boolean value) {
+    setFormat(component, "italic", value);
+  }
+
+  private void setFormat(Object component, String formatKey, @Nullable Boolean value) {
     if (value == null) {
-      ((JsonObject) component).remove(propertyName);
+      ((JsonObject) component).remove(formatKey);
       return;
     }
 
-    ((JsonObject) component).addProperty(propertyName, value);
+    ((JsonObject) component).addProperty(formatKey, value);
   }
 
   // ================================================================================

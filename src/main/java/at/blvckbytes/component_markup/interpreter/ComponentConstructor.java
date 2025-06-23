@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.style.Format;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -69,7 +68,15 @@ public interface ComponentConstructor {
 
   void setFont(Object component, @Nullable String font);
 
-  void setFormat(Object component, Format format, @Nullable Boolean value);
+  void setObfuscatedFormat(Object component, @Nullable Boolean value);
+
+  void setBoldFormat(Object component, @Nullable Boolean value);
+
+  void setStrikethroughFormat(Object component, @Nullable Boolean value);
+
+  void setUnderlinedFormat(Object component, @Nullable Boolean value);
+
+  void setItalicFormat(Object component, @Nullable Boolean value);
 
   // ================================================================================
   // Miscellaneous
