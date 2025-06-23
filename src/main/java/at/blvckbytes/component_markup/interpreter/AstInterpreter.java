@@ -13,27 +13,50 @@ import java.util.*;
 
 public class AstInterpreter implements Interpreter {
 
-  private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
   private final TemporaryMemberEnvironment environment;
-  private final BreakMode breakMode;
+  private final OutputBuilder builder;
 
-  public AstInterpreter(
+  private AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
     IEvaluationEnvironment baseEnvironment,
-    BreakMode breakMode
+    char breakChar
   ) {
-    this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
-    this.breakMode = breakMode;
+    this.builder = new OutputBuilder(componentConstructor, environment, breakChar);
+  }
+
+  public static Object interpretSingle(
+    ComponentConstructor componentConstructor,
+    IExpressionEvaluator expressionEvaluator,
+    IEvaluationEnvironment baseEnvironment,
+    char breakChar,
+    AstNode node
+  ) {
+    if (breakChar == 0)
+      throw new IllegalStateException("Break-char cannot be zero");
+
+    AstInterpreter interpreter = new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, breakChar);
+    interpreter.interpret(node);
+    return interpreter.builder.getResult().get(0);
+  }
+
+  public static List<Object> interpretMulti(
+    ComponentConstructor componentConstructor,
+    IExpressionEvaluator expressionEvaluator,
+    IEvaluationEnvironment baseEnvironment,
+    AstNode node
+  ) {
+    AstInterpreter interpreter = new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, (char) 0);
+    interpreter.interpret(node);
+    return interpreter.builder.getResult();
   }
 
   @Override
   public List<Object> interpret(AstNode node) {
-    OutputBuilder builder = new OutputBuilder(componentConstructor, environment, breakMode);
-    _interpret(null, node, builder, environment);
+    _interpret(null, node);
     return builder.getResult();
   }
 
@@ -75,7 +98,6 @@ public class AstInterpreter implements Interpreter {
   private void interpretIfThenElse(
     @Nullable InterpreterInterceptor interceptor,
     IfThenElseNode node,
-    OutputBuilder builder,
     TemporaryMemberEnvironment environment
   ) {
     if (node.conditions.isEmpty())
@@ -87,29 +109,24 @@ public class AstInterpreter implements Interpreter {
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(interceptor, conditional.body, builder, environment);
+      _interpret(interceptor, conditional.body);
       return;
     }
 
     if (node.fallback == null)
       return;
 
-    _interpret(interceptor, node.fallback, builder, environment);
+    _interpret(interceptor, node.fallback);
   }
 
-  private void interpretConditional(
-    @Nullable InterpreterInterceptor interceptor,
-    ConditionalNode node,
-    OutputBuilder builder,
-    TemporaryMemberEnvironment environment
-  ) {
+  private void interpretConditional(@Nullable InterpreterInterceptor interceptor, ConditionalNode node) {
     Object result = expressionEvaluator.evaluateExpression(node.condition, environment);
 
     if (environment.getValueInterpreter().asBoolean(result))
-      _interpret(interceptor, node.body, builder, environment);
+      _interpret(interceptor, node.body);
   }
 
-  private @Nullable Set<String> introduceLetBindings(AstNode node, TemporaryMemberEnvironment environment) {
+  private @Nullable Set<String> introduceLetBindings(AstNode node) {
     if (node.letBindings == null)
       return null;
 
@@ -128,12 +145,7 @@ public class AstInterpreter implements Interpreter {
     return boundVariables.keySet();
   }
 
-  private void interpretForLoop(
-    @Nullable InterpreterInterceptor interceptor,
-    ForLoopNode node,
-    OutputBuilder builder,
-    TemporaryMemberEnvironment environment
-  ) {
+  private void interpretForLoop(@Nullable InterpreterInterceptor interceptor, ForLoopNode node) {
     Object iterable = expressionEvaluator.evaluateExpression(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asCollection(iterable);
 
@@ -142,7 +154,7 @@ public class AstInterpreter implements Interpreter {
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
 
-    Set<String> introducedNames = introduceLetBindings(node, environment);
+    Set<String> introducedNames = introduceLetBindings(node);
 
     for (int index = 0; index < items.size(); ++index) {
       Object item = items.get(index);
@@ -151,7 +163,7 @@ public class AstInterpreter implements Interpreter {
 
       environment.updateVariable(node.iterationVariable, item);
 
-      _interpret(interceptor, node.body, builder, environment);
+      _interpret(interceptor, node.body);
     }
 
     if (introducedNames != null)
@@ -161,12 +173,7 @@ public class AstInterpreter implements Interpreter {
     environment.popVariable("loop");
   }
 
-  private void _interpret(
-    @Nullable InterpreterInterceptor interceptor,
-    AstNode node,
-    OutputBuilder builder,
-    TemporaryMemberEnvironment environment
-  ) {
+  private void _interpret(@Nullable InterpreterInterceptor interceptor, AstNode node) {
     if (node instanceof InterpreterInterceptor)
       interceptor = (InterpreterInterceptor) node;
 
@@ -182,7 +189,7 @@ public class AstInterpreter implements Interpreter {
     }
 
     if (node instanceof IfThenElseNode) {
-      interpretIfThenElse(interceptor, (IfThenElseNode) node, builder, environment);
+      interpretIfThenElse(interceptor, (IfThenElseNode) node, environment);
 
       if (callInterceptorAfter)
         interceptor.afterInterpretation(node, builder, this);
@@ -191,7 +198,7 @@ public class AstInterpreter implements Interpreter {
     }
 
     if (node instanceof ForLoopNode) {
-      interpretForLoop(interceptor, (ForLoopNode) node, builder, environment);
+      interpretForLoop(interceptor, (ForLoopNode) node);
 
       if (callInterceptorAfter)
         interceptor.afterInterpretation(node, builder, this);
@@ -200,7 +207,7 @@ public class AstInterpreter implements Interpreter {
     }
 
     if (node instanceof ConditionalNode) {
-      interpretConditional(interceptor, (ConditionalNode) node, builder, environment);
+      interpretConditional(interceptor, (ConditionalNode) node);
 
       if (callInterceptorAfter)
         interceptor.afterInterpretation(node, builder, this);
@@ -217,7 +224,7 @@ public class AstInterpreter implements Interpreter {
       return;
     }
 
-    Set<String> introducedBindings = introduceLetBindings(node, environment);
+    Set<String> introducedBindings = introduceLetBindings(node);
 
     if (node instanceof ContentNode) {
       builder.onContent((ContentNode) node);
@@ -235,7 +242,7 @@ public class AstInterpreter implements Interpreter {
       builder.onNonTerminalBegin(node);
 
       for (AstNode child : node.children)
-        _interpret(interceptor, child, builder, environment);
+        _interpret(interceptor, child);
 
       builder.onNonTerminalEnd();
     }

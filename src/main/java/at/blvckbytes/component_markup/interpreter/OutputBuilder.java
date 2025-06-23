@@ -10,16 +10,16 @@ public class OutputBuilder {
 
   public final ComponentConstructor componentConstructor;
   public final IEvaluationEnvironment environment;
-  private final BreakMode breakMode;
+  private final char breakChar;
 
   public OutputBuilder(
     ComponentConstructor componentConstructor,
     IEvaluationEnvironment environment,
-    BreakMode breakMode
+    char breakChar
   ) {
     this.componentConstructor = componentConstructor;
     this.environment = environment;
-    this.breakMode = breakMode;
+    this.breakChar = breakChar;
   }
 
   public void onBreak() {
