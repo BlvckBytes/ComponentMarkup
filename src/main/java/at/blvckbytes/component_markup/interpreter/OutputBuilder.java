@@ -8,7 +8,7 @@ import java.util.List;
 
 public class OutputBuilder {
 
-  private final ComponentConstructor componentConstructor;
+  public final ComponentConstructor componentConstructor;
   public final IEvaluationEnvironment environment;
   private final BreakMode breakMode;
 
@@ -34,7 +34,7 @@ public class OutputBuilder {
     throw new UnsupportedOperationException();
   }
 
-  public void onContent(ContentNode node) {
+  public Object onContent(ContentNode node) {
     throw new UnsupportedOperationException();
   }
 
