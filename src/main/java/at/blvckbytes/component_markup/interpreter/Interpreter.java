@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.constructor;
+package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;

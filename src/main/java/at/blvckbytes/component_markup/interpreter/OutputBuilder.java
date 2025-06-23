@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 
 import java.util.List;

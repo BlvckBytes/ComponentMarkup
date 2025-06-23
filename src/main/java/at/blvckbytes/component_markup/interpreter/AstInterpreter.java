@@ -4,8 +4,6 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.*;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.constructor.ComponentConstructor;
-import at.blvckbytes.component_markup.constructor.Interpreter;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
