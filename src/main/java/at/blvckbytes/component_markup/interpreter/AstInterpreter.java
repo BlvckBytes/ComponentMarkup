@@ -5,36 +5,67 @@ import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.*;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
+import at.blvckbytes.component_markup.constructor.Interpreter;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
+import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class AstInterpreter {
+public class AstInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
-  private final IEvaluationEnvironment baseEnvironment;
   private final BreakMode breakMode;
 
   public AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment environment,
     BreakMode breakMode
   ) {
     this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
-    this.baseEnvironment = environment;
     this.breakMode = breakMode;
   }
 
-  public List<Object> interpret(AstNode node) {
+  @Override
+  public List<Object> interpret(AstNode node, IEvaluationEnvironment baseEnvironment) {
     TemporaryMemberEnvironment environment = new TemporaryMemberEnvironment(baseEnvironment);
     OutputBuilder builder = new OutputBuilder(componentConstructor, environment, breakMode);
     _interpret(null, node, builder, environment);
     return builder.getResult();
+  }
+
+  @Override
+  public Object joinComponents(List<Object> components, IEvaluationEnvironment environment) {
+    throw new UnsupportedOperationException();
+  }
+
+  // TODO: Catch errors while evaluating and return sane defaults (while also logging!)
+
+  @Override
+  public String evaluateAsString(AExpression expression, IEvaluationEnvironment environment) {
+    Object value = expressionEvaluator.evaluateExpression(expression, environment);
+    return environment.getValueInterpreter().asString(value);
+  }
+
+  @Override
+  public long evaluateAsLong(AExpression expression, IEvaluationEnvironment environment) {
+    Object value = expressionEvaluator.evaluateExpression(expression, environment);
+    return environment.getValueInterpreter().asLong(value);
+  }
+
+  @Override
+  public double evaluateAsDouble(AExpression expression, IEvaluationEnvironment environment) {
+    Object value = expressionEvaluator.evaluateExpression(expression, environment);
+    return environment.getValueInterpreter().asDouble(value);
+  }
+
+  @Override
+  public boolean evaluateAsBoolean(AExpression expression, IEvaluationEnvironment environment) {
+    Object value = expressionEvaluator.evaluateExpression(expression, environment);
+    return environment.getValueInterpreter().asBoolean(value);
   }
 
   private void interpretIfThenElse(

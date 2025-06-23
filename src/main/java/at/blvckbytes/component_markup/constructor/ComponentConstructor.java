@@ -11,16 +11,16 @@ import java.util.List;
 
 public interface ComponentConstructor {
 
-  Object createContentNode(ContentNode node, IEvaluationEnvironment environment);
+  Object createContentNode(ContentNode node, Interpreter interpreter, IEvaluationEnvironment environment);
 
-  void setStyle(Object component, NodeStyle style, IEvaluationEnvironment environment);
+  void setStyle(Object component, NodeStyle style, Interpreter interpreter, IEvaluationEnvironment environment);
 
   void setChildren(Object component, List<Object> children);
 
-  void setClickAction(Object component, ClickNode node, IEvaluationEnvironment environment);
+  void setClickAction(Object component, ClickNode node, Interpreter interpreter, IEvaluationEnvironment environment);
 
-  void setHoverAction(Object component, HoverNode node, IEvaluationEnvironment environment);
+  void setHoverAction(Object component, HoverNode node, Interpreter interpreter, IEvaluationEnvironment environment);
 
-  void setInsertAction(Object component, InsertNode node, IEvaluationEnvironment environment);
+  void setInsertAction(Object component, InsertNode node, Interpreter interpreter, IEvaluationEnvironment environment);
 
 }
