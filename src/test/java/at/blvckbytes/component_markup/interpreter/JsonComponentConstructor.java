@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -107,41 +106,45 @@ public class JsonComponentConstructor implements ComponentConstructor {
     return component;
   }
 
+  @Override
+  public void setClickChangePageAction(Object component, String value) {
+    setClickAction(component, "change_page", value);
+  }
+
+  @Override
+  public void setClickCopyToClipboardAction(Object component, String value) {
+    setClickAction(component, "copy_to_clipboard", value);
+  }
+
+  @Override
+  public void setClickOpenFileAction(Object component, String value) {
+    setClickAction(component, "open_file", value);
+  }
+
+  @Override
+  public void setClickOpenUrlAction(Object component, String value) {
+    setClickAction(component, "open_url", value);
+  }
+
+  @Override
+  public void setClickRunCommandAction(Object component, String value) {
+    setClickAction(component, "run_command", value);
+  }
+
+  @Override
+  public void setClickSuggestCommandAction(Object component, String value) {
+    setClickAction(component, "suggest_command", value);
+  }
+
   // ================================================================================
   // Click-Action
   // ================================================================================
 
-  @Override
-  public void setClickAction(Object component, ClickAction action, String value) {
+  public void setClickAction(Object component, String action, String value) {
     JsonObject eventObject = new JsonObject();
 
     eventObject.addProperty("value", value);
-
-    switch (action) {
-      case OPEN_URL:
-        eventObject.addProperty("action", "open_url");
-        break;
-
-      case OPEN_FILE:
-        eventObject.addProperty("action", "open_file");
-        break;
-
-      case CHANGE_PAGE:
-        eventObject.addProperty("action", "change_page");
-        break;
-
-      case RUN_COMMAND:
-        eventObject.addProperty("action", "run_command");
-        break;
-
-      case SUGGEST_COMMAND:
-        eventObject.addProperty("action", "suggest_command");
-        break;
-
-      case COPY_TO_CLIPBOARD:
-        eventObject.addProperty("action", "copy_to_clipboard");
-        break;
-    }
+    eventObject.addProperty("action", action);
 
     ((JsonObject) component).add("clickEvent", eventObject);
   }

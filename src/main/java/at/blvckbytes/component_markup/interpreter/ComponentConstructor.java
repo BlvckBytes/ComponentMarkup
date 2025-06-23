@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +28,17 @@ public interface ComponentConstructor {
   // Click-Action
   // ================================================================================
 
-  void setClickAction(Object component, ClickAction action, String value);
+  void setClickChangePageAction(Object component, String value);
+
+  void setClickCopyToClipboardAction(Object component, String value);
+
+  void setClickOpenFileAction(Object component, String value);
+
+  void setClickOpenUrlAction(Object component, String value);
+
+  void setClickRunCommandAction(Object component, String value);
+
+  void setClickSuggestCommandAction(Object component, String value);
 
   // ================================================================================
   // Hover-Action
