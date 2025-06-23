@@ -126,8 +126,11 @@ public class AstParser implements XmlEventConsumer {
     if (attribute.type == AttributeType.SUBTREE)
       throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
 
+    if (!attribute.multiValue && currentLayer.hasAttribute(name))
+      throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
     AExpression expression = isExpressionMode ? expressionEvaluator.parseString(value) : ImmediateExpression.of(value);
-    currentLayer.attributes.add(new ExpressionAttribute(name, lastPosition, expression));
+    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
   }
 
   @Override
@@ -188,6 +191,9 @@ public class AstParser implements XmlEventConsumer {
       if (attribute == null)
         throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
 
+      if (!attribute.multiValue && currentLayer.hasAttribute(name))
+        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
       if (attribute.type != AttributeType.SUBTREE)
         throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
     }
@@ -209,6 +215,8 @@ public class AstParser implements XmlEventConsumer {
     else
       throw new IllegalStateException("Expected there to be a subtree-parser");
 
+    name = lower(name);
+
     TagAndBuffers currentLayer = tagStack.peek();
     AstNode subtree = subtreeParser.getResult();
     subtreeParser = null;
@@ -218,7 +226,7 @@ public class AstParser implements XmlEventConsumer {
       return;
     }
 
-    currentLayer.attributes.add(new SubtreeAttribute(name, subtree));
+    currentLayer.addAttribute(new SubtreeAttribute(name, subtree));
   }
 
   @Override
@@ -429,7 +437,10 @@ public class AstParser implements XmlEventConsumer {
     if (attribute.type == AttributeType.SUBTREE)
       throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
 
-    currentLayer.attributes.add(new ExpressionAttribute(name, lastPosition, expression));
+    if (!attribute.multiValue && currentLayer.hasAttribute(name))
+      throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
+    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
   }
 
   private boolean isValidExpressionIdentifier(String identifier) {

@@ -15,10 +15,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TagAndBuffers implements ParserChildItem {
 
@@ -29,7 +26,9 @@ public class TagAndBuffers implements ParserChildItem {
   private final List<LetBinding> bindings;
   private final Set<String> bindingNames;
 
-  public final List<Attribute> attributes;
+  private final List<Attribute> attributes;
+  private final Set<String> attributeNames;
+
   public final List<ParserChildItem> children;
 
   public @Nullable AExpression condition;
@@ -47,7 +46,17 @@ public class TagAndBuffers implements ParserChildItem {
     this.bindings = new ArrayList<>();
     this.bindingNames = new HashSet<>();
     this.attributes = new ArrayList<>();
+    this.attributeNames = new HashSet<>();
     this.children = new ArrayList<>();
+  }
+
+  public boolean hasAttribute(String name) {
+    return this.attributeNames.contains(name);
+  }
+
+  public void addAttribute(Attribute attribute) {
+    this.attributes.add(attribute);
+    this.attributeNames.add(attribute.name);
   }
 
   public boolean hasLetBinding(String name) {
