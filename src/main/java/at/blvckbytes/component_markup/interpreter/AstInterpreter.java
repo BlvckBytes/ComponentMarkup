@@ -15,54 +15,60 @@ public class AstInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
+  private final TemporaryMemberEnvironment environment;
   private final BreakMode breakMode;
 
   public AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
+    IEvaluationEnvironment baseEnvironment,
     BreakMode breakMode
   ) {
     this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
+    this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.breakMode = breakMode;
   }
 
   @Override
-  public List<Object> interpret(AstNode node, IEvaluationEnvironment baseEnvironment) {
-    TemporaryMemberEnvironment environment = new TemporaryMemberEnvironment(baseEnvironment);
+  public List<Object> interpret(AstNode node) {
     OutputBuilder builder = new OutputBuilder(componentConstructor, environment, breakMode);
     _interpret(null, node, builder, environment);
     return builder.getResult();
   }
 
   @Override
-  public Object joinComponents(List<Object> components, IEvaluationEnvironment environment) {
+  public Object joinComponents(List<Object> components) {
     throw new UnsupportedOperationException();
   }
 
   // TODO: Catch errors while evaluating and return sane defaults (while also logging!)
 
   @Override
-  public String evaluateAsString(AExpression expression, IEvaluationEnvironment environment) {
+  public String evaluateAsString(AExpression expression) {
     Object value = expressionEvaluator.evaluateExpression(expression, environment);
     return environment.getValueInterpreter().asString(value);
   }
 
   @Override
-  public long evaluateAsLong(AExpression expression, IEvaluationEnvironment environment) {
+  public long evaluateAsLong(AExpression expression) {
     Object value = expressionEvaluator.evaluateExpression(expression, environment);
     return environment.getValueInterpreter().asLong(value);
   }
 
   @Override
-  public double evaluateAsDouble(AExpression expression, IEvaluationEnvironment environment) {
+  public double evaluateAsDouble(AExpression expression) {
     Object value = expressionEvaluator.evaluateExpression(expression, environment);
     return environment.getValueInterpreter().asDouble(value);
   }
 
   @Override
-  public boolean evaluateAsBoolean(AExpression expression, IEvaluationEnvironment environment) {
+  public @Nullable Boolean evaluateAsBoolean(AExpression expression) {
     Object value = expressionEvaluator.evaluateExpression(expression, environment);
+
+    if (value == null)
+      return null;
+
     return environment.getValueInterpreter().asBoolean(value);
   }
 
@@ -167,7 +173,7 @@ public class AstInterpreter implements Interpreter {
     boolean callInterceptorAfter = false;
 
     if (interceptor != null) {
-      InterceptionResult interceptionResult = interceptor.interceptInterpretation(node, builder, environment, expressionEvaluator);
+      InterceptionResult interceptionResult = interceptor.interceptInterpretation(node, builder, this);
 
       if (interceptionResult == InterceptionResult.DO_NOT_PROCESS)
         return;
@@ -179,7 +185,7 @@ public class AstInterpreter implements Interpreter {
       interpretIfThenElse(interceptor, (IfThenElseNode) node, builder, environment);
 
       if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+        interceptor.afterInterpretation(node, builder, this);
 
       return;
     }
@@ -188,7 +194,7 @@ public class AstInterpreter implements Interpreter {
       interpretForLoop(interceptor, (ForLoopNode) node, builder, environment);
 
       if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+        interceptor.afterInterpretation(node, builder, this);
 
       return;
     }
@@ -197,7 +203,7 @@ public class AstInterpreter implements Interpreter {
       interpretConditional(interceptor, (ConditionalNode) node, builder, environment);
 
       if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+        interceptor.afterInterpretation(node, builder, this);
 
       return;
     }
@@ -206,7 +212,7 @@ public class AstInterpreter implements Interpreter {
       builder.onBreak();
 
       if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+        interceptor.afterInterpretation(node, builder, this);
 
       return;
     }
@@ -220,7 +226,7 @@ public class AstInterpreter implements Interpreter {
         environment.popVariables(introducedBindings);
 
       if (callInterceptorAfter)
-        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+        interceptor.afterInterpretation(node, builder, this);
 
       return;
     }
@@ -238,6 +244,6 @@ public class AstInterpreter implements Interpreter {
       environment.popVariables(introducedBindings);
 
     if (callInterceptorAfter)
-      interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+      interceptor.afterInterpretation(node, builder, this);
   }
 }
