@@ -33,11 +33,16 @@ public class AstInterpreter {
   public List<Object> interpret(AstNode node) {
     TemporaryMemberEnvironment environment = new TemporaryMemberEnvironment(baseEnvironment);
     OutputBuilder builder = new OutputBuilder(componentConstructor, environment, breakMode);
-    _interpret(node, builder, environment);
+    _interpret(null, node, builder, environment);
     return builder.getResult();
   }
 
-  private void interpretIfThenElse(IfThenElseNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
+  private void interpretIfThenElse(
+    @Nullable InterpreterInterceptor interceptor,
+    IfThenElseNode node,
+    OutputBuilder builder,
+    TemporaryMemberEnvironment environment
+  ) {
     if (node.conditions.isEmpty())
       throw new IllegalStateException("Expecting at least one condition!");
 
@@ -47,21 +52,26 @@ public class AstInterpreter {
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(conditional.body, builder, environment);
+      _interpret(interceptor, conditional.body, builder, environment);
       return;
     }
 
     if (node.fallback == null)
       return;
 
-    _interpret(node.fallback, builder, environment);
+    _interpret(interceptor, node.fallback, builder, environment);
   }
 
-  private void interpretConditional(ConditionalNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
+  private void interpretConditional(
+    @Nullable InterpreterInterceptor interceptor,
+    ConditionalNode node,
+    OutputBuilder builder,
+    TemporaryMemberEnvironment environment
+  ) {
     Object result = expressionEvaluator.evaluateExpression(node.condition, environment);
 
     if (environment.getValueInterpreter().asBoolean(result))
-      _interpret(node.body, builder, environment);
+      _interpret(interceptor, node.body, builder, environment);
   }
 
   private @Nullable Set<String> introduceLetBindings(AstNode node, TemporaryMemberEnvironment environment) {
@@ -83,7 +93,12 @@ public class AstInterpreter {
     return boundVariables.keySet();
   }
 
-  private void interpretForLoop(ForLoopNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
+  private void interpretForLoop(
+    @Nullable InterpreterInterceptor interceptor,
+    ForLoopNode node,
+    OutputBuilder builder,
+    TemporaryMemberEnvironment environment
+  ) {
     Object iterable = expressionEvaluator.evaluateExpression(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asCollection(iterable);
 
@@ -101,7 +116,7 @@ public class AstInterpreter {
 
       environment.updateVariable(node.iterationVariable, item);
 
-      _interpret(node.body, builder, environment);
+      _interpret(interceptor, node.body, builder, environment);
     }
 
     if (introducedNames != null)
@@ -111,24 +126,59 @@ public class AstInterpreter {
     environment.popVariable("loop");
   }
 
-  private void _interpret(AstNode node, OutputBuilder builder, TemporaryMemberEnvironment environment) {
+  private void _interpret(
+    @Nullable InterpreterInterceptor interceptor,
+    AstNode node,
+    OutputBuilder builder,
+    TemporaryMemberEnvironment environment
+  ) {
+    if (node instanceof InterpreterInterceptor)
+      interceptor = (InterpreterInterceptor) node;
+
+    boolean callInterceptorAfter = false;
+
+    if (interceptor != null) {
+      InterceptionResult interceptionResult = interceptor.interceptInterpretation(node, builder, environment, expressionEvaluator);
+
+      if (interceptionResult == InterceptionResult.DO_NOT_PROCESS)
+        return;
+
+      callInterceptorAfter = interceptionResult == InterceptionResult.PROCESS_DO_CALL_AFTER;
+    }
+
     if (node instanceof IfThenElseNode) {
-      interpretIfThenElse((IfThenElseNode) node, builder, environment);
+      interpretIfThenElse(interceptor, (IfThenElseNode) node, builder, environment);
+
+      if (callInterceptorAfter)
+        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+
       return;
     }
 
     if (node instanceof ForLoopNode) {
-      interpretForLoop((ForLoopNode) node, builder, environment);
+      interpretForLoop(interceptor, (ForLoopNode) node, builder, environment);
+
+      if (callInterceptorAfter)
+        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+
       return;
     }
 
     if (node instanceof ConditionalNode) {
-      interpretConditional((ConditionalNode) node, builder, environment);
+      interpretConditional(interceptor, (ConditionalNode) node, builder, environment);
+
+      if (callInterceptorAfter)
+        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+
       return;
     }
 
     if (node instanceof BreakNode) {
       builder.onBreak();
+
+      if (callInterceptorAfter)
+        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+
       return;
     }
 
@@ -140,20 +190,25 @@ public class AstInterpreter {
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);
 
+      if (callInterceptorAfter)
+        interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
+
       return;
     }
 
-    builder.onNonTerminalBegin(node);
+    if (node.children != null && !node.children.isEmpty()) {
+      builder.onNonTerminalBegin(node);
 
-    if (node.children == null || node.children.isEmpty())
-      throw new IllegalStateException("Encountered empty non-terminal tag");
+      for (AstNode child : node.children)
+        _interpret(interceptor, child, builder, environment);
 
-    for (AstNode child : node.children)
-      _interpret(child, builder, environment);
-
-    builder.onNonTerminalEnd();
+      builder.onNonTerminalEnd();
+    }
 
     if (introducedBindings != null)
       environment.popVariables(introducedBindings);
+
+    if (callInterceptorAfter)
+      interceptor.afterInterpretation(node, builder, environment, expressionEvaluator);
   }
 }
