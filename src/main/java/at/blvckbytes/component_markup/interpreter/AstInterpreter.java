@@ -7,26 +7,32 @@ import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AstInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final IExpressionEvaluator expressionEvaluator;
   private final TemporaryMemberEnvironment environment;
+  private final Logger logger;
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
 
   private AstInterpreter(
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment baseEnvironment
+    IEvaluationEnvironment baseEnvironment,
+    Logger logger
   ) {
     this.componentConstructor = componentConstructor;
     this.expressionEvaluator = expressionEvaluator;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
+    this.logger = logger;
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
   }
@@ -35,13 +41,14 @@ public class AstInterpreter implements Interpreter {
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
     IEvaluationEnvironment baseEnvironment,
+    Logger logger,
     char breakChar,
     AstNode node
   ) {
     if (breakChar == 0)
       throw new IllegalStateException("Break-char cannot be zero");
 
-    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment)
+    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, logger)
       .interpret(node, breakChar).get(0);
   }
 
@@ -49,17 +56,118 @@ public class AstInterpreter implements Interpreter {
     ComponentConstructor componentConstructor,
     IExpressionEvaluator expressionEvaluator,
     IEvaluationEnvironment baseEnvironment,
+    Logger logger,
     AstNode node
   ) {
-    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment)
+    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, logger)
       .interpret(node, (char) 0);
   }
 
   @Override
+  public @NotNull String evaluateAsString(AExpression expression) {
+    String value = evaluateAsStringOrNull(expression);
+
+    if (value == null)
+      return "";
+
+    return value;
+  }
+
+  @Override
+  public @Nullable String evaluateAsStringOrNull(AExpression expression) {
+    try {
+      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+
+      if (result == null)
+        return null;
+
+      return environment.getValueInterpreter().asString(result);
+    } catch (Throwable e) {
+      logger.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a string", e);
+      return null;
+    }
+  }
+
+  @Override
+  public long evaluateAsLong(AExpression expression) {
+    Long value = evaluateAsLongOrNull(expression);
+
+    if (value == null)
+      return 0L;
+
+    return value;
+  }
+
+  @Override
+  public @Nullable Long evaluateAsLongOrNull(AExpression expression) {
+    try {
+      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+
+      if (result == null)
+        return null;
+
+      return environment.getValueInterpreter().asLong(result);
+    } catch (Throwable e) {
+      logger.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long", e);
+      return null;
+    }
+  }
+
+  @Override
+  public double evaluateAsDouble(AExpression expression) {
+    Double value = evaluateAsDoubleOrNull(expression);
+
+    if (value == null)
+      return 0D;
+
+    return value;
+  }
+
+  @Override
+  public @Nullable Double evaluateAsDoubleOrNull(AExpression expression) {
+    try {
+      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+
+      if (result == null)
+        return null;
+
+      return environment.getValueInterpreter().asDouble(result);
+    } catch (Throwable e) {
+      logger.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a double", e);
+      return null;
+    }
+  }
+
+  @Override
+  public boolean evaluateAsBoolean(AExpression expression) {
+    Boolean value = evaluateAsBooleanOrNull(expression);
+
+    if (value == null)
+      return false;
+
+    return value;
+  }
+
+  @Override
+  public @Nullable Boolean evaluateAsBooleanOrNull(AExpression expression) {
+    try {
+      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+
+      if (result == null)
+        return null;
+
+      return environment.getValueInterpreter().asBoolean(result);
+    } catch (Throwable e) {
+      logger.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a boolean", e);
+      return null;
+    }
+  }
+
+  @Override
   public List<Object> interpret(AstNode node, char breakChar) {
-    builderStack.push(new OutputBuilder(componentConstructor, environment, breakChar));
+    builderStack.push(new OutputBuilder(componentConstructor, this, breakChar));
     _interpret(node);
-    return builderStack.pop().getResult();
+    return builderStack.pop().build();
   }
 
   @Override
@@ -75,36 +183,6 @@ public class AstInterpreter implements Interpreter {
   @Override
   public boolean isInSubtree() {
     return builderStack.size() > 1;
-  }
-
-  // TODO: Catch errors while evaluating and return sane defaults (while also logging!)
-
-  @Override
-  public String evaluateAsString(AExpression expression) {
-    Object value = expressionEvaluator.evaluateExpression(expression, environment);
-    return environment.getValueInterpreter().asString(value);
-  }
-
-  @Override
-  public long evaluateAsLong(AExpression expression) {
-    Object value = expressionEvaluator.evaluateExpression(expression, environment);
-    return environment.getValueInterpreter().asLong(value);
-  }
-
-  @Override
-  public double evaluateAsDouble(AExpression expression) {
-    Object value = expressionEvaluator.evaluateExpression(expression, environment);
-    return environment.getValueInterpreter().asDouble(value);
-  }
-
-  @Override
-  public @Nullable Boolean evaluateAsBoolean(AExpression expression) {
-    Object value = expressionEvaluator.evaluateExpression(expression, environment);
-
-    if (value == null)
-      return null;
-
-    return environment.getValueInterpreter().asBoolean(value);
   }
 
   private void interpretIfThenElse(IfThenElseNode node, TemporaryMemberEnvironment environment) {
