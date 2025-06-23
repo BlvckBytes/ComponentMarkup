@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
+import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ public class AstInterpreterTests {
   private static final Logger logger = Logger.getAnonymousLogger();
 
   @Test
-  public void shouldInterpretSimpleText() {
+  public void shouldRenderSimpleText() {
     TextWithAnchors text = new TextWithAnchors(
       "<red><bold>Hello, world! :)"
     );
@@ -35,6 +36,37 @@ public class AstInterpreterTests {
         .string("text", "Hello, world! :)")
         .string("color", "red")
         .bool("bold", true)
+    );
+  }
+
+  @Test
+  public void shouldRenderIfElse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<italic>",
+      "  <red *if=\"my_flag\">My flag is true!</red>",
+      "  <blue *else>My flag is false!</blue>"
+    );
+
+    makeCase(
+      text,
+      new EvaluationEnvironmentBuilder()
+        .withVariable("my_flag", true)
+        .build(),
+      new JsonObjectBuilder()
+        .string("text", "My flag is true!")
+        .string("color", "red")
+        .bool("italic", true)
+    );
+
+    makeCase(
+      text,
+      new EvaluationEnvironmentBuilder()
+        .withVariable("my_flag", false)
+        .build(),
+      new JsonObjectBuilder()
+        .string("text", "My flag is false!")
+        .string("color", "blue")
+        .bool("italic", true)
     );
   }
 
