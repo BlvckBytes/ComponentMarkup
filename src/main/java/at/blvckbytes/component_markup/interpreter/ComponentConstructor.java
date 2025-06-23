@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,7 +21,11 @@ public interface ComponentConstructor {
 
   Object createSelectorNode(String selector, @Nullable Object separator);
 
-  Object createNbtNode(NbtSource source, String identifier, String path, boolean interpret, @Nullable Object separator);
+  Object createBlockNbtNode(String coordinates, String path, boolean interpret, @Nullable Object separator);
+
+  Object createEntityNbtNode(String selector, String path, boolean interpret, @Nullable Object separator);
+
+  Object createStorageNbtNode(String resource, String path, boolean interpret, @Nullable Object separator);
 
   // ================================================================================
   // Click-Action

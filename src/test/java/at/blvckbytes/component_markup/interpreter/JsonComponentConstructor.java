@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -77,7 +76,21 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public Object createNbtNode(NbtSource source, String identifier, String path, boolean interpret, @Nullable Object separator) {
+  public Object createBlockNbtNode(String coordinates, String path, boolean interpret, @Nullable Object separator) {
+    return createNbtNode("storage", coordinates, path, interpret, separator);
+  }
+
+  @Override
+  public Object createEntityNbtNode(String selector, String path, boolean interpret, @Nullable Object separator) {
+    return createNbtNode("entity", selector, path, interpret, separator);
+  }
+
+  @Override
+  public Object createStorageNbtNode(String resource, String path, boolean interpret, @Nullable Object separator) {
+    return createNbtNode("storage", resource, path, interpret, separator);
+  }
+
+  private Object createNbtNode(String sourceKey, String identifier, String path, boolean interpret, @Nullable Object separator) {
     JsonObject component = new JsonObject();
 
     component.addProperty("nbt", path);
@@ -88,23 +101,14 @@ public class JsonComponentConstructor implements ComponentConstructor {
     if (separator != null)
       component.add("separator", (JsonObject) separator);
 
-    switch (source) {
-      case BLOCK:
-        component.addProperty("block", identifier);
-        break;
-      case ENTITY:
-        component.addProperty("entity", identifier);
-        break;
-      case STORAGE:
-        component.addProperty("storage", identifier);
-        break;
-
-      default:
-        return component;
-    }
+    component.addProperty(sourceKey, identifier);
 
     return component;
   }
+
+  // ================================================================================
+  // Click-Action
+  // ================================================================================
 
   @Override
   public void setClickChangePageAction(Object component, String value) {
@@ -136,11 +140,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
     setClickAction(component, "suggest_command", value);
   }
 
-  // ================================================================================
-  // Click-Action
-  // ================================================================================
-
-  public void setClickAction(Object component, String action, String value) {
+  private void setClickAction(Object component, String action, String value) {
     JsonObject eventObject = new JsonObject();
 
     eventObject.addProperty("value", value);
