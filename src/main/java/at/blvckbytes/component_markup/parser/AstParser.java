@@ -176,13 +176,21 @@ public class AstParser implements XmlEventConsumer {
       throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
-    AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
-    if (attribute == null)
-      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
+    if (name.equals("for-separator") && currentLayer.iterable != null) {
+      if (currentLayer.separator != null)
+        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+    }
 
-    if (attribute.type != AttributeType.SUBTREE)
-      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
+    else {
+      AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
+
+      if (attribute == null)
+        throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
+
+      if (attribute.type != AttributeType.SUBTREE)
+        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
+    }
 
     subtreeParser = new AstParser(tagRegistry, expressionEvaluator, lastPosition);
   }
@@ -202,8 +210,15 @@ public class AstParser implements XmlEventConsumer {
       throw new IllegalStateException("Expected there to be a subtree-parser");
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.attributes.add(new SubtreeAttribute(name, subtreeParser.getResult()));
+    AstNode subtree = subtreeParser.getResult();
     subtreeParser = null;
+
+    if (name.equals("for-separator") && currentLayer.iterable != null) {
+      currentLayer.separator = subtree;
+      return;
+    }
+
+    currentLayer.attributes.add(new SubtreeAttribute(name, subtree));
   }
 
   @Override

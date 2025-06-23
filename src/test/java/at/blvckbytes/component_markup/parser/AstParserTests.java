@@ -70,7 +70,8 @@ public class AstParserTests extends AstParserTestsBase {
         container(text.anchor(0))
           .child(text(imm("hello, "), text.anchor(1)))
           .child(text(expr("member"), text.anchor(2)))
-          .child(text(imm("!"), text.anchor(3)))
+          .child(text(imm("!"), text.anchor(3))),
+        null
       )
     );
   }
@@ -94,7 +95,8 @@ public class AstParserTests extends AstParserTestsBase {
             .child(text(imm("hello, "), text.anchor(1)))
             .child(text(expr("member"), text.anchor(2)))
             .child(text(imm("!"), text.anchor(3)))
-        )
+        ),
+        null
       )
     );
   }

@@ -36,6 +36,7 @@ public class TagAndBuffers implements ParserChildItem {
   public ConditionType conditionType = ConditionType.NONE;
 
   public @Nullable AExpression iterable;
+  public @Nullable AstNode separator;
   public String iterationVariable = "";
 
   public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {
@@ -91,6 +92,7 @@ public class TagAndBuffers implements ParserChildItem {
             tagAndBuffers.iterable,
             tagAndBuffers.iterationVariable,
             currentNode,
+            tagAndBuffers.separator,
             tagAndBuffers.bindings
           );
 

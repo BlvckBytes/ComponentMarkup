@@ -249,6 +249,9 @@ public class AstInterpreter implements Interpreter {
 
       environment.updateVariable(node.iterationVariable, item);
 
+      if (index != 0 && node.separator != null)
+        _interpret(node.separator);
+
       _interpret(node.body);
     }
 
