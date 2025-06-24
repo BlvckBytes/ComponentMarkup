@@ -5,8 +5,7 @@ import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.parser.AstParser;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
@@ -14,7 +13,9 @@ import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class AstInterpreterTests {
@@ -86,6 +87,7 @@ public class AstInterpreterTests {
         .build(),
       new JsonObjectBuilder()
         .string("text", "")
+        .string("color", "red")
         .array("extra", extra -> (
           extra
             .object(interpolation -> (
@@ -97,7 +99,6 @@ public class AstInterpreterTests {
                 .string("text", "prefix Steve suffix")
             ))
         ))
-        .string("color", "red")
     );
   }
 
@@ -124,6 +125,7 @@ public class AstInterpreterTests {
             .object(container -> (
               container
                 .string("text", "")
+                .string("color", "red")
                 .array("extra", containerExtra -> (
                   containerExtra
                     .object(interpolation -> (
@@ -139,7 +141,6 @@ public class AstInterpreterTests {
                         .string("text", "0")
                     ))
                 ))
-                .string("color", "red")
             ))
             .object(interpolation -> (
               interpolation
@@ -149,6 +150,7 @@ public class AstInterpreterTests {
             .object(container -> (
               container
                 .string("text", "")
+                .string("color", "red")
                 .array("extra", containerExtra -> (
                   containerExtra
                     .object(interpolation -> (
@@ -164,7 +166,6 @@ public class AstInterpreterTests {
                         .string("text", "1")
                     ))
                 ))
-                .string("color", "red")
             ))
             .object(interpolation -> (
               interpolation
@@ -174,6 +175,7 @@ public class AstInterpreterTests {
             .object(container -> (
               container
                 .string("text", "")
+                .string("color", "red")
                 .array("extra", containerExtra -> (
                   containerExtra
                   .object(interpolation -> (
@@ -189,10 +191,39 @@ public class AstInterpreterTests {
                       .string("text", "2")
                   ))
                 ))
-                .string("color", "red")
             ))
         ))
     );
+  }
+
+  private JsonElement sortKeysRecursively(JsonElement input) {
+    if (input instanceof JsonArray) {
+      JsonArray jsonArray = (JsonArray) input;
+
+      for (int index = 0; index < jsonArray.size(); ++index) {
+        jsonArray.set(index, sortKeysRecursively(jsonArray.get(index)));
+      }
+
+      return jsonArray;
+    }
+
+    if (input instanceof JsonObject) {
+      JsonObject jsonObject = (JsonObject) input;
+      JsonObject result = new JsonObject();
+
+      List<String> jsonKeys = new ArrayList<>(jsonObject.keySet());
+      jsonKeys.sort(String::compareTo);
+
+      for (String key : jsonKeys)
+        result.add(key, sortKeysRecursively(jsonObject.get(key)));
+
+      return result;
+    }
+
+    if (input instanceof JsonPrimitive)
+      return input;
+
+    throw new IllegalStateException("Unaccounted-for json-element: " + input.getClass());
   }
 
   private void makeCase(TextWithAnchors input, IEvaluationEnvironment baseEnvironment, JsonBuilder expectedResult) {
@@ -200,23 +231,18 @@ public class AstInterpreterTests {
     XmlEventParser.parse(input.text, parser);
     AstNode actualAst = parser.getResult();
 
-    String expectedJson = gsonInstance.toJson(expectedResult.build());
-    String actualJson;
+    String expectedJson = gsonInstance.toJson(sortKeysRecursively(expectedResult.build()));
 
-    if (expectedResult instanceof JsonObjectBuilder) {
-      actualJson = gsonInstance.toJson(
-        AstInterpreter.interpretSingle(componentConstructor, expressionEvaluator, baseEnvironment, logger, '\n', actualAst)
-      );
-    }
+    JsonElement resultJson;
 
-    else if (expectedResult instanceof JsonArrayBuilder) {
-      actualJson = gsonInstance.toJson(
-        AstInterpreter.interpretMulti(componentConstructor, expressionEvaluator, baseEnvironment, logger, actualAst)
-      );
-    }
-
+    if (expectedResult instanceof JsonObjectBuilder)
+      resultJson = (JsonElement) AstInterpreter.interpretSingle(componentConstructor, expressionEvaluator, baseEnvironment, logger, '\n', actualAst);
+    else if (expectedResult instanceof JsonArrayBuilder)
+      resultJson = (JsonElement) AstInterpreter.interpretMulti(componentConstructor, expressionEvaluator, baseEnvironment, logger, actualAst);
     else
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
+
+    String actualJson = gsonInstance.toJson(sortKeysRecursively(resultJson));
 
     Assertions.assertEquals(expectedJson, actualJson);
   }
