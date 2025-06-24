@@ -580,6 +580,12 @@ public class XmlEventParserTests {
   }
 
   @Test
+  public void shouldThrowOnLinebreakInString() {
+    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello \n world\"");
+    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello \r world\"");
+  }
+
+  @Test
   public void shouldThrowOnMalformedNumbers() {
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "-");

@@ -172,6 +172,9 @@ public class XmlEventParser {
     while (cursor.peekChar() != 0) {
       char currentChar = cursor.nextChar();
 
+      if (currentChar == '\r' || currentChar == '\n')
+        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
+
       if (currentChar == '"') {
         if (priorChar == '\\') {
           substringBuilder.addIndexToBeRemoved(cursor.getNextCharIndex() - 2);
