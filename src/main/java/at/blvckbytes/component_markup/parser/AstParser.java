@@ -87,6 +87,9 @@ public class AstParser implements XmlEventConsumer {
 
     int nameLength = name.length();
 
+    if (name.equals("let"))
+      throw new AstParseException(lastPosition, AstParseError.UNNAMED_LET_BINDING);
+
     if (name.startsWith("let-")) {
       if (nameLength == 4)
         throw new AstParseException(lastPosition, AstParseError.UNNAMED_LET_BINDING);
@@ -178,6 +181,9 @@ public class AstParser implements XmlEventConsumer {
     if (name.charAt(0) == '[')
       throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
+    if (name.equals("let") || name.startsWith("let-"))
+      throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
+
     TagAndBuffers currentLayer = tagStack.peek();
 
     if (name.equals("for-separator") && currentLayer.iterable != null) {
@@ -243,10 +249,7 @@ public class AstParser implements XmlEventConsumer {
       return;
     }
 
-    if (name.charAt(0) == '[')
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
-
-    handleScalarNonStringAttribute(name, ImmediateExpression.of(true));
+    throw new AstParseException(lastPosition, AstParseError.MISSING_ATTRIBUTE_VALUE);
   }
 
   @Override
@@ -302,7 +305,9 @@ public class AstParser implements XmlEventConsumer {
       return;
     }
 
-    TagDefinition closedTag = tagRegistry.locateTag(lower(tagName));
+    tagName = lower(tagName);
+
+    TagDefinition closedTag = tagRegistry.locateTag(tagName);
 
     if (closedTag == null)
       throw new AstParseException(lastPosition, AstParseError.UNKNOWN_TAG);
@@ -310,12 +315,13 @@ public class AstParser implements XmlEventConsumer {
     TagAndBuffers openedTag;
 
     do {
+      openedTag = tagStack.pop();
+
       if (tagStack.isEmpty())
         throw new AstParseException(lastPosition, AstParseError.UNBALANCED_CLOSING_TAG);
 
-      openedTag = tagStack.pop();
       tagStack.peek().children.add(openedTag);
-    } while(openedTag.tag != closedTag);
+    } while(!openedTag.tagNameLower.equals(tagName));
   }
 
   @Override
@@ -353,7 +359,7 @@ public class AstParser implements XmlEventConsumer {
     switch (name) {
       case "*if": {
         if (value == null)
-          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
+          throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
@@ -365,7 +371,7 @@ public class AstParser implements XmlEventConsumer {
 
       case "*else-if": {
         if (value == null)
-          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
+          throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
@@ -387,6 +393,7 @@ public class AstParser implements XmlEventConsumer {
       }
 
       case "*for":
+      case "*for-":
         throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
     }
 
@@ -395,7 +402,7 @@ public class AstParser implements XmlEventConsumer {
         throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
 
       if (value == null)
-        throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_VALUE);
+        throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
       if (currentLayer.iterable != null)
         throw new AstParseException(lastPosition, AstParseError.MULTIPLE_LOOPS);
@@ -425,7 +432,7 @@ public class AstParser implements XmlEventConsumer {
     if (name.charAt(0) == '[')
       throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    if (name.startsWith("let-"))
+    if (name.equals("let") || name.startsWith("let-"))
       throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
