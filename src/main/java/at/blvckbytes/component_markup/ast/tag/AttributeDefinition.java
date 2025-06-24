@@ -20,6 +20,12 @@ public class AttributeDefinition {
     if (!NAME_PATTERN.matcher(name).matches())
       throw new IllegalStateException("Malformed attribute-name; please adhere to " + NAME_PATTERN.pattern());
 
+    if (name.startsWith("let-"))
+      throw new IllegalStateException("The let- namespace is reserved as to bind variables with");
+
+    if (name.startsWith("for-"))
+      throw new IllegalStateException("The for- namespace is reserved as to pass parameters to loops");
+
     this.name = name;
     this.type = type;
     this.multiValue = multiValue;
