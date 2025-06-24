@@ -47,7 +47,12 @@ public abstract class TagRegistry {
         candidates.add(member);
     }
 
-    if (candidates.size() == 1)
+    int candidateCount = candidates.size();
+
+    if (candidateCount == 0)
+      return null;
+
+    if (candidateCount == 1)
       return candidates.get(0);
 
     candidates.sort(Comparator.comparingInt(item -> item.tagPriority.ordinal()));

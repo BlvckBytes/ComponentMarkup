@@ -23,6 +23,9 @@ public class AttributeDefinition {
     if (name.startsWith("let-"))
       throw new IllegalStateException("The let- namespace is reserved as to bind variables with");
 
+    if (name.equals("let"))
+      throw new IllegalStateException("Do not use let as an attribute, as it is easily confused with let-binding");
+
     if (name.startsWith("for-"))
       throw new IllegalStateException("The for- namespace is reserved as to pass parameters to loops");
 
