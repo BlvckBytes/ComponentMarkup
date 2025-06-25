@@ -5,12 +5,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class IfThenElseNode extends AstNode {
+public class IfElseIfElseNode extends AstNode {
 
   public final List<ConditionalNode> conditions;
   public final @Nullable AstNode fallback;
 
-  public IfThenElseNode(
+  public IfElseIfElseNode(
     List<ConditionalNode> conditions,
     @Nullable AstNode fallback
   ) {

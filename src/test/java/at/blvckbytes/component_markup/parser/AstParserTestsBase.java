@@ -7,7 +7,7 @@ import at.blvckbytes.component_markup.ast.node.content.TranslateNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.control.ForLoopNode;
-import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
+import at.blvckbytes.component_markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
@@ -31,13 +31,13 @@ public abstract class AstParserTestsBase {
   }
 
   @SafeVarargs
-  protected static NodeWrapper<IfThenElseNode> ifThenElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<ConditionalNode>... wrappedConditions) {
+  protected static NodeWrapper<IfElseIfElseNode> ifElseIfElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<ConditionalNode>... wrappedConditions) {
     List<ConditionalNode> conditions = new ArrayList<>();
 
     for (NodeWrapper<ConditionalNode> wrappedCondition : wrappedConditions)
       conditions.add(wrappedCondition.get());
 
-    return new NodeWrapper<>(new IfThenElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
+    return new NodeWrapper<>(new IfElseIfElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
   protected static AExpression imm(String value) {

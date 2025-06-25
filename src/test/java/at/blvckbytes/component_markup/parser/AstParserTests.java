@@ -121,7 +121,7 @@ public class AstParserTests extends AstParserTestsBase {
   }
 
   @Test
-  public void shouldParseIfThenElse() {
+  public void shouldParseIfElseIfElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
       "<container *if=\"a\">@if contents</container>",
@@ -136,7 +136,7 @@ public class AstParserTests extends AstParserTestsBase {
       container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
-          ifThenElse(
+          ifElseIfElse(
             text(imm("else contents"), text.anchor(4)),
             conditional(
               expr("a"),
@@ -157,7 +157,7 @@ public class AstParserTests extends AstParserTestsBase {
   }
 
   @Test
-  public void shouldParseNestedIfThenElse() {
+  public void shouldParseNestedIfElseIfElse() {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
       "<container *if=\"a\">",
@@ -177,8 +177,8 @@ public class AstParserTests extends AstParserTestsBase {
       container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
-          ifThenElse(
-            ifThenElse(
+          ifElseIfElse(
+            ifElseIfElse(
               text(imm("if not a and not c"), text.anchor(5)),
               conditional(
                 expr("c"),
@@ -187,7 +187,7 @@ public class AstParserTests extends AstParserTestsBase {
             ),
             conditional(
               expr("a"),
-              ifThenElse(
+              ifElseIfElse(
                 text(imm("if a and not b"), text.anchor(3)),
                 conditional(
                   expr("b"),

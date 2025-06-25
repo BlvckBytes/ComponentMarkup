@@ -185,7 +185,7 @@ public class AstInterpreter implements Interpreter {
     return builderStack.size() > 1;
   }
 
-  private void interpretIfThenElse(IfThenElseNode node, TemporaryMemberEnvironment environment) {
+  private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
     if (node.conditions.isEmpty())
       throw new IllegalStateException("Expecting at least one condition!");
 
@@ -266,11 +266,11 @@ public class AstInterpreter implements Interpreter {
     if (node instanceof InterpreterInterceptor)
       interceptors.add((InterpreterInterceptor) node);
 
-    if (node instanceof IfThenElseNode) {
+    if (node instanceof IfElseIfElseNode) {
       if (interceptors.handleBeforeAndGetIfSkip(node))
         return;
 
-      interpretIfThenElse((IfThenElseNode) node, environment);
+      interpretIfElseIfElse((IfElseIfElseNode) node, environment);
 
       interceptors.handleAfter(node);
       return;

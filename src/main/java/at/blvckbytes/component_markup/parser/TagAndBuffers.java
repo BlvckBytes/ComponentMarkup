@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.control.ForLoopNode;
-import at.blvckbytes.component_markup.ast.node.control.IfThenElseNode;
+import at.blvckbytes.component_markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.TagDefinition;
@@ -154,7 +154,7 @@ public class TagAndBuffers implements ParserChildItem {
               break;
 
             case ELSE:
-              result.add(new IfThenElseNode(conditions, currentNode));
+              result.add(new IfElseIfElseNode(conditions, currentNode));
               conditions = null;
               break;
           }
@@ -166,13 +166,13 @@ public class TagAndBuffers implements ParserChildItem {
 
           switch (currentConditionType) {
             case NONE:
-              result.add(new IfThenElseNode(conditions, null));
+              result.add(new IfElseIfElseNode(conditions, null));
               conditions = null;
               result.add(currentNode);
               break;
 
             case IF:
-              result.add(new IfThenElseNode(conditions, null));
+              result.add(new IfElseIfElseNode(conditions, null));
               conditions = new ArrayList<>();
               conditions.add((ConditionalNode) currentNode);
               break;
@@ -182,7 +182,7 @@ public class TagAndBuffers implements ParserChildItem {
               break;
 
             case ELSE:
-              result.add(new IfThenElseNode(conditions, currentNode));
+              result.add(new IfElseIfElseNode(conditions, currentNode));
               conditions = null;
               break;
           }
@@ -221,7 +221,7 @@ public class TagAndBuffers implements ParserChildItem {
 
       else {
         assert priorConditionType == ConditionType.ELSE_IF;
-        result.add(new IfThenElseNode(conditions, null));
+        result.add(new IfElseIfElseNode(conditions, null));
       }
     }
 
