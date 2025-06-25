@@ -56,14 +56,19 @@ public class XmlEventParser {
 
           while (cursor.peekChar() != 0) {
             int possiblePreTerminationIndex = cursor.getNextCharIndex();
-            char c = cursor.nextChar();
+            char currentChar = cursor.nextChar();
 
-            inStringDetector.onEncounter(c);
+            if (currentChar == '\n') {
+              consumer.onCursorPosition(beginPosition);
+              throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
+            }
+
+            inStringDetector.onEncounter(currentChar);
 
             if (inStringDetector.isInString())
               continue;
 
-            if (c == '}' && cursor.peekChar() == '}') {
+            if (currentChar == '}' && cursor.peekChar() == '}') {
               cursor.nextChar();
               substringBuilder.setEndExclusive(possiblePreTerminationIndex);
               break;

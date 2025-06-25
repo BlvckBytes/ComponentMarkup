@@ -577,6 +577,18 @@ public class XmlEventParserTests {
       new TagOpenEndEvent("red", false),
       text.anchorEvent(2)
     );
+
+    text = new TextWithAnchors(
+      "@<red@>@{{user.name\n}}"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      XmlParseError.UNTERMINATED_INTERPOLATION,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      text.anchorEvent(2)
+    );
   }
 
   @Test
