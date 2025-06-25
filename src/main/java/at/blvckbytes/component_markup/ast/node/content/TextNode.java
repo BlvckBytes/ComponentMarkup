@@ -20,14 +20,4 @@ public class TextNode extends ContentNode {
 
     this.text = text;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "TextNode{\n" +
-      indent(indentLevel + 1) + "text=" + text.expressionify() + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

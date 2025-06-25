@@ -20,14 +20,4 @@ public class KeyNode extends ContentNode {
 
     this.key = key;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "KeyNode{\n" +
-      indent(indentLevel + 1) + "key=" + key.expressionify() + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

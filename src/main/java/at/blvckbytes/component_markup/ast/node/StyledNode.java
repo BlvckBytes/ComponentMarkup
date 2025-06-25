@@ -34,21 +34,4 @@ public abstract class StyledNode extends AstNode {
   public void setStyle(@Nullable NodeStyle style) {
     this.style = style;
   }
-
-  @Override
-  protected String stringifyBaseMembers(int indentLevel) {
-    if (style == null) {
-      return (
-        super.stringifyBaseMembers(indentLevel) + ",\n" +
-        indent(indentLevel) + "style=null"
-      );
-    }
-
-    return (
-      super.stringifyBaseMembers(indentLevel) + ",\n" +
-      indent(indentLevel) + "style=(\n" +
-      style.stringify(indentLevel + 1) + "\n" +
-      indent(indentLevel) + ")"
-    );
-  }
 }

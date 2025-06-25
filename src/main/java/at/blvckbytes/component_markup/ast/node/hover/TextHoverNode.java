@@ -20,14 +20,4 @@ public class TextHoverNode extends HoverNode {
 
     this.value = value;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "TextHoverNode{\n" +
-      stringifySubtree(value, "value", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

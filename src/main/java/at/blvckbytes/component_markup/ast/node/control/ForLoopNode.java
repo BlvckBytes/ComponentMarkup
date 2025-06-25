@@ -28,17 +28,4 @@ public class ForLoopNode extends AstNode {
     this.body = body;
     this.separator = separator;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "ForLoopNode{\n" +
-      indent(indentLevel + 1) + "iterable='" + iterable.expressionify() + "',\n" +
-      indent(indentLevel + 1) + "iterationVariable='" + iterationVariable + "',\n" +
-      stringifySubtree(body, "body", indentLevel + 1) + ",\n" +
-      stringifySubtree(separator, "separator", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

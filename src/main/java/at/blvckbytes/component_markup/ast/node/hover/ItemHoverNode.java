@@ -31,17 +31,4 @@ public class ItemHoverNode extends HoverNode {
     this.name = name;
     this.lore = lore;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "ItemHoverNode{\n" +
-      indent(indentLevel + 1) + "material=" + material.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "amount=" + (amount == null ? "null" : amount.expressionify()) + ",\n" +
-      stringifySubtree(name, "name", indentLevel + 1) + ",\n" +
-      stringifySubtree(lore, "lore", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

@@ -8,13 +8,4 @@ public class BreakNode extends AstNode {
   public BreakNode(CursorPosition position) {
     super(position, null, null);
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "BreakNode{\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

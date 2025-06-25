@@ -1,13 +1,16 @@
 package at.blvckbytes.component_markup.ast.node.style;
 
 import at.blvckbytes.component_markup.ast.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.util.Jsonifiable;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public class NodeStyle {
+public class NodeStyle extends Jsonifiable {
 
   public final AExpression[] formatStates;
   public @Nullable AExpression color;
@@ -99,13 +102,11 @@ public class NodeStyle {
     return result.toString();
   }
 
-  public String stringify(int indentLevel) {
-    return(
-      AstNode.indent(indentLevel) + "NodeStyle{\n" +
-      AstNode.indent(indentLevel + 1) + "color=" + (color == null ? "null" : color.expressionify()) + ",\n" +
-      AstNode.indent(indentLevel + 1) + "font=" + (font == null ? "null" : font.expressionify()) + ",\n" +
-      AstNode.indent(indentLevel + 1) + "format=" + makeFormatExpression() + "\n" +
-      AstNode.indent(indentLevel) + "}"
-    );
+  @Override
+  protected @Nullable JsonElement overrideJsonRepresentation(String field) {
+    if (field.equals("formatStates"))
+      return new JsonPrimitive(makeFormatExpression());
+
+    return null;
   }
 }

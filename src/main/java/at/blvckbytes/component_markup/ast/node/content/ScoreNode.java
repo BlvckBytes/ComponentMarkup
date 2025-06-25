@@ -26,16 +26,4 @@ public class ScoreNode extends ContentNode {
     this.objective = objective;
     this.value = value;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "ScoreNode{\n" +
-      indent(indentLevel + 1) + "name=" + name.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "objective=" + objective.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "value=" + (value == null ? "null" : value.expressionify()) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

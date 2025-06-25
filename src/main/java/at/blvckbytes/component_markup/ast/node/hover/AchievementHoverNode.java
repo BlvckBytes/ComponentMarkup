@@ -21,14 +21,4 @@ public class AchievementHoverNode extends HoverNode {
 
     this.value = value;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "AchievementHoverNode{\n" +
-      indent(indentLevel + 1) + "value=" + value.expressionify() + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

@@ -28,16 +28,4 @@ public class EntityHoverNode extends HoverNode {
     this.id = id;
     this.name = name;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "EntityHoverNode{\n" +
-      indent(indentLevel + 1) + "type=" + type.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "id=" + id.expressionify() + ",\n" +
-      stringifySubtree(name, "name", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

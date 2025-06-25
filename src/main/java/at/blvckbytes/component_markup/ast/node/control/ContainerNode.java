@@ -16,13 +16,4 @@ public class ContainerNode extends StyledNode {
   ) {
     super(position, children, letBindings);
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "ContainerNode{\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

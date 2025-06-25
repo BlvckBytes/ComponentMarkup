@@ -1,10 +1,10 @@
 package at.blvckbytes.component_markup.ast.tag;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 
-public class LetBinding {
+public class LetBinding extends Jsonifiable {
 
   public final String name;
   public final AExpression expression;
@@ -18,15 +18,5 @@ public class LetBinding {
     this.name = name;
     this.expression = expression;
     this.position = position;
-  }
-
-  public String stringify(int indentLevel) {
-    return(
-      AstNode.indent(indentLevel) + "LetBinding{\n" +
-      AstNode.indent(indentLevel + 1) + "name='" + name + "',\n" +
-      AstNode.indent(indentLevel + 1) + "expression='" + expression.expressionify() + "',\n" +
-      AstNode.indent(indentLevel + 1) + "position=" + position + ",\n" +
-      AstNode.indent(indentLevel) + "}"
-    );
   }
 }

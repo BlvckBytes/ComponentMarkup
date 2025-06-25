@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.interpreter.*;
+import at.blvckbytes.component_markup.util.JsonifyIgnore;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,7 @@ import java.util.Stack;
 
 public class GradientNode extends AstNode implements InterpreterInterceptor {
 
+  @JsonifyIgnore
   private final ThreadLocal<Stack<List<Object>>> threadLocalInjectedComponentsStack = ThreadLocal.withInitial(Stack::new);
 
   private final boolean affectSubtrees;
@@ -30,15 +32,6 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
     // TODO: apply if requested
     this.affectSubtrees = false;
-  }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "GradientNode{\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
   }
 
   @Override

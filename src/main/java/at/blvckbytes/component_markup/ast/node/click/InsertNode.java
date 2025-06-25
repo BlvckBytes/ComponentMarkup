@@ -22,14 +22,4 @@ public class InsertNode extends AstNode {
 
     this.value = value;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "InsertNode{\n" +
-      indent(indentLevel + 1) + "value=" + value.expressionify() + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

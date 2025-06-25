@@ -27,16 +27,4 @@ public class TranslateNode extends ContentNode {
     this.with = with;
     this.fallback = fallback;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "TranslateNode{\n" +
-      indent(indentLevel + 1) + "key=" + key.expressionify() + ",\n" +
-      indent(indentLevel + 1) + "with=" + stringifyList(with, indentLevel) + ",\n" +
-      stringifySubtree(fallback, "fallback", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }

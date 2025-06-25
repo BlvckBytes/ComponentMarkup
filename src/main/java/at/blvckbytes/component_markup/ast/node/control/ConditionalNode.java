@@ -21,15 +21,4 @@ public class ConditionalNode extends AstNode {
     this.condition = condition;
     this.body = body;
   }
-
-  @Override
-  public String stringify(int indentLevel) {
-    return (
-      indent(indentLevel) + "ConditionalNode{\n" +
-      indent(indentLevel + 1) + "condition='" + condition.expressionify() + "',\n" +
-      stringifySubtree(body, "body", indentLevel + 1) + ",\n" +
-      stringifyBaseMembers(indentLevel + 1) + "\n" +
-      indent(indentLevel) + "}"
-    );
-  }
 }
