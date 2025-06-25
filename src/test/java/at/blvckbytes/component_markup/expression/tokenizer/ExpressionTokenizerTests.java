@@ -21,37 +21,37 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       input,
-      Operator.TERNARY_BEGIN,
+      Punctuation.QUESTION_MARK,
       Punctuation.OPENING_PARENTHESIS,
-      Operator.NEGATION,
+      PrefixOperator.NEGATION,
       "'hello, world'",
-      Operator.ADDITION,
-      Operator.TERNARY_DELIMITER,
+      InfixOperator.ADDITION,
+      Punctuation.COLON,
       Punctuation.OPENING_BRACKET,
       8192,
-      Operator.GREATER_THAN,
-      Operator.SUBTRACTION,
-      Operator.CONJUNCTION,
+      InfixOperator.GREATER_THAN,
+      PrefixOperator.FLIP_SIGN,
+      InfixOperator.CONJUNCTION,
       2.7182,
-      Operator.GREATER_THAN_OR_EQUAL,
-      Operator.MULTIPLICATION,
-      Operator.DISJUNCTION,
+      InfixOperator.GREATER_THAN_OR_EQUAL,
+      InfixOperator.MULTIPLICATION,
+      InfixOperator.DISJUNCTION,
       true,
-      Operator.LESS_THAN,
-      Operator.DIVISION,
-      Operator.NULL_COALESCE,
+      InfixOperator.LESS_THAN,
+      InfixOperator.DIVISION,
+      InfixOperator.NULL_COALESCE,
       Punctuation.CLOSING_BRACKET,
       false,
-      Operator.LESS_THAN_OR_EQUAL,
-      Operator.MODULO,
+      InfixOperator.LESS_THAN_OR_EQUAL,
+      InfixOperator.MODULO,
       null,
-      Operator.EQUAL_TO,
-      Operator.EXPONENTIATION,
+      InfixOperator.EQUAL_TO,
+      InfixOperator.EXPONENTIATION,
       "my_variable",
-      Operator.NOT_EQUAL_TO,
-      Operator.CONCATENATION,
+      InfixOperator.NOT_EQUAL_TO,
+      InfixOperator.CONCATENATION,
       Punctuation.CLOSING_PARENTHESIS,
-      Operator.RANGE,
+      InfixOperator.RANGE,
       .5
     );
   }
@@ -96,27 +96,55 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      .5, Operator.RANGE, .3
+      .5, InfixOperator.RANGE, .3
     );
   }
 
   @Test
-  public void shouldTokenizeIdentifiersWedgedWithOperatorsAndPunctuation() {
-    List<Object> nonIdentifiers = new ArrayList<>();
+  public void shouldTokenizeInfixOperatorsAndPunctuationWedgedWithIdentifiers() {
+    List<Object> items = new ArrayList<>();
 
-    nonIdentifiers.addAll(Arrays.asList(Operator.values()));
-    nonIdentifiers.addAll(Arrays.asList(Punctuation.values()));
+    items.addAll(Arrays.asList(InfixOperator.values()));
+    items.addAll(Arrays.asList(Punctuation.values()));
 
-    for (Object nonIdentifier : nonIdentifiers) {
+    for (Object item : items) {
       TextWithAnchors text = new TextWithAnchors(
-        "@before @a@" + nonIdentifier + "@b @after"
+        "@before @a@" + item + "@b @after"
       );
 
       makeCase(
         text,
-        "before", "a", nonIdentifier, "b", "after"
+        "before", "a", item, "b", "after"
       );
     }
+  }
+
+  @Test
+  public void shouldTokenizeDashesCorrectly() {
+    TextWithAnchors text = new TextWithAnchors("@-@identifier");
+    makeCase(text, PrefixOperator.FLIP_SIGN, "identifier");
+
+    text = new TextWithAnchors("@-@5.0");
+    makeCase(text, PrefixOperator.FLIP_SIGN, 5.0);
+
+    text = new TextWithAnchors("@-@.5");
+    makeCase(text, PrefixOperator.FLIP_SIGN, .5);
+
+    text = new TextWithAnchors("@5 @- @- @3");
+    makeCase(text, 5, InfixOperator.SUBTRACTION, PrefixOperator.FLIP_SIGN, 3);
+
+    text = new TextWithAnchors("@5 @-@- @- @3 @- @[");
+
+    makeCase(
+      text,
+      5,
+      InfixOperator.SUBTRACTION,
+      PrefixOperator.FLIP_SIGN,
+      PrefixOperator.FLIP_SIGN,
+      3,
+      InfixOperator.SUBTRACTION,
+      Punctuation.OPENING_BRACKET
+    );
   }
 
   @Test
@@ -127,7 +155,7 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      0, Operator.RANGE, 100
+      0, InfixOperator.RANGE, 100
     );
 
     text = new TextWithAnchors(
@@ -136,7 +164,7 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      "a", Operator.RANGE, "b"
+      "a", InfixOperator.RANGE, "b"
     );
   }
 
@@ -266,8 +294,10 @@ public class ExpressionTokenizerTests {
         token = new DoubleToken(charIndex, ((Number) expectedValue).doubleValue());
       else if (expectedValue instanceof Integer || expectedValue instanceof Long)
         token = new LongToken(charIndex, ((Number) expectedValue).longValue());
-      else if (expectedValue instanceof Operator)
-        token = new OperatorToken(charIndex, (Operator) expectedValue);
+      else if (expectedValue instanceof InfixOperator)
+        token = new InfixOperatorToken(charIndex, (InfixOperator) expectedValue);
+      else if (expectedValue instanceof PrefixOperator)
+        token = new PrefixOperatorToken(charIndex, (PrefixOperator) expectedValue);
       else if (expectedValue instanceof Punctuation)
         token = new PunctuationToken(charIndex, (Punctuation) expectedValue);
       else if (expectedValue instanceof String) {

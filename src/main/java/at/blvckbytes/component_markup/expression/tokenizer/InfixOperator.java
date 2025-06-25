@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-public enum Operator {
+public enum InfixOperator {
   ADDITION("+"),
   SUBTRACTION("-"),
   MULTIPLICATION("*"),
@@ -8,8 +8,6 @@ public enum Operator {
   MODULO("%"),
   EXPONENTIATION("^"),
   CONCATENATION("&"),
-  TERNARY_BEGIN("?"),
-  TERNARY_DELIMITER(":"),
   GREATER_THAN(">"),
   GREATER_THAN_OR_EQUAL(">="),
   LESS_THAN("<"),
@@ -18,7 +16,6 @@ public enum Operator {
   NOT_EQUAL_TO("!="),
   RANGE(".."),
   MEMBER("."),
-  NEGATION("!"),
   CONJUNCTION("&&"),
   DISJUNCTION("||"),
   NULL_COALESCE("??")
@@ -26,7 +23,7 @@ public enum Operator {
 
   private final String representation;
 
-  Operator(String representation) {
+  InfixOperator(String representation) {
     this.representation = representation;
   }
 

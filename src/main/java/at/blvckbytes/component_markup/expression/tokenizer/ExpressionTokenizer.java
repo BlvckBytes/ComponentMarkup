@@ -10,11 +10,15 @@ public class ExpressionTokenizer {
   private final Stack<ExpressionToken> pendingStack;
   private final String input;
   private int nextCharIndex;
+  private boolean dashIsPrefix;
 
   public ExpressionTokenizer(String input) {
     this.pendingStack = new Stack<>();
     this.input = input;
     this.nextCharIndex = 0;
+
+    // The only purpose of a dash at the very beginning is to flip a sign
+    this.dashIsPrefix = true;
   }
 
   private char nextChar() {
@@ -71,6 +75,9 @@ public class ExpressionTokenizer {
         break;
 
       ExpressionToken upcomingOperatorOrPunctuation;
+
+      // The current token is most definitely an operand, so don't interpret as a prefix-operator
+      dashIsPrefix = false;
 
       if ((upcomingOperatorOrPunctuation = tryParseOperatorOrPunctuationToken()) != null) {
         pendingStack.push(upcomingOperatorOrPunctuation);
@@ -185,35 +192,38 @@ public class ExpressionTokenizer {
         return new PunctuationToken(beginIndex, Punctuation.COMMA);
 
       case '+':
-        return new OperatorToken(beginIndex, Operator.ADDITION);
+        return new InfixOperatorToken(beginIndex, InfixOperator.ADDITION);
 
       case '-':
-        return new OperatorToken(beginIndex, Operator.SUBTRACTION);
+        if (dashIsPrefix)
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.FLIP_SIGN);
+
+        return new InfixOperatorToken(beginIndex, InfixOperator.SUBTRACTION);
 
       case '*':
-        return new OperatorToken(beginIndex, Operator.MULTIPLICATION);
+        return new InfixOperatorToken(beginIndex, InfixOperator.MULTIPLICATION);
 
       case '/':
-        return new OperatorToken(beginIndex, Operator.DIVISION);
+        return new InfixOperatorToken(beginIndex, InfixOperator.DIVISION);
 
       case '%':
-        return new OperatorToken(beginIndex, Operator.MODULO);
+        return new InfixOperatorToken(beginIndex, InfixOperator.MODULO);
 
       case '^':
-        return new OperatorToken(beginIndex, Operator.EXPONENTIATION);
+        return new InfixOperatorToken(beginIndex, InfixOperator.EXPONENTIATION);
 
       case '&':
         if (peekChar() == '&') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.CONJUNCTION);
+          return new InfixOperatorToken(beginIndex, InfixOperator.CONJUNCTION);
         }
 
-        return new OperatorToken(beginIndex, Operator.CONCATENATION);
+        return new InfixOperatorToken(beginIndex, InfixOperator.CONCATENATION);
 
       case '|':
         if (peekChar() == '|') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.DISJUNCTION);
+          return new InfixOperatorToken(beginIndex, InfixOperator.DISJUNCTION);
         }
 
         throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_PIPE);
@@ -221,34 +231,34 @@ public class ExpressionTokenizer {
       case '?':
         if (peekChar() == '?') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.NULL_COALESCE);
+          return new InfixOperatorToken(beginIndex, InfixOperator.NULL_COALESCE);
         }
 
-        return new OperatorToken(beginIndex, Operator.TERNARY_BEGIN);
+        return new PunctuationToken(beginIndex, Punctuation.QUESTION_MARK);
 
       case ':':
-        return new OperatorToken(beginIndex, Operator.TERNARY_DELIMITER);
+        return new PunctuationToken(beginIndex, Punctuation.COLON);
 
       case '>':
         if (peekChar() == '=') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.GREATER_THAN_OR_EQUAL);
+          return new InfixOperatorToken(beginIndex, InfixOperator.GREATER_THAN_OR_EQUAL);
         }
 
-        return new OperatorToken(beginIndex, Operator.GREATER_THAN);
+        return new InfixOperatorToken(beginIndex, InfixOperator.GREATER_THAN);
 
       case '<':
         if (peekChar() == '=') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.LESS_THAN_OR_EQUAL);
+          return new InfixOperatorToken(beginIndex, InfixOperator.LESS_THAN_OR_EQUAL);
         }
 
-        return new OperatorToken(beginIndex, Operator.LESS_THAN);
+        return new InfixOperatorToken(beginIndex, InfixOperator.LESS_THAN);
 
       case '=':
         if (peekChar() == '=') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.EQUAL_TO);
+          return new InfixOperatorToken(beginIndex, InfixOperator.EQUAL_TO);
         }
 
         throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_EQUALS);
@@ -256,17 +266,17 @@ public class ExpressionTokenizer {
       case '!':
         if (peekChar() == '=') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.NOT_EQUAL_TO);
+          return new InfixOperatorToken(beginIndex, InfixOperator.NOT_EQUAL_TO);
         }
 
-        return new OperatorToken(beginIndex, Operator.NEGATION);
+        return new PrefixOperatorToken(beginIndex, PrefixOperator.NEGATION);
 
       case '.':
         char upcomingChar = peekChar();
 
         if (upcomingChar == '.') {
           nextChar();
-          return new OperatorToken(beginIndex, Operator.RANGE);
+          return new InfixOperatorToken(beginIndex, InfixOperator.RANGE);
         }
 
         if (upcomingChar >= '0' && upcomingChar <= '9') {
@@ -274,7 +284,7 @@ public class ExpressionTokenizer {
           return tryParseDotDoubleToken();
         }
 
-        return new OperatorToken(beginIndex, Operator.MEMBER);
+        return new InfixOperatorToken(beginIndex, InfixOperator.MEMBER);
     }
 
     nextCharIndex = beginIndex;
@@ -285,8 +295,6 @@ public class ExpressionTokenizer {
     if (!this.pendingStack.isEmpty())
       return this.pendingStack.pop();
 
-    ExpressionToken result;
-
     while (Character.isWhitespace(peekChar()))
       nextChar();
 
@@ -295,21 +303,22 @@ public class ExpressionTokenizer {
     if (upcomingChar == 0)
       return null;
 
+    ExpressionToken result;
+
     if (upcomingChar == '\'')
-      return parseStringToken();
+      result = parseStringToken();
 
-    if (upcomingChar >= '0' && upcomingChar <= '9')
-      return parseLongOrDoubleToken();
+    else if (upcomingChar >= '0' && upcomingChar <= '9')
+      result = parseLongOrDoubleToken();
 
-    if (upcomingChar == '.') {
-      if ((result = tryParseDotDoubleToken()) != null)
-        return result;
+    else {
+      if ((upcomingChar != '.' || (result = tryParseDotDoubleToken()) == null) && (result = tryParseOperatorOrPunctuationToken()) == null)
+        result = parseIdentifierOrLiteralToken();
     }
 
-    if ((result = tryParseOperatorOrPunctuationToken()) != null)
-      return result;
+    dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken;
 
-    return parseIdentifierOrLiteralToken();
+    return result;
   }
 
   public @Nullable ExpressionToken peekToken() {
