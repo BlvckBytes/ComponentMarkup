@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 
-public class PunctuationToken extends ExpressionToken {
+public class PunctuationToken extends Token {
 
   public final Punctuation punctuation;
 

@@ -286,7 +286,7 @@ public class ExpressionTokenizerTests {
 
       int charIndex = input.anchorIndex(valueIndex);
 
-      ExpressionToken token;
+      Token token;
 
       if (expectedValue instanceof Boolean)
         token = new BooleanToken(charIndex, (boolean) expectedValue);

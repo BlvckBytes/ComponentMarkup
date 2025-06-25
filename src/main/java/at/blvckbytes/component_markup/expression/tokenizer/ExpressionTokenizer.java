@@ -7,7 +7,7 @@ import java.util.Stack;
 
 public class ExpressionTokenizer {
 
-  private final Stack<ExpressionToken> pendingStack;
+  private final Stack<Token> pendingStack;
   private final String input;
   private int nextCharIndex;
   private boolean dashIsPrefix;
@@ -35,7 +35,7 @@ public class ExpressionTokenizer {
     return input.charAt(this.nextCharIndex);
   }
 
-  private ExpressionToken parseStringToken() {
+  private Token parseStringToken() {
     int beginIndex = nextCharIndex;
 
     char priorChar;
@@ -63,7 +63,7 @@ public class ExpressionTokenizer {
     return new StringToken(beginIndex, contents);
   }
 
-  private ExpressionToken parseIdentifierOrLiteralToken() {
+  private Token parseIdentifierOrLiteralToken() {
     int beginIndex = nextCharIndex;
     int endIndexExclusive = beginIndex;
 
@@ -74,7 +74,7 @@ public class ExpressionTokenizer {
       if (Character.isWhitespace(upcomingChar))
         break;
 
-      ExpressionToken upcomingOperatorOrPunctuation;
+      Token upcomingOperatorOrPunctuation;
 
       // The current token is most definitely an operand, so don't interpret as a prefix-operator
       dashIsPrefix = false;
@@ -131,7 +131,7 @@ public class ExpressionTokenizer {
     return beginIndex != nextCharIndex;
   }
 
-  private ExpressionToken parseLongOrDoubleToken() {
+  private Token parseLongOrDoubleToken() {
     int beginIndex = nextCharIndex;
 
     if (!collectSubsequentDigits())
@@ -158,7 +158,7 @@ public class ExpressionTokenizer {
     return new LongToken(beginIndex, Long.parseLong(input.substring(beginIndex, nextCharIndex)));
   }
 
-  private @Nullable ExpressionToken tryParseDotDoubleToken() {
+  private @Nullable Token tryParseDotDoubleToken() {
     int beginIndex = nextCharIndex;
 
     if (nextChar() != '.')
@@ -172,7 +172,7 @@ public class ExpressionTokenizer {
     return new DoubleToken(beginIndex, Double.parseDouble(input.substring(beginIndex, nextCharIndex)));
   }
 
-  private @Nullable ExpressionToken tryParseOperatorOrPunctuationToken() {
+  private @Nullable Token tryParseOperatorOrPunctuationToken() {
     int beginIndex = nextCharIndex;
 
     switch (nextChar()) {
@@ -291,7 +291,7 @@ public class ExpressionTokenizer {
     return null;
   }
 
-  public @Nullable ExpressionToken nextToken() {
+  public @Nullable Token nextToken() {
     if (!this.pendingStack.isEmpty())
       return this.pendingStack.pop();
 
@@ -303,7 +303,7 @@ public class ExpressionTokenizer {
     if (upcomingChar == 0)
       return null;
 
-    ExpressionToken result;
+    Token result;
 
     if (upcomingChar == '\'')
       result = parseStringToken();
@@ -321,7 +321,7 @@ public class ExpressionTokenizer {
     return result;
   }
 
-  public @Nullable ExpressionToken peekToken() {
+  public @Nullable Token peekToken() {
     if (this.pendingStack.isEmpty())
       this.pendingStack.add(nextToken());
 

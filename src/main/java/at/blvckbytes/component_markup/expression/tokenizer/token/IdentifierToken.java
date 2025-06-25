@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
-public class IdentifierToken extends ExpressionToken {
+public class IdentifierToken extends TerminalToken {
 
   public final String identifier;
 

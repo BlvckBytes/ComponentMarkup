@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 
-public class InfixOperatorToken extends ExpressionToken {
+public class InfixOperatorToken extends Token {
 
   public final InfixOperator operator;
 

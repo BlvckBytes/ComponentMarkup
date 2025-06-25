@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
-public class BooleanToken extends ExpressionToken {
+public class BooleanToken extends TerminalToken {
 
   public final boolean value;
 
