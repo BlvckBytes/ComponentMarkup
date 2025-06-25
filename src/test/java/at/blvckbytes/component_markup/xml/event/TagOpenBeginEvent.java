@@ -1,15 +1,12 @@
 package at.blvckbytes.component_markup.xml.event;
 
-public class TagOpenBeginEvent implements XmlEvent {
+import at.blvckbytes.component_markup.util.Jsonifiable;
+
+public class TagOpenBeginEvent extends Jsonifiable implements XmlEvent {
 
   public final String tagName;
 
   public TagOpenBeginEvent(String tagName) {
     this.tagName = tagName;
-  }
-
-  @Override
-  public String toString() {
-    return "TagOpenBeginEvent{tagName='" + tagName + "'}";
   }
 }

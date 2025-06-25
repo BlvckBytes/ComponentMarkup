@@ -12,8 +12,6 @@ import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.IExpressionEvaluator;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
@@ -26,7 +24,6 @@ import java.util.logging.Logger;
 
 public abstract class AstParserTestsBase {
 
-  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
   private static final IExpressionEvaluator expressionEvaluator = new GPEEE(Logger.getAnonymousLogger());
 
   protected static NodeWrapper<ForLoopNode> forLoop(AExpression iterable, String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator) {
@@ -76,10 +73,6 @@ public abstract class AstParserTestsBase {
     AstParser parser = new AstParser(BuiltInTagRegistry.get(), expressionEvaluator);
     XmlEventParser.parse(input.text, parser);
     AstNode actualAst = parser.getResult();
-
-    Assertions.assertEquals(
-      gsonInstance.toJson(wrappedExpectedAst.get().jsonify()),
-      gsonInstance.toJson(actualAst.jsonify())
-    );
+    Assertions.assertEquals(wrappedExpectedAst.get().toString(), actualAst.toString());
   }
 }

@@ -17,9 +17,4 @@ public class CursorPosition extends Jsonifiable {
     this.lineNumber = lineNumber;
     this.columnNumber = columnNumber;
   }
-
-  @Override
-  public String toString() {
-    return "CursorPosition{nextCharIndex=" + nextCharIndex + ", lineNumber=" + lineNumber + ", columnNumber=" + columnNumber + "}";
-  }
 }

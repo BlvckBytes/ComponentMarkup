@@ -13,6 +13,8 @@ import java.util.Map;
 
 public abstract class Jsonifiable {
 
+  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
+
   public JsonObject jsonify() {
     JsonObject result = new JsonObject();
 
@@ -103,5 +105,10 @@ public abstract class Jsonifiable {
     }
 
     throw new IllegalStateException("Don't know how to stringify " + item.getClass().getSimpleName());
+  }
+
+  @Override
+  public String toString() {
+    return gsonInstance.toJson(jsonify());
   }
 }

@@ -1,15 +1,12 @@
 package at.blvckbytes.component_markup.xml.event;
 
-public class FlagAttributeEvent implements XmlEvent {
+import at.blvckbytes.component_markup.util.Jsonifiable;
+
+public class FlagAttributeEvent extends Jsonifiable implements XmlEvent {
 
   public final String name;
 
   public FlagAttributeEvent(String name) {
     this.name = name;
-  }
-
-  @Override
-  public String toString() {
-    return "FlagAttributeEvent{name='" + name + "'}";
   }
 }

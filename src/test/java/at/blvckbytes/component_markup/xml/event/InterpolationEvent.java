@@ -1,15 +1,12 @@
 package at.blvckbytes.component_markup.xml.event;
 
-public class InterpolationEvent implements XmlEvent {
+import at.blvckbytes.component_markup.util.Jsonifiable;
+
+public class InterpolationEvent extends Jsonifiable implements XmlEvent {
 
   public final String expression;
 
   public InterpolationEvent(String expression) {
     this.expression = expression;
-  }
-
-  @Override
-  public String toString() {
-    return "InterpolationEvent{expression='" + expression + "'}";
   }
 }

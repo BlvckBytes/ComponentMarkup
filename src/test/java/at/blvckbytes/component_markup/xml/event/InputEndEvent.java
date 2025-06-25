@@ -1,9 +1,5 @@
 package at.blvckbytes.component_markup.xml.event;
 
-public class InputEndEvent implements XmlEvent {
+import at.blvckbytes.component_markup.util.Jsonifiable;
 
-  @Override
-  public String toString() {
-    return "InputEndEvent{}";
-  }
-}
+public class InputEndEvent extends Jsonifiable implements XmlEvent {}
