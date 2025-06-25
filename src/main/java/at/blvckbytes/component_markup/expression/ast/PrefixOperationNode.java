@@ -4,13 +4,13 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.PrefixOperatorT
 
 public class PrefixOperationNode extends ExpressionNode {
 
-  public final PrefixOperatorToken operator;
+  public final PrefixOperatorToken operatorToken;
   public final ExpressionNode operand;
 
-  public PrefixOperationNode(PrefixOperatorToken operator, ExpressionNode operand) {
+  public PrefixOperationNode(PrefixOperatorToken operatorToken, ExpressionNode operand) {
     super(operand.beginIndex);
 
-    this.operator = operator;
+    this.operatorToken = operatorToken;
     this.operand = operand;
   }
 }

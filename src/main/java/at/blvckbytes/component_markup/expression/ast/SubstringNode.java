@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SubstringNode extends ExpressionNode {
 
+  public final ExpressionNode operand;
   public final PunctuationToken openingBracket;
   public final @Nullable ExpressionNode lowerBound;
   public final PunctuationToken boundsSeparator;
@@ -12,6 +13,7 @@ public class SubstringNode extends ExpressionNode {
   public final PunctuationToken closingBracket;
 
   public SubstringNode(
+    ExpressionNode operand,
     PunctuationToken openingBracket,
     @Nullable ExpressionNode lowerBound,
     PunctuationToken boundsSeparator,
@@ -20,6 +22,7 @@ public class SubstringNode extends ExpressionNode {
   ) {
     super(openingBracket.beginIndex);
 
+    this.operand = operand;
     this.openingBracket = openingBracket;
     this.lowerBound = lowerBound;
     this.boundsSeparator = boundsSeparator;

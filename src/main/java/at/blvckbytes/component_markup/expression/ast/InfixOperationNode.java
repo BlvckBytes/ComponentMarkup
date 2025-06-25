@@ -5,14 +5,14 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorTo
 public class InfixOperationNode extends ExpressionNode {
 
   public final ExpressionNode lhs;
-  public final InfixOperatorToken operator;
+  public final InfixOperatorToken operatorToken;
   public final ExpressionNode rhs;
 
-  public InfixOperationNode(ExpressionNode lhs, InfixOperatorToken operator, ExpressionNode rhs) {
+  public InfixOperationNode(ExpressionNode lhs, InfixOperatorToken operatorToken, ExpressionNode rhs) {
     super(lhs.beginIndex);
 
     this.lhs = lhs;
-    this.operator = operator;
+    this.operatorToken = operatorToken;
     this.rhs = rhs;
   }
 }
