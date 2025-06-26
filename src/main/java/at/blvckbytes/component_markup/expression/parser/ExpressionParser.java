@@ -32,7 +32,7 @@ public class ExpressionParser {
   }
 
   private @Nullable ExpressionNode parseExpression(@Nullable InfixOperator priorOperator) {
-    ExpressionNode lhs = parsePrefixOperations();
+    ExpressionNode lhs = parsePrefixExpression();
 
     if (lhs == null)
       return null;
@@ -77,7 +77,7 @@ public class ExpressionParser {
           return rhs;
       }
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_RHS_OPERAND, upcomingToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken);
     }
 
     return makeInfixExpression(lhs, upcomingToken, rhs);
@@ -139,19 +139,19 @@ public class ExpressionParser {
           ExpressionNode falseBranch = parseExpression(null);
 
           if (falseBranch == null)
-            throw new IllegalStateException("Expected false-branch of ? after :, but got nothing");
+            throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, punctuationToken);
 
           return new IfElseNode(lhs, operatorToken, rhs, punctuationToken, falseBranch);
         }
       }
 
-      throw new IllegalStateException("Expected : delimiter for ? branching, but got " + (delimiterToken == null ? "nothing" : delimiterToken.getClass().getSimpleName()));
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken);
     }
 
     return new InfixOperationNode(lhs, operatorToken, rhs);
   }
 
-  private @Nullable ExpressionNode parsePrefixOperations() {
+  private @Nullable ExpressionNode parsePrefixExpression() {
     Token operatorToken;
 
     if (!((operatorToken = tokenizer.peekToken()) instanceof PrefixOperatorToken))
@@ -164,7 +164,7 @@ public class ExpressionParser {
     ExpressionNode operand = parseExpression(null);
 
     if (operand == null)
-      throw new IllegalStateException("Expected an operand for " + prefixToken.operator + " but got nothing");
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, prefixToken);
 
     return new PrefixOperationNode(prefixToken, operand);
   }
@@ -184,6 +184,8 @@ public class ExpressionParser {
 
     List<ExpressionNode> arrayItems = new ArrayList<>();
 
+    Token delimiterToken = null;
+
     while (tokenizer.peekToken() != null) {
       ExpressionNode arrayItem = parseExpression(null);
 
@@ -191,12 +193,10 @@ public class ExpressionParser {
         if (arrayItems.isEmpty())
           break;
 
-        throw new IllegalStateException("Expected an array-item after a trailing comma");
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_ITEM, delimiterToken);
       }
 
       arrayItems.add(arrayItem);
-
-      Token delimiterToken;
 
       if ((delimiterToken = tokenizer.peekToken()) instanceof PunctuationToken) {
         PunctuationToken delimiterPunctuation = (PunctuationToken) delimiterToken;
@@ -210,7 +210,7 @@ public class ExpressionParser {
         }
       }
 
-      throw new IllegalStateException("Expected , to separate array-items or ] to terminate array, but got " + (delimiterToken == null ? "nothing" : delimiterToken.getClass().getSimpleName()));
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken);
     }
 
     Token terminatorToken;
@@ -222,7 +222,7 @@ public class ExpressionParser {
         return new ArrayNode(introductionOperator, arrayItems, terminatorPunctuation);
     }
 
-    throw new IllegalStateException("Expected closing ] of array");
+    throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken);
   }
 
   private @Nullable ExpressionNode parseParenthesesExpression() {
@@ -241,7 +241,7 @@ public class ExpressionParser {
     ExpressionNode expression = parseExpression(null);
 
     if (expression == null)
-      throw new IllegalStateException("Expected contents of parentheses, but got nothing");
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken);
 
     Token terminationToken;
 
@@ -252,7 +252,7 @@ public class ExpressionParser {
         return expression;
     }
 
-    throw new IllegalStateException("Expecting closing-parentheses, but got " + (terminationToken == null ? "nothing" : terminationToken.getClass().getSimpleName()));
+    throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken);
   }
 
   private @Nullable ExpressionNode parseTerminalNode() {

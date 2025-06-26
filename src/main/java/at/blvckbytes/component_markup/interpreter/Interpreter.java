@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface Interpreter {
 
+  // TODO: Would also be cool if interceptors could specify temporary members using this interface
+
   @NotNull String evaluateAsString(AExpression expression);
 
   @Nullable String evaluateAsStringOrNull(AExpression expression);
