@@ -26,7 +26,7 @@ public class ExpressionParser {
     Token trailingToken;
 
     if ((trailingToken = tokenizer.peekToken()) != null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_EOS, trailingToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_EOS, trailingToken.beginIndex);
 
     return result;
   }
@@ -77,7 +77,7 @@ public class ExpressionParser {
           return rhs;
       }
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken.endIndex);
     }
 
     return makeInfixExpression(lhs, upcomingToken, rhs);
@@ -90,58 +90,68 @@ public class ExpressionParser {
     @Nullable PunctuationToken colonToken
   ) {
     if (colonToken == null) {
-      colonToken = tokenizer.nextToken(PunctuationToken.class);
+      colonToken = tokenizer.peekToken(PunctuationToken.class);
 
       if (colonToken == null || colonToken.punctuation != Punctuation.COLON)
         return null;
+
+      tokenizer.nextToken();
     }
 
     PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if (terminationToken != null && terminationToken.punctuation == Punctuation.CLOSING_BRACKET)
+    if (terminationToken != null) {
+      if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, terminationToken.beginIndex);
+
       return new SubstringNode(operand, operatorToken, lowerBound, colonToken, null, terminationToken);
+    }
 
     ExpressionNode upperBound = parseExpression(null);
 
     if (upperBound == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, terminationToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, colonToken.endIndex);
 
     terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if (terminationToken != null && terminationToken.punctuation == Punctuation.CLOSING_BRACKET)
-      return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
+    if (terminationToken == null)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, upperBound.endIndex);
 
-    throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, terminationToken);
+    if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, terminationToken.beginIndex);
+
+    return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
 
   private ExpressionNode makeInfixExpression(ExpressionNode lhs, InfixOperatorToken operatorToken, ExpressionNode rhs) {
     if (operatorToken.operator == InfixOperator.SUBSCRIPTING) {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
-      if (delimiterToken != null) {
-        if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
-          return new SubscriptingNode(lhs, operatorToken, rhs, delimiterToken);
+      if (delimiterToken == null)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.endIndex);
 
-        if (delimiterToken.punctuation == Punctuation.COLON)
-          return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
-      }
+      if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
+        return new SubscriptingNode(lhs, operatorToken, rhs, delimiterToken);
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, delimiterToken);
+      if (delimiterToken.punctuation == Punctuation.COLON)
+        return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
     }
 
     if (operatorToken.operator == InfixOperator.BRANCHING) {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
-      if (delimiterToken != null && delimiterToken.punctuation == Punctuation.COLON) {
-        ExpressionNode falseBranch = parseExpression(null);
+      if (delimiterToken == null)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, rhs.endIndex);
 
-        if (falseBranch == null)
-          throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken);
+      if (delimiterToken.punctuation != Punctuation.COLON)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken.beginIndex);
 
-        return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
-      }
+      ExpressionNode falseBranch = parseExpression(null);
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken);
+      if (falseBranch == null)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken.endIndex);
+
+      return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
     return new InfixOperationNode(lhs, operatorToken, rhs);
@@ -158,7 +168,7 @@ public class ExpressionParser {
     ExpressionNode operand = parseExpression(null);
 
     if (operand == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
 
     return new PrefixOperationNode(operatorToken, operand);
   }
@@ -185,32 +195,44 @@ public class ExpressionParser {
         if (arrayItems.isEmpty())
           break;
 
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_ITEM, delimiterToken);
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_ITEM, delimiterToken.endIndex);
       }
 
       arrayItems.add(arrayItem);
 
       delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
-      if (delimiterToken != null) {
-        if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
-          break;
+      if (delimiterToken == null)
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, arrayItem.endIndex);
 
-        if (delimiterToken.punctuation == Punctuation.COMMA) {
-          tokenizer.nextToken();
-          continue;
-        }
+      if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
+        break;
+
+      if (delimiterToken.punctuation == Punctuation.COMMA) {
+        tokenizer.nextToken();
+        continue;
       }
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken.beginIndex);
     }
 
     PunctuationToken terminatorToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if (terminatorToken != null && terminatorToken.punctuation == Punctuation.CLOSING_BRACKET)
-      return new ArrayNode(introductionToken, arrayItems, terminatorToken);
+    if (terminatorToken == null) {
+      int index;
 
-    throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken);
+      if (!arrayItems.isEmpty())
+        index = arrayItems.get(arrayItems.size() - 1).endIndex;
+      else
+        index = introductionToken.endIndex;
+
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, index);
+    }
+
+    if (terminatorToken.punctuation != Punctuation.CLOSING_BRACKET)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken.beginIndex);
+
+    return new ArrayNode(introductionToken, arrayItems, terminatorToken);
   }
 
   private @Nullable ExpressionNode parseParenthesesExpression() {
@@ -227,14 +249,17 @@ public class ExpressionParser {
     ExpressionNode expression = parseExpression(null);
 
     if (expression == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken.endIndex);
 
     PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if (terminationToken != null && terminationToken.punctuation == Punctuation.CLOSING_PARENTHESIS)
-      return expression;
+    if (terminationToken == null)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, expression.endIndex);
 
-    throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken);
+    if (terminationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken.beginIndex);
+
+    return expression;
   }
 
   private @Nullable ExpressionNode parseTerminalNode() {

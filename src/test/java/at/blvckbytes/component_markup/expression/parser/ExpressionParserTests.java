@@ -16,7 +16,7 @@ import java.util.Arrays;
 public class ExpressionParserTests {
 
   // TODO: (Decide and) test where arrays are allowed to be specified
-  // TODO: Make more error-case tests and implement all remaining error-types
+  // TODO: Write cases for all error-types and indices
 
   @Test
   public void shouldParseEmptyInputAsNull() {
@@ -382,7 +382,7 @@ public class ExpressionParserTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_EOS,
-        token(trailingToken, text.anchorIndex(0))
+        text.anchorIndex(0)
       );
     }
   }
@@ -451,7 +451,7 @@ public class ExpressionParserTests {
     return new InfixOperationNode(lhs, new InfixOperatorToken(operatorBeginIndex, operator), rhs);
   }
 
-  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, @Nullable Token expectedToken) {
+  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int charIndex) {
     ExpressionParserException thrownException = null;
 
     try {
@@ -461,15 +461,8 @@ public class ExpressionParserTests {
     }
 
     Assertions.assertNotNull(thrownException, "Expected an error to be thrown");
-    Assertions.assertEquals(thrownException.error, error, "Encountered mismatching error-type");
-
-    if (expectedToken == null) {
-      Assertions.assertNull(thrownException.token, "Expected there to be no token within the exception");
-      return;
-    }
-
-    Assertions.assertNotNull(thrownException.token, "Expected there to be a token within the exception");
-    Assertions.assertEquals(expectedToken.toString(), thrownException.token.toString());
+    Assertions.assertEquals(error, thrownException.error, "Encountered mismatching error-type");
+    Assertions.assertEquals(charIndex, thrownException.charIndex);
   }
 
   private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {
