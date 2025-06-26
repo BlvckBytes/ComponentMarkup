@@ -332,7 +332,7 @@ public class ExpressionParserTests {
         token(InfixOperator.BRANCHING, text.anchorIndex(1)),
         terminal("b", text.anchorIndex(2)),
         token(Punctuation.COLON, text.anchorIndex(3)),
-        terminal("c", text.anchorIndex(3))
+        terminal("c", text.anchorIndex(4))
       )
     );
   }

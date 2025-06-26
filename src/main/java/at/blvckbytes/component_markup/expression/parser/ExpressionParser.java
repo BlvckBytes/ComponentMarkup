@@ -130,19 +130,15 @@ public class ExpressionParser {
     }
 
     if (operatorToken.operator == InfixOperator.BRANCHING) {
-      Token delimiterToken;
+      PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
-      if ((delimiterToken = tokenizer.nextToken()) instanceof PunctuationToken) {
-        PunctuationToken punctuationToken = (PunctuationToken) delimiterToken;
+      if (delimiterToken != null && delimiterToken.punctuation == Punctuation.COLON) {
+        ExpressionNode falseBranch = parseExpression(null);
 
-        if (punctuationToken.punctuation == Punctuation.COLON) {
-          ExpressionNode falseBranch = parseExpression(null);
+        if (falseBranch == null)
+          throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken);
 
-          if (falseBranch == null)
-            throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, punctuationToken);
-
-          return new IfElseNode(lhs, operatorToken, rhs, punctuationToken, falseBranch);
-        }
+        return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
       }
 
       throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken);
@@ -152,39 +148,35 @@ public class ExpressionParser {
   }
 
   private @Nullable ExpressionNode parsePrefixExpression() {
-    Token operatorToken;
+    PrefixOperatorToken operatorToken = tokenizer.peekToken(PrefixOperatorToken.class);
 
-    if (!((operatorToken = tokenizer.peekToken()) instanceof PrefixOperatorToken))
+    if (operatorToken == null)
       return parseArrayExpression();
-
-    PrefixOperatorToken prefixToken = (PrefixOperatorToken) operatorToken;
 
     tokenizer.nextToken();
 
     ExpressionNode operand = parseExpression(null);
 
     if (operand == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, prefixToken);
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken);
 
-    return new PrefixOperationNode(prefixToken, operand);
+    return new PrefixOperationNode(operatorToken, operand);
   }
 
   private @Nullable ExpressionNode parseArrayExpression() {
-    Token introductionToken;
+    InfixOperatorToken introductionToken = tokenizer.peekToken(InfixOperatorToken.class);
 
-    if (!((introductionToken = tokenizer.peekToken()) instanceof InfixOperatorToken))
+    if (introductionToken == null)
       return parseParenthesesExpression();
 
-    InfixOperatorToken introductionOperator = (InfixOperatorToken) introductionToken;
-
-    if (introductionOperator.operator != InfixOperator.SUBSCRIPTING)
+    if (introductionToken.operator != InfixOperator.SUBSCRIPTING)
       return parseParenthesesExpression();
 
     tokenizer.nextToken();
 
     List<ExpressionNode> arrayItems = new ArrayList<>();
 
-    Token delimiterToken = null;
+    PunctuationToken delimiterToken = null;
 
     while (tokenizer.peekToken() != null) {
       ExpressionNode arrayItem = parseExpression(null);
@@ -198,13 +190,13 @@ public class ExpressionParser {
 
       arrayItems.add(arrayItem);
 
-      if ((delimiterToken = tokenizer.peekToken()) instanceof PunctuationToken) {
-        PunctuationToken delimiterPunctuation = (PunctuationToken) delimiterToken;
+      delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
-        if (delimiterPunctuation.punctuation == Punctuation.CLOSING_BRACKET)
+      if (delimiterToken != null) {
+        if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
           break;
 
-        if (delimiterPunctuation.punctuation == Punctuation.COMMA) {
+        if (delimiterToken.punctuation == Punctuation.COMMA) {
           tokenizer.nextToken();
           continue;
         }
@@ -213,27 +205,21 @@ public class ExpressionParser {
       throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken);
     }
 
-    Token terminatorToken;
+    PunctuationToken terminatorToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if ((terminatorToken = tokenizer.nextToken()) instanceof PunctuationToken) {
-      PunctuationToken terminatorPunctuation = (PunctuationToken) terminatorToken;
-
-      if (terminatorPunctuation.punctuation == Punctuation.CLOSING_BRACKET)
-        return new ArrayNode(introductionOperator, arrayItems, terminatorPunctuation);
-    }
+    if (terminatorToken != null && terminatorToken.punctuation == Punctuation.CLOSING_BRACKET)
+      return new ArrayNode(introductionToken, arrayItems, terminatorToken);
 
     throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken);
   }
 
   private @Nullable ExpressionNode parseParenthesesExpression() {
-    Token introductionToken;
+    PunctuationToken introductionToken = tokenizer.peekToken(PunctuationToken.class);
 
-    if (!((introductionToken = tokenizer.peekToken()) instanceof PunctuationToken))
+    if (introductionToken == null)
       return parseTerminalNode();
 
-    PunctuationToken introductionPunctuation = (PunctuationToken) introductionToken;
-
-    if (introductionPunctuation.punctuation != Punctuation.OPENING_PARENTHESIS)
+    if (introductionToken.punctuation != Punctuation.OPENING_PARENTHESIS)
       return parseTerminalNode();
 
     tokenizer.nextToken();
@@ -243,25 +229,21 @@ public class ExpressionParser {
     if (expression == null)
       throw new ExpressionParserException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken);
 
-    Token terminationToken;
+    PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if ((terminationToken = tokenizer.nextToken()) instanceof PunctuationToken) {
-      PunctuationToken terminationPunctuation = (PunctuationToken) terminationToken;
-
-      if (terminationPunctuation.punctuation == Punctuation.CLOSING_PARENTHESIS)
-        return expression;
-    }
+    if (terminationToken != null && terminationToken.punctuation == Punctuation.CLOSING_PARENTHESIS)
+      return expression;
 
     throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken);
   }
 
   private @Nullable ExpressionNode parseTerminalNode() {
-    Token token = tokenizer.peekToken();
+    TerminalToken terminalToken = tokenizer.peekToken(TerminalToken.class);
 
-    if (!(token instanceof TerminalToken))
+    if (terminalToken == null)
       return null;
 
     tokenizer.nextToken();
-    return new TerminalNode((TerminalToken) token);
+    return new TerminalNode(terminalToken);
   }
 }
