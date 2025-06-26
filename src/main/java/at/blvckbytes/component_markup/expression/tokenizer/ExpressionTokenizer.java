@@ -291,6 +291,22 @@ public class ExpressionTokenizer {
     return null;
   }
 
+  public <T extends Token> @Nullable T peekToken(Class<T> requiredType) {
+    Token token = peekToken();
+
+    if (requiredType.isInstance(token))
+      return requiredType.cast(token);
+
+    return null;
+  }
+
+  public <T extends Token> @Nullable T nextToken(Class<T> requiredType) {
+    if (requiredType.isInstance(peekToken()))
+      return requiredType.cast(nextToken());
+
+    return null;
+  }
+
   public @Nullable Token nextToken() {
     if (!this.pendingStack.isEmpty())
       return this.pendingStack.pop();

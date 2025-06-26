@@ -264,6 +264,46 @@ public class ExpressionTokenizerTests {
     assertEquals(input.anchorIndex(0), thrownException.beginIndex, "Encountered mismatch on thrown error beginIndex");
   }
 
+  public static Token makeToken(Object value, int beginIndex) {
+    Token token;
+
+    if (value instanceof Boolean)
+      token = new BooleanToken(beginIndex, (boolean) value);
+    else if (value instanceof Double || value instanceof Float)
+      token = new DoubleToken(beginIndex, ((Number) value).doubleValue());
+    else if (value instanceof Integer || value instanceof Long)
+      token = new LongToken(beginIndex, ((Number) value).longValue());
+    else if (value instanceof InfixOperator)
+      token = new InfixOperatorToken(beginIndex, (InfixOperator) value);
+    else if (value instanceof PrefixOperator)
+      token = new PrefixOperatorToken(beginIndex, (PrefixOperator) value);
+    else if (value instanceof Punctuation)
+      token = new PunctuationToken(beginIndex, (Punctuation) value);
+    else if (value instanceof String) {
+      String stringValue = (String) value;
+      int stringLength = stringValue.length();
+
+      if (stringLength == 0)
+        throw new IllegalStateException("An empty string cannot represent a token");
+
+      if (stringValue.charAt(0) == '\'') {
+        if (stringValue.charAt(stringLength - 1) != '\'')
+          throw new IllegalStateException("Invalid string: " + stringValue);
+
+        token = new StringToken(beginIndex, stringValue.substring(1, stringLength - 1));
+      }
+      else
+        token = new IdentifierToken(beginIndex, stringValue);
+    }
+    else if (value == null)
+      token = new NullToken(beginIndex);
+
+    else
+      throw new IllegalStateException("Invalid token-representing value: " + value);
+
+    return token;
+  }
+
   private static void makeCase(TextWithAnchors input, Object... expectedValues) {
     StringBuilder actualTokensString = new StringBuilder();
 
@@ -284,45 +324,7 @@ public class ExpressionTokenizerTests {
       if (expectedTokensString.length() != 0)
         expectedTokensString.append('\n');
 
-      int charIndex = input.anchorIndex(valueIndex);
-
-      Token token;
-
-      if (expectedValue instanceof Boolean)
-        token = new BooleanToken(charIndex, (boolean) expectedValue);
-      else if (expectedValue instanceof Double || expectedValue instanceof Float)
-        token = new DoubleToken(charIndex, ((Number) expectedValue).doubleValue());
-      else if (expectedValue instanceof Integer || expectedValue instanceof Long)
-        token = new LongToken(charIndex, ((Number) expectedValue).longValue());
-      else if (expectedValue instanceof InfixOperator)
-        token = new InfixOperatorToken(charIndex, (InfixOperator) expectedValue);
-      else if (expectedValue instanceof PrefixOperator)
-        token = new PrefixOperatorToken(charIndex, (PrefixOperator) expectedValue);
-      else if (expectedValue instanceof Punctuation)
-        token = new PunctuationToken(charIndex, (Punctuation) expectedValue);
-      else if (expectedValue instanceof String) {
-        String stringValue = (String) expectedValue;
-        int stringLength = stringValue.length();
-
-        if (stringLength == 0)
-          throw new IllegalStateException("Invalid empty string at index " + valueIndex);
-
-        if (stringValue.charAt(0) == '\'') {
-          if (stringValue.charAt(stringLength - 1) != '\'')
-            throw new IllegalStateException("Invalid string: " + stringValue);
-
-          token = new StringToken(charIndex, stringValue.substring(1, stringLength - 1));
-        }
-        else
-          token = new IdentifierToken(charIndex, stringValue);
-      }
-      else if (expectedValue == null)
-        token = new NullToken(charIndex);
-
-      else
-        throw new IllegalStateException("Invalid value: " + expectedValue);
-
-      expectedTokensString.append(token);
+      expectedTokensString.append(makeToken(expectedValue, input.anchorIndex(valueIndex)));
     }
 
     assertEquals(expectedTokensString.toString(), actualTokensString.toString());
