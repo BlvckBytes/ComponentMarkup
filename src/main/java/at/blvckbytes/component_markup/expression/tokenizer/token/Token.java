@@ -1,17 +1,14 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.util.Jsonifiable;
-import at.blvckbytes.component_markup.util.JsonifyIgnore;
 
 public abstract class Token extends Jsonifiable {
 
   public final int beginIndex;
+  public final int endIndex;
 
-  // TODO: Implement me
-  @JsonifyIgnore
-  public final int endIndex = -1;
-
-  protected Token(int beginIndex) {
+  protected Token(int beginIndex, int endIndex) {
     this.beginIndex = beginIndex;
+    this.endIndex = endIndex;
   }
 }

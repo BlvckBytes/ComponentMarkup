@@ -24,6 +24,7 @@ public enum InfixOperator {
   ;
 
   private final String representation;
+  public final int length;
 
   // Higher precedence means is evaluated *earlier*.
   // Assuming the following input: "5 + 3 >= 2 + 1", the
@@ -35,6 +36,7 @@ public enum InfixOperator {
 
   InfixOperator(String representation, int precedence, boolean rightAssociative) {
     this.representation = representation;
+    this.length = representation.length();
     this.precedence = precedence;
     this.rightAssociative = rightAssociative;
   }

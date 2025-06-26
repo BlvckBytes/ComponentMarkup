@@ -8,8 +8,12 @@ public class InfixOperationNode extends ExpressionNode {
   public final InfixOperatorToken operatorToken;
   public final ExpressionNode rhs;
 
-  public InfixOperationNode(ExpressionNode lhs, InfixOperatorToken operatorToken, ExpressionNode rhs) {
-    super(lhs.beginIndex);
+  public InfixOperationNode(
+    ExpressionNode lhs,
+    InfixOperatorToken operatorToken,
+    ExpressionNode rhs
+  ) {
+    super(lhs.beginIndex, rhs.endIndex);
 
     this.lhs = lhs;
     this.operatorToken = operatorToken;

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 public class NullToken extends TerminalToken {
 
   public NullToken(int beginIndex) {
-    super(beginIndex);
+    super(beginIndex, beginIndex + (4 - 1));
   }
 
   @Override

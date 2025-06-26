@@ -9,9 +9,11 @@ public enum Punctuation {
   ;
 
   private final String representation;
+  public final int length;
 
   Punctuation(String representation) {
     this.representation = representation;
+    this.length = representation.length();
   }
 
   @Override

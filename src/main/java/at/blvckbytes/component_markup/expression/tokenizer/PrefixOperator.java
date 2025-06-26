@@ -6,9 +6,11 @@ public enum PrefixOperator {
   ;
 
   private final String representation;
+  public final int length;
 
   PrefixOperator(String representation) {
     this.representation = representation;
+    this.length = representation.length();
   }
 
   @Override

@@ -18,7 +18,7 @@ public class IfElseNode extends ExpressionNode {
     PunctuationToken branchSeparator,
     ExpressionNode branchFalse
   ) {
-    super(condition.beginIndex);
+    super(condition.beginIndex, branchFalse.endIndex);
 
     this.condition = condition;
     this.conditionSeparator = conditionSeparator;

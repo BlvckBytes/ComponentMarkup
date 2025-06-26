@@ -8,7 +8,7 @@ public class PrefixOperationNode extends ExpressionNode {
   public final ExpressionNode operand;
 
   public PrefixOperationNode(PrefixOperatorToken operatorToken, ExpressionNode operand) {
-    super(operand.beginIndex);
+    super(operand.beginIndex, operand.endIndex);
 
     this.operatorToken = operatorToken;
     this.operand = operand;

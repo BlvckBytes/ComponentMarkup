@@ -144,7 +144,10 @@ public class ExpressionTokenizer {
 
       if (peekChar() == '.') {
         nextCharIndex = savePoint;
-        return new LongToken(beginIndex, Long.parseLong(input.substring(beginIndex, nextCharIndex)));
+
+        String numberString = input.substring(beginIndex, nextCharIndex);
+
+        return new LongToken(beginIndex, numberString.length(), Long.parseLong(numberString));
       }
     }
 
@@ -152,10 +155,14 @@ public class ExpressionTokenizer {
       if (!collectSubsequentDigits())
         throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
 
-      return new DoubleToken(beginIndex, Double.parseDouble(input.substring(beginIndex, nextCharIndex)));
+      String numberString = input.substring(beginIndex, nextCharIndex);
+
+      return new DoubleToken(beginIndex, numberString.length(), Double.parseDouble(numberString));
     }
 
-    return new LongToken(beginIndex, Long.parseLong(input.substring(beginIndex, nextCharIndex)));
+    String numberString = input.substring(beginIndex, nextCharIndex);
+
+    return new LongToken(beginIndex, numberString.length(), Long.parseLong(numberString));
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
@@ -169,7 +176,9 @@ public class ExpressionTokenizer {
       return null;
     }
 
-    return new DoubleToken(beginIndex, Double.parseDouble(input.substring(beginIndex, nextCharIndex)));
+    String numberString = input.substring(beginIndex, nextCharIndex);
+
+    return new DoubleToken(beginIndex, numberString.length(), Double.parseDouble(numberString));
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationToken() {

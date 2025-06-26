@@ -7,7 +7,7 @@ public class StringToken extends TerminalToken {
   public final String value;
 
   public StringToken(int beginIndex, String value) {
-    super(beginIndex);
+    super(beginIndex, beginIndex + ((value.length() + 2) - 1));
 
     this.value = value;
   }

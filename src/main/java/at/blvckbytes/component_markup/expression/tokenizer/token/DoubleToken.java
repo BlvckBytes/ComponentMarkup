@@ -6,8 +6,8 @@ public class DoubleToken extends TerminalToken {
 
   public final double value;
 
-  public DoubleToken(int beginIndex, double value) {
-    super(beginIndex);
+  public DoubleToken(int beginIndex, int length, double value) {
+    super(beginIndex, beginIndex + (length - 1));
 
     this.value = value;
   }

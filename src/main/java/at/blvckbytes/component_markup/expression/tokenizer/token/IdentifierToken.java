@@ -7,7 +7,7 @@ public class IdentifierToken extends TerminalToken {
   public final String identifier;
 
   public IdentifierToken(int beginIndex, String identifier) {
-    super(beginIndex);
+    super(beginIndex, beginIndex + (identifier.length() - 1));
 
     this.identifier = identifier;
   }

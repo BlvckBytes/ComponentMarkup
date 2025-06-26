@@ -16,7 +16,7 @@ public class ArrayNode extends ExpressionNode {
     List<ExpressionNode> items,
     PunctuationToken closingBracket
   ) {
-    super(openingBracket.beginIndex);
+    super(openingBracket.beginIndex, closingBracket.endIndex);
 
     this.openingBracket = openingBracket;
     this.items = items;

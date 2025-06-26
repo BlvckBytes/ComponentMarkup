@@ -16,7 +16,7 @@ public class SubscriptingNode extends ExpressionNode {
     ExpressionNode rhs,
     PunctuationToken closingBracket
   ) {
-    super(lhs.beginIndex);
+    super(lhs.beginIndex, closingBracket.endIndex);
 
     this.lhs = lhs;
     this.openingBracket = openingBracket;

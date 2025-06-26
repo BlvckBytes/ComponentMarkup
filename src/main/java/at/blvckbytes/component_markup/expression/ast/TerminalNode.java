@@ -10,7 +10,7 @@ public class TerminalNode extends ExpressionNode {
   public final TerminalToken token;
 
   public TerminalNode(TerminalToken token) {
-    super(token.beginIndex);
+    super(token.beginIndex, token.endIndex);
 
     this.token = token;
   }

@@ -21,7 +21,7 @@ public class SubstringNode extends ExpressionNode {
     @Nullable ExpressionNode upperBound,
     PunctuationToken closingBracket
   ) {
-    super(openingBracket.beginIndex);
+    super(openingBracket.beginIndex, closingBracket.endIndex);
 
     this.operand = operand;
     this.openingBracket = openingBracket;

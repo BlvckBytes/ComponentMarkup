@@ -7,7 +7,7 @@ public class InfixOperatorToken extends Token {
   public final InfixOperator operator;
 
   public InfixOperatorToken(int beginIndex, InfixOperator operator) {
-    super(beginIndex);
+    super(beginIndex, beginIndex + (operator.length - 1));
 
     this.operator = operator;
   }

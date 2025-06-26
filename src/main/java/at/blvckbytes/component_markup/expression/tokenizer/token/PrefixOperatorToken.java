@@ -7,7 +7,7 @@ public class PrefixOperatorToken extends Token {
   public final PrefixOperator operator;
 
   public PrefixOperatorToken(int beginIndex, PrefixOperator operator) {
-    super(beginIndex);
+    super(beginIndex, beginIndex + (operator.length - 1));
 
     this.operator = operator;
   }

@@ -52,7 +52,7 @@ public class ExpressionTokenizerTests {
       InfixOperator.CONCATENATION,
       Punctuation.CLOSING_PARENTHESIS,
       InfixOperator.RANGE,
-      .5
+      DotDouble.of(.5)
     );
   }
 
@@ -84,7 +84,7 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      .3, "a", .5, "b", .4
+      DotDouble.of(.3), "a", DotDouble.of(.5), "b", DotDouble.of(.4)
     );
   }
 
@@ -96,7 +96,7 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      .5, InfixOperator.RANGE, .3
+      DotDouble.of(.5), InfixOperator.RANGE, DotDouble.of(.3)
     );
   }
 
@@ -128,7 +128,7 @@ public class ExpressionTokenizerTests {
     makeCase(text, PrefixOperator.FLIP_SIGN, 5.0);
 
     text = new TextWithAnchors("@-@.5");
-    makeCase(text, PrefixOperator.FLIP_SIGN, .5);
+    makeCase(text, PrefixOperator.FLIP_SIGN, DotDouble.of(.5));
 
     text = new TextWithAnchors("@5 @- @- @3");
     makeCase(text, 5, InfixOperator.SUBTRACTION, PrefixOperator.FLIP_SIGN, 3);
@@ -269,11 +269,16 @@ public class ExpressionTokenizerTests {
 
     if (value instanceof Boolean)
       token = new BooleanToken(beginIndex, (boolean) value);
-    else if (value instanceof Double || value instanceof Float)
-      token = new DoubleToken(beginIndex, ((Number) value).doubleValue());
-    else if (value instanceof Integer || value instanceof Long)
-      token = new LongToken(beginIndex, ((Number) value).longValue());
-    else if (value instanceof InfixOperator)
+    else if (value instanceof DotDouble) {
+      DotDouble dotDouble = (DotDouble) value;
+      token = new DoubleToken(beginIndex, String.valueOf(dotDouble.value).length() - 1, dotDouble.value);
+    } else if (value instanceof Double || value instanceof Float) {
+      double number = ((Number) value).doubleValue();
+      token = new DoubleToken(beginIndex, String.valueOf(number).length(), number);
+    } else if (value instanceof Integer || value instanceof Long) {
+      long number = ((Number) value).longValue();
+      token = new LongToken(beginIndex, String.valueOf(number).length(), number);
+    } else if (value instanceof InfixOperator)
       token = new InfixOperatorToken(beginIndex, (InfixOperator) value);
     else if (value instanceof PrefixOperator)
       token = new PrefixOperatorToken(beginIndex, (PrefixOperator) value);
