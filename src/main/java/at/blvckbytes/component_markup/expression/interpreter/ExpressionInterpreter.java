@@ -166,6 +166,17 @@ public class ExpressionInterpreter {
       );
     }
 
+    if (expression instanceof ArrayNode) {
+      ArrayNode node = (ArrayNode) expression;
+
+      List<Object> result = new ArrayList<>();
+
+      for (ExpressionNode item : node.items)
+        result.add(interpret(item, environment));
+
+      return result;
+    }
+
     logger.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
   }
