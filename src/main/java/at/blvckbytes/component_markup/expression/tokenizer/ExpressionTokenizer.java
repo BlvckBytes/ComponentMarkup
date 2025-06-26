@@ -183,7 +183,7 @@ public class ExpressionTokenizer {
         return new PunctuationToken(beginIndex, Punctuation.CLOSING_PARENTHESIS);
 
       case '[':
-        return new PunctuationToken(beginIndex, Punctuation.OPENING_BRACKET);
+        return new InfixOperatorToken(beginIndex, InfixOperator.SUBSCRIPTING);
 
       case ']':
         return new PunctuationToken(beginIndex, Punctuation.CLOSING_BRACKET);
@@ -234,7 +234,7 @@ public class ExpressionTokenizer {
           return new InfixOperatorToken(beginIndex, InfixOperator.NULL_COALESCE);
         }
 
-        return new PunctuationToken(beginIndex, Punctuation.QUESTION_MARK);
+        return new InfixOperatorToken(beginIndex, InfixOperator.BRANCHING);
 
       case ':':
         return new PunctuationToken(beginIndex, Punctuation.COLON);

@@ -1,12 +1,13 @@
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 import org.jetbrains.annotations.Nullable;
 
 public class SubstringNode extends ExpressionNode {
 
   public final ExpressionNode operand;
-  public final PunctuationToken openingBracket;
+  public final InfixOperatorToken openingBracket;
   public final @Nullable ExpressionNode lowerBound;
   public final PunctuationToken boundsSeparator;
   public final @Nullable ExpressionNode upperBound;
@@ -14,7 +15,7 @@ public class SubstringNode extends ExpressionNode {
 
   public SubstringNode(
     ExpressionNode operand,
-    PunctuationToken openingBracket,
+    InfixOperatorToken openingBracket,
     @Nullable ExpressionNode lowerBound,
     PunctuationToken boundsSeparator,
     @Nullable ExpressionNode upperBound,

@@ -1,17 +1,18 @@
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 
 public class SubscriptingNode extends ExpressionNode {
 
   public final ExpressionNode lhs;
-  public final PunctuationToken openingBracket;
+  public final InfixOperatorToken openingBracket;
   public final ExpressionNode rhs;
   public final PunctuationToken closingBracket;
 
   public SubscriptingNode(
     ExpressionNode lhs,
-    PunctuationToken openingBracket,
+    InfixOperatorToken openingBracket,
     ExpressionNode rhs,
     PunctuationToken closingBracket
   ) {

@@ -3,10 +3,8 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 public enum Punctuation {
   OPENING_PARENTHESIS("("),
   CLOSING_PARENTHESIS(")"),
-  OPENING_BRACKET("["),
   CLOSING_BRACKET("]"),
   COMMA(","),
-  QUESTION_MARK("?"),
   COLON(":"),
   ;
 

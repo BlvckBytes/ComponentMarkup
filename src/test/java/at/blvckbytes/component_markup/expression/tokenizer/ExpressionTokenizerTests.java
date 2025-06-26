@@ -21,13 +21,13 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       input,
-      Punctuation.QUESTION_MARK,
+      InfixOperator.BRANCHING,
       Punctuation.OPENING_PARENTHESIS,
       PrefixOperator.NEGATION,
       "'hello, world'",
       InfixOperator.ADDITION,
       Punctuation.COLON,
-      Punctuation.OPENING_BRACKET,
+      InfixOperator.SUBSCRIPTING,
       8192,
       InfixOperator.GREATER_THAN,
       PrefixOperator.FLIP_SIGN,
@@ -143,7 +143,7 @@ public class ExpressionTokenizerTests {
       PrefixOperator.FLIP_SIGN,
       3,
       InfixOperator.SUBTRACTION,
-      Punctuation.OPENING_BRACKET
+      InfixOperator.SUBSCRIPTING
     );
   }
 
