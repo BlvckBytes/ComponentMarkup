@@ -6,8 +6,8 @@ public class IdentifierToken extends TerminalToken {
 
   public final String identifier;
 
-  public IdentifierToken(int charIndex, String identifier) {
-    super(charIndex);
+  public IdentifierToken(int beginIndex, String identifier) {
+    super(beginIndex);
 
     this.identifier = identifier;
   }
