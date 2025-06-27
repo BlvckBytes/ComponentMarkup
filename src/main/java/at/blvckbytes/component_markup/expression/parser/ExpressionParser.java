@@ -31,6 +31,25 @@ public class ExpressionParser {
     return result;
   }
 
+  private ExpressionNode patchInfixIfApplicable(InfixOperationNode node) {
+    if (node.operatorToken.operator.precedence < InfixOperator.SUBSCRIPTING.precedence)
+      return node;
+
+    if (node.lhs instanceof InfixOperationNode)
+      node.lhs = patchInfixIfApplicable((InfixOperationNode) node.lhs);
+
+    if (node.lhs instanceof PrefixOperationNode) {
+      PrefixOperationNode prefixOperation = (PrefixOperationNode) node.lhs;
+
+      node.lhs = prefixOperation.operand;
+      prefixOperation.operand = patchInfixIfApplicable(node);
+
+      return prefixOperation;
+    }
+
+    return node;
+  }
+
   private @Nullable ExpressionNode parseExpression(@Nullable InfixOperator priorOperator) {
     ExpressionNode lhs = parseArrayExpression();
 
@@ -40,8 +59,12 @@ public class ExpressionParser {
     while (true) {
       ExpressionNode node = parseInfixExpression(lhs, priorOperator);
 
-      if (node == lhs)
+      if (node == lhs) {
+        if (priorOperator == null && node instanceof InfixOperationNode)
+          lhs = patchInfixIfApplicable((InfixOperationNode) node);
+
         break;
+      }
 
       lhs = node;
     }
@@ -240,7 +263,7 @@ public class ExpressionParser {
 
     tokenizer.nextToken();
 
-    ExpressionNode operand = parseParenthesesExpression();
+    ExpressionNode operand = parsePrefixExpression();
 
     if (operand == null)
       throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);

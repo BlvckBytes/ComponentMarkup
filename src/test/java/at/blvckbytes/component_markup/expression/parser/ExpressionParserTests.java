@@ -459,25 +459,117 @@ public class ExpressionParserTests {
     );
   }
 
+  private final PrefixOperator[][] prefixCases = {
+    { PrefixOperator.FLIP_SIGN },
+    { PrefixOperator.FLIP_SIGN, PrefixOperator.FLIP_SIGN },
+    { PrefixOperator.FLIP_SIGN, PrefixOperator.NEGATION, PrefixOperator.FLIP_SIGN },
+    { PrefixOperator.NEGATION, PrefixOperator.NEGATION },
+  };
+
   @Test
-  public void shouldParsePrefixWithInfixOpRightBeforeSubscripting() {
-    TextWithAnchors text = new TextWithAnchors(
-      "@-@a @?? @b"
+  public void shouldParsePrefixWithMemberAccess() {
+    for (PrefixOperator[] prefixCase : prefixCases) {
+      TextWithAnchors text = new TextWithAnchors(
+        joinAtPrependedPrefixes(prefixCase) + "@a@.@m_b@.@m_c"
+      );
+
+      makeCase(
+        text,
+        makePrefixMemberSubscriptExpression(
+          text,
+          prefixCase,
+          new String[] { "a", "m_b", "m_c" }
+        )
+      );
+    }
+  }
+
+  @Test
+  public void shouldParsePrefixWithSubscripting() {
+    for (PrefixOperator[] prefixCase : prefixCases) {
+      TextWithAnchors text = new TextWithAnchors(
+        joinAtPrependedPrefixes(prefixCase) + "@a@[@s_b@]@[@s_c@]"
+      );
+
+      makeCase(
+        text,
+        makePrefixMemberSubscriptExpression(
+          text,
+          prefixCase,
+          new String[] { "a", "s_b", "s_c" }
+        )
+      );
+    }
+  }
+
+  @Test
+  public void shouldParsePrefixWithMemberAccessAndSubscripting() {
+    for (PrefixOperator[] prefixCase : prefixCases) {
+      TextWithAnchors text = new TextWithAnchors(
+        joinAtPrependedPrefixes(prefixCase) + "@a@[@s_b@]@.@m_c@[@s_d@]@.@m_e@[@s_f@]"
+      );
+
+      makeCase(
+        text,
+        makePrefixMemberSubscriptExpression(
+          text,
+          prefixCase,
+          new String[] { "a", "s_b", "m_c", "s_d", "m_e", "s_f" }
+        )
+      );
+    }
+  }
+
+  private ExpressionNode makePrefixMemberSubscriptExpression(
+    TextWithAnchors text,
+    PrefixOperator[] prefixes,
+    String[] identifiers
+  ) {
+    ExpressionNode node = MemberAndSubscriptChainGenerator.generate(
+      text,
+      prefixes.length,
+      Arrays.asList(identifiers)
     );
 
-    makeCase(
-      text,
-      infix(
-        prefix(
-          terminal("a", text.anchorIndex(1)),
-          PrefixOperator.FLIP_SIGN,
-          text.anchorIndex(0)
-        ),
-        InfixOperator.NULL_COALESCE,
-        text.anchorIndex(2),
-        terminal("b", text.anchorIndex(3))
-      )
-    );
+    for (int i = prefixes.length - 1; i >= 0; --i)
+      node = prefix(node, prefixes[i], text.anchorIndex(i));
+
+    return node;
+  }
+
+  private String joinAtPrependedPrefixes(PrefixOperator[] prefixes) {
+    StringBuilder result = new StringBuilder();
+
+    for (PrefixOperator prefix : prefixes)
+      result.append('@').append(prefix);
+
+    return result.toString();
+  }
+
+  @Test
+  public void shouldParsePrefixWithInfixOpRightBeforeSubscripting() {
+    for (PrefixOperator[] prefixCase : prefixCases) {
+      TextWithAnchors text = new TextWithAnchors(
+        joinAtPrependedPrefixes(prefixCase) + "@a @?? @b"
+      );
+
+      int indexOffset = prefixCase.length;
+
+      ExpressionNode lhs = terminal("a", text.anchorIndex(indexOffset));
+
+      for (int i = prefixCase.length - 1; i >= 0; --i)
+        lhs = prefix(lhs, prefixCase[i], text.anchorIndex(i));
+
+      makeCase(
+        text,
+        infix(
+          lhs,
+          InfixOperator.NULL_COALESCE,
+          text.anchorIndex(indexOffset + 1),
+          terminal("b", text.anchorIndex(indexOffset + 2))
+        )
+      );
+    }
   }
 
   protected static ExpressionNode array(
