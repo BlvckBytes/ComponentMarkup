@@ -1,9 +1,6 @@
-package at.blvckbytes.component_markup.interpreter;
+package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.parser.AstParseError;
-import at.blvckbytes.component_markup.parser.AstParseException;
-import at.blvckbytes.component_markup.parser.AstParser;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
