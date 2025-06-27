@@ -21,13 +21,21 @@ public class SubstringNode extends ExpressionNode {
     @Nullable ExpressionNode upperBound,
     PunctuationToken closingBracket
   ) {
-    super(openingBracket.beginIndex, closingBracket.endIndex);
-
     this.operand = operand;
     this.openingBracket = openingBracket;
     this.lowerBound = lowerBound;
     this.boundsSeparator = boundsSeparator;
     this.upperBound = upperBound;
     this.closingBracket = closingBracket;
+  }
+
+  @Override
+  public int getBeginIndex() {
+    return operand.getBeginIndex();
+  }
+
+  @Override
+  public int getEndIndex() {
+    return closingBracket.endIndex;
   }
 }

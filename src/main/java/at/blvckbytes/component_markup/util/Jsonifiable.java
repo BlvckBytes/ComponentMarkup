@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,26 @@ public abstract class Jsonifiable {
           result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
           throw new IllegalStateException("Could not access field " + fieldName + " of " + currentClass, e);
+        }
+      }
+
+      for (Method method : currentClass.getDeclaredMethods()) {
+        if (Modifier.isStatic(method.getModifiers()))
+          continue;
+
+        if (!method.isAnnotationPresent(JsonifyGetter.class))
+          continue;
+
+        if (method.getParameterCount() > 0)
+          throw new IllegalStateException("Can only call getters which require no arguments");
+
+        String methodName = method.getName();
+
+        try {
+          method.setAccessible(true);
+          result.add(methodName, jsonifyObject(method.getReturnType(), method.invoke(instance)));
+        } catch (Exception e) {
+          throw new IllegalStateException("Could not access method " + methodName + " of " + currentClass, e);
         }
       }
 

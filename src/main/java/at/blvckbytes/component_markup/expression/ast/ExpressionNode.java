@@ -1,14 +1,15 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.util.Jsonifiable;
+import at.blvckbytes.component_markup.util.JsonifyGetter;
 
 public abstract class ExpressionNode extends Jsonifiable {
 
-  public final int beginIndex;
-  public final int endIndex;
+  protected ExpressionNode() {}
 
-  protected ExpressionNode(int beginIndex, int endIndex) {
-    this.beginIndex = beginIndex;
-    this.endIndex = endIndex;
-  }
+  @JsonifyGetter
+  public abstract int getBeginIndex();
+
+  @JsonifyGetter
+  public abstract int getEndIndex();
 }

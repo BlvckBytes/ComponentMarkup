@@ -16,10 +16,18 @@ public class ArrayNode extends ExpressionNode {
     List<ExpressionNode> items,
     PunctuationToken closingBracket
   ) {
-    super(openingBracket.beginIndex, closingBracket.endIndex);
-
     this.openingBracket = openingBracket;
     this.items = items;
     this.closingBracket = closingBracket;
+  }
+
+  @Override
+  public int getBeginIndex() {
+    return openingBracket.beginIndex;
+  }
+
+  @Override
+  public int getEndIndex() {
+    return closingBracket.endIndex;
   }
 }

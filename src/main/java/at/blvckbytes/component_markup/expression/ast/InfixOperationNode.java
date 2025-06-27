@@ -17,11 +17,22 @@ public class InfixOperationNode extends ExpressionNode {
     ExpressionNode rhs,
     @Nullable PunctuationToken terminator
   ) {
-    super(lhs.beginIndex, terminator == null ? rhs.endIndex : terminator.endIndex);
-
     this.lhs = lhs;
     this.operatorToken = operatorToken;
     this.rhs = rhs;
     this.terminator = terminator;
+  }
+
+  @Override
+  public int getBeginIndex() {
+    return lhs.getBeginIndex();
+  }
+
+  @Override
+  public int getEndIndex() {
+    if (terminator == null)
+      return rhs.getEndIndex();
+
+    return terminator.endIndex;
   }
 }

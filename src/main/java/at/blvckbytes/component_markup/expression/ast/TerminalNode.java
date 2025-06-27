@@ -10,8 +10,6 @@ public class TerminalNode extends ExpressionNode {
   public final TerminalToken token;
 
   public TerminalNode(TerminalToken token) {
-    super(token.beginIndex, token.endIndex);
-
     this.token = token;
   }
 
@@ -20,5 +18,15 @@ public class TerminalNode extends ExpressionNode {
       return environment.getVariableValue((String) token.getPlainValue());
 
     return token.getPlainValue();
+  }
+
+  @Override
+  public int getBeginIndex() {
+    return token.beginIndex;
+  }
+
+  @Override
+  public int getEndIndex() {
+    return token.endIndex;
   }
 }
