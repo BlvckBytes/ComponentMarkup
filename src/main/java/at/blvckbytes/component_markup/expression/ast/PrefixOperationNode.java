@@ -4,8 +4,8 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.PrefixOperatorT
 
 public class PrefixOperationNode extends ExpressionNode {
 
-  public final PrefixOperatorToken operatorToken;
-  public final ExpressionNode operand;
+  public PrefixOperatorToken operatorToken;
+  public ExpressionNode operand;
 
   public PrefixOperationNode(PrefixOperatorToken operatorToken, ExpressionNode operand) {
     this.operatorToken = operatorToken;

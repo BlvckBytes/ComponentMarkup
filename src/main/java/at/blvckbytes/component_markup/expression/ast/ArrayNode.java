@@ -7,9 +7,9 @@ import java.util.List;
 
 public class ArrayNode extends ExpressionNode {
 
-  public final InfixOperatorToken openingBracket;
-  public final List<ExpressionNode> items;
-  public final PunctuationToken closingBracket;
+  public InfixOperatorToken openingBracket;
+  public List<ExpressionNode> items;
+  public PunctuationToken closingBracket;
 
   public ArrayNode(
     InfixOperatorToken openingBracket,

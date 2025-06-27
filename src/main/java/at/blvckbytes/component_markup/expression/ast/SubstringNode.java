@@ -6,12 +6,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class SubstringNode extends ExpressionNode {
 
-  public final ExpressionNode operand;
-  public final InfixOperatorToken openingBracket;
-  public final @Nullable ExpressionNode lowerBound;
-  public final PunctuationToken boundsSeparator;
-  public final @Nullable ExpressionNode upperBound;
-  public final PunctuationToken closingBracket;
+  public ExpressionNode operand;
+  public InfixOperatorToken openingBracket;
+  public @Nullable ExpressionNode lowerBound;
+  public PunctuationToken boundsSeparator;
+  public @Nullable ExpressionNode upperBound;
+  public PunctuationToken closingBracket;
 
   public SubstringNode(
     ExpressionNode operand,

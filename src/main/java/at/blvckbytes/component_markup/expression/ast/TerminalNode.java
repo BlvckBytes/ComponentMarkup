@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TerminalNode extends ExpressionNode {
 
-  public final TerminalToken token;
+  public TerminalToken token;
 
   public TerminalNode(TerminalToken token) {
     this.token = token;

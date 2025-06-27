@@ -5,11 +5,11 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToke
 
 public class IfElseNode extends ExpressionNode {
 
-  public final ExpressionNode condition;
-  public final InfixOperatorToken conditionSeparator;
-  public final ExpressionNode branchTrue;
-  public final PunctuationToken branchSeparator;
-  public final ExpressionNode branchFalse;
+  public ExpressionNode condition;
+  public InfixOperatorToken conditionSeparator;
+  public ExpressionNode branchTrue;
+  public PunctuationToken branchSeparator;
+  public ExpressionNode branchFalse;
 
   public IfElseNode(
     ExpressionNode condition,

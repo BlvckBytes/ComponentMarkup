@@ -6,10 +6,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class InfixOperationNode extends ExpressionNode {
 
-  public final ExpressionNode lhs;
-  public final InfixOperatorToken operatorToken;
-  public final ExpressionNode rhs;
-  public final @Nullable PunctuationToken terminator;
+  public ExpressionNode lhs;
+  public InfixOperatorToken operatorToken;
+  public ExpressionNode rhs;
+  public @Nullable PunctuationToken terminator;
 
   public InfixOperationNode(
     ExpressionNode lhs,
