@@ -192,8 +192,16 @@ public class ExpressionInterpreter {
     if (source instanceof List<?>) {
       List<?> list = (List<?>) source;
       int index = (int) environment.getValueInterpreter().asLong(key);
+      int listSize = list.size();
 
-      if (index < 0 || index >= list.size())
+      if (index < 0) {
+        if (Math.abs(index) > listSize)
+          return null;
+
+        index += listSize;
+      }
+
+      if (index < 0 || index >= listSize)
         return null;
 
       return list.get(index);
