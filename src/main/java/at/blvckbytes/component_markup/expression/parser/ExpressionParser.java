@@ -190,7 +190,7 @@ public class ExpressionParser {
 
     PunctuationToken delimiterToken = null;
 
-    while (tokenizer.peekToken() != null) {
+    while (true) {
       ExpressionNode arrayItem = parseExpression(null);
 
       if (arrayItem == null) {
