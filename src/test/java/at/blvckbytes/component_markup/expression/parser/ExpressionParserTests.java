@@ -307,9 +307,10 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      subscripting(
+      infix(
         terminal("a", text.anchorIndex(0)),
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(1)),
+        InfixOperator.SUBSCRIPTING,
+        text.anchorIndex(1),
         terminal("b", text.anchorIndex(2)),
         token(Punctuation.CLOSING_BRACKET, text.anchorIndex(3))
       )
@@ -375,7 +376,7 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      subscripting(
+      infix(
         array(
           token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
           token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4)),
@@ -383,7 +384,8 @@ public class ExpressionParserTests {
           terminal(1, text.anchorIndex(2)),
           terminal(2, text.anchorIndex(3))
         ),
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(5)),
+        InfixOperator.SUBSCRIPTING,
+        text.anchorIndex(5),
         terminal(0, text.anchorIndex(6)),
         token(Punctuation.CLOSING_BRACKET, text.anchorIndex(7))
       )
@@ -398,8 +400,8 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      subscripting(
-        subscripting(
+      infix(
+        infix(
           array(
             token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
             token(Punctuation.CLOSING_BRACKET, text.anchorIndex(13)),
@@ -422,11 +424,13 @@ public class ExpressionParserTests {
               terminal(5, text.anchorIndex(11))
             )
           ),
-          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(14)),
+          InfixOperator.SUBSCRIPTING,
+          text.anchorIndex(14),
           terminal(0, text.anchorIndex(15)),
           token(Punctuation.CLOSING_BRACKET, text.anchorIndex(16))
         ),
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(17)),
+        InfixOperator.SUBSCRIPTING,
+        text.anchorIndex(17),
         terminal(1, text.anchorIndex(18)),
         token(Punctuation.CLOSING_BRACKET, text.anchorIndex(19))
       )
@@ -441,13 +445,14 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      subscripting(
+      infix(
         array(
           token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
           token(Punctuation.CLOSING_BRACKET, text.anchorIndex(2)),
           terminal(0, text.anchorIndex(1))
         ),
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(3)),
+        InfixOperator.SUBSCRIPTING,
+        text.anchorIndex(3),
         terminal(0, text.anchorIndex(4)),
         token(Punctuation.CLOSING_BRACKET, text.anchorIndex(5))
       )
@@ -470,15 +475,6 @@ public class ExpressionParserTests {
     ExpressionNode branchFalse
   ) {
     return new IfElseNode(condition, (InfixOperatorToken) conditionSeparator, branchTrue, (PunctuationToken) branchSeparator, branchFalse);
-  }
-
-  protected static ExpressionNode subscripting(
-    ExpressionNode lhs,
-    Token openingBracket,
-    ExpressionNode rhs,
-    Token closingBracket
-  ) {
-    return new SubscriptingNode(lhs, (InfixOperatorToken) openingBracket, rhs, (PunctuationToken) closingBracket);
   }
 
   protected static ExpressionNode substring(
@@ -515,7 +511,11 @@ public class ExpressionParserTests {
   }
 
   protected static ExpressionNode infix(ExpressionNode lhs, InfixOperator operator, int operatorBeginIndex, ExpressionNode rhs) {
-    return new InfixOperationNode(lhs, new InfixOperatorToken(operatorBeginIndex, operator), rhs);
+    return infix(lhs, operator, operatorBeginIndex, rhs, null);
+  }
+
+  protected static ExpressionNode infix(ExpressionNode lhs, InfixOperator operator, int operatorBeginIndex, ExpressionNode rhs, @Nullable Token terminator) {
+    return new InfixOperationNode(lhs, new InfixOperatorToken(operatorBeginIndex, operator), rhs, (PunctuationToken) terminator);
   }
 
   private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {

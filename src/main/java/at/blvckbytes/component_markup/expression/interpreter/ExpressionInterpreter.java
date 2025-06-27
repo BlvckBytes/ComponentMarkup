@@ -145,17 +145,13 @@ public class ExpressionInterpreter {
         case NULL_COALESCE:
           return lhsValue != null ? lhsValue : rhsValue;
 
+        case SUBSCRIPTING:
+          return performSubscripting(lhsValue, rhsValue, environment);
+
         default:
           logger.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
           return null;
       }
-    }
-
-    if (expression instanceof SubscriptingNode) {
-      SubscriptingNode node = (SubscriptingNode) expression;
-      Object lhs = interpret(node.lhs, environment);
-      Object rhs = interpret(node.rhs, environment);
-      return performSubscripting(lhs, rhs, environment);
     }
 
     if (expression instanceof IfElseNode) {

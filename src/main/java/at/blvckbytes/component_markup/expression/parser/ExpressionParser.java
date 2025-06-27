@@ -32,7 +32,7 @@ public class ExpressionParser {
   }
 
   private @Nullable ExpressionNode parseExpression(@Nullable InfixOperator priorOperator) {
-    ExpressionNode lhs = parsePrefixExpression();
+    ExpressionNode lhs = parseArrayExpression();
 
     if (lhs == null)
       return null;
@@ -48,6 +48,10 @@ public class ExpressionParser {
 
     return lhs;
   }
+
+  // ================================================================================
+  // Infix
+  // ================================================================================
 
   private @Nullable ExpressionNode parseInfixExpression(ExpressionNode lhs, @Nullable InfixOperator priorOperator) {
     InfixOperatorToken upcomingToken = tokenizer.peekToken(InfixOperatorToken.class);
@@ -131,7 +135,7 @@ public class ExpressionParser {
         throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.endIndex);
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
-        return new SubscriptingNode(lhs, operatorToken, rhs, delimiterToken);
+        return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
 
       if (delimiterToken.punctuation == Punctuation.COLON)
         return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
@@ -156,33 +160,21 @@ public class ExpressionParser {
       return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
-    return new InfixOperationNode(lhs, operatorToken, rhs);
+    return new InfixOperationNode(lhs, operatorToken, rhs, null);
   }
 
-  private @Nullable ExpressionNode parsePrefixExpression() {
-    PrefixOperatorToken operatorToken = tokenizer.peekToken(PrefixOperatorToken.class);
-
-    if (operatorToken == null)
-      return parseArrayExpression();
-
-    tokenizer.nextToken();
-
-    ExpressionNode operand = parseExpression(null);
-
-    if (operand == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
-
-    return new PrefixOperationNode(operatorToken, operand);
-  }
+  // ================================================================================
+  // Array
+  // ================================================================================
 
   private @Nullable ExpressionNode parseArrayExpression() {
     InfixOperatorToken introductionToken = tokenizer.peekToken(InfixOperatorToken.class);
 
     if (introductionToken == null)
-      return parseParenthesesExpression();
+      return parsePrefixExpression();
 
     if (introductionToken.operator != InfixOperator.SUBSCRIPTING)
-      return parseParenthesesExpression();
+      return parsePrefixExpression();
 
     tokenizer.nextToken();
 
@@ -236,6 +228,29 @@ public class ExpressionParser {
 
     return new ArrayNode(introductionToken, arrayItems, terminatorToken);
   }
+  // ================================================================================
+  // Prefix
+  // ================================================================================
+
+  private @Nullable ExpressionNode parsePrefixExpression() {
+    PrefixOperatorToken operatorToken = tokenizer.peekToken(PrefixOperatorToken.class);
+
+    if (operatorToken == null)
+      return parseParenthesesExpression();
+
+    tokenizer.nextToken();
+
+    ExpressionNode operand = parseParenthesesExpression();
+
+    if (operand == null)
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
+
+    return new PrefixOperationNode(operatorToken, operand);
+  }
+
+  // ================================================================================
+  // Parentheses
+  // ================================================================================
 
   private @Nullable ExpressionNode parseParenthesesExpression() {
     PunctuationToken introductionToken = tokenizer.peekToken(PunctuationToken.class);
@@ -263,6 +278,10 @@ public class ExpressionParser {
 
     return expression;
   }
+
+  // ================================================================================
+  // Terminal
+  // ================================================================================
 
   private @Nullable ExpressionNode parseTerminalNode() {
     TerminalToken terminalToken = tokenizer.peekToken(TerminalToken.class);
