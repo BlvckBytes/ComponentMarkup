@@ -34,9 +34,10 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable AExpression condition;
   public ConditionType conditionType = ConditionType.NONE;
 
-  public @Nullable AExpression iterable;
-  public @Nullable AstNode separator;
-  public String iterationVariable = "";
+  public @Nullable AExpression forIterable;
+  public @Nullable AstNode forSeparator;
+  public @Nullable AExpression forReversed;
+  public String forIterationVariable = "";
 
   public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {
     this.tag = tag;
@@ -96,12 +97,13 @@ public class TagAndBuffers implements ParserChildItem {
           );
         }
 
-        if (tagAndBuffers.iterable != null) {
+        if (tagAndBuffers.forIterable != null) {
           currentNode = new ForLoopNode(
-            tagAndBuffers.iterable,
-            tagAndBuffers.iterationVariable,
+            tagAndBuffers.forIterable,
+            tagAndBuffers.forIterationVariable,
             currentNode,
-            tagAndBuffers.separator,
+            tagAndBuffers.forSeparator,
+            tagAndBuffers.forReversed,
             tagAndBuffers.bindings
           );
 

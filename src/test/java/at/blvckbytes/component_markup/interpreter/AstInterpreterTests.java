@@ -104,10 +104,16 @@ public class AstInterpreterTests {
 
   @Test
   public void shouldRenderForLoop() {
+    makeForLoopCase(false);
+    makeForLoopCase(true);
+  }
+
+  private void makeForLoopCase(boolean reversed) {
     TextWithAnchors text = new TextWithAnchors(
       "<red",
       "  *for-char=\"my_chars\"",
       "  for-separator={ <aqua>separator }",
+      "  for-reversed=" + reversed,
       "  let-index=\"loop.index\"",
       ">",
       "  {{char}} at index {{index}}"
@@ -192,6 +198,7 @@ public class AstInterpreterTests {
                   ))
                 ))
             ))
+            .reverse(reversed)
         ))
     );
   }

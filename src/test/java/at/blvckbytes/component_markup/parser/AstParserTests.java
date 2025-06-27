@@ -71,6 +71,7 @@ public class AstParserTests extends AstParserTestsBase {
           .child(text(imm("hello, "), text.anchor(1)))
           .child(text(expr("member"), text.anchor(2)))
           .child(text(imm("!"), text.anchor(3))),
+        null,
         null
       )
     );
@@ -96,15 +97,20 @@ public class AstParserTests extends AstParserTestsBase {
             .child(text(expr("member"), text.anchor(2)))
             .child(text(imm("!"), text.anchor(3)))
         ),
+        null,
         null
       )
     );
   }
 
   @Test
-  public void shouldParseForLoopWithSeparator() {
+  public void shouldParseForLoopWithSeparatorAndReversed() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red *for-member=\"members\" for-separator={ <aqua>@separator }>@Hello, world"
+      "<red",
+      "  *for-member=\"members\"",
+      "  for-separator={ <aqua>@separator }",
+      "  for-reversed=true",
+      ">@Hello, world"
     );
 
     makeCase(
@@ -115,7 +121,8 @@ public class AstParserTests extends AstParserTestsBase {
         text(imm("Hello, world"), text.anchor(1))
           .color("red"),
         text(imm("separator"), text.anchor(0))
-          .color("aqua")
+          .color("aqua"),
+        imm(true)
       )
     );
   }

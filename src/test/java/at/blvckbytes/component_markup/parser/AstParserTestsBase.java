@@ -26,8 +26,8 @@ public abstract class AstParserTestsBase {
 
   private static final IExpressionEvaluator expressionEvaluator = new GPEEE(Logger.getAnonymousLogger());
 
-  protected static NodeWrapper<ForLoopNode> forLoop(AExpression iterable, String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator) {
-    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), new ArrayList<>()));
+  protected static NodeWrapper<ForLoopNode> forLoop(AExpression iterable, String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable AExpression reversed) {
+    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
   }
 
   @SafeVarargs
@@ -38,6 +38,10 @@ public abstract class AstParserTestsBase {
       conditions.add(wrappedCondition.get());
 
     return new NodeWrapper<>(new IfElseIfElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
+  }
+
+  protected static AExpression imm(boolean value) {
+    return ImmediateExpression.of(value);
   }
 
   protected static AExpression imm(String value) {

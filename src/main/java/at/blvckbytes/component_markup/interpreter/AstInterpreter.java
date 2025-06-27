@@ -242,15 +242,28 @@ public class AstInterpreter implements Interpreter {
 
     Set<String> introducedNames = introduceLetBindings(node);
 
-    for (int index = 0; index < items.size(); ++index) {
+    boolean reversed;
+
+    if (node.reversed == null)
+      reversed = false;
+    else {
+      Object reversedValue = expressionEvaluator.evaluateExpression(node.reversed, environment);
+      reversed = environment.getValueInterpreter().asBoolean(reversedValue);
+    }
+
+    int size = items.size();
+
+    for (int index = (reversed ? size - 1 : 0); (reversed ? index >= 0 : index < size); index += (reversed ? -1 : 1)) {
       Object item = items.get(index);
 
       loopVariable.setIndex(index);
 
       environment.updateVariable(node.iterationVariable, item);
 
-      if (index != 0 && node.separator != null)
-        _interpret(node.separator);
+      if (node.separator != null) {
+        if (reversed ? index != size - 1 : index != 0)
+          _interpret(node.separator);
+      }
 
       _interpret(node.body);
     }

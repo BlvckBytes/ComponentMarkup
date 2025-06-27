@@ -315,10 +315,61 @@ public class AstParserErrorTests {
   }
 
   @Test
+  public void shouldThrowOnNonSubtreeForSeparator() {
+    makeErrorCase(
+      AstParseError.EXPECTED_SUBTREE_VALUE,
+      "<red *for-member=\"members\" @for-separator=.5>"
+    );
+
+    makeErrorCase(
+      AstParseError.EXPECTED_SUBTREE_VALUE,
+      "<red *for-member=\"members\" @for-separator=5>"
+    );
+
+    makeErrorCase(
+      AstParseError.EXPECTED_SUBTREE_VALUE,
+      "<red *for-member=\"members\" @for-separator=true>"
+    );
+
+    makeErrorCase(
+      AstParseError.EXPECTED_SUBTREE_VALUE,
+      "<red *for-member=\"members\" @for-separator=\"hello\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnNonScalarForReversed() {
+    makeErrorCase(
+      AstParseError.EXPECTED_SCALAR_VALUE,
+      "<red *for-member=\"members\" @for-reversed={}>"
+    );
+  }
+
+  @Test
   public void shouldThrowOnMultipleNonMultiAttributes() {
     makeErrorCase(
       AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-separator={} @for-separator={}>"
+    );
+
+    makeErrorCase(
+      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      "<red *for-member=\"members\" for-reversed=true @for-reversed=false>"
+    );
+
+    makeErrorCase(
+      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      "<red *for-member=\"members\" for-reversed=.5 @for-reversed=.2>"
+    );
+
+    makeErrorCase(
+      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      "<red *for-member=\"members\" for-reversed=5 @for-reversed=2>"
+    );
+
+    makeErrorCase(
+      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      "<red *for-member=\"members\" for-reversed=\"hello\" @for-reversed=\"hello\">"
     );
 
     makeErrorCase(

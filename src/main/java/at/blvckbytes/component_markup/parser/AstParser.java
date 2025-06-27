@@ -99,7 +99,7 @@ public class AstParser implements XmlEventConsumer {
       if (!isValidExpressionIdentifier(bindingName))
         throw new AstParseException(lastPosition, AstParseError.MALFORMED_IDENTIFIER);
 
-      if (bindingName.equals(currentLayer.iterationVariable))
+      if (bindingName.equals(currentLayer.forIterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
       AExpression bindingExpression = expressionEvaluator.parseString(value);
@@ -121,6 +121,25 @@ public class AstParser implements XmlEventConsumer {
       name = name.substring(1, nameLength - 1);
     }
 
+    AExpression expression = isExpressionMode ? expressionEvaluator.parseString(value) : ImmediateExpression.of(value);
+
+    if (currentLayer.forIterable != null) {
+      if (name.equals("for-reversed")) {
+        if (currentLayer.forReversed != null)
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
+        currentLayer.forReversed = expression;
+        return;
+      }
+
+      if (name.equals("for-separator")) {
+        if (currentLayer.forSeparator != null)
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
+        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+      }
+    }
+
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
@@ -132,7 +151,6 @@ public class AstParser implements XmlEventConsumer {
     if (!attribute.multiValue && currentLayer.hasAttribute(name))
       throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-    AExpression expression = isExpressionMode ? expressionEvaluator.parseString(value) : ImmediateExpression.of(value);
     currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
   }
 
@@ -186,10 +204,13 @@ public class AstParser implements XmlEventConsumer {
 
     TagAndBuffers currentLayer = tagStack.peek();
 
-    if (name.equals("for-separator") && currentLayer.iterable != null) {
-      if (currentLayer.separator != null)
+    if (name.equals("for-separator") && currentLayer.forIterable != null) {
+      if (currentLayer.forSeparator != null)
         throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
     }
+
+    else if (name.equals("for-reversed"))
+      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
 
     else {
       AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
@@ -227,8 +248,8 @@ public class AstParser implements XmlEventConsumer {
     AstNode subtree = subtreeParser.getResult();
     subtreeParser = null;
 
-    if (name.equals("for-separator") && currentLayer.iterable != null) {
-      currentLayer.separator = subtree;
+    if (name.equals("for-separator") && currentLayer.forIterable != null) {
+      currentLayer.forSeparator = subtree;
       return;
     }
 
@@ -404,7 +425,7 @@ public class AstParser implements XmlEventConsumer {
       if (value == null)
         throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
-      if (currentLayer.iterable != null)
+      if (currentLayer.forIterable != null)
         throw new AstParseException(lastPosition, AstParseError.MULTIPLE_LOOPS);
 
       String iterationVariable = name.substring(5);
@@ -415,8 +436,8 @@ public class AstParser implements XmlEventConsumer {
       if (currentLayer.hasLetBinding(iterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
-      currentLayer.iterable = expressionEvaluator.parseString(value);
-      currentLayer.iterationVariable = iterationVariable;
+      currentLayer.forIterable = expressionEvaluator.parseString(value);
+      currentLayer.forIterationVariable = iterationVariable;
       return;
     }
 
@@ -436,6 +457,24 @@ public class AstParser implements XmlEventConsumer {
       throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
+
+    if (currentLayer.forIterable != null) {
+      if (name.equals("for-separator")) {
+        if (currentLayer.forSeparator != null)
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
+        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+      }
+
+      if (name.equals("for-reversed")) {
+        if (currentLayer.forReversed != null)
+          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+
+        currentLayer.forReversed = expression;
+        return;
+      }
+    }
+
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)

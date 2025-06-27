@@ -13,12 +13,14 @@ public class ForLoopNode extends AstNode {
   public final String iterationVariable;
   public final AstNode body;
   public final @Nullable AstNode separator;
+  public final @Nullable AExpression reversed;
 
   public ForLoopNode(
     AExpression iterable,
     String iterationVariable,
     AstNode body,
     @Nullable AstNode separator,
+    @Nullable AExpression reversed,
     List<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
@@ -27,5 +29,6 @@ public class ForLoopNode extends AstNode {
     this.iterationVariable = iterationVariable;
     this.body = body;
     this.separator = separator;
+    this.reversed = reversed;
   }
 }
