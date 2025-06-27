@@ -6,8 +6,8 @@ public class BooleanToken extends TerminalToken {
 
   public final boolean value;
 
-  public BooleanToken(int beginIndex, boolean value) {
-    super(beginIndex, beginIndex + ((value ? 4 : 5) - 1));
+  public BooleanToken(int beginIndex, String raw, boolean value) {
+    super(beginIndex, raw);
 
     this.value = value;
   }

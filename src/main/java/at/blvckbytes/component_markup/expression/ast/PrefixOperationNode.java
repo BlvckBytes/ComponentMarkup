@@ -21,4 +21,9 @@ public class PrefixOperationNode extends ExpressionNode {
   public int getEndIndex() {
     return operand.getEndIndex();
   }
+
+  @Override
+  public String toExpression() {
+    return parenthesise(operatorToken.operator + operand.toExpression());
+  }
 }

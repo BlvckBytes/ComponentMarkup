@@ -576,6 +576,28 @@ public class ExpressionParserTests {
     }
   }
 
+  @Test
+  public void shouldConvertNodesToExpressions() {
+    makeCasePlain("5 + 4");
+    makeCasePlain("a[b].c");
+    makeCasePlain("d && (f || g)");
+    makeCasePlain(".23 - .4 & 'hello'");
+    makeCasePlain("a[:]");
+    makeCasePlain("a[b:]");
+    makeCasePlain("a[:b]");
+    makeCasePlain("a[c:b]");
+    makeCasePlain("a ? b : c");
+    makeCasePlain("[a, b, c]");
+    makeCasePlain("[]");
+  }
+
+  @Test
+  public void shouldPassComplicatedPlainTests() {
+    // Because honestly, I'm too lazy to depict the whole AST...
+
+    makeCasePlain("a + --b * c & --a.b[c].d");
+  }
+
   protected static ExpressionNode array(
     Token openingBracket,
     Token closingBracket,
@@ -650,5 +672,12 @@ public class ExpressionParserTests {
 
     Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
     Assertions.assertEquals(expectedNode.toString(), actualNode.toString());
+  }
+
+  private void makeCasePlain(String expression) {
+    ExpressionNode actualNode = ExpressionParser.parse(expression);
+
+    Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
+    Assertions.assertEquals(expression, actualNode.toExpression());
   }
 }

@@ -6,8 +6,8 @@ public class LongToken extends TerminalToken {
 
   public final long value;
 
-  public LongToken(int beginIndex, int length, long value) {
-    super(beginIndex, beginIndex + (length - 1));
+  public LongToken(int beginIndex, String raw, long value) {
+    super(beginIndex, raw);
 
     this.value = value;
   }

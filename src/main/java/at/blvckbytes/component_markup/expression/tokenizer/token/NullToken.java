@@ -4,8 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class NullToken extends TerminalToken {
 
-  public NullToken(int beginIndex) {
-    super(beginIndex, beginIndex + (4 - 1));
+  public NullToken(int beginIndex, String raw) {
+    super(beginIndex, raw);
   }
 
   @Override

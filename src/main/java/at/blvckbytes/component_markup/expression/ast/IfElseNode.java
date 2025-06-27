@@ -34,4 +34,15 @@ public class IfElseNode extends ExpressionNode {
   public int getEndIndex() {
     return branchFalse.getEndIndex();
   }
+
+  @Override
+  public String toExpression() {
+    return parenthesise(
+      condition.toExpression()
+        + " " + conditionSeparator.operator
+        + " " + branchTrue.toExpression()
+        + " " + branchSeparator.punctuation
+        + " " + branchFalse.toExpression()
+    );
+  }
 }

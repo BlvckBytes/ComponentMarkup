@@ -30,4 +30,22 @@ public class ArrayNode extends ExpressionNode {
   public int getEndIndex() {
     return closingBracket.endIndex;
   }
+
+  @Override
+  public String toExpression() {
+    StringBuilder result = new StringBuilder();
+
+    result.append(openingBracket.operator);
+
+    for (int itemIndex = 0; itemIndex < items.size(); ++itemIndex) {
+      if (itemIndex != 0)
+        result.append(", ");
+
+      result.append(items.get(itemIndex).toExpression());
+    }
+
+    result.append(closingBracket.punctuation);
+
+    return parenthesise(result.toString());
+  }
 }

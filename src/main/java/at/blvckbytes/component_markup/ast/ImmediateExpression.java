@@ -6,9 +6,9 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 
 public class ImmediateExpression {
 
-  private static final TerminalNode TRUE_EXPRESSION = new TerminalNode(new BooleanToken(0, true));
-  private static final TerminalNode FALSE_EXPRESSION = new TerminalNode(new BooleanToken(0, false));
-  private static final TerminalNode NULL_EXPRESSION = new TerminalNode(new NullToken(0));
+  private static final TerminalNode TRUE_EXPRESSION = new TerminalNode(new BooleanToken(0, "true", true));
+  private static final TerminalNode FALSE_EXPRESSION = new TerminalNode(new BooleanToken(0, "false", false));
+  private static final TerminalNode NULL_EXPRESSION = new TerminalNode(new NullToken(0, "null"));
 
   // TODO: I kind of don't like this class... Also, the lengths should not be 0 - they *are* known.
 
@@ -17,11 +17,11 @@ public class ImmediateExpression {
   }
 
   public static ExpressionNode of(long value) {
-    return new TerminalNode(new LongToken(0, 0, value));
+    return new TerminalNode(new LongToken(0, String.valueOf(value), value));
   }
 
   public static ExpressionNode of(double value) {
-    return new TerminalNode(new DoubleToken(0, 0, value));
+    return new TerminalNode(new DoubleToken(0, String.valueOf(value), value));
   }
 
   public static ExpressionNode of(boolean value) {

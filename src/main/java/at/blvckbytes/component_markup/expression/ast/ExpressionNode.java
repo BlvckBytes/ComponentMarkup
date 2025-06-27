@@ -14,4 +14,13 @@ public abstract class ExpressionNode extends Jsonifiable {
 
   @JsonifyGetter
   public abstract int getEndIndex();
+
+  public abstract String toExpression();
+
+  protected String parenthesise(String input) {
+    if (!parenthesised)
+      return input;
+
+    return "(" + input + ")";
+  }
 }

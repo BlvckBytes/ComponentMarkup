@@ -108,13 +108,13 @@ public class ExpressionTokenizer {
 
     switch (value) {
       case "true":
-        return new BooleanToken(beginIndex, true);
+        return new BooleanToken(beginIndex, "true", true);
 
       case "false":
-        return new BooleanToken(beginIndex, false);
+        return new BooleanToken(beginIndex, "false", false);
 
       case "null":
-        return new NullToken(beginIndex);
+        return new NullToken(beginIndex, "null");
     }
 
     return new IdentifierToken(beginIndex, value);
@@ -147,7 +147,7 @@ public class ExpressionTokenizer {
 
         String numberString = input.substring(beginIndex, nextCharIndex);
 
-        return new LongToken(beginIndex, numberString.length(), Long.parseLong(numberString));
+        return new LongToken(beginIndex, numberString, Long.parseLong(numberString));
       }
     }
 
@@ -157,12 +157,12 @@ public class ExpressionTokenizer {
 
       String numberString = input.substring(beginIndex, nextCharIndex);
 
-      return new DoubleToken(beginIndex, numberString.length(), Double.parseDouble(numberString));
+      return new DoubleToken(beginIndex, numberString, Double.parseDouble(numberString));
     }
 
     String numberString = input.substring(beginIndex, nextCharIndex);
 
-    return new LongToken(beginIndex, numberString.length(), Long.parseLong(numberString));
+    return new LongToken(beginIndex, numberString, Long.parseLong(numberString));
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
@@ -178,7 +178,7 @@ public class ExpressionTokenizer {
 
     String numberString = input.substring(beginIndex, nextCharIndex);
 
-    return new DoubleToken(beginIndex, numberString.length(), Double.parseDouble(numberString));
+    return new DoubleToken(beginIndex, numberString, Double.parseDouble(numberString));
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationToken() {

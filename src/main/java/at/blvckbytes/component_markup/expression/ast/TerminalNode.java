@@ -29,4 +29,9 @@ public class TerminalNode extends ExpressionNode {
   public int getEndIndex() {
     return token.endIndex;
   }
+
+  @Override
+  public String toExpression() {
+    return parenthesise(token.raw);
+  }
 }

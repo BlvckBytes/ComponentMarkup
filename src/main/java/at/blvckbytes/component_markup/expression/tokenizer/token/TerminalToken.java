@@ -4,8 +4,12 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class TerminalToken extends Token {
 
-  protected TerminalToken(int beginIndex, int endIndex) {
-    super(beginIndex, endIndex);
+  public final String raw;
+
+  protected TerminalToken(int beginIndex, String raw) {
+    super(beginIndex, beginIndex + (raw.length() - 1));
+
+    this.raw = raw;
   }
 
   public abstract @Nullable Object getPlainValue();

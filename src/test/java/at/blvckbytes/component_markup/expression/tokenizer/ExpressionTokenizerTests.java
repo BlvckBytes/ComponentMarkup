@@ -268,16 +268,16 @@ public class ExpressionTokenizerTests {
     Token token;
 
     if (value instanceof Boolean)
-      token = new BooleanToken(beginIndex, (boolean) value);
+      token = new BooleanToken(beginIndex, String.valueOf(value), (boolean) value);
     else if (value instanceof DotDouble) {
       DotDouble dotDouble = (DotDouble) value;
-      token = new DoubleToken(beginIndex, String.valueOf(dotDouble.value).length() - 1, dotDouble.value);
+      token = new DoubleToken(beginIndex, String.valueOf(dotDouble.value).substring(1), dotDouble.value);
     } else if (value instanceof Double || value instanceof Float) {
       double number = ((Number) value).doubleValue();
-      token = new DoubleToken(beginIndex, String.valueOf(number).length(), number);
+      token = new DoubleToken(beginIndex, String.valueOf(number), number);
     } else if (value instanceof Integer || value instanceof Long) {
       long number = ((Number) value).longValue();
-      token = new LongToken(beginIndex, String.valueOf(number).length(), number);
+      token = new LongToken(beginIndex, String.valueOf(number), number);
     } else if (value instanceof InfixOperator)
       token = new InfixOperatorToken(beginIndex, (InfixOperator) value);
     else if (value instanceof PrefixOperator)
@@ -301,7 +301,7 @@ public class ExpressionTokenizerTests {
         token = new IdentifierToken(beginIndex, stringValue);
     }
     else if (value == null)
-      token = new NullToken(beginIndex);
+      token = new NullToken(beginIndex, "null");
 
     else
       throw new IllegalStateException("Invalid token-representing value: " + value);

@@ -38,4 +38,16 @@ public class SubstringNode extends ExpressionNode {
   public int getEndIndex() {
     return closingBracket.endIndex;
   }
+
+  @Override
+  public String toExpression() {
+    return parenthesise(
+      operand.toExpression()
+        + openingBracket.operator
+        + (lowerBound == null ? "" : lowerBound.toExpression())
+        + ":"
+        + (upperBound == null ? "" : upperBound.toExpression())
+        + closingBracket.punctuation
+    );
+  }
 }
