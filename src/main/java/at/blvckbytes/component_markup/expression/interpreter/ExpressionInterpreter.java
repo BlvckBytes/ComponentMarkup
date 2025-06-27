@@ -3,6 +3,8 @@ package at.blvckbytes.component_markup.expression.interpreter;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
@@ -55,10 +57,27 @@ public class ExpressionInterpreter {
     if (expression instanceof InfixOperationNode) {
       InfixOperationNode node = (InfixOperationNode) expression;
       Object lhsValue = interpret(node.lhs, environment);
-      Object rhsValue = interpret(node.rhs, environment);
 
       InfixOperator infixOperator = node.operatorToken.operator;
       ArithmeticOperator arithmeticOperator = ArithmeticOperator.fromInfix(infixOperator);
+
+      if (infixOperator == InfixOperator.MEMBER) {
+        Object rhsValue = null;
+
+        if (node.rhs instanceof TerminalNode) {
+          TerminalToken terminalToken = ((TerminalNode) node.rhs).token;
+
+          if (terminalToken instanceof IdentifierToken)
+            rhsValue = ((IdentifierToken) terminalToken).identifier;
+        }
+
+        if (rhsValue == null)
+          rhsValue = interpret(node.rhs, environment);
+
+        return performSubscripting(lhsValue, rhsValue, environment);
+      }
+
+      Object rhsValue = interpret(node.rhs, environment);
 
       if (arithmeticOperator != null) {
         Number lhs = valueInterpreter.asLongOrDouble(lhsValue);
@@ -116,9 +135,6 @@ public class ExpressionInterpreter {
 
           return result;
         }
-
-        case MEMBER:
-          return performSubscripting(lhsValue, rhsValue, environment);
 
         case CONJUNCTION:
           return valueInterpreter.asBoolean(lhsValue) && valueInterpreter.asBoolean(rhsValue);

@@ -107,7 +107,17 @@ public class DefaultValueInterpreter implements ValueInterpreter {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public @NotNull List<Object> asList(@Nullable Object value) {
+    if (value instanceof List<?>)
+      return (List<Object>) value;
+
+    if (value instanceof Collection<?>)
+      return new ArrayList<>((Collection<?>) value);
+
+    if (value instanceof Map<?, ?>)
+      return new ArrayList<>(((Map<?, ?>) value).keySet());
+
     List<Object> result = new ArrayList<>();
     result.add(value);
     return result;
