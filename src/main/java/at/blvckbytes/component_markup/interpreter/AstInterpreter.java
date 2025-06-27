@@ -4,9 +4,9 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.*;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
-import me.blvckbytes.gpeee.IExpressionEvaluator;
-import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class AstInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
-  private final IExpressionEvaluator expressionEvaluator;
+  private final ExpressionInterpreter expressionInterpreter;
   private final TemporaryMemberEnvironment environment;
   private final Logger logger;
   private final InterceptorStack interceptors;
@@ -25,12 +25,12 @@ public class AstInterpreter implements Interpreter {
 
   private AstInterpreter(
     ComponentConstructor componentConstructor,
-    IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment baseEnvironment,
+    ExpressionInterpreter expressionInterpreter,
+    InterpretationEnvironment baseEnvironment,
     Logger logger
   ) {
     this.componentConstructor = componentConstructor;
-    this.expressionEvaluator = expressionEvaluator;
+    this.expressionInterpreter = expressionInterpreter;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.logger = logger;
     this.interceptors = new InterceptorStack(this);
@@ -39,8 +39,8 @@ public class AstInterpreter implements Interpreter {
 
   public static Object interpretSingle(
     ComponentConstructor componentConstructor,
-    IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment baseEnvironment,
+    ExpressionInterpreter expressionInterpreter,
+    InterpretationEnvironment baseEnvironment,
     Logger logger,
     char breakChar,
     AstNode node
@@ -48,23 +48,23 @@ public class AstInterpreter implements Interpreter {
     if (breakChar == 0)
       throw new IllegalStateException("Break-char cannot be zero");
 
-    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, logger)
+    return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
       .interpret(node, breakChar).get(0);
   }
 
   public static List<Object> interpretMulti(
     ComponentConstructor componentConstructor,
-    IExpressionEvaluator expressionEvaluator,
-    IEvaluationEnvironment baseEnvironment,
+    ExpressionInterpreter expressionInterpreter,
+    InterpretationEnvironment baseEnvironment,
     Logger logger,
     AstNode node
   ) {
-    return new AstInterpreter(componentConstructor, expressionEvaluator, baseEnvironment, logger)
+    return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
       .interpret(node, (char) 0);
   }
 
   @Override
-  public @NotNull String evaluateAsString(AExpression expression) {
+  public @NotNull String evaluateAsString(ExpressionNode expression) {
     String value = evaluateAsStringOrNull(expression);
 
     if (value == null)
@@ -74,9 +74,9 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable String evaluateAsStringOrNull(AExpression expression) {
+  public @Nullable String evaluateAsStringOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+      Object result = expressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -89,7 +89,7 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public long evaluateAsLong(AExpression expression) {
+  public long evaluateAsLong(ExpressionNode expression) {
     Long value = evaluateAsLongOrNull(expression);
 
     if (value == null)
@@ -99,9 +99,9 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Long evaluateAsLongOrNull(AExpression expression) {
+  public @Nullable Long evaluateAsLongOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+      Object result = expressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -114,7 +114,7 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public double evaluateAsDouble(AExpression expression) {
+  public double evaluateAsDouble(ExpressionNode expression) {
     Double value = evaluateAsDoubleOrNull(expression);
 
     if (value == null)
@@ -124,9 +124,9 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Double evaluateAsDoubleOrNull(AExpression expression) {
+  public @Nullable Double evaluateAsDoubleOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+      Object result = expressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -139,7 +139,7 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public boolean evaluateAsBoolean(AExpression expression) {
+  public boolean evaluateAsBoolean(ExpressionNode expression) {
     Boolean value = evaluateAsBooleanOrNull(expression);
 
     if (value == null)
@@ -149,9 +149,9 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Boolean evaluateAsBooleanOrNull(AExpression expression) {
+  public @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionEvaluator.evaluateExpression(expression, environment);
+      Object result = expressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -190,7 +190,7 @@ public class AstInterpreter implements Interpreter {
       throw new IllegalStateException("Expecting at least one condition!");
 
     for (ConditionalNode conditional : node.conditions) {
-      Object result = expressionEvaluator.evaluateExpression(conditional.condition, environment);
+      Object result = expressionInterpreter.interpret(conditional.condition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
@@ -206,7 +206,7 @@ public class AstInterpreter implements Interpreter {
   }
 
   private void interpretConditional(ConditionalNode node) {
-    Object result = expressionEvaluator.evaluateExpression(node.condition, environment);
+    Object result = expressionInterpreter.interpret(node.condition, environment);
 
     if (environment.getValueInterpreter().asBoolean(result))
       _interpret(node.body);
@@ -219,7 +219,7 @@ public class AstInterpreter implements Interpreter {
     Map<String, Object> boundVariables = new HashMap<>();
 
     for (LetBinding letBinding : node.letBindings) {
-      Object value = expressionEvaluator.evaluateExpression(letBinding.expression, environment);
+      Object value = expressionInterpreter.interpret(letBinding.expression, environment);
 
       if (boundVariables.put(letBinding.name, value) != null)
         throw new IllegalStateException("Duplicate let-binding " + letBinding.name);
@@ -232,8 +232,8 @@ public class AstInterpreter implements Interpreter {
   }
 
   private void interpretForLoop(ForLoopNode node) {
-    Object iterable = expressionEvaluator.evaluateExpression(node.iterable, environment);
-    List<Object> items = environment.getValueInterpreter().asCollection(iterable);
+    Object iterable = expressionInterpreter.interpret(node.iterable, environment);
+    List<Object> items = environment.getValueInterpreter().asList(iterable);
 
     environment.pushVariable(node.iterationVariable, null);
 
@@ -247,7 +247,7 @@ public class AstInterpreter implements Interpreter {
     if (node.reversed == null)
       reversed = false;
     else {
-      Object reversedValue = expressionEvaluator.evaluateExpression(node.reversed, environment);
+      Object reversedValue = expressionInterpreter.interpret(node.reversed, environment);
       reversed = environment.getValueInterpreter().asBoolean(reversedValue);
     }
 

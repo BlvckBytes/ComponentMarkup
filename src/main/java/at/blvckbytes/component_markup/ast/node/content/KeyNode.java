@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.node.content;
 
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class KeyNode extends ContentNode {
 
-  public final AExpression key;
+  public final ExpressionNode key;
 
   public KeyNode(
-    AExpression key,
+    ExpressionNode key,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {

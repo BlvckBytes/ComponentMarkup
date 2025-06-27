@@ -5,8 +5,8 @@ import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeWrapper<T extends AstNode> {
@@ -23,7 +23,7 @@ public class NodeWrapper<T extends AstNode> {
     return this;
   }
 
-  public NodeWrapper<T> let(String name, AExpression expression, CursorPosition position) {
+  public NodeWrapper<T> let(String name, ExpressionNode expression, CursorPosition position) {
     assert node.letBindings != null;
     node.letBindings.add(new LetBinding(name, expression, position));
     return this;
@@ -33,7 +33,7 @@ public class NodeWrapper<T extends AstNode> {
     return color(ImmediateExpression.of(color));
   }
 
-  public NodeWrapper<T> color(AExpression color) {
+  public NodeWrapper<T> color(ExpressionNode color) {
     if (!(node instanceof StyledNode))
       throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
@@ -45,7 +45,7 @@ public class NodeWrapper<T extends AstNode> {
     return font(ImmediateExpression.of(font));
   }
 
-  public NodeWrapper<T> font(AExpression font) {
+  public NodeWrapper<T> font(ExpressionNode font) {
     if (!(node instanceof StyledNode))
       throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
@@ -53,7 +53,7 @@ public class NodeWrapper<T extends AstNode> {
     return this;
   }
 
-  public NodeWrapper<T> format(Format format, AExpression value) {
+  public NodeWrapper<T> format(Format format, ExpressionNode value) {
     if (!(node instanceof StyledNode))
       throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
@@ -65,7 +65,7 @@ public class NodeWrapper<T extends AstNode> {
     if (!(node instanceof StyledNode))
       throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
 
-    AExpression expressionValue;
+    ExpressionNode expressionValue;
 
     if (value == null)
       expressionValue = ImmediateExpression.ofNull();

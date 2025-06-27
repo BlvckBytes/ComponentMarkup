@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.tag;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 
 public class LetBinding extends Jsonifiable {
 
   public final String name;
-  public final AExpression expression;
+  public final ExpressionNode expression;
   public final CursorPosition position;
 
   public LetBinding(
     String name,
-    AExpression expression,
+    ExpressionNode expression,
     CursorPosition position
   ) {
     this.name = name;

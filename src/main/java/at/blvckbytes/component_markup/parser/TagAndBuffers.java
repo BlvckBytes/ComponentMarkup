@@ -11,8 +11,8 @@ import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.TagDefinition;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -31,12 +31,12 @@ public class TagAndBuffers implements ParserChildItem {
 
   public final List<ParserChildItem> children;
 
-  public @Nullable AExpression condition;
+  public @Nullable ExpressionNode condition;
   public ConditionType conditionType = ConditionType.NONE;
 
-  public @Nullable AExpression forIterable;
+  public @Nullable ExpressionNode forIterable;
   public @Nullable AstNode forSeparator;
-  public @Nullable AExpression forReversed;
+  public @Nullable ExpressionNode forReversed;
   public String forIterationVariable = "";
 
   public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {

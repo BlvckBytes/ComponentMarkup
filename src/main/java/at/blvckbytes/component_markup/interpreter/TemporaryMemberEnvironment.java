@@ -1,18 +1,17 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import me.blvckbytes.gpeee.functions.AExpressionFunction;
-import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
-import me.blvckbytes.gpeee.interpreter.IValueInterpreter;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class TemporaryMemberEnvironment implements IEvaluationEnvironment {
+public class TemporaryMemberEnvironment implements InterpretationEnvironment {
 
-  private final IEvaluationEnvironment baseEnvironment;
+  private final InterpretationEnvironment baseEnvironment;
   private final Map<String, Stack<Object>> shadowingStaticVariables;
 
-  public TemporaryMemberEnvironment(IEvaluationEnvironment baseEnvironment) {
+  public TemporaryMemberEnvironment(InterpretationEnvironment baseEnvironment) {
     this.baseEnvironment = baseEnvironment;
     this.shadowingStaticVariables = new HashMap<>();
   }
@@ -47,32 +46,27 @@ public class TemporaryMemberEnvironment implements IEvaluationEnvironment {
   }
 
   @Override
-  public @Nullable AExpressionFunction getFunction(String name) {
-    return baseEnvironment.getFunction(name);
-  }
-
-  @Override
-  public @Nullable Object getVariable(String name) {
+  public @Nullable Object getVariableValue(String name) {
     Stack<Object> valueStack = shadowingStaticVariables.get(name);
 
     if (valueStack != null && !valueStack.isEmpty())
       return valueStack.peek();
 
-    return baseEnvironment.getVariable(name);
+    return baseEnvironment.getVariableValue(name);
   }
 
   @Override
-  public boolean hasVariable(String name) {
+  public boolean doesVariableExist(String name) {
     Stack<Object> valueStack = shadowingStaticVariables.get(name);
 
     if (valueStack != null && !valueStack.isEmpty())
       return true;
 
-    return baseEnvironment.hasVariable(name);
+    return baseEnvironment.doesVariableExist(name);
   }
 
   @Override
-  public IValueInterpreter getValueInterpreter() {
+  public ValueInterpreter getValueInterpreter() {
     return baseEnvironment.getValueInterpreter();
   }
 }

@@ -2,8 +2,8 @@ package at.blvckbytes.component_markup.ast.tag;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.tag.attribute.*;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,8 +73,8 @@ public abstract class TagDefinition {
     throw new IllegalStateException("Required attribute '" + name + "' to be of type subtree");
   }
 
-  protected static AExpression findExpressionAttribute(String name, List<Attribute> attributes) {
-    AExpression value = tryFindExpressionAttribute(name, attributes);
+  protected static ExpressionNode findExpressionAttribute(String name, List<Attribute> attributes) {
+    ExpressionNode value = tryFindExpressionAttribute(name, attributes);
 
     if (value == null)
       throw new IllegalStateException("Required attribute '" + name + "' to be present");
@@ -82,7 +82,7 @@ public abstract class TagDefinition {
     return value;
   }
 
-  protected static @Nullable AExpression tryFindExpressionAttribute(String name, List<Attribute> attributes) {
+  protected static @Nullable ExpressionNode tryFindExpressionAttribute(String name, List<Attribute> attributes) {
     Attribute attribute = tryFindAttribute(name, attributes);
 
     if (attribute == null)
@@ -103,8 +103,8 @@ public abstract class TagDefinition {
     return null;
   }
 
-  protected static List<AExpression> findExpressionAttributes(String name, List<Attribute> attributes) {
-    List<AExpression> result = new ArrayList<>();
+  protected static List<ExpressionNode> findExpressionAttributes(String name, List<Attribute> attributes) {
+    List<ExpressionNode> result = new ArrayList<>();
 
     for (Attribute attribute : attributes) {
       if (!attribute.name.equalsIgnoreCase(name))

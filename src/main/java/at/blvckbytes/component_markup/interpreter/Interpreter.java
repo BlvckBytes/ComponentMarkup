@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.interpreter;
 
 import at.blvckbytes.component_markup.ast.node.AstNode;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,21 +11,21 @@ public interface Interpreter {
 
   // TODO: Would also be cool if interceptors could specify temporary members using this interface
 
-  @NotNull String evaluateAsString(AExpression expression);
+  @NotNull String evaluateAsString(ExpressionNode expression);
 
-  @Nullable String evaluateAsStringOrNull(AExpression expression);
+  @Nullable String evaluateAsStringOrNull(ExpressionNode expression);
 
-  long evaluateAsLong(AExpression expression);
+  long evaluateAsLong(ExpressionNode expression);
 
-  @Nullable Long evaluateAsLongOrNull(AExpression expression);
+  @Nullable Long evaluateAsLongOrNull(ExpressionNode expression);
 
-  double evaluateAsDouble(AExpression expression);
+  double evaluateAsDouble(ExpressionNode expression);
 
-  @Nullable Double evaluateAsDoubleOrNull(AExpression expression);
+  @Nullable Double evaluateAsDoubleOrNull(ExpressionNode expression);
 
-  boolean evaluateAsBoolean(AExpression expression);
+  boolean evaluateAsBoolean(ExpressionNode expression);
 
-  @Nullable Boolean evaluateAsBooleanOrNull(AExpression expression);
+  @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression);
 
   List<Object> interpret(AstNode astNode, char breakChar);
 

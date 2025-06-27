@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.util;
 
 import com.google.gson.*;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
@@ -38,15 +37,6 @@ public abstract class Jsonifiable {
           continue;
 
         String fieldName = field.getName();
-
-        if (instance instanceof JsonifyOverrider) {
-          JsonElement overrideRepresentation = ((JsonifyOverrider) instance).overrideJsonRepresentation(fieldName);
-
-          if (overrideRepresentation != null) {
-            result.add(fieldName, overrideRepresentation);
-            continue;
-          }
-        }
 
         try {
           field.setAccessible(true);
@@ -85,9 +75,6 @@ public abstract class Jsonifiable {
 
     if (item instanceof Jsonifiable)
       return ((Jsonifiable) item).jsonify();
-
-    if (item instanceof AExpression)
-      return new JsonPrimitive(((AExpression) item).expressionify());
 
     if (item instanceof Number)
       return new JsonPrimitive((Number) item);

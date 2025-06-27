@@ -1,22 +1,22 @@
 package at.blvckbytes.component_markup.ast.node.content;
 
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class ScoreNode extends ContentNode {
 
-  public final AExpression name;
-  public final AExpression objective;
-  public final @Nullable AExpression value;
+  public final ExpressionNode name;
+  public final ExpressionNode objective;
+  public final @Nullable ExpressionNode value;
 
   public ScoreNode(
-    AExpression name,
-    AExpression objective,
-    @Nullable AExpression value,
+    ExpressionNode name,
+    ExpressionNode objective,
+    @Nullable ExpressionNode value,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {

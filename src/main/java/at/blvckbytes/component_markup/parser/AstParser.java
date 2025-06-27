@@ -7,32 +7,30 @@ import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.ast.tag.attribute.SubtreeAttribute;
 import at.blvckbytes.component_markup.ast.tag.built_in.ContainerTag;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.XmlEventConsumer;
-import me.blvckbytes.gpeee.IExpressionEvaluator;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 
 public class AstParser implements XmlEventConsumer {
 
-  private static final AExpression EMPTY_TEXT = ImmediateExpression.of("");
+  private static final ExpressionNode EMPTY_TEXT = ImmediateExpression.of("");
 
   private final TagRegistry tagRegistry;
-  private final IExpressionEvaluator expressionEvaluator;
   private final Stack<TagAndBuffers> tagStack;
 
   private CursorPosition lastPosition;
   private @Nullable AstParser subtreeParser;
   private AstNode result;
 
-  public AstParser(TagRegistry tagRegistry, IExpressionEvaluator expressionEvaluator) {
-    this(tagRegistry, expressionEvaluator, CursorPosition.ZERO);
+  public AstParser(TagRegistry tagRegistry) {
+    this(tagRegistry, CursorPosition.ZERO);
   }
 
-  private AstParser(TagRegistry tagRegistry, IExpressionEvaluator expressionEvaluator, CursorPosition initialPosition) {
-    this.expressionEvaluator = expressionEvaluator;
+  private AstParser(TagRegistry tagRegistry, CursorPosition initialPosition) {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.lastPosition = initialPosition;
@@ -102,7 +100,7 @@ public class AstParser implements XmlEventConsumer {
       if (bindingName.equals(currentLayer.forIterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
-      AExpression bindingExpression = expressionEvaluator.parseString(value);
+      ExpressionNode bindingExpression = ExpressionParser.parse(value);
       LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
@@ -121,7 +119,7 @@ public class AstParser implements XmlEventConsumer {
       name = name.substring(1, nameLength - 1);
     }
 
-    AExpression expression = isExpressionMode ? expressionEvaluator.parseString(value) : ImmediateExpression.of(value);
+    ExpressionNode expression = isExpressionMode ? ExpressionParser.parse(value) : ImmediateExpression.of(value);
 
     if (currentLayer.forIterable != null) {
       if (name.equals("for-reversed")) {
@@ -225,7 +223,7 @@ public class AstParser implements XmlEventConsumer {
         throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
     }
 
-    subtreeParser = new AstParser(tagRegistry, expressionEvaluator, lastPosition);
+    subtreeParser = new AstParser(tagRegistry, lastPosition);
   }
 
   @Override
@@ -316,7 +314,7 @@ public class AstParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.children.add(new TextNode(expressionEvaluator.parseString(expression), lastPosition, null));
+    currentLayer.children.add(new TextNode(ExpressionParser.parse(expression), lastPosition, null));
   }
 
   @Override
@@ -385,7 +383,7 @@ public class AstParser implements XmlEventConsumer {
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
-        currentLayer.condition = expressionEvaluator.parseString(value);
+        currentLayer.condition = ExpressionParser.parse(value);
         currentLayer.conditionType = ConditionType.IF;
         return;
       }
@@ -397,7 +395,7 @@ public class AstParser implements XmlEventConsumer {
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
-        currentLayer.condition = expressionEvaluator.parseString(value);
+        currentLayer.condition = ExpressionParser.parse(value);
         currentLayer.conditionType = ConditionType.ELSE_IF;
         return;
       }
@@ -436,7 +434,7 @@ public class AstParser implements XmlEventConsumer {
       if (currentLayer.hasLetBinding(iterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
-      currentLayer.forIterable = expressionEvaluator.parseString(value);
+      currentLayer.forIterable = ExpressionParser.parse(value);
       currentLayer.forIterationVariable = iterationVariable;
       return;
     }
@@ -444,7 +442,7 @@ public class AstParser implements XmlEventConsumer {
     throw new AstParseException(lastPosition, AstParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE);
   }
 
-  private void handleScalarNonStringAttribute(String name, AExpression expression) {
+  private void handleScalarNonStringAttribute(String name, ExpressionNode expression) {
     name = lower(name);
 
     if (name.charAt(0) == '*')

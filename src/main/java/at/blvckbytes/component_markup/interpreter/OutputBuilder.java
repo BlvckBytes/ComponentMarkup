@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.ast.node.content.*;
 import at.blvckbytes.component_markup.ast.node.hover.*;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
-import me.blvckbytes.gpeee.parser.expression.AExpression;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -215,7 +215,7 @@ public class OutputBuilder {
     }
 
     for (Format format : Format.VALUES) {
-      AExpression formatExpression = style.formatStates[format.ordinal()];
+      ExpressionNode formatExpression = style.formatStates[format.ordinal()];
 
       if (formatExpression == ImmediateExpression.ofNull())
         continue;

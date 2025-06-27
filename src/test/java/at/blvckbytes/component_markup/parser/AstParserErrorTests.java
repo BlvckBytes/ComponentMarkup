@@ -4,8 +4,6 @@ import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.xml.XmlEventParser;
-import me.blvckbytes.gpeee.GPEEE;
-import me.blvckbytes.gpeee.IExpressionEvaluator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +13,6 @@ import java.util.logging.Logger;
 public class AstParserErrorTests {
 
   private static final Logger logger = Logger.getAnonymousLogger();
-  private static final IExpressionEvaluator expressionEvaluator = new GPEEE(logger);
 
   @Test
   public void shouldThrowOnUnknownTag() {
@@ -469,7 +466,7 @@ public class AstParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      AstParser parser = new AstParser(BuiltInTagRegistry.get(), expressionEvaluator);
+      AstParser parser = new AstParser(BuiltInTagRegistry.get());
       XmlEventParser.parse(input.text, parser);
     } catch (Throwable e) {
       thrownError = e;

@@ -1,31 +1,34 @@
 package at.blvckbytes.component_markup.ast;
 
-import me.blvckbytes.gpeee.parser.LiteralType;
-import me.blvckbytes.gpeee.parser.expression.*;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 
 public class ImmediateExpression {
 
-  private static final LiteralExpression TRUE_EXPRESSION = new LiteralExpression(LiteralType.TRUE, null, null, null);
-  private static final LiteralExpression FALSE_EXPRESSION = new LiteralExpression(LiteralType.FALSE, null, null, null);
-  private static final LiteralExpression NULL_EXPRESSION = new LiteralExpression(LiteralType.NULL, null, null, null);
+  private static final TerminalNode TRUE_EXPRESSION = new TerminalNode(new BooleanToken(0, true));
+  private static final TerminalNode FALSE_EXPRESSION = new TerminalNode(new BooleanToken(0, false));
+  private static final TerminalNode NULL_EXPRESSION = new TerminalNode(new NullToken(0));
 
-  public static AExpression of(String value) {
-    return new StringExpression(value, null, null, null);
+  // TODO: I kind of don't like this class... Also, the lengths should not be 0 - they *are* known.
+
+  public static ExpressionNode of(String value) {
+    return new TerminalNode(new StringToken(0, value));
   }
 
-  public static AExpression of(long value) {
-    return new LongExpression(value, null, null, null);
+  public static ExpressionNode of(long value) {
+    return new TerminalNode(new LongToken(0, 0, value));
   }
 
-  public static AExpression of(double value) {
-    return new DoubleExpression(value, null, null, null);
+  public static ExpressionNode of(double value) {
+    return new TerminalNode(new DoubleToken(0, 0, value));
   }
 
-  public static AExpression of(boolean value) {
+  public static ExpressionNode of(boolean value) {
     return value ? TRUE_EXPRESSION : FALSE_EXPRESSION;
   }
 
-  public static AExpression ofNull() {
+  public static ExpressionNode ofNull() {
     return NULL_EXPRESSION;
   }
 }
