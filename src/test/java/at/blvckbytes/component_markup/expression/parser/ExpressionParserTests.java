@@ -459,6 +459,27 @@ public class ExpressionParserTests {
     );
   }
 
+  @Test
+  public void shouldParsePrefixWithInfixOpRightBeforeSubscripting() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@-@a @?? @b"
+    );
+
+    makeCase(
+      text,
+      infix(
+        prefix(
+          terminal("a", text.anchorIndex(1)),
+          PrefixOperator.FLIP_SIGN,
+          text.anchorIndex(0)
+        ),
+        InfixOperator.NULL_COALESCE,
+        text.anchorIndex(2),
+        terminal("b", text.anchorIndex(3))
+      )
+    );
+  }
+
   protected static ExpressionNode array(
     Token openingBracket,
     Token closingBracket,
