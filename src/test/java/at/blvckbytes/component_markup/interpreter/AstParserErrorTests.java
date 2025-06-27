@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AstInterpreterErrorTests {
+public class AstParserErrorTests {
 
   private static final Logger logger = Logger.getAnonymousLogger();
   private static final IExpressionEvaluator expressionEvaluator = new GPEEE(logger);
