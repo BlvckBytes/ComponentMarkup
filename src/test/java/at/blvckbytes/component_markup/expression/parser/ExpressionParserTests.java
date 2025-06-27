@@ -187,19 +187,23 @@ public class ExpressionParserTests {
     makeCase(
       text,
       infix(
-        infix(
-          terminal("a", text.anchorIndex(0)),
-          InfixOperator.ADDITION,
-          text.anchorIndex(1),
-          terminal("b", text.anchorIndex(2))
+        parenthesised(
+          infix(
+            terminal("a", text.anchorIndex(0)),
+            InfixOperator.ADDITION,
+            text.anchorIndex(1),
+            terminal("b", text.anchorIndex(2))
+          )
         ),
         InfixOperator.MULTIPLICATION,
         text.anchorIndex(3),
-        infix(
-          terminal("c", text.anchorIndex(4)),
-          InfixOperator.SUBTRACTION,
-          text.anchorIndex(5),
-          terminal("d", text.anchorIndex(6))
+        parenthesised(
+          infix(
+            terminal("c", text.anchorIndex(4)),
+            InfixOperator.SUBTRACTION,
+            text.anchorIndex(5),
+            terminal("d", text.anchorIndex(6))
+          )
         )
       )
     );
@@ -621,6 +625,11 @@ public class ExpressionParserTests {
 
   protected static ExpressionNode prefix(ExpressionNode operand, PrefixOperator operator, int operatorBeginIndex) {
     return new PrefixOperationNode(new PrefixOperatorToken(operatorBeginIndex, operator), operand);
+  }
+
+  protected static ExpressionNode parenthesised(ExpressionNode node) {
+    node.parenthesised = true;
+    return node;
   }
 
   protected static ExpressionNode infix(ExpressionNode lhs, InfixOperator operator, int operatorBeginIndex, ExpressionNode rhs) {

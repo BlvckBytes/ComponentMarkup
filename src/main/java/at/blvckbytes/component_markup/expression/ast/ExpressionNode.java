@@ -5,6 +5,8 @@ import at.blvckbytes.component_markup.util.JsonifyGetter;
 
 public abstract class ExpressionNode extends Jsonifiable {
 
+  public boolean parenthesised = false;
+
   protected ExpressionNode() {}
 
   @JsonifyGetter

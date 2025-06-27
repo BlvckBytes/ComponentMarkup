@@ -299,6 +299,8 @@ public class ExpressionParser {
     if (terminationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
       throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken.beginIndex);
 
+    expression.parenthesised = true;
+
     return expression;
   }
 
