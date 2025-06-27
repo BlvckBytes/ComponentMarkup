@@ -2,15 +2,15 @@ package at.blvckbytes.component_markup.ast.node.style;
 
 import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.util.Jsonifiable;
+import at.blvckbytes.component_markup.util.JsonifyOverrider;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.blvckbytes.gpeee.parser.expression.AExpression;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public class NodeStyle extends Jsonifiable {
+public class NodeStyle extends Jsonifiable implements JsonifyOverrider {
 
   public final AExpression[] formatStates;
   public @Nullable AExpression color;
@@ -103,7 +103,7 @@ public class NodeStyle extends Jsonifiable {
   }
 
   @Override
-  protected @Nullable JsonElement overrideJsonRepresentation(String field) {
+  public @Nullable JsonElement overrideJsonRepresentation(String field) {
     if (field.equals("formatStates"))
       return new JsonPrimitive(makeFormatExpression());
 

@@ -16,13 +16,20 @@ public abstract class Jsonifiable {
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
 
   public JsonObject jsonify() {
+    return jsonify(this);
+  }
+
+  public static JsonObject jsonify(Object instance) {
     JsonObject result = new JsonObject();
 
-    Class<?> currentClass = getClass();
+    Class<?> currentClass = instance.getClass();
 
     result.addProperty("className", currentClass.getName());
 
     do {
+      if (isJavaStandardClass(currentClass))
+        break;
+
       for (Field field : currentClass.getDeclaredFields()) {
         if (Modifier.isStatic(field.getModifiers()))
           continue;
@@ -31,16 +38,19 @@ public abstract class Jsonifiable {
           continue;
 
         String fieldName = field.getName();
-        JsonElement overrideRepresentation = overrideJsonRepresentation(fieldName);
 
-        if (overrideRepresentation != null) {
-          result.add(fieldName, overrideRepresentation);
-          continue;
+        if (instance instanceof JsonifyOverrider) {
+          JsonElement overrideRepresentation = ((JsonifyOverrider) instance).overrideJsonRepresentation(fieldName);
+
+          if (overrideRepresentation != null) {
+            result.add(fieldName, overrideRepresentation);
+            continue;
+          }
         }
 
         try {
           field.setAccessible(true);
-          result.add(fieldName, jsonifyObject(field.getType(), field.get(this)));
+          result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
           throw new IllegalStateException("Could not access field " + fieldName + " of " + currentClass, e);
         }
@@ -52,11 +62,7 @@ public abstract class Jsonifiable {
     return result;
   }
 
-  protected @Nullable JsonElement overrideJsonRepresentation(String field) {
-    return null;
-  }
-
-  private JsonElement jsonifyObject(@Nullable Class<?> type, @Nullable Object item) {
+  private static JsonElement jsonifyObject(@Nullable Class<?> type, @Nullable Object item) {
     if (item == null) {
       if (type != null && (Collection.class.isAssignableFrom(type) || type.isArray()))
         return new JsonArray();
@@ -110,5 +116,23 @@ public abstract class Jsonifiable {
   @Override
   public String toString() {
     return gsonInstance.toJson(jsonify());
+  }
+
+  public static String toString(Object item) {
+    return gsonInstance.toJson(Jsonifiable.jsonify(item));
+  }
+
+  private static boolean isJavaStandardClass(Class<?> clazz) {
+    String packageName = clazz.getPackage().getName();
+
+    return (
+      packageName.startsWith("java.") ||
+        packageName.startsWith("javax.") ||
+        packageName.startsWith("jdk.") ||
+        packageName.startsWith("sun.") ||
+        packageName.startsWith("com.sun.") ||
+        packageName.startsWith("org.w3c.dom.") ||
+        packageName.startsWith("org.xml.sax.")
+    );
   }
 }
