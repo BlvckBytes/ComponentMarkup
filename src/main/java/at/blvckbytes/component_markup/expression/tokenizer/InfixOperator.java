@@ -20,7 +20,7 @@ public enum InfixOperator {
   EXPONENTIATION       ("^",  10, true),
   NULL_COALESCE        ("??", 11, false),
   SUBSCRIPTING         ("[",  12, false),
-  MEMBER               (".",  13, false),
+  MEMBER               (".",  12, false),
   ;
 
   private final String representation;
