@@ -6,16 +6,18 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 
 public class ExpressionParserTests {
 
-  // TODO: (Decide and) test where arrays are allowed to be specified
   // TODO: Write cases for all error-types and indices
 
   @Test
@@ -371,6 +373,93 @@ public class ExpressionParserTests {
   }
 
   @Test
+  public void shouldSubscriptIntoImmediateArray() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@[@0, @1, @2@]@[@0@]"
+    );
+
+    makeCase(
+      text,
+      subscripting(
+        array(
+          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
+          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4)),
+          terminal(0, text.anchorIndex(1)),
+          terminal(1, text.anchorIndex(2)),
+          terminal(2, text.anchorIndex(3))
+        ),
+        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(5)),
+        terminal(0, text.anchorIndex(6)),
+        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(7))
+      )
+    );
+  }
+
+  @Test
+  public void shouldParseNestedArrays() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@[@[@0, @1@], @[@2, @3@], @[@4, @5@]@]@[@0@]@[@1@]"
+    );
+
+    makeCase(
+      text,
+      subscripting(
+        subscripting(
+          array(
+            token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
+            token(Punctuation.CLOSING_BRACKET, text.anchorIndex(13)),
+            array(
+              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(1)),
+              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4)),
+              terminal(0, text.anchorIndex(2)),
+              terminal(1, text.anchorIndex(3))
+            ),
+            array(
+              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(5)),
+              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(8)),
+              terminal(2, text.anchorIndex(6)),
+              terminal(3, text.anchorIndex(7))
+            ),
+            array(
+              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(9)),
+              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(12)),
+              terminal(4, text.anchorIndex(10)),
+              terminal(5, text.anchorIndex(11))
+            )
+          ),
+          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(14)),
+          terminal(0, text.anchorIndex(15)),
+          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(16))
+        ),
+        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(17)),
+        terminal(1, text.anchorIndex(18)),
+        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(19))
+      )
+    );
+  }
+
+  @Test
+  public void shouldSubscriptIntoSingleItemArray() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@[@0@]@[@0@]"
+    );
+
+    makeCase(
+      text,
+      subscripting(
+        array(
+          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
+          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(2)),
+          terminal(0, text.anchorIndex(1))
+        ),
+        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(3)),
+        terminal(0, text.anchorIndex(4)),
+        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(5))
+      )
+    );
+  }
+
+  @Test
   public void shouldThrowOnTrailingExpressions() {
     Object[] trailingTokens = { "c", Punctuation.OPENING_PARENTHESIS, 5, true };
 
@@ -385,6 +474,19 @@ public class ExpressionParserTests {
         text.anchorIndex(0)
       );
     }
+  }
+
+  @Test
+  public void shouldThrowOnArrayAfterSubscripting() {
+    TextWithAnchors text = new TextWithAnchors(
+      "a[0][1@, 2]"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
+      text.anchorIndex(0)
+    );
   }
 
   protected static ExpressionNode array(
@@ -461,8 +563,15 @@ public class ExpressionParserTests {
     }
 
     Assertions.assertNotNull(thrownException, "Expected an error to be thrown");
-    Assertions.assertEquals(error, thrownException.error, "Encountered mismatching error-type");
-    Assertions.assertEquals(charIndex, thrownException.charIndex);
+
+    StringWriter stringWriter = new StringWriter();
+    thrownException.printStackTrace(new PrintWriter(stringWriter));
+
+    ExpressionParserException expectedException = new ExpressionParserException(error, charIndex);
+
+    Assertions.assertEquals(Jsonifiable.toString(expectedException), Jsonifiable.toString(thrownException), () -> (
+      "Mismatched on the exception thrown:\n" + stringWriter
+    ));
   }
 
   private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {

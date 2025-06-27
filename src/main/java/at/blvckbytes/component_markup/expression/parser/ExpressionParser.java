@@ -135,6 +135,8 @@ public class ExpressionParser {
 
       if (delimiterToken.punctuation == Punctuation.COLON)
         return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
+
+      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, delimiterToken.beginIndex);
     }
 
     if (operatorToken.operator == InfixOperator.BRANCHING) {
