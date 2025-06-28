@@ -246,6 +246,11 @@ public class ExpressionTokenizer {
         return new InfixOperatorToken(beginIndex, InfixOperator.BRANCHING);
 
       case '@':
+        if (peekChar() == '@') {
+          nextChar();
+          return new InfixOperatorToken(beginIndex, InfixOperator.EXPLODE_REGEX);
+        }
+
         return new InfixOperatorToken(beginIndex, InfixOperator.EXPLODE);
 
       case ':':

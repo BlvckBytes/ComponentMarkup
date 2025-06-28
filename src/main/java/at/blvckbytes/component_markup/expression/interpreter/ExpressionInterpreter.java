@@ -119,10 +119,17 @@ public class ExpressionInterpreter {
         case CONCATENATION:
           return valueInterpreter.asString(lhsValue) + valueInterpreter.asString(rhsValue);
 
+        case EXPLODE_REGEX:
         case EXPLODE: {
           String input = valueInterpreter.asString(lhsValue);
-          String regex = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
-          return Arrays.asList(input.split(regex));
+          String delimiter = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
+
+          return Arrays.asList(
+            Pattern.compile(
+              delimiter,
+              infixOperator == InfixOperator.EXPLODE ? Pattern.LITERAL : 0
+            ).split(input)
+          );
         }
 
         case GREATER_THAN_OR_EQUAL:

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -101,10 +102,18 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldExplodeStringWithRegex() {
+    InterpretationEnvironment environment = new EnvironmentBuilder()
+      .withStatic("input", "first0second1third2fourth");
+
     makeCase(
       "input @ '[0-9]'",
-      new EnvironmentBuilder()
-        .withStatic("input", "first0second1third2fourth"),
+      environment,
+      Collections.singletonList(environment.getVariableValue("input"))
+    );
+
+    makeCase(
+      "input @@ '[0-9]'",
+      environment,
       Arrays.asList("first", "second", "third", "fourth")
     );
   }

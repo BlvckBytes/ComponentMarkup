@@ -19,6 +19,7 @@ public enum InfixOperator {
   MODULO               ("%",   9, false),
   EXPONENTIATION       ("^",  10, true),
   EXPLODE              ("@",  11, false),
+  EXPLODE_REGEX        ("@@", 11, false),
   FALLBACK             ("??", 12, false),
   SUBSCRIPTING         ("[",  13, false),
   MEMBER               (".",  13, false),
