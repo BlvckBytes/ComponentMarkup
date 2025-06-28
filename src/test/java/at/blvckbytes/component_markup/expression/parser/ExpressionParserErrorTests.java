@@ -325,6 +325,23 @@ public class ExpressionParserErrorTests {
     }
   }
 
+  @Test
+  public void shouldThrowOnMemberAccessUsingNonIdentifierRhs() {
+    String[] nonIdentifiers = { "-d", "--d", "'hey'", "true", "false", "null", "[]" };
+
+    for (String nonIdentifier : nonIdentifiers) {
+      TextWithAnchors text = new TextWithAnchors(
+        "a + a.b.@" + nonIdentifier
+      );
+
+      makeErrorCase(
+        text,
+        ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS,
+        text.anchorIndex(0)
+      );
+    }
+  }
+
   private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int charIndex) {
     ExpressionParserException thrownException = null;
 

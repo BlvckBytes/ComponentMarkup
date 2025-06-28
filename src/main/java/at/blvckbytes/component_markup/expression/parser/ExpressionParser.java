@@ -183,6 +183,11 @@ public class ExpressionParser {
       return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
+    if (operatorToken.operator == InfixOperator.MEMBER) {
+      if (!(rhs instanceof TerminalNode) || !(((TerminalNode) rhs).token instanceof IdentifierToken))
+        throw new ExpressionParserException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex());
+    }
+
     return new InfixOperationNode(lhs, operatorToken, rhs, null);
   }
 
