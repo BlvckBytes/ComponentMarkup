@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -458,6 +459,89 @@ public class AstParserErrorTests {
       AstParseError.MISSING_ATTRIBUTE_VALUE,
       "<container @let-my_var>"
     );
+  }
+
+  @Test
+  public void shouldCreateProperErrorScreens() {
+    makeErrorScreenCase(
+      new TextWithAnchors(
+        "<translate",
+        "  let-a=\"b\"",
+        "  [key]=\"my.expr[222 c.d.e\"",
+        "  fallback={",
+        "    hello, {{user}}",
+        "  }",
+        "/>"
+      ),
+      // The escaped double-quote adds an extra char to line 3, thus it only looks like
+      // the pointer is off by one in code, not when printed later on.
+      new TextWithAnchors(
+        "1: <translate",
+        "2:   let-a=\"b\"",
+        "3:   [key]=\"my.expr[222 c.d.e\"",
+        "                     -^",
+        "   Error: Expected a closing-bracket ] after the indexing-invocation",
+        "4:   fallback={",
+        "5:     hello, {{user}}",
+        "6:   }",
+        "7: />"
+      )
+    );
+
+    makeErrorScreenCase(
+      new TextWithAnchors(
+        "<red",
+        "  let-a=\"b\"",
+        ">{{ user.'name' }}"
+      ),
+      new TextWithAnchors(
+        "1: <red",
+        "2:   let-a=\"b\"",
+        "3: >{{ user.'name' }}",
+        "           -^",
+        "   Error: The right-hand-side of a member-access (.) operation may only be an identifier"
+      )
+    );
+
+    makeErrorScreenCase(
+      new TextWithAnchors(
+        "<red",
+        "  let-a=\"b\"",
+        "/>"
+      ),
+      new TextWithAnchors(
+        "1: <red",
+        "2:   let-a=\"b\"",
+        "3: />",
+        "   -^",
+        "   Error: This tag requires a separate closing-tag as it expects content, and does not support self-closing <name />"
+      )
+    );
+
+    makeErrorScreenCase(
+      new TextWithAnchors(
+        "<red",
+        "  my-attr=trruee",
+        "/>"
+      ),
+      new TextWithAnchors(
+        "1: <red",
+        "2:   my-attr=trruee",
+        "    -^",
+        "   Error: This true-literal is malformed",
+        "3: />"
+      )
+    );
+  }
+
+  private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
+    AstParseException exception = Assertions.assertThrows(
+      AstParseException.class,
+      () -> AstParser.parse(input.text, BuiltInTagRegistry.get())
+    );
+
+    List<String> screenLines = exception.makeErrorScreen(input.text);
+    Assertions.assertEquals(screen.text, String.join("\n", screenLines));
   }
 
   private void makeErrorCase(AstParseError error, String... lines) {

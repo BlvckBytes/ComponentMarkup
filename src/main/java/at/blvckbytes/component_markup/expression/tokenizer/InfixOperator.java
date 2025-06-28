@@ -1,5 +1,9 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public enum InfixOperator {
   BRANCHING            ("?",   1, false),
   DISJUNCTION          ("||",  2, false),
@@ -24,6 +28,14 @@ public enum InfixOperator {
   SUBSCRIPTING         ("[",  13, false),
   MEMBER               (".",  13, false),
   ;
+
+  public static final List<InfixOperator> CONTAINING_PIPE = Collections.singletonList(
+    DISJUNCTION
+  );
+
+  public static final List<InfixOperator> CONTAINING_EQUALS = Arrays.asList(
+    EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL
+  );
 
   private final String representation;
   public final int length;

@@ -1,5 +1,8 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum PrefixOperator {
   NEGATION   ("!"),
   FLIP_SIGN  ("-"),
@@ -12,6 +15,10 @@ public enum PrefixOperator {
   TRIM       ("~|"),
   REVERSE    ("~<"),
   ;
+
+  public static List<PrefixOperator> CONTAINING_TILDE = Arrays.asList(
+    UPPER_CASE, LOWER_CASE, TITLE_CASE, TOGGLE_CASE, SLUGIFY, ASCIIFY, TRIM, REVERSE
+  );
 
   private final String representation;
   public final int length;
