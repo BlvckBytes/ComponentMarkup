@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.content.TranslateNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
@@ -56,7 +56,7 @@ public abstract class AstParserTestsBase {
   }
 
   protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, CursorPosition position, @Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<?>... wrappedWiths) {
-    List<AstNode> withs = new ArrayList<>();
+    List<MarkupNode> withs = new ArrayList<>();
 
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
@@ -69,7 +69,7 @@ public abstract class AstParserTestsBase {
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
-    AstNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
+    MarkupNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
     Assertions.assertEquals(wrappedExpectedAst.get().toString(), actualAst.toString());
   }
 }

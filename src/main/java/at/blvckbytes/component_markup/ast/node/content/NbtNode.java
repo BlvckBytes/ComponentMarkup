@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.ast.node.content;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.ast.tag.built_in.nbt.NbtSource;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
@@ -15,14 +15,14 @@ public class NbtNode extends ContentNode {
   public final ExpressionNode identifier;
   public final ExpressionNode path;
   public final @Nullable ExpressionNode interpret;
-  public final @Nullable AstNode separator;
+  public final @Nullable MarkupNode separator;
 
   public NbtNode(
     NbtSource source,
     ExpressionNode identifier,
     ExpressionNode path,
     @Nullable ExpressionNode interpret,
-    @Nullable AstNode separator,
+    @Nullable MarkupNode separator,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {

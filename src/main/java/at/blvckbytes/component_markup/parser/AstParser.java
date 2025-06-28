@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.ExpressionAttribute;
@@ -32,7 +32,7 @@ public class AstParser implements XmlEventConsumer {
 
   private CursorPosition lastPosition;
   private @Nullable AstParser subtreeParser;
-  private AstNode result;
+  private MarkupNode result;
 
   private AstParser(TagRegistry tagRegistry) {
     this(tagRegistry, CursorPosition.ZERO);
@@ -251,7 +251,7 @@ public class AstParser implements XmlEventConsumer {
     name = lower(name);
 
     TagAndBuffers currentLayer = tagStack.peek();
-    AstNode subtree = subtreeParser.result;
+    MarkupNode subtree = subtreeParser.result;
     subtreeParser = null;
 
     if (name.equals("for-separator") && currentLayer.forIterable != null) {
@@ -372,7 +372,7 @@ public class AstParser implements XmlEventConsumer {
   // Public API
   // ================================================================================
 
-  public static AstNode parse(String input, TagRegistry tagRegistry) {
+  public static MarkupNode parse(String input, TagRegistry tagRegistry) {
     AstParser parser = new AstParser(tagRegistry);
 
     try {

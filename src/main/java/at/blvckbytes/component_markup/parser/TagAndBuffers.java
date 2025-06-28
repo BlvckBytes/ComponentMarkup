@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.parser;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.ConditionalNode;
@@ -35,7 +35,7 @@ public class TagAndBuffers implements ParserChildItem {
   public ConditionType conditionType = ConditionType.NONE;
 
   public @Nullable ExpressionNode forIterable;
-  public @Nullable AstNode forSeparator;
+  public @Nullable MarkupNode forSeparator;
   public @Nullable ExpressionNode forReversed;
   public String forIterationVariable = "";
 
@@ -72,14 +72,14 @@ public class TagAndBuffers implements ParserChildItem {
     return true;
   }
 
-  private List<AstNode> getProcessedChildren() {
-    List<AstNode> result = new ArrayList<>(children.size());
+  private List<MarkupNode> getProcessedChildren() {
+    List<MarkupNode> result = new ArrayList<>(children.size());
 
     ConditionType priorConditionType = ConditionType.NONE;
     List<ConditionalNode> conditions = null;
 
     for (ParserChildItem child : children) {
-      AstNode currentNode;
+      MarkupNode currentNode;
 
       ConditionType currentConditionType = ConditionType.NONE;
 
@@ -230,8 +230,8 @@ public class TagAndBuffers implements ParserChildItem {
     return result;
   }
 
-  public AstNode construct() {
-    AstNode result = tag.construct(
+  public MarkupNode construct() {
+    MarkupNode result = tag.construct(
       tagNameLower,
       position,
       attributes, bindings, getProcessedChildren()
@@ -245,7 +245,7 @@ public class TagAndBuffers implements ParserChildItem {
     if (containerNode.children == null || containerNode.children.size() != 1)
       return result;
 
-    AstNode onlyChild = containerNode.children.get(0);
+    MarkupNode onlyChild = containerNode.children.get(0);
     NodeStyle containerStyle = containerNode.getStyle();
 
     if (containerStyle == null || !containerStyle.hasEffect())

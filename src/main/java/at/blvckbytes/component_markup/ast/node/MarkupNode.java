@@ -7,15 +7,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class AstNode extends Jsonifiable {
+public abstract class MarkupNode extends Jsonifiable {
 
   public final CursorPosition position;
-  public final @Nullable List<AstNode> children;
+  public final @Nullable List<MarkupNode> children;
   public final @Nullable List<LetBinding> letBindings;
 
-  public AstNode(
+  public MarkupNode(
     CursorPosition position,
-    @Nullable List<AstNode> children,
+    @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     this.position = position;

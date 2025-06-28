@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag.built_in.gradient;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
@@ -16,7 +16,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Stack;
 
-public class GradientNode extends AstNode implements InterpreterInterceptor {
+public class GradientNode extends MarkupNode implements InterpreterInterceptor {
 
   @JsonifyIgnore
   private final ThreadLocal<Stack<List<Object>>> threadLocalInjectedComponentsStack = ThreadLocal.withInitial(Stack::new);
@@ -25,7 +25,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
 
   public GradientNode(
     CursorPosition position,
-    @Nullable List<AstNode> children,
+    @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
@@ -35,7 +35,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public EnumSet<InterceptionFlag> interceptInterpretation(AstNode node, Interpreter interpreter) {
+  public EnumSet<InterceptionFlag> interceptInterpretation(MarkupNode node, Interpreter interpreter) {
     if (!affectSubtrees && interpreter.isInSubtree())
       return EnumSet.noneOf(InterceptionFlag.class);
 
@@ -94,7 +94,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public void afterInterpretation(AstNode node, Interpreter interpreter) {
+  public void afterInterpretation(MarkupNode node, Interpreter interpreter) {
     if (node instanceof GradientNode) {
       List<Object> injectedComponents = threadLocalInjectedComponentsStack.get().pop();
 
@@ -113,7 +113,7 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
   }
 
   @Override
-  public void onSkippedByOther(AstNode node, Interpreter interpreter) {
+  public void onSkippedByOther(MarkupNode node, Interpreter interpreter) {
     if (!affectSubtrees && interpreter.isInSubtree())
       return;
 

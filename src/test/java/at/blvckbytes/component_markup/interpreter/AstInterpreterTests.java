@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.interpreter.EnvironmentBuilder;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
@@ -228,7 +228,7 @@ public class AstInterpreterTests {
   }
 
   private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
-    AstNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
+    MarkupNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
 
     char breakChar;
     JsonElement expectedJson;

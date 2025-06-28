@@ -1,18 +1,18 @@
 package at.blvckbytes.component_markup.ast.node.control;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class IfElseIfElseNode extends AstNode {
+public class IfElseIfElseNode extends MarkupNode {
 
   public final List<ConditionalNode> conditions;
-  public final @Nullable AstNode fallback;
+  public final @Nullable MarkupNode fallback;
 
   public IfElseIfElseNode(
     List<ConditionalNode> conditions,
-    @Nullable AstNode fallback
+    @Nullable MarkupNode fallback
   ) {
     super(conditions.get(0).position, null, null);
 

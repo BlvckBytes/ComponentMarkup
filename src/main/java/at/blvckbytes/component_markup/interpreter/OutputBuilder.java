@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.ast.node.click.InsertNode;
@@ -43,17 +43,17 @@ public class OutputBuilder {
       return;
     }
 
-    List<AstNode> poppedNonTerminals = new ArrayList<>();
+    List<MarkupNode> poppedNonTerminals = new ArrayList<>();
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
     sequencesStack.push(new ArrayList<>());
 
-    for (AstNode poppedNonTerminal : poppedNonTerminals)
+    for (MarkupNode poppedNonTerminal : poppedNonTerminals)
       onNonTerminalBegin(poppedNonTerminal);
   }
 
-  public void onNonTerminalBegin(AstNode node) {
+  public void onNonTerminalBegin(MarkupNode node) {
     List<Object> sequence = new ArrayList<>();
     sequence.add(node);
     sequencesStack.push(sequence);
@@ -68,16 +68,16 @@ public class OutputBuilder {
     sequencesStack.peek().add(item);
   }
 
-  private @Nullable Object popAndCombineSequence(@Nullable List<AstNode> nonTerminalCollector) {
+  private @Nullable Object popAndCombineSequence(@Nullable List<MarkupNode> nonTerminalCollector) {
     if (sequencesStack.isEmpty())
       return null;
 
     List<Object> sequence = sequencesStack.pop();
 
-    AstNode nonTerminalNode = null;
+    MarkupNode nonTerminalNode = null;
 
-    if (sequence.get(0) instanceof AstNode)
-      nonTerminalNode = (AstNode) sequence.remove(0);
+    if (sequence.get(0) instanceof MarkupNode)
+      nonTerminalNode = (MarkupNode) sequence.remove(0);
 
     Object sequenceComponent;
 
@@ -322,7 +322,7 @@ public class OutputBuilder {
 
       List<Object> with = new ArrayList<>();
 
-      for (AstNode withNode : translateNode.with)
+      for (MarkupNode withNode : translateNode.with)
         with.add(interpreter.interpret(withNode, ' ').get(0));
 
       Object fallback = null;
@@ -343,7 +343,7 @@ public class OutputBuilder {
     return result;
   }
 
-  private void popAllSequencesAndAddToResult(@Nullable List<AstNode> nonTerminalCollector) {
+  private void popAllSequencesAndAddToResult(@Nullable List<MarkupNode> nonTerminalCollector) {
     while (true) {
       Object item = popAndCombineSequence(nonTerminalCollector);
 

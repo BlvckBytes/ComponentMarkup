@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.ast.node.control.*;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -43,7 +43,7 @@ public class AstInterpreter implements Interpreter {
     InterpretationEnvironment baseEnvironment,
     Logger logger,
     char breakChar,
-    AstNode node
+    MarkupNode node
   ) {
     return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
       .interpret(node, breakChar);
@@ -155,7 +155,7 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
-  public List<Object> interpret(AstNode node, char breakChar) {
+  public List<Object> interpret(MarkupNode node, char breakChar) {
     builderStack.push(new OutputBuilder(componentConstructor, this, breakChar));
     _interpret(node);
     return builderStack.pop().build();
@@ -203,7 +203,7 @@ public class AstInterpreter implements Interpreter {
       _interpret(node.body);
   }
 
-  private @Nullable Set<String> introduceLetBindings(AstNode node) {
+  private @Nullable Set<String> introduceLetBindings(MarkupNode node) {
     if (node.letBindings == null)
       return null;
 
@@ -266,7 +266,7 @@ public class AstInterpreter implements Interpreter {
     environment.popVariable("loop");
   }
 
-  private void _interpret(AstNode node) {
+  private void _interpret(MarkupNode node) {
     if (node instanceof InterpreterInterceptor)
       interceptors.add((InterpreterInterceptor) node);
 
@@ -334,7 +334,7 @@ public class AstInterpreter implements Interpreter {
     if (node.children != null && !node.children.isEmpty()) {
       builder.onNonTerminalBegin(node);
 
-      for (AstNode child : node.children)
+      for (MarkupNode child : node.children)
         _interpret(child);
 
       builder.onNonTerminalEnd();

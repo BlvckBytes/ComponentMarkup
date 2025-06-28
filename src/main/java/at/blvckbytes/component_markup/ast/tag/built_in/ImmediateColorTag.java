@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
@@ -81,12 +81,12 @@ public class ImmediateColorTag extends TagDefinition {
   }
 
   @Override
-  public @NotNull AstNode construct(
+  public @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
-    List<AstNode> children
+    List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     wrapper.getOrInstantiateStyle().color = ImmediateExpression.of(tagNameToColor(tagNameLower));

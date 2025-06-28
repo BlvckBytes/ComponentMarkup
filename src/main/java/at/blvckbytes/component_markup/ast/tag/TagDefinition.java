@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.ast.tag;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.tag.attribute.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
@@ -44,16 +44,16 @@ public abstract class TagDefinition {
 
   public abstract boolean matchName(String tagNameLower);
 
-  public abstract @NotNull AstNode construct(
+  public abstract @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
-    List<AstNode> children
+    List<MarkupNode> children
   );
 
-  protected static AstNode findSubtreeAttribute(String name, List<Attribute> attributes) {
-    AstNode value = tryFindSubtreeAttribute(name, attributes);
+  protected static MarkupNode findSubtreeAttribute(String name, List<Attribute> attributes) {
+    MarkupNode value = tryFindSubtreeAttribute(name, attributes);
 
     if (value == null)
       throw new IllegalStateException("Required attribute '" + name + "' to be present");
@@ -61,7 +61,7 @@ public abstract class TagDefinition {
     return value;
   }
 
-  protected static @Nullable AstNode tryFindSubtreeAttribute(String name, List<Attribute> attributes) {
+  protected static @Nullable MarkupNode tryFindSubtreeAttribute(String name, List<Attribute> attributes) {
     Attribute attribute = tryFindAttribute(name, attributes);
 
     if (attribute == null)
@@ -119,8 +119,8 @@ public abstract class TagDefinition {
     return result;
   }
 
-  protected static List<AstNode> findSubtreeAttributes(String name, List<Attribute> attributes) {
-    List<AstNode> result = new ArrayList<>();
+  protected static List<MarkupNode> findSubtreeAttributes(String name, List<Attribute> attributes) {
+    List<MarkupNode> result = new ArrayList<>();
 
     for (Attribute attribute : attributes) {
       if (!attribute.name.equalsIgnoreCase(name))

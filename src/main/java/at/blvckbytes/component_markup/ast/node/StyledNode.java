@@ -8,13 +8,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class StyledNode extends AstNode {
+public abstract class StyledNode extends MarkupNode {
 
   private @Nullable NodeStyle style;
 
   public StyledNode(
     CursorPosition position,
-    @Nullable List<AstNode> children,
+    @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);

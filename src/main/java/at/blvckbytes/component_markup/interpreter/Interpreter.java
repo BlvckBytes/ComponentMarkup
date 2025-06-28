@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +27,7 @@ public interface Interpreter {
 
   @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression);
 
-  List<Object> interpret(AstNode astNode, char breakChar);
+  List<Object> interpret(MarkupNode node, char breakChar);
 
   OutputBuilder getCurrentBuilder();
 

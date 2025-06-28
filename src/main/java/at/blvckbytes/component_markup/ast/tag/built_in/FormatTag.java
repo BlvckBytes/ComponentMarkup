@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.node.style.NodeStyle;
@@ -37,12 +37,12 @@ public class FormatTag extends TagDefinition {
   }
 
   @Override
-  public @NotNull AstNode construct(
+  public @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
-    List<AstNode> children
+    List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     applyFormat(attributes, wrapper.getOrInstantiateStyle());

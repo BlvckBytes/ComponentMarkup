@@ -1,12 +1,11 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.tag.*;
 import at.blvckbytes.component_markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -31,12 +30,12 @@ public class FontTag extends TagDefinition {
   }
 
   @Override
-  public @NotNull AstNode construct(
+  public @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
     List<Attribute> attributes,
     List<LetBinding> letBindings,
-    List<AstNode> children
+    List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
     wrapper.getOrInstantiateStyle().font = findExpressionAttribute("name", attributes);

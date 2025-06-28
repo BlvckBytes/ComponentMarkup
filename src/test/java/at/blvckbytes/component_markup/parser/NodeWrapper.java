@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.ast.tag.LetBinding;
@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
-public class NodeWrapper<T extends AstNode> {
+public class NodeWrapper<T extends MarkupNode> {
 
   private final T node;
 

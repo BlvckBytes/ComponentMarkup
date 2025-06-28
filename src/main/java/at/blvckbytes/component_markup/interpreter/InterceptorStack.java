@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.node.AstNode;
+import at.blvckbytes.component_markup.ast.node.MarkupNode;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ public class InterceptorStack {
     interceptorStack.add(new InterceptorEntry(interceptor));
   }
 
-  public boolean handleBeforeAndGetIfSkip(AstNode node) {
+  public boolean handleBeforeAndGetIfSkip(MarkupNode node) {
     List<EnumSet<InterceptionFlag>> flagsList = new ArrayList<>();
 
     boolean skip = false;
@@ -54,7 +54,7 @@ public class InterceptorStack {
     return skip;
   }
 
-  public void handleAfter(AstNode node) {
+  public void handleAfter(MarkupNode node) {
     for (Iterator<InterceptorEntry> iterator = interceptorStack.iterator(); iterator.hasNext();) {
       InterceptorEntry entry = iterator.next();
       EnumSet<InterceptionFlag> flags = entry.flagStack.pop();
