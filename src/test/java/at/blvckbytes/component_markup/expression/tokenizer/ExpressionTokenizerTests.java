@@ -17,7 +17,7 @@ public class ExpressionTokenizerTests {
     TextWithAnchors input = new TextWithAnchors(
       "@? @( @! @'hello, world' @+ @: @[ @8192 @> @- @&& @2.7182 @>= @* @|| @true",
       "@< @/ @?? @] @false @<= @% @null @== @^ @my_variable @!= @& @) @.. @.5",
-      "@~^ @~_ @~\\# @~! @~- @~? @~|"
+      "@~^ @~_ @~\\# @~! @~- @~? @~| @\\@"
     );
 
     makeCase(
@@ -60,7 +60,8 @@ public class ExpressionTokenizerTests {
       PrefixOperator.TOGGLE_CASE,
       PrefixOperator.SLUGIFY,
       PrefixOperator.ASCIIFY,
-      PrefixOperator.TRIM
+      PrefixOperator.TRIM,
+      InfixOperator.EXPLODE
     );
   }
 

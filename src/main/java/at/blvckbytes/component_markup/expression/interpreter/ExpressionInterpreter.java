@@ -119,6 +119,12 @@ public class ExpressionInterpreter {
         case CONCATENATION:
           return valueInterpreter.asString(lhsValue) + valueInterpreter.asString(rhsValue);
 
+        case EXPLODE: {
+          String input = valueInterpreter.asString(lhsValue);
+          String regex = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
+          return Arrays.asList(input.split(regex));
+        }
+
         case GREATER_THAN_OR_EQUAL:
         case LESS_THAN_OR_EQUAL:
           if (checkEquality(lhsValue, rhsValue))

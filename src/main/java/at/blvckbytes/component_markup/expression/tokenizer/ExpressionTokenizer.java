@@ -245,6 +245,9 @@ public class ExpressionTokenizer {
 
         return new InfixOperatorToken(beginIndex, InfixOperator.BRANCHING);
 
+      case '@':
+        return new InfixOperatorToken(beginIndex, InfixOperator.EXPLODE);
+
       case ':':
         return new PunctuationToken(beginIndex, Punctuation.COLON);
 

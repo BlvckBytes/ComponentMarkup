@@ -18,9 +18,10 @@ public enum InfixOperator {
   DIVISION             ("/",   9, false),
   MODULO               ("%",   9, false),
   EXPONENTIATION       ("^",  10, true),
-  NULL_COALESCE        ("??", 11, false),
-  SUBSCRIPTING         ("[",  12, false),
-  MEMBER               (".",  12, false),
+  EXPLODE              ("@",  11, false),
+  NULL_COALESCE        ("??", 12, false),
+  SUBSCRIPTING         ("[",  13, false),
+  MEMBER               (".",  13, false),
   ;
 
   private final String representation;

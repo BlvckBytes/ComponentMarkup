@@ -5,6 +5,8 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class ExpressionInterpreterTests {
@@ -68,6 +70,42 @@ public class ExpressionInterpreterTests {
       new EnvironmentBuilder()
         .withStatic("my_string", "  Hello, World  "),
       "before Hello, World test"
+    );
+  }
+
+  @Test
+  public void shouldExplodeStringWithNullOrEmptyString() {
+    List<String> result = Arrays.asList("h", "e", "l", "l", "o");
+
+    makeCase(
+      "'hello' @ null",
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      result
+    );
+
+    makeCase(
+      "'hello' @ ''",
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      result
+    );
+  }
+
+  @Test
+  public void shouldExplodeStringWithDelimiter() {
+    makeCase(
+      "'first second third' @ ' '",
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      Arrays.asList("first", "second", "third")
+    );
+  }
+
+  @Test
+  public void shouldExplodeStringWithRegex() {
+    makeCase(
+      "input @ '[0-9]'",
+      new EnvironmentBuilder()
+        .withStatic("input", "first0second1third2fourth"),
+      Arrays.asList("first", "second", "third", "fourth")
     );
   }
 
