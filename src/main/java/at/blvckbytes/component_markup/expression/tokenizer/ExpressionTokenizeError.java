@@ -5,5 +5,6 @@ public enum ExpressionTokenizeError {
   MALFORMED_IDENTIFIER,
   EXPECTED_DECIMAL_DIGITS,
   SINGLE_EQUALS,
+  SINGLE_TILDE,
   SINGLE_PIPE,
 }

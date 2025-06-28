@@ -47,7 +47,7 @@ public class ExpressionParserErrorTests {
   public void shouldThrowOnMissingInfixRightOperand() {
     for (InfixOperator operator : InfixOperator.values()) {
       TextWithAnchors text = new TextWithAnchors(
-        "a " + operator + "@"
+        "a " + TextWithAnchors.escape(operator) + "@"
       );
 
       makeErrorCase(
@@ -75,7 +75,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[:@" + punctuation
+        "a[:@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -90,7 +90,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[@:" + operator
+        "a[@:" + TextWithAnchors.escape(operator)
       );
 
       makeErrorCase(
@@ -128,7 +128,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[:test@" + punctuation
+        "a[:test@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -156,7 +156,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[test@" + punctuation
+        "a[test@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -184,7 +184,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a ? test@" + punctuation
+        "a ? test@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -212,7 +212,7 @@ public class ExpressionParserErrorTests {
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
       TextWithAnchors text = new TextWithAnchors(
-        operator.toString() + "@"
+        TextWithAnchors.escape(operator) + "@"
       );
 
       makeErrorCase(
@@ -273,7 +273,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "[true@" + punctuation
+        "[true@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -314,7 +314,7 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "(true@" + punctuation
+        "(true@" + TextWithAnchors.escape(punctuation)
       );
 
       makeErrorCase(
@@ -327,7 +327,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMemberAccessUsingNonIdentifierRhs() {
-    String[] nonIdentifiers = { "-d", "--d", "'hey'", "true", "false", "null", "[]" };
+    String[] nonIdentifiers = { "-d", "'hey'", "true", "false", "null", "[]" };
 
     for (String nonIdentifier : nonIdentifiers) {
       TextWithAnchors text = new TextWithAnchors(

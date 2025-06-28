@@ -1,8 +1,15 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 public enum PrefixOperator {
-  NEGATION("!"),
-  FLIP_SIGN("-"),
+  NEGATION   ("!"),
+  FLIP_SIGN  ("-"),
+  UPPER_CASE ("~^"),
+  LOWER_CASE ("~_"),
+  TITLE_CASE ("~#"),
+  TOGGLE_CASE("~!"),
+  SLUGIFY    ("~-"),
+  ASCIIFY    ("~?"),
+  TRIM       ("~|"),
   ;
 
   private final String representation;

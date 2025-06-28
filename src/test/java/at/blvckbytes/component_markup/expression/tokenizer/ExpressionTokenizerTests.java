@@ -16,7 +16,8 @@ public class ExpressionTokenizerTests {
   public void shouldTokenizeAllTypes() {
     TextWithAnchors input = new TextWithAnchors(
       "@? @( @! @'hello, world' @+ @: @[ @8192 @> @- @&& @2.7182 @>= @* @|| @true",
-      "@< @/ @?? @] @false @<= @% @null @== @^ @my_variable @!= @& @) @.. @.5"
+      "@< @/ @?? @] @false @<= @% @null @== @^ @my_variable @!= @& @) @.. @.5",
+      "@~^ @~_ @~\\# @~! @~- @~? @~|"
     );
 
     makeCase(
@@ -52,7 +53,14 @@ public class ExpressionTokenizerTests {
       InfixOperator.CONCATENATION,
       Punctuation.CLOSING_PARENTHESIS,
       InfixOperator.RANGE,
-      DotDouble.of(.5)
+      DotDouble.of(.5),
+      PrefixOperator.UPPER_CASE,
+      PrefixOperator.LOWER_CASE,
+      PrefixOperator.TITLE_CASE,
+      PrefixOperator.TOGGLE_CASE,
+      PrefixOperator.SLUGIFY,
+      PrefixOperator.ASCIIFY,
+      PrefixOperator.TRIM
     );
   }
 
@@ -109,7 +117,7 @@ public class ExpressionTokenizerTests {
 
     for (Object item : items) {
       TextWithAnchors text = new TextWithAnchors(
-        "@before @a@" + item + "@b @after"
+        "@before @a@" + TextWithAnchors.escape(item) + "@b @after"
       );
 
       makeCase(
@@ -242,6 +250,15 @@ public class ExpressionTokenizerTests {
     makeErrorCase(
       text,
       ExpressionTokenizeError.SINGLE_EQUALS
+    );
+
+    text = new TextWithAnchors(
+      "@~"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.SINGLE_TILDE
     );
   }
 

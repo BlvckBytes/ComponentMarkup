@@ -9,14 +9,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.BreakIterator;
+import java.text.Normalizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class ExpressionInterpreter {
+
+  private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]");
+  private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+  private static final Pattern NON_WORDS = Pattern.compile("[^\\p{IsAlphabetic}\\d]+");
+  private static final Pattern DASHES = Pattern.compile("(^-+)(|-+$)");
 
   private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
 
@@ -47,6 +52,27 @@ public class ExpressionInterpreter {
 
         case FLIP_SIGN:
           return flipSignOf(valueInterpreter.asLongOrDouble(operandValue));
+
+        case LOWER_CASE:
+          return valueInterpreter.asString(operandValue).toLowerCase(Locale.ROOT);
+
+        case UPPER_CASE:
+          return valueInterpreter.asString(operandValue).toUpperCase(Locale.ROOT);
+
+        case TITLE_CASE:
+          return toTitleCase(valueInterpreter.asString(operandValue));
+
+        case TOGGLE_CASE:
+          return toggleCase(valueInterpreter.asString(operandValue));
+
+        case SLUGIFY:
+          return slugify(valueInterpreter.asString(operandValue));
+
+        case ASCIIFY:
+          return asciify(valueInterpreter.asString(operandValue));
+
+        case TRIM:
+          return valueInterpreter.asString(operandValue).trim();
 
         default:
           logger.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
@@ -313,5 +339,64 @@ public class ExpressionInterpreter {
       return input.longValue() * -1;
 
     return flipSignOf(input.longValue());
+  }
+
+  private String toTitleCase(String input) {
+    if (input.isEmpty())
+      return input;
+
+    Locale locale = Locale.ROOT;
+    StringBuilder result = new StringBuilder(input.length());
+
+    BreakIterator wordIterator = BreakIterator.getWordInstance(locale);
+    wordIterator.setText(input);
+
+    int start = wordIterator.first();
+    for (int end = wordIterator.next(); end != BreakIterator.DONE; start = end, end = wordIterator.next()) {
+      String word = input.substring(start, end);
+
+      if (Character.isLetterOrDigit(word.codePointAt(0))) {
+        int firstCodepoint = word.codePointAt(0);
+        int firstCharLength = Character.charCount(firstCodepoint);
+
+        result.appendCodePoint(Character.toTitleCase(firstCodepoint));
+        result.append(word.substring(firstCharLength).toLowerCase(locale));
+        continue;
+      }
+
+      result.append(word);
+    }
+
+    return result.toString();
+  }
+
+  private String toggleCase(String input) {
+    StringBuilder result = new StringBuilder(input.length());
+
+    for (int index = 0; index < input.length(); ++index) {
+      char currentChar = input.charAt(index);
+
+      if (Character.isUpperCase(currentChar))
+        currentChar = Character.toLowerCase(currentChar);
+
+      if (Character.isLowerCase(currentChar))
+        currentChar = Character.toUpperCase(currentChar);
+
+      result.append(currentChar);
+    }
+
+    return result.toString();
+  }
+
+  private String slugify(String input) {
+    String slug = NON_WORDS.matcher(input).replaceAll("-");
+    slug = DASHES.matcher(slug).replaceAll("");
+    return slug.toLowerCase();
+  }
+
+  private String asciify(String input) {
+    String decomposed = Normalizer.normalize(input, Normalizer.Form.NFD);
+    String withoutDiacritics = DIACRITICS.matcher(decomposed).replaceAll("");
+    return NON_ASCII.matcher(withoutDiacritics).replaceAll("");
   }
 }

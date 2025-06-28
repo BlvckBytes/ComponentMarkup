@@ -26,17 +26,32 @@ public class TextWithAnchors {
 
       for (int lineCharIndex = 0; lineCharIndex < line.length(); ++lineCharIndex) {
         char currentChar = line.charAt(lineCharIndex);
+        boolean isEscaped = lineCharIndex != 0 && line.charAt(lineCharIndex - 1) == '\\';
 
         CursorPositionEvent event = new CursorPositionEvent(new CursorPosition(charIndex + 1, lineNumber, columnNumber));
 
         if (currentChar == '@') {
-          this.anchors.add(event);
-          continue;
+          if (isEscaped) {
+            result.deleteCharAt(result.length() - 1);
+            --charIndex;
+          }
+
+          else {
+            this.anchors.add(event);
+            continue;
+          }
         }
 
         if (currentChar == '#') {
-          this.auxAnchors.add(event);
-          continue;
+          if (isEscaped) {
+            result.deleteCharAt(result.length() - 1);
+            --charIndex;
+          }
+
+          else {
+            this.auxAnchors.add(event);
+            continue;
+          }
         }
 
         if (currentChar == '\n') {
@@ -101,5 +116,11 @@ public class TextWithAnchors {
       return null;
 
     return auxAnchors.get(index);
+  }
+
+  public static String escape(Object input) {
+    return String.valueOf(input)
+      .replace("@", "\\@")
+      .replace("#", "\\#");
   }
 }

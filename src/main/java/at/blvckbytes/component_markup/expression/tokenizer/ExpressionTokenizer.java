@@ -280,6 +280,44 @@ public class ExpressionTokenizer {
 
         return new PrefixOperatorToken(beginIndex, PrefixOperator.NEGATION);
 
+      case '~':
+        if (peekChar() == '^') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.UPPER_CASE);
+        }
+
+        if (peekChar() == '_') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.LOWER_CASE);
+        }
+
+        if (peekChar() == '#') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.TITLE_CASE);
+        }
+
+        if (peekChar() == '!') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.TOGGLE_CASE);
+        }
+
+        if (peekChar() == '-') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.SLUGIFY);
+        }
+
+        if (peekChar() == '?') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.ASCIIFY);
+        }
+
+        if (peekChar() == '|') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.TRIM);
+        }
+
+        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_TILDE);
+
       case '.':
         char upcomingChar = peekChar();
 
