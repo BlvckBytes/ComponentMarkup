@@ -37,7 +37,7 @@ public class AstInterpreter implements Interpreter {
     this.builderStack = new Stack<>();
   }
 
-  public static Object interpretSingle(
+  public static List<Object> interpret(
     ComponentConstructor componentConstructor,
     ExpressionInterpreter expressionInterpreter,
     InterpretationEnvironment baseEnvironment,
@@ -45,22 +45,8 @@ public class AstInterpreter implements Interpreter {
     char breakChar,
     AstNode node
   ) {
-    if (breakChar == 0)
-      throw new IllegalStateException("Break-char cannot be zero");
-
     return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
-      .interpret(node, breakChar).get(0);
-  }
-
-  public static List<Object> interpretMulti(
-    ComponentConstructor componentConstructor,
-    ExpressionInterpreter expressionInterpreter,
-    InterpretationEnvironment baseEnvironment,
-    Logger logger,
-    AstNode node
-  ) {
-    return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
-      .interpret(node, (char) 0);
+      .interpret(node, breakChar);
   }
 
   @Override

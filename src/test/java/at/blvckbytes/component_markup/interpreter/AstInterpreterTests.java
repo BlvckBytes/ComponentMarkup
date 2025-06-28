@@ -229,19 +229,37 @@ public class AstInterpreterTests {
 
   private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
     AstNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
-    String expectedJson = gsonInstance.toJson(sortKeysRecursively(expectedResult.build()));
 
-    JsonElement resultJson;
+    char breakChar;
+    JsonElement expectedJson;
 
-    if (expectedResult instanceof JsonObjectBuilder)
-      resultJson = (JsonElement) AstInterpreter.interpretSingle(componentConstructor, expressionInterpreter, baseEnvironment, logger, '\n', actualAst);
-    else if (expectedResult instanceof JsonArrayBuilder)
-      resultJson = (JsonElement) AstInterpreter.interpretMulti(componentConstructor, expressionInterpreter, baseEnvironment, logger, actualAst);
+    if (expectedResult instanceof JsonObjectBuilder) {
+      JsonArray array = new JsonArray();
+      array.add(expectedResult.build());
+      expectedJson = array;
+      breakChar = '\n';
+    }
+    else if (expectedResult instanceof JsonArrayBuilder) {
+      expectedJson = expectedResult.build();
+      breakChar = 0;
+    }
     else
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
-    String actualJson = gsonInstance.toJson(sortKeysRecursively(resultJson));
+    List<Object> resultItems = AstInterpreter.interpret(
+      componentConstructor, expressionInterpreter,
+      baseEnvironment,
+      logger, breakChar, actualAst
+    );
 
-    Assertions.assertEquals(expectedJson, actualJson);
+    JsonArray actualJson = new JsonArray();
+
+    for (Object resultItem : resultItems)
+      actualJson.add((JsonElement) resultItem);
+
+    Assertions.assertEquals(
+      gsonInstance.toJson(sortKeysRecursively(expectedJson)),
+      gsonInstance.toJson(sortKeysRecursively(actualJson))
+    );
   }
 }
