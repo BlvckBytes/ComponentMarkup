@@ -328,10 +328,10 @@ public class OutputBuilder {
       for (MarkupNode withNode : translateNode.with)
         with.add(interpreter.interpret(withNode, ' ').get(0));
 
-      Object fallback = null;
+      String fallback = null;
 
       if (translateNode.fallback != null)
-        fallback = interpreter.interpret(translateNode.fallback, ' ').get(0);
+        fallback = interpreter.evaluateAsStringOrNull(translateNode.fallback);
 
       result = componentConstructor.createTranslateNode(key, with, fallback);
     }

@@ -29,7 +29,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public Object createTranslateNode(String key, List<Object> with, @Nullable Object fallback) {
+  public Object createTranslateNode(String key, List<Object> with, @Nullable String fallback) {
     JsonObject component = new JsonObject();
     component.addProperty("translate", key);
 
@@ -43,7 +43,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     if (fallback != null)
-      component.add("fallback", (JsonObject) fallback);
+      component.addProperty("fallback", fallback);
+
     return component;
   }
 

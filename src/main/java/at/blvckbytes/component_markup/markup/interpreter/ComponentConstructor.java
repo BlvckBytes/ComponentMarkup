@@ -14,7 +14,7 @@ public interface ComponentConstructor {
 
   Object createKeyNode(String key);
 
-  Object createTranslateNode(String key, List<Object> with, @Nullable Object fallback);
+  Object createTranslateNode(String key, List<Object> with, @Nullable String fallback);
 
   Object createScoreNode(String name, String objective, @Nullable String value);
 

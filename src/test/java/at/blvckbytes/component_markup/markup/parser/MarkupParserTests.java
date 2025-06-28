@@ -13,9 +13,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       "@<translate",
       "  @let-a=\"b\"",
       "  [key]=\"my.expr\"",
-      "  @fallback={",
-      "    @hello, @{{user}}",
-      "  }",
+      "  @[fallback]=\"'hello, ' & user\"",
       "/>"
     );
 
@@ -24,9 +22,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       translate(
         expr("my.expr"),
         text.anchor(0),
-        container(text.anchor(2))
-          .child(text(imm("hello, "), text.anchor(3)))
-          .child(text(expr("user"), text.anchor(4)))
+        expr("'hello, ' & user")
       )
       .let("a", expr("b"), text.anchor(1))
     );

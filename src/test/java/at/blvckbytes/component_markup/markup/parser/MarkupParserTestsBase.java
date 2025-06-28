@@ -55,13 +55,13 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new ArrayList<>()));
   }
 
-  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, CursorPosition position, @Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<?>... wrappedWiths) {
+  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, CursorPosition position, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
     List<MarkupNode> withs = new ArrayList<>();
 
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
 
-    return new NodeWrapper<>(new TranslateNode(key, withs, wrappedFallback == null ? null : wrappedFallback.get(), position, new ArrayList<>()));
+    return new NodeWrapper<>(new TranslateNode(key, withs, fallback, position, new ArrayList<>()));
   }
 
   protected static NodeWrapper<TextNode> text(ExpressionNode value, CursorPosition position) {

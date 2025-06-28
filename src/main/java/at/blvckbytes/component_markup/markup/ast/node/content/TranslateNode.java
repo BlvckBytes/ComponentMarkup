@@ -12,12 +12,12 @@ public class TranslateNode extends ContentNode {
 
   public final ExpressionNode key;
   public final List<MarkupNode> with;
-  public final @Nullable MarkupNode fallback;
+  public final @Nullable ExpressionNode fallback;
 
   public TranslateNode(
     ExpressionNode key,
     List<MarkupNode> with,
-    @Nullable MarkupNode fallback,
+    @Nullable ExpressionNode fallback,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {
