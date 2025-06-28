@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.parser;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.tag.*;
@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.ast.tag.built_in.ContainerTag;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParserException;
 import at.blvckbytes.component_markup.expression.tokenizer.token.BooleanToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.DoubleToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.LongToken;
@@ -20,9 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Stack;
 
 public class AstParser implements XmlEventConsumer {
-
-  // TODO: each time .parse is called, the exception needs to be caught and re-thrown
-  //       with the context of the corresponding XML-element to render properly
 
   private static final ExpressionNode EMPTY_TEXT = ImmediateExpression.of("");
 
@@ -107,7 +105,7 @@ public class AstParser implements XmlEventConsumer {
       if (bindingName.equals(currentLayer.forIterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
-      ExpressionNode bindingExpression = ExpressionParser.parse(value);
+      ExpressionNode bindingExpression = parseExpression(value);
       LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
@@ -126,7 +124,7 @@ public class AstParser implements XmlEventConsumer {
       name = name.substring(1, nameLength - 1);
     }
 
-    ExpressionNode expression = isExpressionMode ? ExpressionParser.parse(value) : ImmediateExpression.of(value);
+    ExpressionNode expression = isExpressionMode ? parseExpression(value) : ImmediateExpression.of(value);
 
     if (currentLayer.forIterable != null) {
       if (name.equals("for-reversed")) {
@@ -321,7 +319,7 @@ public class AstParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.children.add(new TextNode(ExpressionParser.parse(expression), lastPosition, null));
+    currentLayer.children.add(new TextNode(parseExpression(expression), lastPosition, null));
   }
 
   @Override
@@ -390,7 +388,7 @@ public class AstParser implements XmlEventConsumer {
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
-        currentLayer.condition = ExpressionParser.parse(value);
+        currentLayer.condition = parseExpression(value);
         currentLayer.conditionType = ConditionType.IF;
         return;
       }
@@ -402,7 +400,7 @@ public class AstParser implements XmlEventConsumer {
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
 
-        currentLayer.condition = ExpressionParser.parse(value);
+        currentLayer.condition = parseExpression(value);
         currentLayer.conditionType = ConditionType.ELSE_IF;
         return;
       }
@@ -441,7 +439,7 @@ public class AstParser implements XmlEventConsumer {
       if (currentLayer.hasLetBinding(iterationVariable))
         throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
 
-      currentLayer.forIterable = ExpressionParser.parse(value);
+      currentLayer.forIterable = parseExpression(value);
       currentLayer.forIterationVariable = iterationVariable;
       return;
     }
@@ -542,5 +540,13 @@ public class AstParser implements XmlEventConsumer {
     }
 
     return result;
+  }
+
+  private ExpressionNode parseExpression(String input) {
+    try {
+      return ExpressionParser.parse(input);
+    } catch (ExpressionParserException expressionException) {
+      throw new IllegalStateException("Not yet implemented");
+    }
   }
 }

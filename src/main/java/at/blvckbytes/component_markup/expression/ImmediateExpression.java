@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.ast;
+package at.blvckbytes.component_markup.expression;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;

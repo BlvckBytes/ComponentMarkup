@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.ast.tag.built_in;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.ast.node.style.Format;

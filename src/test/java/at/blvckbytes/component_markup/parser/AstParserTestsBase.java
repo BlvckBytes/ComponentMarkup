@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.parser;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.ast.node.content.TranslateNode;
