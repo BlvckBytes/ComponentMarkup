@@ -32,7 +32,10 @@ public class ExpressionInterpreter {
     this.logger = logger;
   }
 
-  public @Nullable Object interpret(ExpressionNode expression, InterpretationEnvironment environment) {
+  public @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment) {
+    if (expression == null)
+      return null;
+
     if (expression instanceof TerminalNode)
       return ((TerminalNode) expression).getValue(environment);
 

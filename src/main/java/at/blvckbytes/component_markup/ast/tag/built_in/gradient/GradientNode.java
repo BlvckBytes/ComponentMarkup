@@ -51,8 +51,10 @@ public class GradientNode extends AstNode implements InterpreterInterceptor {
       OutputBuilder builder = interpreter.getCurrentBuilder();
       NodeStyle nodeStyle = ((ContentNode) node).getStyle();
 
-      if (nodeStyle != null && nodeStyle.color != ImmediateExpression.ofNull())
-        return EnumSet.noneOf(InterceptionFlag.class);
+      if (nodeStyle != null) {
+        if (nodeStyle.color != null && interpreter.evaluateAsBooleanOrNull(nodeStyle.color) != null)
+          return EnumSet.noneOf(InterceptionFlag.class);
+      }
 
       if (node instanceof TextNode) {
         String nodeText = interpreter.evaluateAsString(((TextNode) node).text);

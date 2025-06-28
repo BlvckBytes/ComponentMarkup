@@ -8,7 +8,6 @@ public class ImmediateExpression {
 
   private static final TerminalNode TRUE_EXPRESSION = new TerminalNode(new BooleanToken(0, "true", true));
   private static final TerminalNode FALSE_EXPRESSION = new TerminalNode(new BooleanToken(0, "false", false));
-  private static final TerminalNode NULL_EXPRESSION = new TerminalNode(new NullToken(0, "null"));
 
   // TODO: I kind of don't like this class... Also, the lengths should not be 0 - they *are* known.
 
@@ -26,9 +25,5 @@ public class ImmediateExpression {
 
   public static ExpressionNode of(boolean value) {
     return value ? TRUE_EXPRESSION : FALSE_EXPRESSION;
-  }
-
-  public static ExpressionNode ofNull() {
-    return NULL_EXPRESSION;
   }
 }

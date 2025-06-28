@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.interpreter;
 
-import at.blvckbytes.component_markup.ast.ImmediateExpression;
 import at.blvckbytes.component_markup.ast.node.AstNode;
 import at.blvckbytes.component_markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.ast.node.click.ClickNode;
@@ -217,10 +216,10 @@ public class OutputBuilder {
     for (Format format : Format.VALUES) {
       ExpressionNode formatExpression = style.formatStates[format.ordinal()];
 
-      if (formatExpression == ImmediateExpression.ofNull())
+      if (formatExpression == null)
         continue;
 
-      boolean expression = interpreter.evaluateAsBoolean(formatExpression);
+      Boolean expression = interpreter.evaluateAsBooleanOrNull(formatExpression);
 
       switch (format) {
         case BOLD:

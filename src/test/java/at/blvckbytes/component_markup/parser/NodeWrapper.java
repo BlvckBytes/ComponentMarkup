@@ -68,7 +68,7 @@ public class NodeWrapper<T extends AstNode> {
     ExpressionNode expressionValue;
 
     if (value == null)
-      expressionValue = ImmediateExpression.ofNull();
+      expressionValue = null;
     else
       expressionValue = ImmediateExpression.of(value);
 
