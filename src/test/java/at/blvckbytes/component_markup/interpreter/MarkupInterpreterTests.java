@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class AstInterpreterTests {
+public class MarkupInterpreterTests {
 
   private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter(Logger.getAnonymousLogger());
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
@@ -246,7 +246,7 @@ public class AstInterpreterTests {
     else
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
-    List<Object> resultItems = AstInterpreter.interpret(
+    List<Object> resultItems = MarkupInterpreter.interpret(
       componentConstructor, expressionInterpreter,
       baseEnvironment,
       logger, breakChar, actualNode

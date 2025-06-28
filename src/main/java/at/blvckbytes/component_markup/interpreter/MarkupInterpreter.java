@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AstInterpreter implements Interpreter {
+public class MarkupInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final ExpressionInterpreter expressionInterpreter;
@@ -23,7 +23,7 @@ public class AstInterpreter implements Interpreter {
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
 
-  private AstInterpreter(
+  private MarkupInterpreter(
     ComponentConstructor componentConstructor,
     ExpressionInterpreter expressionInterpreter,
     InterpretationEnvironment baseEnvironment,
@@ -45,7 +45,7 @@ public class AstInterpreter implements Interpreter {
     char breakChar,
     MarkupNode node
   ) {
-    return new AstInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
+    return new MarkupInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
       .interpret(node, breakChar);
   }
 
