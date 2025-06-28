@@ -3,7 +3,7 @@ package at.blvckbytes.component_markup.expression.ast;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 
-public class IfElseNode extends ExpressionNode {
+public class BranchingNode extends ExpressionNode {
 
   public ExpressionNode condition;
   public InfixOperatorToken conditionSeparator;
@@ -11,7 +11,7 @@ public class IfElseNode extends ExpressionNode {
   public PunctuationToken branchSeparator;
   public ExpressionNode branchFalse;
 
-  public IfElseNode(
+  public BranchingNode(
     ExpressionNode condition,
     InfixOperatorToken conditionSeparator,
     ExpressionNode branchTrue,

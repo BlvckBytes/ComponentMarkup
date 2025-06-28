@@ -329,7 +329,7 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      ifElse(
+      branching(
         terminal("a", text.anchorIndex(0)),
         token(InfixOperator.BRANCHING, text.anchorIndex(1)),
         terminal("b", text.anchorIndex(2)),
@@ -568,7 +568,7 @@ public class ExpressionParserTests {
         text,
         infix(
           lhs,
-          InfixOperator.NULL_COALESCE,
+          InfixOperator.FALLBACK,
           text.anchorIndex(indexOffset + 1),
           terminal("b", text.anchorIndex(indexOffset + 2))
         )
@@ -606,14 +606,14 @@ public class ExpressionParserTests {
     return new ArrayNode((InfixOperatorToken) openingBracket, Arrays.asList(items), (PunctuationToken) closingBracket);
   }
 
-  protected static ExpressionNode ifElse(
+  protected static ExpressionNode branching(
     ExpressionNode condition,
     Token conditionSeparator,
     ExpressionNode branchTrue,
     Token branchSeparator,
     ExpressionNode branchFalse
   ) {
-    return new IfElseNode(condition, (InfixOperatorToken) conditionSeparator, branchTrue, (PunctuationToken) branchSeparator, branchFalse);
+    return new BranchingNode(condition, (InfixOperatorToken) conditionSeparator, branchTrue, (PunctuationToken) branchSeparator, branchFalse);
   }
 
   protected static ExpressionNode substring(

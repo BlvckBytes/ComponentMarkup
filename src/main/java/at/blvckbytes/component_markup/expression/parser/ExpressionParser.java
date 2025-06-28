@@ -180,7 +180,7 @@ public class ExpressionParser {
       if (falseBranch == null)
         throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken.endIndex);
 
-      return new IfElseNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
+      return new BranchingNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
     if (operatorToken.operator == InfixOperator.MEMBER) {

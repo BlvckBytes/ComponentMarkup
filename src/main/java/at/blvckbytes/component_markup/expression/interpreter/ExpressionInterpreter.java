@@ -174,7 +174,7 @@ public class ExpressionInterpreter {
         case DISJUNCTION:
           return valueInterpreter.asBoolean(lhsValue) || valueInterpreter.asBoolean(rhsValue);
 
-        case NULL_COALESCE:
+        case FALLBACK:
           return lhsValue != null ? lhsValue : rhsValue;
 
         case SUBSCRIPTING:
@@ -186,8 +186,8 @@ public class ExpressionInterpreter {
       }
     }
 
-    if (expression instanceof IfElseNode) {
-      IfElseNode node = (IfElseNode) expression;
+    if (expression instanceof BranchingNode) {
+      BranchingNode node = (BranchingNode) expression;
 
       if (valueInterpreter.asBoolean(interpret(node.condition, environment)))
         return interpret(node.branchTrue, environment);

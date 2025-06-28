@@ -40,7 +40,7 @@ public class ExpressionTokenizerTests {
       true,
       InfixOperator.LESS_THAN,
       InfixOperator.DIVISION,
-      InfixOperator.NULL_COALESCE,
+      InfixOperator.FALLBACK,
       Punctuation.CLOSING_BRACKET,
       false,
       InfixOperator.LESS_THAN_OR_EQUAL,

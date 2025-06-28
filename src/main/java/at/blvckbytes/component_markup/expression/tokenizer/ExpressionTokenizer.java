@@ -240,7 +240,7 @@ public class ExpressionTokenizer {
       case '?':
         if (peekChar() == '?') {
           nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.NULL_COALESCE);
+          return new InfixOperatorToken(beginIndex, InfixOperator.FALLBACK);
         }
 
         return new InfixOperatorToken(beginIndex, InfixOperator.BRANCHING);
