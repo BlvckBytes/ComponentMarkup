@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

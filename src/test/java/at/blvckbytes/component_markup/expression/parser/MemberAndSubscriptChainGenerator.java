@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 
 import java.util.ArrayList;
 import java.util.List;

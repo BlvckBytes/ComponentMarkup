@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
