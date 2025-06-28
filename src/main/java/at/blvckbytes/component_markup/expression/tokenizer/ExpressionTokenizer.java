@@ -317,28 +317,30 @@ public class ExpressionTokenizer {
   }
 
   public @Nullable Token nextToken() {
-    if (!this.pendingStack.isEmpty())
-      return this.pendingStack.pop();
-
-    while (Character.isWhitespace(peekChar()))
-      nextChar();
-
-    char upcomingChar = peekChar();
-
-    if (upcomingChar == 0)
-      return null;
-
     Token result;
 
-    if (upcomingChar == '\'')
-      result = parseStringToken();
-
-    else if (upcomingChar >= '0' && upcomingChar <= '9')
-      result = parseLongOrDoubleToken();
+    if (!this.pendingStack.isEmpty())
+      result = this.pendingStack.pop();
 
     else {
-      if ((upcomingChar != '.' || (result = tryParseDotDoubleToken()) == null) && (result = tryParseOperatorOrPunctuationToken()) == null)
-        result = parseIdentifierOrLiteralToken();
+      while (Character.isWhitespace(peekChar()))
+        nextChar();
+
+      char upcomingChar = peekChar();
+
+      if (upcomingChar == 0)
+        return null;
+
+      if (upcomingChar == '\'')
+        result = parseStringToken();
+
+      else if (upcomingChar >= '0' && upcomingChar <= '9')
+        result = parseLongOrDoubleToken();
+
+      else {
+        if ((upcomingChar != '.' || (result = tryParseDotDoubleToken()) == null) && (result = tryParseOperatorOrPunctuationToken()) == null)
+          result = parseIdentifierOrLiteralToken();
+      }
     }
 
     dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken;
@@ -348,7 +350,7 @@ public class ExpressionTokenizer {
 
   public @Nullable Token peekToken() {
     if (this.pendingStack.isEmpty())
-      this.pendingStack.add(nextToken());
+      this.pendingStack.push(nextToken());
 
     return this.pendingStack.peek();
   }
