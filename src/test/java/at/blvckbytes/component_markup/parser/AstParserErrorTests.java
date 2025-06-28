@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.parser;
 import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.xml.XmlEventParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -466,8 +465,7 @@ public class AstParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      AstParser parser = new AstParser(BuiltInTagRegistry.get());
-      XmlEventParser.parse(input.text, parser);
+      AstParser.parse(input.text, BuiltInTagRegistry.get());
     } catch (Throwable e) {
       thrownError = e;
     }

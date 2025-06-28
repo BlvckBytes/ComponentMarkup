@@ -54,6 +54,8 @@ public class XmlEventParser {
 
           substringBuilder.setStartInclusive(cursor.getNextCharIndex());
 
+          CursorPosition valueBeginPosition = null;
+
           while (cursor.peekChar() != 0) {
             int possiblePreTerminationIndex = cursor.getNextCharIndex();
             char currentChar = cursor.nextChar();
@@ -62,6 +64,9 @@ public class XmlEventParser {
               consumer.onCursorPosition(beginPosition);
               throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
             }
+
+            if (valueBeginPosition == null)
+              valueBeginPosition = cursor.getPosition();
 
             inStringDetector.onEncounter(currentChar);
 
@@ -84,7 +89,7 @@ public class XmlEventParser {
 
           String expression = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
 
-          consumer.onInterpolation(expression);
+          consumer.onInterpolation(expression, valueBeginPosition);
           continue;
         }
 
@@ -165,9 +170,11 @@ public class XmlEventParser {
     return substringBuilder.build(StringBuilderMode.NORMAL_MODE);
   }
 
-  private String parseStringAttributeValue() {
+  private void parseAndEmitStringAttributeValue(String attributeName) {
     if (cursor.nextChar() != '"')
       throw new IllegalStateException("Expected opening double-quotes");
+
+    CursorPosition valueBeginPosition = null;
 
     substringBuilder.setStartInclusive(cursor.getNextCharIndex());
 
@@ -179,6 +186,9 @@ public class XmlEventParser {
 
       if (currentChar == '\r' || currentChar == '\n')
         throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
+
+      if (valueBeginPosition == null)
+        valueBeginPosition = cursor.getPosition();
 
       if (currentChar == '"') {
         if (priorChar == '\\') {
@@ -196,7 +206,9 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    return substringBuilder.build(StringBuilderMode.NORMAL_MODE);
+    String value = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
+
+    consumer.onStringAttribute(attributeName, valueBeginPosition, value);
   }
 
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
@@ -305,7 +317,7 @@ public class XmlEventParser {
 
     switch (cursor.peekChar()) {
       case '"':
-        consumer.onStringAttribute(attributeName, parseStringAttributeValue());
+        parseAndEmitStringAttributeValue(attributeName);
         return true;
 
       case '{':

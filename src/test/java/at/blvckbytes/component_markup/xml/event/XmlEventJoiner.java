@@ -18,8 +18,8 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onStringAttribute(String name, String value) {
-    appendEvent(new StringAttributeEvent(name, value));
+  public void onStringAttribute(String name, CursorPosition valueBeginPosition, String value) {
+    appendEvent(new StringAttributeEvent(name, valueBeginPosition, value));
   }
 
   @Override
@@ -63,8 +63,8 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onInterpolation(String expression) {
-    appendEvent(new InterpolationEvent(expression));
+  public void onInterpolation(String expression, CursorPosition valueBeginPosition) {
+    appendEvent(new InterpolationEvent(expression, valueBeginPosition));
   }
 
   @Override

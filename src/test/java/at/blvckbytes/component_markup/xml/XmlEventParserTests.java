@@ -30,13 +30,13 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "  @<red @attr-1=\"string\" @attr-2=true @attr-3=false @attr-4=.3 @attr-5=-3@>@ my content"
+      "  @<red @attr-1=\"#string\" @attr-2=true @attr-3=false @attr-4=.3 @attr-5=-3@>@ my content"
     );
 
     makeCaseWithInterleavedAnchors(
       text,
       new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("attr-1", "string"),
+      new StringAttributeEvent("attr-1", text.auxAnchor(0), "string"),
       new BooleanAttributeEvent("attr-2", "true", true),
       new BooleanAttributeEvent("attr-3", "false", false),
       new DoubleAttributeEvent("attr-4", ".3", .3),
@@ -51,18 +51,18 @@ public class XmlEventParserTests {
   public void shouldParseMultilineAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
       "@<red",
-      "  @attr-1=\"value 1\"",
-      "  @attr-2=\"value 2\"",
-      "  @attr-3=\"value 3\"",
+      "  @attr-1=\"#value 1\"",
+      "  @attr-2=\"#value 2\"",
+      "  @attr-3=\"#value 3\"",
       "@>"
     );
 
     makeCaseWithInterleavedAnchors(
       text,
       new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("attr-1", "value 1"),
-      new StringAttributeEvent("attr-2", "value 2"),
-      new StringAttributeEvent("attr-3", "value 3"),
+      new StringAttributeEvent("attr-1", text.auxAnchor(0), "value 1"),
+      new StringAttributeEvent("attr-2", text.auxAnchor(1), "value 2"),
+      new StringAttributeEvent("attr-3", text.auxAnchor(2), "value 3"),
       new TagOpenEndEvent("red", false),
       new InputEndEvent()
     );
@@ -175,7 +175,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationExpressions() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{{user.name}}@!"
+      "@<red@>@Hello, @{{#user.name}}@!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -183,7 +183,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
       new TextEvent("Hello, "),
-      new InterpolationEvent("user.name"),
+      new InterpolationEvent("user.name", text.auxAnchor(0)),
       new TextEvent("!"),
       new InputEndEvent()
     );
@@ -197,14 +197,14 @@ public class XmlEventParserTests {
       "  @lore={@<blue@>@First line@<br/@>",
       "       @<green@>@Second line@<br/@>",
       "       @<gray",
-      "         @*for-member=\"members\"",
+      "         @*for-member=\"#members\"",
       "         @limit=5",
       "         @separator={@<br/@>@}",
       "         @empty={@<red@>@No items found!@}",
-      "       @>@- @<yellow@>@{{ member.item }}@</gray>@<br/@>",
+      "       @>@- @<yellow@>@{{# member.item }}@</gray>@<br/@>",
       "       @<gray@>@Last line! :)",
       "  @}",
-      "@>@hover over @{{\"me\"}}@! :)"
+      "@>@hover over @{{#\"me\"}}@! :)"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -228,7 +228,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("br"),
       new TagOpenEndEvent("br", true),
       new TagOpenBeginEvent("gray"),
-      new StringAttributeEvent("*for-member", "members"),
+      new StringAttributeEvent("*for-member", text.auxAnchor(0), "members"),
       new LongAttributeEvent("limit", "5", 5),
       new TagAttributeBeginEvent("separator"),
       new TagOpenBeginEvent("br"),
@@ -243,7 +243,7 @@ public class XmlEventParserTests {
       new TextEvent("- "),
       new TagOpenBeginEvent("yellow"),
       new TagOpenEndEvent("yellow", false),
-      new InterpolationEvent(" member.item "),
+      new InterpolationEvent(" member.item ", text.auxAnchor(1)),
       new TagCloseEvent("gray"),
       new TagOpenBeginEvent("br"),
       new TagOpenEndEvent("br", true),
@@ -253,7 +253,7 @@ public class XmlEventParserTests {
       new TagAttributeEndEvent("lore"),
       new TagOpenEndEvent("show-item", false),
       new TextEvent("hover over "),
-      new InterpolationEvent("\"me\""),
+      new InterpolationEvent("\"me\"", text.auxAnchor(2)),
       new TextEvent("! :)"),
       new InputEndEvent()
     );
@@ -262,7 +262,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationWithCurlyBracketsInStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{{user.name + \"}}\" + '}}'}}@!"
+      "@<red@>@Hello, @{{#user.name + \"}}\" + '}}'}}@!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -270,7 +270,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
       new TextEvent("Hello, "),
-      new InterpolationEvent("user.name + \"}}\" + '}}'"),
+      new InterpolationEvent("user.name + \"}}\" + '}}'", text.auxAnchor(0)),
       new TextEvent("!"),
       new InputEndEvent()
     );
@@ -347,7 +347,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveSurroundingInterpolationSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello @{{user.name}}@ world!"
+      "@<red@>@Hello @{{#user.name}}@ world!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -355,7 +355,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
       new TextEvent("Hello "),
-      new InterpolationEvent("user.name"),
+      new InterpolationEvent("user.name", text.auxAnchor(0)),
       new TextEvent(" world!"),
       new InputEndEvent()
     );
@@ -364,32 +364,32 @@ public class XmlEventParserTests {
   @Test
   public void shouldEscapeCharactersInAttributeValues() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red @a=\"hello \\\" quote\"@>"
+      "@<red @a=\"#hello \\\" quote\"@>"
     );
 
     makeCaseWithInterleavedAnchors(
       text,
       new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", "hello \" quote"),
+      new StringAttributeEvent("a", text.auxAnchor(0), "hello \" quote"),
       new TagOpenEndEvent("red", false),
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
-      "@<red @a=\"these > should < not require escaping\"@>"
+      "@<red @a=\"#these > should < not require escaping\"@>"
     );
 
     makeCaseWithInterleavedAnchors(
       text,
       new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", "these > should < not require escaping"),
+      new StringAttributeEvent("a", text.auxAnchor(0), "these > should < not require escaping"),
       new TagOpenEndEvent("red", false),
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
       "@<red @a={",
-      "  @<green @b=\"neither } should { these\"@>",
+      "  @<green @b=\"#neither } should { these\"@>",
       "@}@>"
     );
 
@@ -398,7 +398,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("red"),
       new TagAttributeBeginEvent("a"),
       new TagOpenBeginEvent("green"),
-      new StringAttributeEvent("b", "neither } should { these"),
+      new StringAttributeEvent("b", text.auxAnchor(0), "neither } should { these"),
       new TagOpenEndEvent("green", false),
       new TagAttributeEndEvent("a"),
       new TagOpenEndEvent("red", false),
@@ -445,7 +445,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveNonEscapingBackslashes() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red @a=\"a \\ backslash\"@>@another \\ backslash"
+      "@<red @a=\"#a \\ backslash\"@>@another \\ backslash"
     );
 
     // Because why not? :) There's absolutely no reason to treat backslashes which do not
@@ -455,7 +455,7 @@ public class XmlEventParserTests {
     makeCaseWithInterleavedAnchors(
       text,
       new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", "a \\ backslash"),
+      new StringAttributeEvent("a", text.auxAnchor(0), "a \\ backslash"),
       new TagOpenEndEvent("red", false),
       new TextEvent("another \\ backslash"),
       new InputEndEvent()

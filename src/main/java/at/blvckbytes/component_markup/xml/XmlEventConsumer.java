@@ -6,7 +6,7 @@ public interface XmlEventConsumer {
 
   void onTagOpenBegin(String tagName);
 
-  void onStringAttribute(String name, String value);
+  void onStringAttribute(String name, CursorPosition valueBeginPosition, String value);
 
   void onLongAttribute(String name, String raw, long value);
 
@@ -24,7 +24,7 @@ public interface XmlEventConsumer {
 
   void onText(String text);
 
-  void onInterpolation(String expression);
+  void onInterpolation(String expression, CursorPosition valueBeginPosition);
 
   void onTagClose(String tagName);
 

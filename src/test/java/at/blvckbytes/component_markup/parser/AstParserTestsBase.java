@@ -13,7 +13,6 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.xml.XmlEventParser;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
@@ -70,9 +69,7 @@ public abstract class AstParserTestsBase {
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
-    AstParser parser = new AstParser(BuiltInTagRegistry.get());
-    XmlEventParser.parse(input.text, parser);
-    AstNode actualAst = parser.getResult();
+    AstNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
     Assertions.assertEquals(wrappedExpectedAst.get().toString(), actualAst.toString());
   }
 }

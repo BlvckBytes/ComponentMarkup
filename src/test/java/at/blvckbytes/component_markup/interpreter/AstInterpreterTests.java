@@ -7,7 +7,6 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.parser.AstParser;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.xml.XmlEventParser;
 import com.google.gson.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -229,10 +228,7 @@ public class AstInterpreterTests {
   }
 
   private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
-    AstParser parser = new AstParser(BuiltInTagRegistry.get());
-    XmlEventParser.parse(input.text, parser);
-    AstNode actualAst = parser.getResult();
-
+    AstNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
     String expectedJson = gsonInstance.toJson(sortKeysRecursively(expectedResult.build()));
 
     JsonElement resultJson;

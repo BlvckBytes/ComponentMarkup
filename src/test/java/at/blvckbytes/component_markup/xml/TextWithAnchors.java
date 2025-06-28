@@ -118,6 +118,15 @@ public class TextWithAnchors {
     return auxAnchors.get(index);
   }
 
+  public @NotNull CursorPosition auxAnchor(int index) {
+    CursorPositionEvent positionEvent = auxAnchorEvent(index);
+
+    if (positionEvent == null)
+      throw new IllegalStateException("Required aux-anchor at index " + index);
+
+    return positionEvent.position;
+  }
+
   public static String escape(Object input) {
     return String.valueOf(input)
       .replace("@", "\\@")
