@@ -9,35 +9,35 @@ import at.blvckbytes.component_markup.xml.XmlParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AstParseException extends RuntimeException implements ErrorMessage {
+public class MarkupParseException extends RuntimeException implements ErrorMessage {
 
   public final CursorPosition position;
-  public final AstParseError error;
+  public final MarkupParseError error;
 
-  public AstParseException(CursorPosition position, AstParseError error) {
+  public MarkupParseException(CursorPosition position, MarkupParseError error) {
     this.position = position;
     this.error = error;
   }
 
-  public AstParseException(CursorPosition position, XmlParseException xmlException) {
+  public MarkupParseException(CursorPosition position, XmlParseException xmlException) {
     super(xmlException);
 
     this.position = position;
-    this.error = AstParseError.XML_PARSE_ERROR;
+    this.error = MarkupParseError.XML_PARSE_ERROR;
   }
 
-  public AstParseException(CursorPosition position, ExpressionParseException expressionParseException) {
+  public MarkupParseException(CursorPosition position, ExpressionParseException expressionParseException) {
     super(expressionParseException);
 
     this.position = position;
-    this.error = AstParseError.EXPRESSION_PARSE_ERROR;
+    this.error = MarkupParseError.EXPRESSION_PARSE_ERROR;
   }
 
-  public AstParseException(CursorPosition position, ExpressionTokenizeException expressionTokenizeException) {
+  public MarkupParseException(CursorPosition position, ExpressionTokenizeException expressionTokenizeException) {
     super(expressionTokenizeException);
 
     this.position = position;
-    this.error = AstParseError.EXPRESSION_TOKENIZE_ERROR;
+    this.error = MarkupParseError.EXPRESSION_TOKENIZE_ERROR;
   }
 
   @Override

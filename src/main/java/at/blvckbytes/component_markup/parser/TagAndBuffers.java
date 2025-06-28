@@ -130,7 +130,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE_IF:
             case ELSE:
-              throw new AstParseException(currentNode.position, AstParseError.MISSING_PRECEDING_IF_SIBLING);
+              throw new MarkupParseException(currentNode.position, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }
@@ -206,7 +206,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE:
             case ELSE_IF:
-              throw new AstParseException(currentNode.position, AstParseError.MISSING_PRECEDING_IF_SIBLING);
+              throw new MarkupParseException(currentNode.position, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }

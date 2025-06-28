@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
 
-public class AstParserTests extends AstParserTestsBase {
+public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseSimpleCase() {

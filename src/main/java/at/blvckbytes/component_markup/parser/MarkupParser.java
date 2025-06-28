@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 
-public class AstParser implements XmlEventConsumer {
+public class MarkupParser implements XmlEventConsumer {
 
   private static final ExpressionNode EMPTY_TEXT = ImmediateExpression.of("");
 
@@ -31,14 +31,14 @@ public class AstParser implements XmlEventConsumer {
   private final Stack<TagAndBuffers> tagStack;
 
   private CursorPosition lastPosition;
-  private @Nullable AstParser subtreeParser;
+  private @Nullable MarkupParser subtreeParser;
   private MarkupNode result;
 
-  private AstParser(TagRegistry tagRegistry) {
+  private MarkupParser(TagRegistry tagRegistry) {
     this(tagRegistry, CursorPosition.ZERO);
   }
 
-  private AstParser(TagRegistry tagRegistry, CursorPosition initialPosition) {
+  private MarkupParser(TagRegistry tagRegistry, CursorPosition initialPosition) {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.lastPosition = initialPosition;
@@ -70,7 +70,7 @@ public class AstParser implements XmlEventConsumer {
     TagDefinition tag = tagRegistry.locateTag(tagNameLower);
 
     if (tag == null)
-      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG);
 
     tagStack.push(new TagAndBuffers(tag, tagNameLower, lastPosition));
   }
@@ -94,25 +94,25 @@ public class AstParser implements XmlEventConsumer {
     int nameLength = name.length();
 
     if (name.equals("let"))
-      throw new AstParseException(lastPosition, AstParseError.UNNAMED_LET_BINDING);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
 
     if (name.startsWith("let-")) {
       if (nameLength == 4)
-        throw new AstParseException(lastPosition, AstParseError.UNNAMED_LET_BINDING);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
 
       String bindingName = name.substring(4);
 
       if (!isValidExpressionIdentifier(bindingName))
-        throw new AstParseException(lastPosition, AstParseError.MALFORMED_IDENTIFIER);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
 
       if (bindingName.equals(currentLayer.forIterationVariable))
-        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
 
       ExpressionNode bindingExpression = parseExpression(value, valueBeginPosition);
       LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
-        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
 
       return;
     }
@@ -121,7 +121,7 @@ public class AstParser implements XmlEventConsumer {
 
     if (nameLength > 2 && name.charAt(0) == '[') {
       if (name.charAt(nameLength - 1) != ']')
-        throw new AstParseException(lastPosition, AstParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
 
       isExpressionMode = true;
       name = name.substring(1, nameLength - 1);
@@ -132,7 +132,7 @@ public class AstParser implements XmlEventConsumer {
     if (currentLayer.forIterable != null) {
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
         currentLayer.forReversed = expression;
         return;
@@ -140,22 +140,22 @@ public class AstParser implements XmlEventConsumer {
 
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
       }
     }
 
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
     if (attribute.type == AttributeType.SUBTREE)
-      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
 
     if (!attribute.multiValue && currentLayer.hasAttribute(name))
-      throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
     currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
   }
@@ -200,38 +200,38 @@ public class AstParser implements XmlEventConsumer {
     name = lower(name);
 
     if (name.charAt(0) == '*')
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
     if (name.charAt(0) == '[')
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     if (name.equals("let") || name.startsWith("let-"))
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
 
     if (name.equals("for-separator") && currentLayer.forIterable != null) {
       if (currentLayer.forSeparator != null)
-        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
     }
 
     else if (name.equals("for-reversed"))
-      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
 
     else {
       AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
       if (attribute == null)
-        throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
       if (!attribute.multiValue && currentLayer.hasAttribute(name))
-        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
       if (attribute.type != AttributeType.SUBTREE)
-        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SCALAR_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
     }
 
-    subtreeParser = new AstParser(tagRegistry, lastPosition);
+    subtreeParser = new MarkupParser(tagRegistry, lastPosition);
   }
 
   @Override
@@ -276,7 +276,7 @@ public class AstParser implements XmlEventConsumer {
       return;
     }
 
-    throw new AstParseException(lastPosition, AstParseError.MISSING_ATTRIBUTE_VALUE);
+    throw new MarkupParseException(lastPosition, MarkupParseError.MISSING_ATTRIBUTE_VALUE);
   }
 
   @Override
@@ -291,13 +291,13 @@ public class AstParser implements XmlEventConsumer {
 
     if (!wasSelfClosing) {
       if (tagClosing == TagClosing.SELF_CLOSE)
-        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SELF_CLOSING_TAG);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SELF_CLOSING_TAG);
 
       return;
     }
 
     if (tagClosing == TagClosing.OPEN_CLOSE)
-      throw new AstParseException(lastPosition, AstParseError.EXPECTED_OPEN_CLOSE_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG);
 
     tagStack.pop();
     tagStack.peek().children.add(currentLayer);
@@ -337,7 +337,7 @@ public class AstParser implements XmlEventConsumer {
     TagDefinition closedTag = tagRegistry.locateTag(tagName);
 
     if (closedTag == null)
-      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG);
 
     TagAndBuffers openedTag;
 
@@ -345,7 +345,7 @@ public class AstParser implements XmlEventConsumer {
       openedTag = tagStack.pop();
 
       if (tagStack.isEmpty())
-        throw new AstParseException(lastPosition, AstParseError.UNBALANCED_CLOSING_TAG);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG);
 
       tagStack.peek().children.add(openedTag);
     } while(!openedTag.tagNameLower.equals(tagName));
@@ -373,12 +373,12 @@ public class AstParser implements XmlEventConsumer {
   // ================================================================================
 
   public static MarkupNode parse(String input, TagRegistry tagRegistry) {
-    AstParser parser = new AstParser(tagRegistry);
+    MarkupParser parser = new MarkupParser(tagRegistry);
 
     try {
       XmlEventParser.parse(input, parser);
     } catch (XmlParseException xmlException) {
-      throw new AstParseException(parser.lastPosition, xmlException);
+      throw new MarkupParseException(parser.lastPosition, xmlException);
     }
 
     return parser.result;
@@ -394,10 +394,10 @@ public class AstParser implements XmlEventConsumer {
     switch (name) {
       case "*if": {
         if (value == null)
-          throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.condition = parseExpression(value, valueBeginPosition);
         currentLayer.conditionType = ConditionType.IF;
@@ -406,10 +406,10 @@ public class AstParser implements XmlEventConsumer {
 
       case "*else-if": {
         if (value == null)
-          throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.condition = parseExpression(value, valueBeginPosition);
         currentLayer.conditionType = ConditionType.ELSE_IF;
@@ -418,10 +418,10 @@ public class AstParser implements XmlEventConsumer {
 
       case "*else": {
         if (value != null)
-          throw new AstParseException(lastPosition, AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG);
+          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG);
 
         if (currentLayer.conditionType != ConditionType.NONE)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_CONDITIONS);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
 
         currentLayer.conditionType = ConditionType.ELSE;
         return;
@@ -429,60 +429,60 @@ public class AstParser implements XmlEventConsumer {
 
       case "*for":
       case "*for-":
-        throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_FOR_LOOP);
     }
 
     if (name.startsWith("*for-")) {
       if (name.length() == 5)
-        throw new AstParseException(lastPosition, AstParseError.UNNAMED_FOR_LOOP);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_FOR_LOOP);
 
       if (value == null)
-        throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
       if (currentLayer.forIterable != null)
-        throw new AstParseException(lastPosition, AstParseError.MULTIPLE_LOOPS);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_LOOPS);
 
       String iterationVariable = name.substring(5);
 
       if (!isValidExpressionIdentifier(iterationVariable))
-        throw new AstParseException(lastPosition, AstParseError.MALFORMED_IDENTIFIER);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
 
       if (currentLayer.hasLetBinding(iterationVariable))
-        throw new AstParseException(lastPosition, AstParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
 
       currentLayer.forIterable = parseExpression(value, valueBeginPosition);
       currentLayer.forIterationVariable = iterationVariable;
       return;
     }
 
-    throw new AstParseException(lastPosition, AstParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE);
+    throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE);
   }
 
   private void handleScalarNonStringAttribute(String name, ExpressionNode expression) {
     name = lower(name);
 
     if (name.charAt(0) == '*')
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
     if (name.charAt(0) == '[')
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     if (name.equals("let") || name.startsWith("let-"))
-      throw new AstParseException(lastPosition, AstParseError.NON_STRING_LET_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
 
     if (currentLayer.forIterable != null) {
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-        throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
       }
 
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
         currentLayer.forReversed = expression;
         return;
@@ -492,13 +492,13 @@ public class AstParser implements XmlEventConsumer {
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new AstParseException(lastPosition, AstParseError.UNKNOWN_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
     if (attribute.type == AttributeType.SUBTREE)
-      throw new AstParseException(lastPosition, AstParseError.EXPECTED_SUBTREE_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
 
     if (!attribute.multiValue && currentLayer.hasAttribute(name))
-      throw new AstParseException(lastPosition, AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
     currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
   }
@@ -557,9 +557,9 @@ public class AstParser implements XmlEventConsumer {
     try {
       return ExpressionParser.parse(input);
     } catch (ExpressionTokenizeException expressionTokenizeException) {
-      throw new AstParseException(valueBeginPosition, expressionTokenizeException);
+      throw new MarkupParseException(valueBeginPosition, expressionTokenizeException);
     } catch (ExpressionParseException expressionParseException) {
-      throw new AstParseException(valueBeginPosition, expressionParseException);
+      throw new MarkupParseException(valueBeginPosition, expressionParseException);
     }
   }
 }

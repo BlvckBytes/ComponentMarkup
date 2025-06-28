@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AstParserErrorTests {
+public class MarkupParserErrorTests {
 
   private static final Logger logger = Logger.getAnonymousLogger();
 
   @Test
   public void shouldThrowOnUnknownTag() {
     makeErrorCase(
-      AstParseError.UNKNOWN_TAG,
+      MarkupParseError.UNKNOWN_TAG,
       "@<unknown-tag>"
     );
   }
@@ -25,27 +25,27 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnknownAttribute() {
     makeErrorCase(
-      AstParseError.UNKNOWN_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_ATTRIBUTE,
       "<hover-text @unknown=5>"
     );
 
     makeErrorCase(
-      AstParseError.UNKNOWN_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_ATTRIBUTE,
       "<hover-text @unknown=5.5>"
     );
 
     makeErrorCase(
-      AstParseError.UNKNOWN_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_ATTRIBUTE,
       "<hover-text @unknown=\"hello\">"
     );
 
     makeErrorCase(
-      AstParseError.UNKNOWN_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_ATTRIBUTE,
       "<hover-text @unknown=true>"
     );
 
     makeErrorCase(
-      AstParseError.UNKNOWN_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_ATTRIBUTE,
       "<hover-text @unknown={}>"
     );
   }
@@ -53,7 +53,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnknownStructuralAttribute() {
     makeErrorCase(
-      AstParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE,
       "<container @*unknown>"
     );
   }
@@ -61,12 +61,12 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnnamedLetBinding() {
     makeErrorCase(
-      AstParseError.UNNAMED_LET_BINDING,
+      MarkupParseError.UNNAMED_LET_BINDING,
       "<container @let-=\"\">"
     );
 
     makeErrorCase(
-      AstParseError.UNNAMED_LET_BINDING,
+      MarkupParseError.UNNAMED_LET_BINDING,
       "<container @let=\"\">"
     );
   }
@@ -74,12 +74,12 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
-      AstParseError.UNNAMED_FOR_LOOP,
+      MarkupParseError.UNNAMED_FOR_LOOP,
       "<container @*for=\"\">"
     );
 
     makeErrorCase(
-      AstParseError.UNNAMED_FOR_LOOP,
+      MarkupParseError.UNNAMED_FOR_LOOP,
       "<container @*for-=\"\">"
     );
   }
@@ -87,17 +87,17 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnBindingInUse() {
     makeErrorCase(
-      AstParseError.BINDING_IN_USE,
+      MarkupParseError.BINDING_IN_USE,
       "<container let-a=\"one\" @let-a=\"two\">"
     );
 
     makeErrorCase(
-      AstParseError.BINDING_IN_USE,
+      MarkupParseError.BINDING_IN_USE,
       "<container *for-a=\"one\" @let-a=\"two\">"
     );
 
     makeErrorCase(
-      AstParseError.BINDING_IN_USE,
+      MarkupParseError.BINDING_IN_USE,
       "<container let-a=\"one\" @*for-a=\"two\">"
     );
   }
@@ -105,22 +105,22 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnMalformedIdentifier() {
     makeErrorCase(
-      AstParseError.MALFORMED_IDENTIFIER,
+      MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @let-a-b=\"one\">"
     );
 
     makeErrorCase(
-      AstParseError.MALFORMED_IDENTIFIER,
+      MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @let-0abc=\"one\">"
     );
 
     makeErrorCase(
-      AstParseError.MALFORMED_IDENTIFIER,
+      MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @*for-a-b=\"one\">"
     );
 
     makeErrorCase(
-      AstParseError.MALFORMED_IDENTIFIER,
+      MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @*for-0abc=\"one\">"
     );
   }
@@ -128,7 +128,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnbalancedAttributeBrackets() {
     makeErrorCase(
-      AstParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
+      MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
       "<container @[hello=\"world\">"
     );
   }
@@ -136,17 +136,17 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnUnbalancedClosingTag() {
     makeErrorCase(
-      AstParseError.UNBALANCED_CLOSING_TAG,
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
       "<red>hello<green>world</green></red>@</red>"
     );
 
     makeErrorCase(
-      AstParseError.UNBALANCED_CLOSING_TAG,
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
       "<red>hello@</blue>"
     );
 
     makeErrorCase(
-      AstParseError.UNBALANCED_CLOSING_TAG,
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
       "Hello@</red>"
     );
   }
@@ -160,32 +160,32 @@ public class AstParserErrorTests {
 
   private void makeNonStringStructuralAttributeCase(String attribute) {
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + "=5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + "=5.5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + "=true>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + "=false>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + "={}>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
       "<container @*" + attribute + ">"
     );
   }
@@ -193,27 +193,27 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnNonStringExpressionAttribute() {
     makeErrorCase(
-      AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
+      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container @[attr]=5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
+      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container @[attr]=5.5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
+      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container @[attr]=true>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
+      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container @[attr]=false>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
+      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container @[attr]={}>"
     );
   }
@@ -221,32 +221,32 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnNonStringLetAttribute() {
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let=5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let-my_var=5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let-my_var=5.5>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let-my_var=true>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let-my_var=false>"
     );
 
     makeErrorCase(
-      AstParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
       "<container @let-my_var={}>"
     );
   }
@@ -254,27 +254,27 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnExpectedSubtreeValue() {
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<hover-text @value=\"hello, world\">"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<hover-text @value=5>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<hover-text @value=5.5>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<hover-text @value=true>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<hover-text @value=false>"
     );
   }
@@ -282,7 +282,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnExpectedScalarValue() {
     makeErrorCase(
-      AstParseError.EXPECTED_SCALAR_VALUE,
+      MarkupParseError.EXPECTED_SCALAR_VALUE,
       "<key @key={} />"
     );
   }
@@ -290,7 +290,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnExpectedSelfClosingTag() {
     makeErrorCase(
-      AstParseError.EXPECTED_SELF_CLOSING_TAG,
+      MarkupParseError.EXPECTED_SELF_CLOSING_TAG,
       "<key@></key>"
     );
   }
@@ -298,7 +298,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnExpectedOpenCloseTag() {
     makeErrorCase(
-      AstParseError.EXPECTED_OPEN_CLOSE_TAG,
+      MarkupParseError.EXPECTED_OPEN_CLOSE_TAG,
       "<red /@>"
     );
   }
@@ -306,7 +306,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnExpectedStructuralAttributeFlag() {
     makeErrorCase(
-      AstParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG,
+      MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG,
       "<red @*else=\"\">"
     );
   }
@@ -314,22 +314,22 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnNonSubtreeForSeparator() {
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<red *for-member=\"members\" @for-separator=.5>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<red *for-member=\"members\" @for-separator=5>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<red *for-member=\"members\" @for-separator=true>"
     );
 
     makeErrorCase(
-      AstParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_SUBTREE_VALUE,
       "<red *for-member=\"members\" @for-separator=\"hello\">"
     );
   }
@@ -337,7 +337,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnNonScalarForReversed() {
     makeErrorCase(
-      AstParseError.EXPECTED_SCALAR_VALUE,
+      MarkupParseError.EXPECTED_SCALAR_VALUE,
       "<red *for-member=\"members\" @for-reversed={}>"
     );
   }
@@ -345,52 +345,52 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnMultipleNonMultiAttributes() {
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-separator={} @for-separator={}>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-reversed=true @for-reversed=false>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-reversed=.5 @for-reversed=.2>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-reversed=5 @for-reversed=2>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<red *for-member=\"members\" for-reversed=\"hello\" @for-reversed=\"hello\">"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<hover-item name={} @name={}>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<hover-item name={} @name={}>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<hover-item amount=1 @amount=1>"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<hover-item material=\"first\" @material=\"second\">"
     );
 
     makeErrorCase(
-      AstParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
+      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<block-nbt interpret=true @interpret=false>"
     );
   }
@@ -405,13 +405,13 @@ public class AstParserErrorTests {
         String secondCondition = conditionals[j];
 
         makeErrorCase(
-          AstParseError.MULTIPLE_CONDITIONS,
+          MarkupParseError.MULTIPLE_CONDITIONS,
           "<red " + firstCondition + " @" + secondCondition + ">"
         );
       }
 
       makeErrorCase(
-        AstParseError.MULTIPLE_CONDITIONS,
+        MarkupParseError.MULTIPLE_CONDITIONS,
         "<red " + firstCondition + " @" + firstCondition + ">"
       );
     }
@@ -420,7 +420,7 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnMultipleLoops() {
     makeErrorCase(
-      AstParseError.MULTIPLE_LOOPS,
+      MarkupParseError.MULTIPLE_LOOPS,
       "<red *for-member=\"members\" @*for-user=\"users\">"
     );
   }
@@ -428,12 +428,12 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrecedingIfSibling() {
     makeErrorCase(
-      AstParseError.MISSING_PRECEDING_IF_SIBLING,
+      MarkupParseError.MISSING_PRECEDING_IF_SIBLING,
       "@<red *else-if=\"true\">"
     );
 
     makeErrorCase(
-      AstParseError.MISSING_PRECEDING_IF_SIBLING,
+      MarkupParseError.MISSING_PRECEDING_IF_SIBLING,
       "@<red *else>"
     );
   }
@@ -441,22 +441,22 @@ public class AstParserErrorTests {
   @Test
   public void shouldThrowOnMissingAttributeValue() {
     makeErrorCase(
-      AstParseError.MISSING_ATTRIBUTE_VALUE,
+      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
       "<key @key />"
     );
 
     makeErrorCase(
-      AstParseError.MISSING_ATTRIBUTE_VALUE,
+      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
       "<container @[attr]>"
     );
 
     makeErrorCase(
-      AstParseError.MISSING_ATTRIBUTE_VALUE,
+      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
       "<hover-text @value>"
     );
 
     makeErrorCase(
-      AstParseError.MISSING_ATTRIBUTE_VALUE,
+      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
       "<container @let-my_var>"
     );
   }
@@ -535,21 +535,21 @@ public class AstParserErrorTests {
   }
 
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
-    AstParseException exception = Assertions.assertThrows(
-      AstParseException.class,
-      () -> AstParser.parse(input.text, BuiltInTagRegistry.get())
+    MarkupParseException exception = Assertions.assertThrows(
+      MarkupParseException.class,
+      () -> MarkupParser.parse(input.text, BuiltInTagRegistry.get())
     );
 
     List<String> screenLines = exception.makeErrorScreen(input.text);
     Assertions.assertEquals(screen.text, String.join("\n", screenLines));
   }
 
-  private void makeErrorCase(AstParseError error, String... lines) {
+  private void makeErrorCase(MarkupParseError error, String... lines) {
     TextWithAnchors input = new TextWithAnchors(lines);
     Throwable thrownError = null;
 
     try {
-      AstParser.parse(input.text, BuiltInTagRegistry.get());
+      MarkupParser.parse(input.text, BuiltInTagRegistry.get());
     } catch (Throwable e) {
       thrownError = e;
     }
@@ -558,14 +558,14 @@ public class AstParserErrorTests {
 
     Throwable finalThrownError = thrownError;
 
-    if (!(thrownError instanceof AstParseException)) {
+    if (!(thrownError instanceof MarkupParseException)) {
       logger.log(Level.SEVERE, "Expected an ast parse exception, but got " + finalThrownError.getClass(), finalThrownError);
       throw new AssertionError();
     }
 
     CursorPosition position = input.anchor(0);
 
-    Assertions.assertEquals(position.toString(), ((AstParseException) thrownError).position.toString());
-    Assertions.assertEquals(error, ((AstParseException) thrownError).error);
+    Assertions.assertEquals(position.toString(), ((MarkupParseException) thrownError).position.toString());
+    Assertions.assertEquals(error, ((MarkupParseException) thrownError).error);
   }
 }

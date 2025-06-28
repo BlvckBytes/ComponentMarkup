@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.parser;
 
 import at.blvckbytes.component_markup.ErrorMessage;
 
-public enum AstParseError implements ErrorMessage {
+public enum MarkupParseError implements ErrorMessage {
   UNKNOWN_TAG("This tag does not exist"),
   UNKNOWN_ATTRIBUTE("This attribute is not a member of its tag"),
   UNKNOWN_STRUCTURAL_ATTRIBUTE("This structural attribute does not exist"),
@@ -32,7 +32,7 @@ public enum AstParseError implements ErrorMessage {
 
   private final String message;
 
-  AstParseError(String message) {
+  MarkupParseError(String message) {
     this.message = message;
   }
 

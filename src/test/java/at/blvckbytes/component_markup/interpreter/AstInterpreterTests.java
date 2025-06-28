@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.interpreter.EnvironmentBuilder;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.parser.AstParser;
+import at.blvckbytes.component_markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.xml.TextWithAnchors;
 import com.google.gson.*;
 import org.junit.jupiter.api.Assertions;
@@ -228,7 +228,7 @@ public class AstInterpreterTests {
   }
 
   private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
-    MarkupNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
+    MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.get());
 
     char breakChar;
     JsonElement expectedJson;
@@ -249,7 +249,7 @@ public class AstInterpreterTests {
     List<Object> resultItems = AstInterpreter.interpret(
       componentConstructor, expressionInterpreter,
       baseEnvironment,
-      logger, breakChar, actualAst
+      logger, breakChar, actualNode
     );
 
     JsonArray actualJson = new JsonArray();

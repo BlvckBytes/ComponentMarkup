@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AstParserTestsBase {
+public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
@@ -68,8 +68,8 @@ public abstract class AstParserTestsBase {
     return new NodeWrapper<>(new TextNode(value, position, new ArrayList<>()));
   }
 
-  protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedAst) {
-    MarkupNode actualAst = AstParser.parse(input.text, BuiltInTagRegistry.get());
-    Assertions.assertEquals(wrappedExpectedAst.get().toString(), actualAst.toString());
+  protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {
+    MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.get());
+    Assertions.assertEquals(wrappedExpectedNode.get().toString(), actualNode.toString());
   }
 }
