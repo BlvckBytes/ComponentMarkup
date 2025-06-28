@@ -394,7 +394,7 @@ public class ExpressionTokenizer {
       }
     }
 
-    dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken;
+    dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken || result instanceof PunctuationToken;
 
     return result;
   }

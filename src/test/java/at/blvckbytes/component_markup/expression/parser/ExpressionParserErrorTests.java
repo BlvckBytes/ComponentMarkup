@@ -86,7 +86,7 @@ public class ExpressionParserErrorTests {
     }
 
     for (InfixOperator operator : InfixOperator.values()) {
-      if (operator == InfixOperator.SUBSCRIPTING)
+      if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION)
         continue;
 
       text = new TextWithAnchors(

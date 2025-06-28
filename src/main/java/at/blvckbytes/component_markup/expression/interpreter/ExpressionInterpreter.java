@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import org.jetbrains.annotations.Nullable;
 
@@ -208,15 +209,9 @@ public class ExpressionInterpreter {
     if (expression instanceof SubstringNode) {
       SubstringNode node = (SubstringNode) expression;
 
-      String stringValue = valueInterpreter.asString(interpret(node.operand, environment));
-
-      Object lowerBound = interpret(node.lowerBound, environment);
-      Object upperBound = interpret(node.upperBound, environment);
-
       return performSubstring(
-        stringValue,
-        lowerBound == null ? null : valueInterpreter.asLong(lowerBound),
-        upperBound == null ? null : valueInterpreter.asLong(upperBound)
+        valueInterpreter.asString(interpret(node.operand, environment)),
+        node, environment
       );
     }
 
@@ -298,43 +293,75 @@ public class ExpressionInterpreter {
     }
   }
 
-  private String performSubstring(String input, @Nullable Long lowerIndex, @Nullable Long upperIndex) {
-    StringBuilder result = new StringBuilder();
-    long stringLength = input.length();
+  private @Nullable String extractStringTerminal(@Nullable ExpressionNode node) {
+    if (node instanceof TerminalNode) {
+      TerminalNode terminal = (TerminalNode) node;
 
-    if (lowerIndex != null) {
-      if (lowerIndex < 0) {
-        lowerIndex = Math.abs(lowerIndex);
-
-        if (lowerIndex >= stringLength)
-          lowerIndex = stringLength - 1;
-
-        result.append(input, (int) (stringLength - 1 - lowerIndex), (int) stringLength);
-        result.reverse();
-      }
+      if (terminal.token instanceof StringToken)
+        return (String) terminal.token.getPlainValue();
     }
 
-    if (upperIndex != null) {
-      if (upperIndex < 0) {
-        upperIndex = Math.abs(upperIndex);
+    return null;
+  }
 
-        if (upperIndex >= stringLength)
-          upperIndex = stringLength - 1;
+  private @Nullable Long decideSubstringIndex(
+    String input,
+    InterpretationEnvironment environment,
+    ExpressionNode node,
+    boolean firstIndex
+  ) {
+    if (node == null)
+      return null;
 
-        result.append(input, 0, upperIndex.intValue());
+    String delimiter = extractStringTerminal(node);
+
+    if (delimiter != null) {
+      int index;
+
+      if (firstIndex) {
+        index = input.indexOf(delimiter);
+
+        if (index < 0)
+          index = 0;
       }
+
+      else {
+        index = input.lastIndexOf(delimiter);
+
+        if (index < 0)
+          index = input.length() - 1;
+      }
+
+      return (long) index;
     }
 
-    if (lowerIndex != null && upperIndex != null) {
-      if (lowerIndex >= 0 && upperIndex >= 0 && lowerIndex.compareTo(upperIndex) <= 0) {
-        if (upperIndex >= stringLength)
-          upperIndex = stringLength - 1;
+    return environment.getValueInterpreter().asLong(interpret(node, environment));
+  }
 
-        result.append(input, lowerIndex.intValue(), upperIndex.intValue() + 1);
-      }
-    }
+  public String performSubstring(String input, SubstringNode node, InterpretationEnvironment environment) {
+    int len = input.length();
 
-    return result.toString();
+    if (len == 0)
+      return "";
+
+    @Nullable Long lowerBound = decideSubstringIndex(input, environment, node.lowerBound, true);
+    @Nullable Long upperBound = decideSubstringIndex(input, environment, node.upperBound, false);
+
+    long beginIndex = (lowerBound == null) ? 0 : (lowerBound < 0 ? len + lowerBound : lowerBound);
+    long endIndex = (upperBound == null) ? len - 1 : (upperBound < 0 ? len + upperBound : upperBound);
+    boolean wereNegative = beginIndex < 0 && endIndex < 0;
+
+    beginIndex = clampZeroAndMax(beginIndex, len);
+    endIndex = clampZeroAndMax(endIndex, len - 1);
+
+    if (beginIndex > endIndex || (wereNegative && beginIndex == endIndex && beginIndex == 0))
+      return "";
+
+    return input.substring((int) beginIndex, (int) endIndex + 1);
+  }
+
+  private long clampZeroAndMax(long value, long max) {
+    return Math.max(0, Math.min(max, value));
   }
 
   private boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue) {

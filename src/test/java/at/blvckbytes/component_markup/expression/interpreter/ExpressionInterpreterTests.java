@@ -128,6 +128,83 @@ public class ExpressionInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldSubstringInAllPermutations() {
+    InterpretationEnvironment environment = new EnvironmentBuilder()
+      .withStatic("input", "ABCDEFGHIJ");
+
+    // Full string
+    makeCase("input[:]", environment, "ABCDEFGHIJ");
+
+    // Start only
+    makeCase("input[0:]", environment, "ABCDEFGHIJ");
+    makeCase("input[3:]", environment, "DEFGHIJ");
+    makeCase("input[9:]", environment, "J");
+    makeCase("input[10:]", environment, "");
+    makeCase("input[-1:]", environment, "J");
+    makeCase("input[-3:]", environment, "HIJ");
+
+    // End only
+    makeCase("input[:0]", environment, "A");
+    makeCase("input[:3]", environment, "ABCD");
+    makeCase("input[:9]", environment, "ABCDEFGHIJ");
+    makeCase("input[:10]", environment, "ABCDEFGHIJ");
+    makeCase("input[:-1]", environment, "ABCDEFGHIJ");
+    makeCase("input[:-3]", environment, "ABCDEFGH");
+
+    // Both bounds positive
+    makeCase("input[2:5]", environment, "CDEF");
+    makeCase("input[5:2]", environment, "");
+
+    // Both bounds negative
+    makeCase("input[-4:-2]", environment, "GHI");
+    makeCase("input[-1:-1]", environment, "J");
+    makeCase("input[-10:-1]", environment, "ABCDEFGHIJ");
+    makeCase("input[-100:-1]", environment, "ABCDEFGHIJ");
+
+    // Mixed signs
+    makeCase("input[-3:9]", environment, "HIJ");
+    makeCase("input[3:-2]", environment, "DEFGHI");
+    makeCase("input[8:-2]", environment, "I");
+    makeCase("input[-2:5]", environment, "");
+
+    // Out-of-bounds (positive)
+    makeCase("input[0:100]", environment, "ABCDEFGHIJ");
+    makeCase("input[10:12]", environment, "");
+    makeCase("input[5:100]", environment, "FGHIJ");
+
+    // Out-of-bounds (negative)
+    makeCase("input[-100:-90]", environment, "");
+    makeCase("input[-100:2]", environment, "ABC");
+    makeCase("input[-2:100]", environment, "IJ");
+
+    // Single Character
+    makeCase("input[0:0]", environment, "A");
+    makeCase("input[9:9]", environment, "J");
+
+    // Empty input
+    makeCase("''[:]", environment, "");
+    makeCase("''[0:]", environment, "");
+    makeCase("''[:0]", environment, "");
+    makeCase("''[-1:]", environment, "");
+    makeCase("''[:-1]", environment, "");
+    makeCase("''[-1:-1]", environment, "");
+
+    // Single char literals
+    makeCase("input['C':]", environment, "CDEFGHIJ");
+    makeCase("input[:'C']", environment, "ABC");
+    makeCase("input[3:'I']", environment, "DEFGHI");
+    makeCase("input['B':5]", environment, "BCDEF");
+    makeCase("input['B':-2]", environment, "BCDEFGHI");
+    makeCase("input[-4:'H']", environment, "GH");
+
+    // Multi char literals
+    makeCase("input['ABC':'GH']", environment, "ABCDEFG");
+
+    // Non-contained literals
+    makeCase("input['Z':'X']", environment, "ABCDEFGHIJ");
+  }
+
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
     ExpressionNode node = ExpressionParser.parse(expression);
     Assertions.assertEquals(expectedResult, interpreter.interpret(node, environment));
