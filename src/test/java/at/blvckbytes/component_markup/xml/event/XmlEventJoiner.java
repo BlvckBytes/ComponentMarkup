@@ -23,18 +23,18 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onLongAttribute(String name, long value) {
-    appendEvent(new LongAttributeEvent(name, value));
+  public void onLongAttribute(String name, String raw, long value) {
+    appendEvent(new LongAttributeEvent(name, raw, value));
   }
 
   @Override
-  public void onDoubleAttribute(String name, double value) {
-    appendEvent(new DoubleAttributeEvent(name, value));
+  public void onDoubleAttribute(String name, String raw, double value) {
+    appendEvent(new DoubleAttributeEvent(name, raw, value));
   }
 
   @Override
-  public void onBooleanAttribute(String name, boolean value) {
-    appendEvent(new BooleanAttributeEvent(name, value));
+  public void onBooleanAttribute(String name, String raw, boolean value) {
+    appendEvent(new BooleanAttributeEvent(name, raw, value));
   }
 
   @Override

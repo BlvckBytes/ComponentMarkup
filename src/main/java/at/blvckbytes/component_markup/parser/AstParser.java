@@ -8,7 +8,11 @@ import at.blvckbytes.component_markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.ast.tag.attribute.SubtreeAttribute;
 import at.blvckbytes.component_markup.ast.tag.built_in.ContainerTag;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.tokenizer.token.BooleanToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.DoubleToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.LongToken;
 import at.blvckbytes.component_markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.xml.XmlEventConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +20,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Stack;
 
 public class AstParser implements XmlEventConsumer {
+
+  // TODO: each time .parse is called, the exception needs to be caught and re-thrown
+  //       with the context of the corresponding XML-element to render properly
 
   private static final ExpressionNode EMPTY_TEXT = ImmediateExpression.of("");
 
@@ -153,33 +160,33 @@ public class AstParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onLongAttribute(String name, long value) {
+  public void onLongAttribute(String name, String raw, long value) {
     if (subtreeParser != null) {
-      subtreeParser.onLongAttribute(name, value);
+      subtreeParser.onLongAttribute(name, raw, value);
       return;
     }
 
-    handleScalarNonStringAttribute(name, ImmediateExpression.of(value));
+    handleScalarNonStringAttribute(name, new TerminalNode(new LongToken(0, raw, value)));
   }
 
   @Override
-  public void onDoubleAttribute(String name, double value) {
+  public void onDoubleAttribute(String name, String raw, double value) {
     if (subtreeParser != null) {
-      subtreeParser.onDoubleAttribute(name, value);
+      subtreeParser.onDoubleAttribute(name, raw, value);
       return;
     }
 
-    handleScalarNonStringAttribute(name, ImmediateExpression.of(value));
+    handleScalarNonStringAttribute(name, new TerminalNode(new DoubleToken(0, raw, value)));
   }
 
   @Override
-  public void onBooleanAttribute(String name, boolean value) {
+  public void onBooleanAttribute(String name, String raw, boolean value) {
     if (subtreeParser != null) {
-      subtreeParser.onBooleanAttribute(name, value);
+      subtreeParser.onBooleanAttribute(name, raw, value);
       return;
     }
 
-    handleScalarNonStringAttribute(name, ImmediateExpression.of(value));
+    handleScalarNonStringAttribute(name, new TerminalNode(new BooleanToken(0, raw, value)));
   }
 
   @Override

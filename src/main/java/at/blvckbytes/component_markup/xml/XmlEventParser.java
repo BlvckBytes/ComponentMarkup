@@ -254,7 +254,7 @@ public class XmlEventParser {
 
     if (encounteredDecimalPoint) {
       try {
-        consumer.onDoubleAttribute(attributeName, Double.parseDouble(numberString));
+        consumer.onDoubleAttribute(attributeName, numberString, Double.parseDouble(numberString));
       } catch (NumberFormatException e) {
         throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
       }
@@ -262,7 +262,7 @@ public class XmlEventParser {
     }
 
     try {
-      consumer.onLongAttribute(attributeName, Long.parseLong(numberString));
+      consumer.onLongAttribute(attributeName, numberString, Long.parseLong(numberString));
     } catch (NumberFormatException e) {
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
     }
@@ -329,29 +329,38 @@ public class XmlEventParser {
         return true;
 
       case 'T':
-      case 't':
+      case 't': {
+        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+
         for (char c : TRUE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
             throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
         }
 
+        substringBuilder.setEndExclusive(cursor.getNextCharIndex());
+
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
 
-        consumer.onBooleanAttribute(attributeName, true);
+        consumer.onBooleanAttribute(attributeName, substringBuilder.build(StringBuilderMode.NORMAL_MODE), true);
         return true;
+      }
 
       case 'F':
       case 'f':
+        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+
         for (char c : FALSE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
             throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
         }
 
+        substringBuilder.setEndExclusive(cursor.getNextCharIndex());
+
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
 
-        consumer.onBooleanAttribute(attributeName, false);
+        consumer.onBooleanAttribute(attributeName, substringBuilder.build(StringBuilderMode.NORMAL_MODE), false);
         return true;
 
       case '0':

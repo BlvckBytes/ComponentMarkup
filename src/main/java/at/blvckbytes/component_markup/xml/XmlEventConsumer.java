@@ -8,11 +8,11 @@ public interface XmlEventConsumer {
 
   void onStringAttribute(String name, String value);
 
-  void onLongAttribute(String name, long value);
+  void onLongAttribute(String name, String raw, long value);
 
-  void onDoubleAttribute(String name, double value);
+  void onDoubleAttribute(String name, String raw, double value);
 
-  void onBooleanAttribute(String name, boolean value);
+  void onBooleanAttribute(String name, String raw, boolean value);
 
   void onTagAttributeBegin(String name);
 
