@@ -26,7 +26,7 @@ public class ExpressionParser {
     Token trailingToken;
 
     if ((trailingToken = tokenizer.peekToken()) != null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_EOS, trailingToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_EOS, trailingToken.beginIndex);
 
     return result;
   }
@@ -104,7 +104,7 @@ public class ExpressionParser {
           return rhs;
       }
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken.endIndex);
     }
 
     return makeInfixExpression(lhs, upcomingToken, rhs);
@@ -129,7 +129,7 @@ public class ExpressionParser {
 
     if (terminationToken != null) {
       if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, terminationToken.beginIndex);
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, terminationToken.beginIndex);
 
       return new SubstringNode(operand, operatorToken, lowerBound, colonToken, null, terminationToken);
     }
@@ -137,15 +137,15 @@ public class ExpressionParser {
     ExpressionNode upperBound = parseExpression(null);
 
     if (upperBound == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, colonToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND, colonToken.endIndex);
 
     terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminationToken == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, upperBound.getEndIndex());
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, upperBound.getEndIndex());
 
     if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, terminationToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, terminationToken.beginIndex);
 
     return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
@@ -155,7 +155,7 @@ public class ExpressionParser {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.getEndIndex());
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.getEndIndex());
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
         return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
@@ -163,29 +163,29 @@ public class ExpressionParser {
       if (delimiterToken.punctuation == Punctuation.COLON)
         return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, delimiterToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, delimiterToken.beginIndex);
     }
 
     if (operatorToken.operator == InfixOperator.BRANCHING) {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, rhs.getEndIndex());
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, rhs.getEndIndex());
 
       if (delimiterToken.punctuation != Punctuation.COLON)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken.beginIndex);
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_BRANCH_DELIMITER, delimiterToken.beginIndex);
 
       ExpressionNode falseBranch = parseExpression(null);
 
       if (falseBranch == null)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken.endIndex);
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_FALSE_BRANCH, delimiterToken.endIndex);
 
       return new BranchingNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
     if (operatorToken.operator == InfixOperator.MEMBER) {
       if (!(rhs instanceof TerminalNode) || !(((TerminalNode) rhs).token instanceof IdentifierToken))
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex());
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex());
     }
 
     return new InfixOperationNode(lhs, operatorToken, rhs, null);
@@ -217,7 +217,7 @@ public class ExpressionParser {
         if (arrayItems.isEmpty())
           break;
 
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_ITEM, delimiterToken.endIndex);
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_ARRAY_ITEM, delimiterToken.endIndex);
       }
 
       arrayItems.add(arrayItem);
@@ -225,7 +225,7 @@ public class ExpressionParser {
       delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, arrayItem.getEndIndex());
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, arrayItem.getEndIndex());
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
         break;
@@ -235,7 +235,7 @@ public class ExpressionParser {
         continue;
       }
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, delimiterToken.beginIndex);
     }
 
     PunctuationToken terminatorToken = tokenizer.nextToken(PunctuationToken.class);
@@ -248,11 +248,11 @@ public class ExpressionParser {
       else
         index = introductionToken.endIndex;
 
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, index);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, index);
     }
 
     if (terminatorToken.punctuation != Punctuation.CLOSING_BRACKET)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET, terminatorToken.beginIndex);
 
     return new ArrayNode(introductionToken, arrayItems, terminatorToken);
   }
@@ -271,7 +271,7 @@ public class ExpressionParser {
     ExpressionNode operand = parsePrefixExpression();
 
     if (operand == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
 
     return new PrefixOperationNode(operatorToken, operand);
   }
@@ -294,15 +294,15 @@ public class ExpressionParser {
     ExpressionNode expression = parseExpression(null);
 
     if (expression == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_PARENTHESES_CONTENT, introductionToken.endIndex);
 
     PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminationToken == null)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, expression.getEndIndex());
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, expression.getEndIndex());
 
     if (terminationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
-      throw new ExpressionParserException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken.beginIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS, terminationToken.beginIndex);
 
     expression.parenthesised = true;
 

@@ -343,11 +343,11 @@ public class ExpressionParserErrorTests {
   }
 
   private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int charIndex) {
-    ExpressionParserException thrownException = null;
+    ExpressionParseException thrownException = null;
 
     try {
       ExpressionParser.parse(input.text);
-    } catch (ExpressionParserException exception) {
+    } catch (ExpressionParseException exception) {
       thrownException = exception;
     }
 
@@ -356,7 +356,7 @@ public class ExpressionParserErrorTests {
     StringWriter stringWriter = new StringWriter();
     thrownException.printStackTrace(new PrintWriter(stringWriter));
 
-    ExpressionParserException expectedException = new ExpressionParserException(error, charIndex);
+    ExpressionParseException expectedException = new ExpressionParseException(error, charIndex);
 
     Assertions.assertEquals(Jsonifiable.toString(expectedException), Jsonifiable.toString(thrownException), () -> (
       "Mismatched on the exception thrown:\n" + stringWriter
