@@ -324,6 +324,11 @@ public class ExpressionTokenizer {
           return new PrefixOperatorToken(beginIndex, PrefixOperator.TRIM);
         }
 
+        if (peekChar() == '<') {
+          nextChar();
+          return new PrefixOperatorToken(beginIndex, PrefixOperator.REVERSE);
+        }
+
         throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_TILDE);
 
       case '.':

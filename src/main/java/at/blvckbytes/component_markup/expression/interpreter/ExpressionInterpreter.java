@@ -74,6 +74,9 @@ public class ExpressionInterpreter {
         case TRIM:
           return valueInterpreter.asString(operandValue).trim();
 
+        case REVERSE:
+          return new StringBuilder(valueInterpreter.asString(operandValue)).reverse().toString();
+
         default:
           logger.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;

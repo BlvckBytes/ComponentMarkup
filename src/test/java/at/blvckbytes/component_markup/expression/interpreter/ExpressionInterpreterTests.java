@@ -75,6 +75,16 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldTransformReverse() {
+    makeCase(
+      "'before ' & ~<my_string & ' test'",
+      new EnvironmentBuilder()
+        .withStatic("my_string", "Hello, World"),
+      "before dlroW ,olleH test"
+    );
+  }
+
+  @Test
   public void shouldExplodeStringWithNullOrEmptyString() {
     List<String> result = Arrays.asList("h", "e", "l", "l", "o");
 

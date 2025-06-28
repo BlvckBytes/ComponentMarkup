@@ -10,6 +10,7 @@ public enum PrefixOperator {
   SLUGIFY    ("~-"),
   ASCIIFY    ("~?"),
   TRIM       ("~|"),
+  REVERSE    ("~<"),
   ;
 
   private final String representation;
