@@ -64,6 +64,11 @@ public class AstInterpreter implements Interpreter {
   }
 
   @Override
+  public TemporaryMemberEnvironment getEnvironment() {
+    return environment;
+  }
+
+  @Override
   public @NotNull String evaluateAsString(ExpressionNode expression) {
     String value = evaluateAsStringOrNull(expression);
 

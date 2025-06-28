@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface Interpreter {
 
-  // TODO: Would also be cool if interceptors could specify temporary members using this interface
+  TemporaryMemberEnvironment getEnvironment();
 
   @NotNull String evaluateAsString(ExpressionNode expression);
 
