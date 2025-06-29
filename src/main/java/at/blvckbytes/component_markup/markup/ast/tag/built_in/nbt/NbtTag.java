@@ -17,10 +17,10 @@ public abstract class NbtTag extends TagDefinition {
   protected NbtTag(NbtSource source, String tagName) {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition(source.attributeName, false, true),
-        new ExpressionAttributeDefinition("path", false, true),
-        new ExpressionAttributeDefinition("interpret", false, false),
-        new MarkupAttributeDefinition("separator", false, false)
+        new ExpressionAttributeDefinition(source.attributeName, AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("path", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("interpret"),
+        new MarkupAttributeDefinition("separator")
       },
       new String[] { tagName },
       TagClosing.SELF_CLOSE,

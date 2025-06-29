@@ -19,11 +19,11 @@ public class FormatTag extends TagDefinition {
   public FormatTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("obfuscated", false, false),
-        new ExpressionAttributeDefinition("strikethrough", false, false),
-        new ExpressionAttributeDefinition("underlined", false, false),
-        new ExpressionAttributeDefinition("italic", false, false),
-        new ExpressionAttributeDefinition("bold", false, false)
+        new ExpressionAttributeDefinition("obfuscated"),
+        new ExpressionAttributeDefinition("strikethrough"),
+        new ExpressionAttributeDefinition("underlined"),
+        new ExpressionAttributeDefinition("italic"),
+        new ExpressionAttributeDefinition("bold")
       },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,

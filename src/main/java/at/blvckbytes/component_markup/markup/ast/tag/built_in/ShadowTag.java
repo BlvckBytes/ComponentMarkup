@@ -19,8 +19,8 @@ public class ShadowTag extends TagDefinition {
   public ShadowTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", false, true),
-        new ExpressionAttributeDefinition("opacity", false, false)
+        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("opacity")
       },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,

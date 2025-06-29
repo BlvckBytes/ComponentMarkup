@@ -16,7 +16,7 @@ public class KeyTag extends TagDefinition {
   public KeyTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("key", false, true)
+        new ExpressionAttributeDefinition("key", AttributeFlag.MANDATORY)
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,

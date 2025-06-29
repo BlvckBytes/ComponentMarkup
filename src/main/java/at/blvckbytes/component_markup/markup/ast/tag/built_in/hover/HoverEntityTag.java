@@ -14,9 +14,9 @@ public class HoverEntityTag extends HoverTag {
   public HoverEntityTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("type", false, true),
-        new ExpressionAttributeDefinition("id", false, true),
-        new MarkupAttributeDefinition("name", false, false),
+        new ExpressionAttributeDefinition("type", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("id", AttributeFlag.MANDATORY),
+        new MarkupAttributeDefinition("name"),
       },
       "hover-entity"
     );

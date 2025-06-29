@@ -16,7 +16,7 @@ public class ColorTag extends TagDefinition {
   public ColorTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", false, true)
+        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY)
       },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,

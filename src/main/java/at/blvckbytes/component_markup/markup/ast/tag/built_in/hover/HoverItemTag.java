@@ -14,10 +14,10 @@ public class HoverItemTag extends HoverTag {
   public HoverItemTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("material", false, false),
-        new ExpressionAttributeDefinition("amount", false, false),
-        new MarkupAttributeDefinition("name", false, false),
-        new MarkupAttributeDefinition("lore", false, false)
+        new ExpressionAttributeDefinition("material", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("amount"),
+        new MarkupAttributeDefinition("name"),
+        new MarkupAttributeDefinition("lore")
       },
       "hover-item"
     );

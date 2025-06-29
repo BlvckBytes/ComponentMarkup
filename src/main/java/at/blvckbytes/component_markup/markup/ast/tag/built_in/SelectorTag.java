@@ -16,8 +16,8 @@ public class SelectorTag extends TagDefinition {
   public SelectorTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("selector", false, true),
-        new MarkupAttributeDefinition("separator", false, false)
+        new ExpressionAttributeDefinition("selector", AttributeFlag.MANDATORY),
+        new MarkupAttributeDefinition("separator")
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,

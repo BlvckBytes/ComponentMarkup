@@ -16,9 +16,9 @@ public class ScoreTag extends TagDefinition {
   public ScoreTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("name", false, true),
-        new ExpressionAttributeDefinition("objective", false, true),
-        new ExpressionAttributeDefinition("value", false, false)
+        new ExpressionAttributeDefinition("name", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("objective", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("value")
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,

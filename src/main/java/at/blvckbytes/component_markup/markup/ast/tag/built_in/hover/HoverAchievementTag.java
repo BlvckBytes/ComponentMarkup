@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.hover;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.markup.ast.tag.AttributeDefinition;
+import at.blvckbytes.component_markup.markup.ast.tag.AttributeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionAttributeDefinition;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
@@ -16,7 +17,7 @@ public class HoverAchievementTag extends HoverTag {
   public HoverAchievementTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", false, true)
+        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY)
       },
       "hover-achievement"
     );

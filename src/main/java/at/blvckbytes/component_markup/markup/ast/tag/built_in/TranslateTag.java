@@ -16,9 +16,9 @@ public class TranslateTag extends TagDefinition {
   public TranslateTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("key", false, true),
-        new MarkupAttributeDefinition("with", true, false),
-        new ExpressionAttributeDefinition("fallback", false, false)
+        new ExpressionAttributeDefinition("key", AttributeFlag.MANDATORY),
+        new MarkupAttributeDefinition("with", AttributeFlag.MULTI_VALUE),
+        new ExpressionAttributeDefinition("fallback")
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,

@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.hover;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.tag.AttributeDefinition;
+import at.blvckbytes.component_markup.markup.ast.tag.AttributeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupAttributeDefinition;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
@@ -16,7 +17,7 @@ public class HoverTextTag extends HoverTag {
   public HoverTextTag() {
     super(
       new AttributeDefinition[] {
-        new MarkupAttributeDefinition("value", false, true)
+        new MarkupAttributeDefinition("value", AttributeFlag.MANDATORY)
       },
       "hover-text"
     );
