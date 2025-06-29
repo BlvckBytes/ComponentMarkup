@@ -235,8 +235,6 @@ public class MarkupInterpreter implements Interpreter {
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
 
-    Set<String> introducedNames = introduceLetBindings(node);
-
     boolean reversed;
 
     if (node.reversed == null)
@@ -256,16 +254,18 @@ public class MarkupInterpreter implements Interpreter {
       if (node.iterationVariable != null)
         environment.updateVariable(node.iterationVariable, item);
 
+      Set<String> introducedNames = introduceLetBindings(node);
+
       if (node.separator != null) {
         if (reversed ? index != size - 1 : index != 0)
           _interpret(node.separator);
       }
 
       _interpret(node.body);
-    }
 
-    if (introducedNames != null)
-      environment.popVariables(introducedNames);
+      if (introducedNames != null)
+        environment.popVariables(introducedNames);
+    }
 
     if (node.iterationVariable != null)
       environment.popVariable(node.iterationVariable);

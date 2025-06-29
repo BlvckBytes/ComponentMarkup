@@ -222,6 +222,38 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldUpdateLetBindingOnLoopNode() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *for=\"1..3\" let-number=\"loop.index + 1\">{{number}}"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "1")
+                .string("color", "red")
+            ))
+            .object(item -> (
+              item
+                .string("text", "2")
+                .string("color", "red")
+            ))
+            .object(item -> (
+              item
+                .string("text", "3")
+                .string("color", "red")
+            ))
+        ))
+    );
+  }
+
   private JsonElement sortKeysRecursively(JsonElement input) {
     if (input instanceof JsonArray) {
       JsonArray jsonArray = (JsonArray) input;
