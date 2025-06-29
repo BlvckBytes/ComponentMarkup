@@ -243,10 +243,10 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   }
 
   @Test
-  public void shouldAllowToCloseAllCurrentlyOpenTags() {
+  public void shouldHandleClosingTagShorthand() {
     TextWithAnchors text = new TextWithAnchors(
       "<aqua>@hello</aqua>",
-      "<red><bold>@world</>",
+      "<red><bold>@world</></>",
       "<green><italic>@test"
     );
 

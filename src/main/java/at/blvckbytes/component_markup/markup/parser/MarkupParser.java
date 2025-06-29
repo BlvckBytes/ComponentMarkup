@@ -339,11 +339,8 @@ public class MarkupParser implements XmlEventConsumer {
       if (tagStack.size() == 1)
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG);
 
-      while (tagStack.size() > 1) {
-        TagAndBuffers openedTag = tagStack.pop();
-        tagStack.peek().children.add(openedTag);
-      }
-
+      TagAndBuffers openedTag = tagStack.pop();
+      tagStack.peek().children.add(openedTag);
       return;
     }
 
