@@ -10,27 +10,9 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.List;
 
 public class ShadowTag extends TagDefinition {
-
-  private static final Color BLACK        = new Color(  0,   0,   0);
-  private static final Color DARK_BLUE    = new Color(  0,   0, 170);
-  private static final Color DARK_GREEN   = new Color(  0, 170,   0);
-  private static final Color DARK_AQUA    = new Color(  0, 170, 170);
-  private static final Color DARK_RED     = new Color(170,   0,   0);
-  private static final Color DARK_PURPLE  = new Color(170,   0, 170);
-  private static final Color GOLD         = new Color(255, 170,   0);
-  private static final Color GRAY         = new Color(170, 170, 170);
-  private static final Color DARK_GRAY    = new Color( 85,  85,  85);
-  private static final Color BLUE         = new Color( 85,  85, 255);
-  private static final Color GREEN        = new Color( 85, 255,  85);
-  private static final Color AQUA         = new Color( 85, 255, 255);
-  private static final Color RED          = new Color(255,  85,  85);
-  private static final Color LIGHT_PURPLE = new Color(255,  85, 255);
-  private static final Color YELLOW       = new Color(255, 255,  85);
-  private static final Color WHITE        = new Color(255, 255, 255);
 
   private static final String TAG_NAME = "shadow";
 
@@ -88,13 +70,13 @@ public class ShadowTag extends TagDefinition {
     if (colorLength == 0)
       return null;
 
-    int a = 255;
+    int alpha = 255;
 
     if (opacity >= 0) {
-      a = (int) Math.round(((double) a) * (opacity / 100.0));
+      alpha = (int) Math.round(((double) alpha) * (opacity / 100.0));
 
-      if (a > 255)
-        a = 255;
+      if (alpha > 255)
+        alpha = 255;
     }
 
     if ((colorLength == 7 || colorLength == 9) && color.charAt(0) == '#') {
@@ -104,78 +86,36 @@ public class ShadowTag extends TagDefinition {
         int b = Integer.parseInt(color.substring(5, 7), 16);
 
         if (opacity < 0 && colorLength == 9)
-          a = Integer.parseInt(color.substring(7, 9), 16);
+          alpha = Integer.parseInt(color.substring(7, 9), 16);
 
-        return packRGBA(r, g, b, a);
+        return packRGBA(r, g, b, alpha);
       } catch (Throwable e) {
         return null;
       }
     }
 
-    Color namedColor = resolveNamedColorOrZero(color.toLowerCase());
+    color = color.toLowerCase();
 
-    if (namedColor == null)
+    AnsiStyleColor ansiColor;
+
+    if (color.charAt(0) == '&' && colorLength == 2)
+      ansiColor = AnsiStyleColor.fromChar(color.charAt(1));
+
+    else
+      ansiColor = AnsiStyleColor.fromName(color);
+
+    if (ansiColor == null)
       return null;
 
-    return packRGBA(namedColor.getRed(), namedColor.getGreen(), namedColor.getBlue(), a);
+    return packRGBA(
+      ansiColor.color.getRed(),
+      ansiColor.color.getGreen(),
+      ansiColor.color.getBlue(),
+      alpha
+    );
   }
 
   private int packRGBA(int r, int g, int b, int a) {
     return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
-  }
-
-  private @Nullable Color resolveNamedColorOrZero(String name) {
-    switch (name) {
-      case "red":
-        return RED;
-
-      case "light_purple":
-        return LIGHT_PURPLE;
-
-      case "gold":
-        return GOLD;
-
-      case "dark_green":
-        return DARK_GREEN;
-
-      case "dark_aqua":
-        return DARK_AQUA;
-
-      case "yellow":
-        return YELLOW;
-
-      case "white":
-        return WHITE;
-
-      case "dark_red":
-        return DARK_RED;
-
-      case "dark_purple":
-        return DARK_PURPLE;
-
-      case "dark_gray":
-        return DARK_GRAY;
-
-      case "blue":
-        return BLUE;
-
-      case "gray":
-        return GRAY;
-
-      case "green":
-        return GREEN;
-
-      case "aqua":
-        return AQUA;
-
-      case "black":
-        return BLACK;
-
-      case "dark_blue":
-        return DARK_BLUE;
-
-      default:
-        return null;
-    }
   }
 }
