@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +36,7 @@ public class TranslateTag extends TagDefinition {
   public @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
-    List<Attribute> attributes,
+    AttributeMap attributes,
     List<LetBinding> letBindings,
     List<MarkupNode> children
   ) {

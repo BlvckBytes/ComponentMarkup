@@ -2,11 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
-import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.markup.ast.tag.TagClosing;
-import at.blvckbytes.component_markup.markup.ast.tag.TagDefinition;
-import at.blvckbytes.component_markup.markup.ast.tag.TagPriority;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
+import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +25,7 @@ public class BreakTag extends TagDefinition {
   public @NotNull MarkupNode construct(
     String tagNameLower,
     CursorPosition position,
-    List<Attribute> attributes,
+    AttributeMap attributes,
     List<LetBinding> letBindings,
     List<MarkupNode> children
   ) {

@@ -1,11 +1,9 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionAttributeDefinition extends AttributeDefinition {
@@ -14,27 +12,11 @@ public class ExpressionAttributeDefinition extends AttributeDefinition {
     super(name, ExpressionAttribute.class, flags);
   }
 
-  public @Nullable ExpressionNode singleOrNull(List<Attribute> attributes) {
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
-
-      return ((ExpressionAttribute) attribute).value;
-    }
-
-    return null;
+  public @Nullable ExpressionNode singleOrNull(AttributeMap attributes) {
+    return attributes.firstExpressionOrNull(name);
   }
 
-  public List<ExpressionNode> multi(List<Attribute> attributes) {
-    List<ExpressionNode> result = new ArrayList<>();
-
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
-
-      result.add(((ExpressionAttribute) attribute).value);
-    }
-
-    return result;
+  public List<ExpressionNode> multi(AttributeMap attributes) {
+    return attributes.expressions(name);
   }
 }

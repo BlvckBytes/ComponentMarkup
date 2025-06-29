@@ -1,11 +1,9 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MarkupAttributeDefinition extends AttributeDefinition {
@@ -14,27 +12,11 @@ public class MarkupAttributeDefinition extends AttributeDefinition {
     super(name, MarkupAttribute.class, flags);
   }
 
-  public @Nullable MarkupNode singleOrNull(List<Attribute> attributes) {
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
-
-      return ((MarkupAttribute) attribute).value;
-    }
-
-    return null;
+  public @Nullable MarkupNode singleOrNull(AttributeMap attributes) {
+    return attributes.firstMarkupOrNull(name);
   }
 
-  public List<MarkupNode> multi(List<Attribute> attributes) {
-    List<MarkupNode> result = new ArrayList<>();
-
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
-
-      result.add(((MarkupAttribute) attribute).value);
-    }
-
-    return result;
+  public List<MarkupNode> multi(AttributeMap attributes) {
+    return attributes.markups(name);
   }
 }

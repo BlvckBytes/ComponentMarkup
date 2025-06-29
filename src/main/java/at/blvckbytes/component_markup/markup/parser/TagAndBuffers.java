@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.markup.ast.tag.AttributeMap;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.TagDefinition;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
@@ -26,7 +27,7 @@ public class TagAndBuffers implements ParserChildItem {
   private final List<LetBinding> bindings;
   private final Set<String> bindingNames;
 
-  private final List<Attribute> attributes;
+  private final AttributeMap attributes;
   private final Set<String> attributeNames;
 
   public final List<ParserChildItem> children;
@@ -46,7 +47,7 @@ public class TagAndBuffers implements ParserChildItem {
 
     this.bindings = new ArrayList<>();
     this.bindingNames = new HashSet<>();
-    this.attributes = new ArrayList<>();
+    this.attributes = new AttributeMap();
     this.attributeNames = new HashSet<>();
     this.children = new ArrayList<>();
   }

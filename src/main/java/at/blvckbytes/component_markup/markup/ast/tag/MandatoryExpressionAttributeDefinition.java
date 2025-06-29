@@ -1,10 +1,8 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MandatoryExpressionAttributeDefinition extends AttributeDefinition {
@@ -13,27 +11,16 @@ public class MandatoryExpressionAttributeDefinition extends AttributeDefinition 
     super(name, ExpressionAttribute.class, flags);
   }
 
-  public ExpressionNode single(List<Attribute> attributes) {
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
+  public ExpressionNode single(AttributeMap attributes) {
+    ExpressionNode result = attributes.firstExpressionOrNull(name);
 
-      return ((ExpressionAttribute) attribute).value;
-    }
+    if (result != null)
+      return result;
 
     throw new AbsentMandatoryAttributeException(this);
   }
 
-  public List<ExpressionNode> multi(List<Attribute> attributes) {
-    List<ExpressionNode> result = new ArrayList<>();
-
-    for (Attribute attribute : attributes) {
-      if (!matches(attribute))
-        continue;
-
-      result.add(((ExpressionAttribute) attribute).value);
-    }
-
-    return result;
+  public List<ExpressionNode> multi(AttributeMap attributes) {
+    return attributes.expressions(name);
   }
 }
