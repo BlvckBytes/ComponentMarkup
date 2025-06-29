@@ -41,6 +41,11 @@ public class ExpressionInterpreter {
 
     ValueInterpreter valueInterpreter = environment.getValueInterpreter();
 
+    if (expression instanceof TransformerNode) {
+      TransformerNode node = (TransformerNode) expression;
+      return node.transformer.transform(interpret(node.wrapped, environment), valueInterpreter);
+    }
+
     if (expression instanceof PrefixOperationNode) {
       PrefixOperationNode node = (PrefixOperationNode) expression;
       Object operandValue = interpret(node.operand, environment);
