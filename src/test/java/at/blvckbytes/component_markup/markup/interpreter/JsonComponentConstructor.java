@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -251,13 +250,13 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setShadowColor(Object component, @Nullable Color color) {
+  public void setShadowColor(Object component, @Nullable Long color) {
     if (color == null) {
       ((JsonObject) component).remove("shadow_color");
       return;
     }
 
-    ((JsonObject) component).addProperty("shadow_color", color.getRGB());
+    ((JsonObject) component).addProperty("shadow_color", color);
   }
 
   @Override

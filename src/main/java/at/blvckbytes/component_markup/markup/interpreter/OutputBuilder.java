@@ -242,8 +242,13 @@ public class OutputBuilder {
       return;
 
     if (style.color != null) {
-      String color = interpreter.evaluateAsString(style.color);
+      String color = interpreter.evaluateAsStringOrNull(style.color);
       componentConstructor.setColor(component, color);
+    }
+
+    if (style.shadowColor != null) {
+      Long shadowColor = interpreter.evaluateAsLongOrNull(style.shadowColor);
+      componentConstructor.setShadowColor(component, shadowColor);
     }
 
     if (style.font != null) {

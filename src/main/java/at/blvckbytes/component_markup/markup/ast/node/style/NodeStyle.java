@@ -10,6 +10,7 @@ public class NodeStyle extends Jsonifiable {
 
   public final @Nullable ExpressionNode[] formatStates;
   public @Nullable ExpressionNode color;
+  public @Nullable ExpressionNode shadowColor;
   public @Nullable ExpressionNode font;
 
   public NodeStyle() {
@@ -20,6 +21,9 @@ public class NodeStyle extends Jsonifiable {
   public void inheritFrom(NodeStyle other) {
     if (this.color == null)
       this.color = other.color;
+
+    if (this.shadowColor == null)
+      this.shadowColor = other.shadowColor;
 
     if (this.font == null)
       this.font = other.font;
@@ -35,7 +39,7 @@ public class NodeStyle extends Jsonifiable {
   }
 
   public boolean hasEffect() {
-    if (this.font != null || this.color != null)
+    if (this.font != null || this.color != null || this.shadowColor != null)
       return true;
 
     for (ExpressionNode formatState : formatStates) {
@@ -53,6 +57,7 @@ public class NodeStyle extends Jsonifiable {
   public void reset() {
     Arrays.fill(formatStates, null);
     this.color = null;
+    this.shadowColor = null;
     this.font = null;
   }
 }

@@ -69,7 +69,7 @@ public interface ComponentConstructor {
 
   void setColor(Object component, @Nullable String color);
 
-  void setShadowColor(Object component, @Nullable Color color);
+  void setShadowColor(Object component, @Nullable Long color);
 
   void setFont(Object component, @Nullable String font);
 
