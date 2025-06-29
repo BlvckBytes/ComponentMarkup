@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public enum Format {
-  MAGIC,
+  OBFUSCATED,
   BOLD,
   STRIKETHROUGH,
   UNDERLINED,

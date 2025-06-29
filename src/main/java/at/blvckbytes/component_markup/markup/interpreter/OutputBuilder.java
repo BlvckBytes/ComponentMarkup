@@ -277,7 +277,7 @@ public class OutputBuilder {
           componentConstructor.setItalicFormat(component, expression);
           break;
 
-        case MAGIC:
+        case OBFUSCATED:
           componentConstructor.setObfuscatedFormat(component, expression);
           break;
 

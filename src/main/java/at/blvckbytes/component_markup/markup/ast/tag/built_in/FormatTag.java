@@ -54,7 +54,7 @@ public class FormatTag extends TagDefinition {
     ExpressionNode expression;
 
     if ((expression = ATTR_OBFUSCATED.singleOrNull(attributes)) != null)
-      style.setFormat(Format.MAGIC, expression);
+      style.setFormat(Format.OBFUSCATED, expression);
 
     if ((expression = ATTR_BOLD.singleOrNull(attributes)) != null)
       style.setFormat(Format.BOLD, expression);

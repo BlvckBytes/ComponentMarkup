@@ -146,7 +146,7 @@ public class ImmediateFormatTag extends TagDefinition {
       case "obfuscated":
       case "!obf":
       case "!obfuscated":
-        format = Format.MAGIC;
+        format = Format.OBFUSCATED;
         break;
 
       case "&r":
