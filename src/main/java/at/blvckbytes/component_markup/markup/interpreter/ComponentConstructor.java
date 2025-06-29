@@ -2,7 +2,10 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 public interface ComponentConstructor {
 
@@ -30,13 +33,13 @@ public interface ComponentConstructor {
   // Click-Action
   // ================================================================================
 
-  void setClickChangePageAction(Object component, String value);
+  void setClickChangePageAction(Object component, int value);
 
   void setClickCopyToClipboardAction(Object component, String value);
 
   void setClickOpenFileAction(Object component, String value);
 
-  void setClickOpenUrlAction(Object component, String value);
+  void setClickOpenUrlAction(Object component, URI value);
 
   void setClickRunCommandAction(Object component, String value);
 
@@ -52,7 +55,7 @@ public interface ComponentConstructor {
 
   void setHoverAchievementAction(Object component, String value);
 
-  void setHoverEntityAction(Object component, String type, String id, @Nullable Object name);
+  void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name);
 
   // ================================================================================
   // Insert-Action
@@ -65,6 +68,8 @@ public interface ComponentConstructor {
   // ================================================================================
 
   void setColor(Object component, @Nullable String color);
+
+  void setShadowColor(Object component, @Nullable Color color);
 
   void setFont(Object component, @Nullable String font);
 

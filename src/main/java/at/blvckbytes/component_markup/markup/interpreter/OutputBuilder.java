@@ -14,9 +14,11 @@ import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.UUID;
 
 public class OutputBuilder {
 
@@ -99,32 +101,56 @@ public class OutputBuilder {
 
     if (nonTerminalNode instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminalNode;
-      String value = interpreter.evaluateAsString(clickNode.value);
 
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
-          componentConstructor.setClickCopyToClipboardAction(sequenceComponent, value);
+          componentConstructor.setClickCopyToClipboardAction(
+            sequenceComponent,
+            interpreter.evaluateAsString(clickNode.value)
+          );
           break;
 
         case SUGGEST_COMMAND:
-          componentConstructor.setClickSuggestCommandAction(sequenceComponent, value);
+          componentConstructor.setClickSuggestCommandAction(
+            sequenceComponent,
+            interpreter.evaluateAsString(clickNode.value)
+          );
           break;
 
         case RUN_COMMAND:
-          componentConstructor.setClickRunCommandAction(sequenceComponent, value);
+          componentConstructor.setClickRunCommandAction(
+            sequenceComponent,
+            interpreter.evaluateAsString(clickNode.value)
+          );
           break;
 
         case CHANGE_PAGE:
-          componentConstructor.setClickChangePageAction(sequenceComponent, value);
+          componentConstructor.setClickChangePageAction(
+            sequenceComponent,
+            (int) interpreter.evaluateAsLong(clickNode.value)
+          );
           break;
 
         case OPEN_FILE:
-          componentConstructor.setClickOpenFileAction(sequenceComponent, value);
+          componentConstructor.setClickOpenFileAction(
+            sequenceComponent,
+            interpreter.evaluateAsString(clickNode.value)
+          );
           break;
 
-        case OPEN_URL:
-          componentConstructor.setClickOpenUrlAction(sequenceComponent, value);
+        case OPEN_URL: {
+          URI uri;
+
+          try {
+            uri = URI.create(interpreter.evaluateAsString(clickNode.value));
+          } catch (Throwable e) {
+            uri = URI.create("https://google.com");
+            // TODO: Log about encountering malformed URI
+          }
+
+          componentConstructor.setClickOpenUrlAction(sequenceComponent, uri);
           break;
+        }
 
         default:
           throw new IllegalStateException("Unknown click-action: " + clickNode.action);
@@ -153,7 +179,16 @@ public class OutputBuilder {
       if (entityHoverNode.name != null)
         name = interpreter.interpret(entityHoverNode.name, ' ').get(0);
 
-      componentConstructor.setHoverEntityAction(sequenceComponent, type, id, name);
+      UUID uuid;
+
+      try {
+        uuid = UUID.fromString(id);
+      } catch (Throwable e) {
+        uuid = UUID.randomUUID();
+        // TODO: Log about encountering malformed URI
+      }
+
+      componentConstructor.setHoverEntityAction(sequenceComponent, type, uuid, name);
     }
 
     else if (nonTerminalNode instanceof ItemHoverNode) {

@@ -1,12 +1,14 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
-import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 public class JsonComponentConstructor implements ComponentConstructor {
 
@@ -112,8 +114,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setClickChangePageAction(Object component, String value) {
-    setClickAction(component, "change_page", value);
+  public void setClickChangePageAction(Object component, int value) {
+    setClickAction(component, "change_page", String.valueOf(value));
   }
 
   @Override
@@ -127,8 +129,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setClickOpenUrlAction(Object component, String value) {
-    setClickAction(component, "open_url", value);
+  public void setClickOpenUrlAction(Object component, URI value) {
+    setClickAction(component, "open_url", value.toString());
   }
 
   @Override
@@ -209,12 +211,12 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setHoverEntityAction(Object component, String type, String id, @Nullable Object name) {
+  public void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name) {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();
 
     contentsObject.addProperty("type", type);
-    contentsObject.addProperty("id", id);
+    contentsObject.addProperty("id", id.toString());
 
     if (name != null)
       contentsObject.add("name", (JsonObject) name);
@@ -246,6 +248,16 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     ((JsonObject) component).addProperty("color", color);
+  }
+
+  @Override
+  public void setShadowColor(Object component, @Nullable Color color) {
+    if (color == null) {
+      ((JsonObject) component).remove("shadow_color");
+      return;
+    }
+
+    ((JsonObject) component).addProperty("shadow_color", color.getRGB());
   }
 
   @Override
