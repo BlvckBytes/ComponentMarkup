@@ -116,10 +116,10 @@ public class ExpressionInterpreter {
         Number lhs = valueInterpreter.asLongOrDouble(lhsValue);
         Number rhs = valueInterpreter.asLongOrDouble(rhsValue);
 
-        if (lhs instanceof Long && rhs instanceof Long)
-          return arithmeticOperator.longOperation(lhs.longValue(), rhs.longValue());
+        if ((lhs instanceof Double || lhs instanceof Float) || (rhs instanceof Double || rhs instanceof Float))
+          return arithmeticOperator.doubleOperation(lhs.doubleValue(), rhs.doubleValue());
 
-        return arithmeticOperator.doubleOperation(lhs.doubleValue(), rhs.doubleValue());
+        return arithmeticOperator.longOperation(lhs.longValue(), rhs.longValue());
       }
 
       switch (infixOperator) {
@@ -151,10 +151,10 @@ public class ExpressionInterpreter {
 
           int comparisonResult;
 
-          if (lhs instanceof Long && rhs instanceof Long)
-            comparisonResult = ((Long) lhs).compareTo((Long) rhs);
-          else
+          if ((lhs instanceof Double || lhs instanceof Float) || (rhs instanceof Double || rhs instanceof Float))
             comparisonResult = Double.compare(lhs.doubleValue(), rhs.doubleValue());
+          else
+            comparisonResult = Long.compare(lhs.longValue(), rhs.longValue());
 
           return (
             infixOperator == InfixOperator.GREATER_THAN || infixOperator == InfixOperator.GREATER_THAN_OR_EQUAL
