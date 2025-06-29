@@ -21,7 +21,7 @@ public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
       return ((MarkupAttribute) attribute).value;
     }
 
-    throw new IllegalStateException("Did not receive mandatory markup-attribute " + name);
+    throw new AbsentMandatoryAttributeException(this);
   }
 
   public List<MarkupNode> multi(List<Attribute> attributes) {

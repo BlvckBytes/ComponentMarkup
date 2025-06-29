@@ -21,7 +21,7 @@ public class MandatoryExpressionAttributeDefinition extends AttributeDefinition 
       return ((ExpressionAttribute) attribute).value;
     }
 
-    throw new IllegalStateException("Did not receive mandatory expression-attribute " + name);
+    throw new AbsentMandatoryAttributeException(this);
   }
 
   public List<ExpressionNode> multi(List<Attribute> attributes) {
