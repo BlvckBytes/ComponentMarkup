@@ -181,7 +181,7 @@ public class OutputBuilder {
     else if (nonTerminalNode instanceof TextHoverNode) {
       TextHoverNode textHoverNode = (TextHoverNode) nonTerminalNode;
 
-      List<Object> text = interpreter.interpret(textHoverNode, (char) 0);
+      List<Object> text = interpreter.interpret(textHoverNode.value, (char) 0);
 
       if (text.size() == 1)
         componentConstructor.setHoverTextAction(sequenceComponent, text.get(0));

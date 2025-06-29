@@ -197,6 +197,31 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldRenderHoverText() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<aqua><bold><hover-text value={<red>Hello, hover!}>Hover over me!"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new JsonObjectBuilder()
+        .string("text", "Hover over me!")
+        .string("color", "aqua")
+        .bool("bold", true)
+        .object("hoverEvent", event -> (
+          event
+            .string("action", "show_text")
+            .object("contents", contents -> (
+              contents
+                .string("text", "Hello, hover!")
+                .string("color", "red")
+            ))
+        ))
+    );
+  }
+
   private JsonElement sortKeysRecursively(JsonElement input) {
     if (input instanceof JsonArray) {
       JsonArray jsonArray = (JsonArray) input;
