@@ -14,7 +14,7 @@ public class HoverItemTag extends HoverTag {
   public HoverItemTag() {
     super(
       new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("material", AttributeFlag.MANDATORY),
+        new ExpressionAttributeDefinition("material"),
         new ExpressionAttributeDefinition("amount"),
         new MarkupAttributeDefinition("name"),
         new MarkupAttributeDefinition("lore")
@@ -32,7 +32,7 @@ public class HoverItemTag extends HoverTag {
     List<MarkupNode> children
   ) {
     return new ItemHoverNode(
-      findExpressionAttribute("material", attributes),
+      tryFindExpressionAttribute("material", attributes),
       tryFindExpressionAttribute("amount", attributes),
       tryFindMarkupAttribute("name", attributes),
       tryFindMarkupAttribute("lore", attributes),

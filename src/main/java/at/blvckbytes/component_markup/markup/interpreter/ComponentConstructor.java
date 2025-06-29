@@ -49,7 +49,7 @@ public interface ComponentConstructor {
   // Hover-Action
   // ================================================================================
 
-  void setHoverItemAction(Object component, String id, @Nullable Integer count, @Nullable Object name, @Nullable List<Object> lore);
+  void setHoverItemAction(Object component, @Nullable String material, @Nullable Integer count, @Nullable Object name, @Nullable List<Object> lore);
 
   void setHoverTextAction(Object component, Object text);
 

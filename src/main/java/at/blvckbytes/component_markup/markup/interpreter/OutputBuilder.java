@@ -193,7 +193,11 @@ public class OutputBuilder {
 
     else if (nonTerminalNode instanceof ItemHoverNode) {
       ItemHoverNode itemHoverNode = (ItemHoverNode) nonTerminalNode;
-      String material = interpreter.evaluateAsString(itemHoverNode.material);
+
+      String material = null;
+
+      if (itemHoverNode.material != null)
+        material = interpreter.evaluateAsStringOrNull(itemHoverNode.material);
 
       Integer count = null;
 
