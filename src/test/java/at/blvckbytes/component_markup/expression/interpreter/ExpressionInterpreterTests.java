@@ -206,6 +206,11 @@ public class ExpressionInterpreterTests {
     makeCase("input['Z':'X']", environment, "ABCDEFGHIJ");
   }
 
+  @Test
+  public void shouldRepeatAString() {
+    makeCase("'hello' ** 5", InterpretationEnvironment.EMPTY_ENVIRONMENT, "hellohellohellohellohello");
+  }
+
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
     ExpressionNode node = ExpressionParser.parse(expression);
     Assertions.assertEquals(expectedResult, interpreter.interpret(node, environment));

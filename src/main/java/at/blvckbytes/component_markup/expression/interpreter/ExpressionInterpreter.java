@@ -144,6 +144,18 @@ public class ExpressionInterpreter {
           );
         }
 
+        case REPEAT: {
+          String input = valueInterpreter.asString(lhsValue);
+          int count = (int) valueInterpreter.asLong(rhsValue);
+
+          StringBuilder result = new StringBuilder(input.length() * count);
+
+          for (int i = 0; i < count; ++i)
+            result.append(input);
+
+          return result.toString();
+        }
+
         case GREATER_THAN_OR_EQUAL:
         case LESS_THAN_OR_EQUAL:
           if (checkEquality(lhsValue, rhsValue))

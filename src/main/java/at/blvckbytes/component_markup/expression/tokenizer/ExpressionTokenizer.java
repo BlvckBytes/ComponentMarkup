@@ -210,6 +210,11 @@ public class ExpressionTokenizer {
         return new InfixOperatorToken(beginIndex, InfixOperator.SUBTRACTION);
 
       case '*':
+        if (peekChar() == '*') {
+          nextChar();
+          return new InfixOperatorToken(beginIndex, InfixOperator.REPEAT);
+        }
+
         return new InfixOperatorToken(beginIndex, InfixOperator.MULTIPLICATION);
 
       case '/':
