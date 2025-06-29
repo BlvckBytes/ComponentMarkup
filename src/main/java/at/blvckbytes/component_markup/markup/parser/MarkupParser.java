@@ -22,6 +22,7 @@ import at.blvckbytes.component_markup.markup.xml.XmlParseException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
+import java.util.logging.Logger;
 
 public class MarkupParser implements XmlEventConsumer {
 
@@ -29,22 +30,24 @@ public class MarkupParser implements XmlEventConsumer {
 
   private final TagRegistry tagRegistry;
   private final Stack<TagAndBuffers> tagStack;
+  private final Logger logger;
 
   private CursorPosition lastPosition;
   private @Nullable MarkupParser subtreeParser;
   private MarkupNode result;
 
-  private MarkupParser(TagRegistry tagRegistry) {
-    this(tagRegistry, CursorPosition.ZERO);
+  private MarkupParser(TagRegistry tagRegistry, Logger logger) {
+    this(tagRegistry, CursorPosition.ZERO, logger);
   }
 
-  private MarkupParser(TagRegistry tagRegistry, CursorPosition initialPosition) {
+  private MarkupParser(TagRegistry tagRegistry, CursorPosition initialPosition, Logger logger) {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.lastPosition = initialPosition;
+    this.logger = logger;
     this.result = new TextNode(EMPTY_TEXT, lastPosition, null);
 
-    this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition));
+    this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition, logger));
   }
 
   // ================================================================================
@@ -72,7 +75,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (tag == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG);
 
-    tagStack.push(new TagAndBuffers(tag, tagNameLower, lastPosition));
+    tagStack.push(new TagAndBuffers(tag, tagNameLower, lastPosition, logger));
   }
 
   @Override
@@ -231,7 +234,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
     }
 
-    subtreeParser = new MarkupParser(tagRegistry, lastPosition);
+    subtreeParser = new MarkupParser(tagRegistry, lastPosition, logger);
   }
 
   @Override
@@ -372,8 +375,8 @@ public class MarkupParser implements XmlEventConsumer {
   // Public API
   // ================================================================================
 
-  public static MarkupNode parse(String input, TagRegistry tagRegistry) {
-    MarkupParser parser = new MarkupParser(tagRegistry);
+  public static MarkupNode parse(String input, TagRegistry tagRegistry, Logger logger) {
+    MarkupParser parser = new MarkupParser(tagRegistry, logger);
 
     try {
       XmlEventParser.parse(input, parser);

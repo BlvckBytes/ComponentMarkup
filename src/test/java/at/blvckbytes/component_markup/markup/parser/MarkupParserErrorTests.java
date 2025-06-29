@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
+import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
@@ -13,6 +14,7 @@ import java.util.logging.Logger;
 public class MarkupParserErrorTests {
 
   private static final Logger logger = Logger.getAnonymousLogger();
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
 
   @Test
   public void shouldThrowOnUnknownTag() {
@@ -532,7 +534,7 @@ public class MarkupParserErrorTests {
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
-      () -> MarkupParser.parse(input.text, BuiltInTagRegistry.get())
+      () -> MarkupParser.parse(input.text, builtInTagRegistry, logger)
     );
 
     List<String> screenLines = exception.makeErrorScreen(input.text);
@@ -544,7 +546,7 @@ public class MarkupParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      MarkupParser.parse(input.text, BuiltInTagRegistry.get());
+      MarkupParser.parse(input.text, builtInTagRegistry, logger);
     } catch (Throwable e) {
       thrownError = e;
     }

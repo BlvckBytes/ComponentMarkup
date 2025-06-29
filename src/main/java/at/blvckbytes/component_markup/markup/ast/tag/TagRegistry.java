@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class TagRegistry {
 
@@ -16,14 +18,16 @@ public abstract class TagRegistry {
 
   private final CharTree charTree;
   private final int maxCharTreeDepth;
+  private final Logger logger;
 
-  public TagRegistry() {
-    this(2);
+  public TagRegistry(Logger logger) {
+    this(2, logger);
   }
 
-  public TagRegistry(int maxCharTreeDepth) {
+  public TagRegistry(int maxCharTreeDepth, Logger logger) {
     this.charTree = new CharTree();
     this.maxCharTreeDepth = maxCharTreeDepth;
+    this.logger = logger;
   }
 
   public @Nullable TagDefinition locateTag(String nameLower) {
@@ -43,8 +47,12 @@ public abstract class TagRegistry {
     List<TagDefinition> candidates = new ArrayList<>();
 
     for (TagDefinition member : currentTree.members) {
-      if (member.matchName(nameLower))
-        candidates.add(member);
+      try {
+        if (member.matchName(nameLower))
+          candidates.add(member);
+      } catch (Throwable thrownError) {
+        logger.log(Level.SEVERE, "An error occurred while trying to match via " + member.getClass().getName() + "#matchName", thrownError);
+      }
     }
 
     int candidateCount = candidates.size();

@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
+import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
@@ -18,8 +19,12 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public abstract class MarkupParserTestsBase {
+
+  private static final Logger logger = Logger.getAnonymousLogger();
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
 
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
@@ -69,7 +74,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {
-    MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.get());
+    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry, logger);
     Assertions.assertEquals(wrappedExpectedNode.get().toString(), actualNode.toString());
   }
 }

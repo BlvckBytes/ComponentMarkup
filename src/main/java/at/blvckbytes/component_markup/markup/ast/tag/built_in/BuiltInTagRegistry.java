@@ -10,11 +10,13 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.BlockNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.EntityNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.StorageNbtTag;
 
+import java.util.logging.Logger;
+
 public class BuiltInTagRegistry extends TagRegistry {
 
-  private static final BuiltInTagRegistry INSTANCE = new BuiltInTagRegistry();
+  public BuiltInTagRegistry(Logger logger) {
+    super(logger);
 
-  private BuiltInTagRegistry() {
     register(new ChangePageTag());
     register(new OpenFileTag());
     register(new OpenUrlTag());
@@ -41,9 +43,5 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new ScoreTag());
     register(new SelectorTag());
     register(new TranslateTag());
-  }
-
-  public static BuiltInTagRegistry get() {
-    return INSTANCE;
   }
 }

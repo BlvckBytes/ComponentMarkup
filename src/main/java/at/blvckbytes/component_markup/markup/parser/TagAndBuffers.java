@@ -1,28 +1,31 @@
 package at.blvckbytes.component_markup.markup.parser;
 
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
-import at.blvckbytes.component_markup.markup.ast.tag.AttributeMap;
-import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.markup.ast.tag.TagDefinition;
+import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TagAndBuffers implements ParserChildItem {
 
   public final TagDefinition tag;
   public final String tagNameLower;
   public final CursorPosition position;
+  public final Logger logger;
 
   private final List<LetBinding> bindings;
   private final Set<String> bindingNames;
@@ -40,10 +43,11 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable ExpressionNode forReversed;
   public @Nullable String forIterationVariable;
 
-  public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {
+  public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position, Logger logger) {
     this.tag = tag;
     this.tagNameLower = tagNameLower;
     this.position = position;
+    this.logger = logger;
 
     this.bindings = new ArrayList<>();
     this.bindingNames = new HashSet<>();
@@ -231,12 +235,31 @@ public class TagAndBuffers implements ParserChildItem {
     return result;
   }
 
+  private @Nullable MarkupNode constructTagOrNull(List<MarkupNode> processedChildren) {
+    try {
+      return tag.construct(tagNameLower, position, attributes, bindings, processedChildren);
+    } catch (Throwable thrownError) {
+      String className = tag.getClass().getName();
+
+      if (thrownError instanceof AbsentMandatoryAttributeException) {
+        AttributeDefinition absentAttribute = ((AbsentMandatoryAttributeException) thrownError).attribute;
+
+        if (!tag.attributes.contains(absentAttribute)) {
+          logger.log(Level.SEVERE, "Tag " + className + " (<" + tagNameLower + ">) tried to require an unregistered attribute called \"" + absentAttribute.name + "\"", thrownError);
+          return null;
+        }
+      }
+
+      logger.log(Level.SEVERE, "An error occurred while trying to construct <" + tagNameLower + "> via " + className + "#construct", thrownError);
+      return null;
+    }
+  }
+
   public MarkupNode construct() {
-    MarkupNode result = tag.construct(
-      tagNameLower,
-      position,
-      attributes, bindings, getProcessedChildren()
-    );
+    MarkupNode result = constructTagOrNull(getProcessedChildren());
+
+    if (result == null)
+      return new TextNode(ImmediateExpression.of("<error>"), position, null);
 
     if (!(result instanceof ContainerNode))
       return result;

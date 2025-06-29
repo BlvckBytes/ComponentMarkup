@@ -12,7 +12,8 @@ import java.util.logging.Logger;
 
 public class ExpressionInterpreterTests {
 
-  private static final ExpressionInterpreter interpreter = new ExpressionInterpreter(Logger.getAnonymousLogger());
+  private static final Logger logger = Logger.getAnonymousLogger();
+  private static final ExpressionInterpreter interpreter = new ExpressionInterpreter(logger);
 
   @Test
   public void shouldTransformUpperCase() {

@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.interpreter.EnvironmentBuilder;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
@@ -18,10 +19,11 @@ import java.util.logging.Logger;
 
 public class MarkupInterpreterTests {
 
-  private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter(Logger.getAnonymousLogger());
+  private static final Logger logger = Logger.getAnonymousLogger();
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
+  private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter(logger);
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
   private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
-  private static final Logger logger = Logger.getAnonymousLogger();
 
   @Test
   public void shouldRenderSimpleText() {
@@ -285,7 +287,7 @@ public class MarkupInterpreterTests {
   }
 
   private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
-    MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.get());
+    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry, logger);
 
     char breakChar;
     JsonElement expectedJson;
