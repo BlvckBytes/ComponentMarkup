@@ -329,9 +329,21 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagClose(String tagName) {
+  public void onTagClose(@Nullable String tagName) {
     if (subtreeParser != null) {
       subtreeParser.onTagClose(tagName);
+      return;
+    }
+
+    if (tagName == null) {
+      if (tagStack.size() == 1)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG);
+
+      while (tagStack.size() > 1) {
+        TagAndBuffers openedTag = tagStack.pop();
+        tagStack.peek().children.add(openedTag);
+      }
+
       return;
     }
 

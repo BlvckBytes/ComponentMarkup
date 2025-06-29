@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
+import org.jetbrains.annotations.Nullable;
 
 public class XmlEventJoiner implements XmlEventConsumer {
 
@@ -68,7 +69,7 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagClose(String tagName) {
+  public void onTagClose(@Nullable String tagName) {
     appendEvent(new TagCloseEvent(tagName));
   }
 

@@ -241,4 +241,32 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       )
     );
   }
+
+  @Test
+  public void shouldAllowToCloseAllCurrentlyOpenTags() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<aqua>@hello</aqua>",
+      "<red><bold>@world</>",
+      "<green><italic>@test"
+    );
+
+    makeCase(
+      text,
+      container(CursorPosition.ZERO)
+        .child(
+          text(imm("hello"), text.anchor(0))
+            .color("aqua")
+        )
+        .child(
+          text(imm("world"), text.anchor(1))
+            .format(Format.BOLD, true)
+            .color("red")
+        )
+        .child(
+          text(imm("test"), text.anchor(2))
+            .format(Format.ITALIC, true)
+            .color("green")
+        )
+    );
+  }
 }

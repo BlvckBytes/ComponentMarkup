@@ -434,11 +434,6 @@ public class XmlEventParser {
 
     String tagName = tryParseIdentifier(false);
 
-    if (tagName == null) {
-      consumer.onCursorPosition(savedPosition);
-      throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
-    }
-
     if (wasClosingTag) {
       consumer.onCursorPosition(savedPosition);
 
@@ -447,6 +442,11 @@ public class XmlEventParser {
 
       consumer.onTagClose(tagName);
       return;
+    }
+
+    if (tagName == null) {
+      consumer.onCursorPosition(savedPosition);
+      throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
     }
 
     if (tryConsumeCommentTag(tagName))

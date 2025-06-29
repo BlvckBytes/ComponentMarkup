@@ -146,6 +146,16 @@ public class MarkupParserErrorTests {
       MarkupParseError.UNBALANCED_CLOSING_TAG,
       "Hello@</red>"
     );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
+      "@</>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
+      "<red>hello</red>@</>"
+    );
   }
 
   @Test

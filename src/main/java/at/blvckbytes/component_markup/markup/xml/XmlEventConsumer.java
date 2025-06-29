@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface XmlEventConsumer {
 
   void onCursorPosition(CursorPosition position);
@@ -26,7 +28,7 @@ public interface XmlEventConsumer {
 
   void onInterpolation(String expression, CursorPosition valueBeginPosition);
 
-  void onTagClose(String tagName);
+  void onTagClose(@Nullable String tagName);
 
   void onInputEnd();
 

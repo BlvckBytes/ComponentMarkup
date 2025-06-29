@@ -636,13 +636,16 @@ public class XmlEventParserTests {
       XmlParseError.MISSING_TAG_NAME,
       text.anchorEvent(0)
     );
+  }
 
-    text = new TextWithAnchors("@</>");
+  @Test
+  public void shouldAllowNullNamedClosingTag() {
+    TextWithAnchors text = new TextWithAnchors("@</>");
 
     makeCaseWithInterleavedAnchors(
       text,
-      XmlParseError.MISSING_TAG_NAME,
-      text.anchorEvent(0)
+      new TagCloseEvent(null),
+      new InputEndEvent()
     );
   }
 
