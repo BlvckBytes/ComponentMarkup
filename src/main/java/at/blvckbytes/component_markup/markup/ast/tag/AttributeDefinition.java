@@ -2,18 +2,16 @@ package at.blvckbytes.component_markup.markup.ast.tag;
 
 import java.util.regex.Pattern;
 
-public class AttributeDefinition {
+public abstract class AttributeDefinition {
 
   public static final Pattern NAME_PATTERN = Pattern.compile("^[a-z]+(-[a-z]+)*$");
 
   public final String name;
-  public final AttributeType type;
   public final boolean multiValue;
   public final boolean mandatory;
 
-  public AttributeDefinition(
+  protected AttributeDefinition(
     String name,
-    AttributeType type,
     boolean multiValue,
     boolean mandatory
   ) {
@@ -30,7 +28,6 @@ public class AttributeDefinition {
       throw new IllegalStateException("The for- namespace is reserved as to pass parameters to loops");
 
     this.name = name;
-    this.type = type;
     this.multiValue = multiValue;
     this.mandatory = mandatory;
   }

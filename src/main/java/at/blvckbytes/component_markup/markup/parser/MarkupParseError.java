@@ -15,7 +15,7 @@ public enum MarkupParseError implements ErrorMessage {
   NON_STRING_STRUCTURAL_ATTRIBUTE("Structural attributes may only be strings, containing expressions"),
   NON_STRING_EXPRESSION_ATTRIBUTE("Attributes bound to expressions may only be strings, containing expressions"),
   NON_STRING_LET_ATTRIBUTE("Let-bindings may only be strings, containing expressions"),
-  EXPECTED_SUBTREE_VALUE("This attribute expected a markup-value: { ... }"),
+  EXPECTED_MARKUP_VALUE("This attribute expected a markup-value: { ... }"),
   EXPECTED_SCALAR_VALUE("This attribute expected a scalar-value: string, boolean or number"),
   EXPECTED_SELF_CLOSING_TAG("This tag is self-closing, <name />, and does not support a separate closing-tag"),
   EXPECTED_OPEN_CLOSE_TAG("This tag requires a separate closing-tag as it expects content, and does not support self-closing <name />"),

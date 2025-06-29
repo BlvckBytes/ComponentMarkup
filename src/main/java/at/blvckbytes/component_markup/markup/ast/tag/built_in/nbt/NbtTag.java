@@ -17,10 +17,10 @@ public abstract class NbtTag extends TagDefinition {
   protected NbtTag(NbtSource source, String tagName) {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition(source.attributeName, AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("path", AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("interpret", AttributeType.EXPRESSION, false, false),
-        new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
+        new ExpressionAttributeDefinition(source.attributeName, false, true),
+        new ExpressionAttributeDefinition("path", false, true),
+        new ExpressionAttributeDefinition("interpret", false, false),
+        new MarkupAttributeDefinition("separator", false, false)
       },
       new String[] { tagName },
       TagClosing.SELF_CLOSE,
@@ -49,7 +49,7 @@ public abstract class NbtTag extends TagDefinition {
       findExpressionAttribute(source.attributeName, attributes),
       findExpressionAttribute("path", attributes),
       tryFindExpressionAttribute("interpret", attributes),
-      tryFindSubtreeAttribute("separator", attributes),
+      tryFindMarkupAttribute("separator", attributes),
       position, letBindings
     );
   }

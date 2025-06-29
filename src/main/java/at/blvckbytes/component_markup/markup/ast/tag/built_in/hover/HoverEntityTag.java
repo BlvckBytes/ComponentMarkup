@@ -2,9 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.hover;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
-import at.blvckbytes.component_markup.markup.ast.tag.AttributeDefinition;
-import at.blvckbytes.component_markup.markup.ast.tag.AttributeType;
-import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
@@ -16,9 +14,9 @@ public class HoverEntityTag extends HoverTag {
   public HoverEntityTag() {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition("type", AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("id", AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("name", AttributeType.SUBTREE, false, false),
+        new ExpressionAttributeDefinition("type", false, true),
+        new ExpressionAttributeDefinition("id", false, true),
+        new MarkupAttributeDefinition("name", false, false),
       },
       "hover-entity"
     );
@@ -35,7 +33,7 @@ public class HoverEntityTag extends HoverTag {
     return new EntityHoverNode(
       findExpressionAttribute("type", attributes),
       findExpressionAttribute("id", attributes),
-      tryFindSubtreeAttribute("name", attributes),
+      tryFindMarkupAttribute("name", attributes),
       position, children, letBindings
     );
   }

@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.SubtreeAttribute;
+import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.ContainerTag;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
@@ -142,7 +142,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (currentLayer.forSeparator != null)
           throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
       }
     }
 
@@ -151,8 +151,8 @@ public class MarkupParser implements XmlEventConsumer {
     if (attribute == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
-    if (attribute.type == AttributeType.SUBTREE)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
+    if (attribute instanceof MarkupAttributeDefinition)
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
 
     if (!attribute.multiValue && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
@@ -227,7 +227,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (!attribute.multiValue && currentLayer.hasAttribute(name))
         throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-      if (attribute.type != AttributeType.SUBTREE)
+      if (!(attribute instanceof MarkupAttributeDefinition))
         throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
     }
 
@@ -259,7 +259,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    currentLayer.addAttribute(new SubtreeAttribute(name, subtree));
+    currentLayer.addAttribute(new MarkupAttribute(name, subtree));
   }
 
   @Override
@@ -477,7 +477,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (currentLayer.forSeparator != null)
           throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
       }
 
       if (name.equals("for-reversed")) {
@@ -494,8 +494,8 @@ public class MarkupParser implements XmlEventConsumer {
     if (attribute == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
-    if (attribute.type == AttributeType.SUBTREE)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SUBTREE_VALUE);
+    if (attribute instanceof MarkupAttributeDefinition)
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
 
     if (!attribute.multiValue && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);

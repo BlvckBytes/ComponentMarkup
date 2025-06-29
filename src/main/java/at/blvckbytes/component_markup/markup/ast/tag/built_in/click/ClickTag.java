@@ -17,7 +17,7 @@ public abstract class ClickTag extends TagDefinition {
   protected ClickTag(ClickAction action, String tagName) {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition("value", AttributeType.EXPRESSION, false, true)
+        new ExpressionAttributeDefinition("value", false, true)
       },
       new String[] { tagName },
       TagClosing.OPEN_CLOSE,

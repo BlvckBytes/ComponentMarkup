@@ -149,7 +149,7 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldParseSubTreeAttribute() {
+  public void shouldParseMarkupAttribute() {
     TextWithAnchors text = new TextWithAnchors(
       "@<tag-outer",
       "  @attr-1={",
@@ -539,7 +539,7 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldThrowOnUnterminatedSubtree() {
+  public void shouldThrowOnUnterminatedMarkupValue() {
     TextWithAnchors text = new TextWithAnchors(
       "@<red",
       "  @my-attr=#{",
@@ -549,7 +549,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      XmlParseError.UNTERMINATED_SUBTREE,
+      XmlParseError.UNTERMINATED_MARKUP_VALUE,
       new TagOpenBeginEvent("red"),
       new TagAttributeBeginEvent("my-attr"),
       new TagOpenBeginEvent("green"),

@@ -333,7 +333,7 @@ public class XmlEventParser {
 
         if (nextChar != '}') {
           consumer.onCursorPosition(openingCurlyPosition);
-          throw new XmlParseException(XmlParseError.UNTERMINATED_SUBTREE);
+          throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE);
         }
 
         consumer.onCursorPosition(cursor.getPosition());

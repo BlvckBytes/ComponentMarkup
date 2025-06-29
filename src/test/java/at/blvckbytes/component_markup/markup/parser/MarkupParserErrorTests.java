@@ -252,29 +252,29 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnExpectedSubtreeValue() {
+  public void shouldThrowOnExpectedMarkupValue() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<hover-text @value=\"hello, world\">"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<hover-text @value=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<hover-text @value=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<hover-text @value=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<hover-text @value=false>"
     );
   }
@@ -312,24 +312,24 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonSubtreeForSeparator() {
+  public void shouldThrowOnNonMarkupForSeparator() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<red *for-member=\"members\" @for-separator=.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<red *for-member=\"members\" @for-separator=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<red *for-member=\"members\" @for-separator=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_SUBTREE_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_VALUE,
       "<red *for-member=\"members\" @for-separator=\"hello\">"
     );
   }

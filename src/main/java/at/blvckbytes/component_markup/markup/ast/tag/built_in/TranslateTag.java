@@ -16,9 +16,9 @@ public class TranslateTag extends TagDefinition {
   public TranslateTag() {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition("key", AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("with", AttributeType.SUBTREE, true, false),
-        new AttributeDefinition("fallback", AttributeType.EXPRESSION, false, false)
+        new ExpressionAttributeDefinition("key", false, true),
+        new MarkupAttributeDefinition("with", true, false),
+        new ExpressionAttributeDefinition("fallback", false, false)
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
@@ -41,7 +41,7 @@ public class TranslateTag extends TagDefinition {
   ) {
     return new TranslateNode(
       findExpressionAttribute("key", attributes),
-      findSubtreeAttributes("with", attributes),
+      findMarkupAttributes("with", attributes),
       tryFindExpressionAttribute("fallback", attributes),
       position, letBindings
     );

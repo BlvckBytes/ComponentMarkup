@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.ErrorMessage;
 public enum XmlParseError implements ErrorMessage {
   UNTERMINATED_INTERPOLATION("This placeholder misses its closing-sequence: }}"),
   UNTERMINATED_STRING("This string misses its closing-sequence: \""),
-  UNTERMINATED_SUBTREE("This markup-value misses its closing-sequence: }"),
+  UNTERMINATED_MARKUP_VALUE("This markup-value misses its closing-sequence: }"),
   UNTERMINATED_TAG("This tag misses its closing-sequence: >"),
   UNESCAPED_CLOSING_CURLY("Closing curly-brackets need to be escaped: \\}"),
   MALFORMED_NUMBER("This number is malformed"),

@@ -16,7 +16,7 @@ public class FontTag extends TagDefinition {
   public FontTag() {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition("name", AttributeType.EXPRESSION, false, true)
+        new ExpressionAttributeDefinition("name", false, true)
       },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,

@@ -16,8 +16,8 @@ public class SelectorTag extends TagDefinition {
   public SelectorTag() {
     super(
       new AttributeDefinition[] {
-        new AttributeDefinition("selector", AttributeType.EXPRESSION, false, true),
-        new AttributeDefinition("separator", AttributeType.SUBTREE, false, false)
+        new ExpressionAttributeDefinition("selector", false, true),
+        new MarkupAttributeDefinition("separator", false, false)
       },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
@@ -40,7 +40,7 @@ public class SelectorTag extends TagDefinition {
   ) {
     return new SelectorNode(
       findExpressionAttribute("selector", attributes),
-      tryFindSubtreeAttribute("separator", attributes),
+      tryFindMarkupAttribute("separator", attributes),
       position, letBindings
     );
   }

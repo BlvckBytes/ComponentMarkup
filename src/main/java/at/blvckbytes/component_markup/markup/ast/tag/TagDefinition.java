@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.SubtreeAttribute;
+import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,8 +54,8 @@ public abstract class TagDefinition {
     List<MarkupNode> children
   );
 
-  protected static MarkupNode findSubtreeAttribute(String name, List<Attribute> attributes) {
-    MarkupNode value = tryFindSubtreeAttribute(name, attributes);
+  protected static MarkupNode findMarkupAttribute(String name, List<Attribute> attributes) {
+    MarkupNode value = tryFindMarkupAttribute(name, attributes);
 
     if (value == null)
       throw new IllegalStateException("Required attribute '" + name + "' to be present");
@@ -63,16 +63,16 @@ public abstract class TagDefinition {
     return value;
   }
 
-  protected static @Nullable MarkupNode tryFindSubtreeAttribute(String name, List<Attribute> attributes) {
+  protected static @Nullable MarkupNode tryFindMarkupAttribute(String name, List<Attribute> attributes) {
     Attribute attribute = tryFindAttribute(name, attributes);
 
     if (attribute == null)
       return null;
 
-    if (attribute instanceof SubtreeAttribute)
-      return ((SubtreeAttribute) attribute).value;
+    if (attribute instanceof MarkupAttribute)
+      return ((MarkupAttribute) attribute).value;
 
-    throw new IllegalStateException("Required attribute '" + name + "' to be of type subtree");
+    throw new IllegalStateException("Required attribute '" + name + "' to be of type markup");
   }
 
   protected static ExpressionNode findExpressionAttribute(String name, List<Attribute> attributes) {
@@ -121,17 +121,17 @@ public abstract class TagDefinition {
     return result;
   }
 
-  protected static List<MarkupNode> findSubtreeAttributes(String name, List<Attribute> attributes) {
+  protected static List<MarkupNode> findMarkupAttributes(String name, List<Attribute> attributes) {
     List<MarkupNode> result = new ArrayList<>();
 
     for (Attribute attribute : attributes) {
       if (!attribute.name.equalsIgnoreCase(name))
         continue;
 
-      if (!(attribute instanceof SubtreeAttribute))
-        throw new IllegalStateException("Required attribute '" + name + "' to be of type subtree");
+      if (!(attribute instanceof MarkupAttribute))
+        throw new IllegalStateException("Required attribute '" + name + "' to be of type markup");
 
-      result.add(((SubtreeAttribute) attribute).value);
+      result.add(((MarkupAttribute) attribute).value);
     }
 
     return result;
