@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -67,9 +66,9 @@ public interface ComponentConstructor {
   // Styling
   // ================================================================================
 
-  void setColor(Object component, @Nullable String color);
+  void setColor(Object component, @Nullable ComponentColor color);
 
-  void setShadowColor(Object component, @Nullable Long color);
+  void setShadowColor(Object component, @Nullable ComponentColor color);
 
   void setFont(Object component, @Nullable String font);
 

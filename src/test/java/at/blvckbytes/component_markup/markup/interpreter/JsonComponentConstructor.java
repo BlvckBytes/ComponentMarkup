@@ -240,23 +240,41 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setColor(Object component, @Nullable String color) {
+  public void setColor(Object component, @Nullable ComponentColor color) {
     if (color == null) {
       ((JsonObject) component).remove("color");
       return;
     }
 
-    ((JsonObject) component).addProperty("color", color);
+    String colorValue;
+
+    if (color instanceof AnsiStyleColor)
+      colorValue = ((AnsiStyleColor) color).name;
+    else if (color instanceof ModernColor)
+      colorValue = ((ModernColor) color).asNonAlphaHex();
+    else
+      return;
+
+    ((JsonObject) component).addProperty("color", colorValue);
   }
 
   @Override
-  public void setShadowColor(Object component, @Nullable Long color) {
+  public void setShadowColor(Object component, @Nullable ComponentColor color) {
     if (color == null) {
       ((JsonObject) component).remove("shadow_color");
       return;
     }
 
-    ((JsonObject) component).addProperty("shadow_color", color);
+    String colorValue;
+
+    if (color instanceof AnsiStyleColor)
+      colorValue = ((AnsiStyleColor) color).name;
+    else if (color instanceof ModernColor)
+      colorValue = ((ModernColor) color).asNonAlphaHex();
+    else
+      return;
+
+    ((JsonObject) component).addProperty("shadow_color", colorValue);
   }
 
   @Override

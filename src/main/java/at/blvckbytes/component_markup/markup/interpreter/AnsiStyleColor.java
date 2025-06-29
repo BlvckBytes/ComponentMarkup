@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.tag;
+package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public enum AnsiStyleColor {
+public enum AnsiStyleColor implements ComponentColor {
 
   BLACK       ('0', new Color(  0,   0,   0)),
   DARK_BLUE   ('1', new Color(  0,   0, 170)),
@@ -26,12 +26,15 @@ public enum AnsiStyleColor {
   WHITE       ('f', new Color(255, 255, 255)),
   ;
 
+  public static final List<AnsiStyleColor> VALUES;
   public static final Set<String> NAMES;
 
   static {
+    VALUES = Collections.unmodifiableList(Arrays.asList(values()));
+
     Set<String> buffer = new HashSet<>();
 
-    for (AnsiStyleColor color : values()) {
+    for (AnsiStyleColor color : VALUES) {
       buffer.add(color.name);
       buffer.addAll(color.aliases);
     }
@@ -44,15 +47,42 @@ public enum AnsiStyleColor {
   public final Color color;
   public final List<String> aliases;
 
+  private final float[] labColor;
+
   AnsiStyleColor(char colorChar, Color color, String... aliases) {
     this.name = name().toLowerCase();
     this.color = color;
     this.colorChar = colorChar;
     this.aliases = Collections.unmodifiableList(Arrays.asList(aliases));
+    this.labColor = CIELabColorSpace.getInstance().fromRGB(color.getRGBComponents(null));
   }
 
-  public static @Nullable AnsiStyleColor fromName(String name) {
-    switch (name) {
+  public static AnsiStyleColor getNearestColor(Color color) {
+    float[] inputLab = CIELabColorSpace.getInstance().fromRGB(color.getRGBComponents(null));
+
+    double minDistanceSquared = 0;
+    AnsiStyleColor closestItem = null;
+
+    for (AnsiStyleColor candidate : VALUES) {
+      float[] candidateLab = candidate.labColor;
+
+      double distanceSquared = (
+        Math.pow(inputLab[0] - candidateLab[0], 2) +
+        Math.pow(inputLab[1] - candidateLab[1], 2) +
+        Math.pow(inputLab[2] - candidateLab[2], 2)
+      );
+
+      if (closestItem == null || distanceSquared < minDistanceSquared) {
+        minDistanceSquared = distanceSquared;
+        closestItem = candidate;
+      }
+    }
+
+    return closestItem;
+  }
+
+  public static @Nullable AnsiStyleColor fromNameLowerOrNull(String nameLower) {
+    switch (nameLower) {
       case "red":
         return RED;
       case "light_purple":
@@ -92,19 +122,25 @@ public enum AnsiStyleColor {
     }
   }
 
-  public static @Nullable AnsiStyleColor fromChar(char c) {
+  public static @Nullable AnsiStyleColor fromCharOrNull(char c) {
     switch (c) {
       case 'a':
+      case 'A':
         return GREEN;
       case 'b':
+      case 'B':
         return AQUA;
       case 'c':
+      case 'C':
         return RED;
       case 'd':
+      case 'D':
         return LIGHT_PURPLE;
       case 'e':
+      case 'E':
         return YELLOW;
       case 'f':
+      case 'F':
         return WHITE;
       case '0':
         return BLACK;

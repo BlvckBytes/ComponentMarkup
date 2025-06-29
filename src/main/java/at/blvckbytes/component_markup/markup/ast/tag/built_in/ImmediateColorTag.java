@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.interpreter.AnsiStyleColor;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +65,7 @@ public class ImmediateColorTag extends TagDefinition {
     AnsiStyleColor color;
 
     if (nameLength == 2 && firstChar == '&') {
-      if ((color = AnsiStyleColor.fromChar(tagNameLower.charAt(1))) != null)
+      if ((color = AnsiStyleColor.fromCharOrNull(tagNameLower.charAt(1))) != null)
         return color.name;
     }
 
@@ -77,7 +78,7 @@ public class ImmediateColorTag extends TagDefinition {
       return tagNameLower;
     }
 
-    if ((color = AnsiStyleColor.fromName(tagNameLower)) != null)
+    if ((color = AnsiStyleColor.fromNameLowerOrNull(tagNameLower)) != null)
       return color.name;
 
     return null;

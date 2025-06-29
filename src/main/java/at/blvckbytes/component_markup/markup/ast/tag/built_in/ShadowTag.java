@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.ast.TransformerNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.interpreter.AnsiStyleColor;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +65,7 @@ public class ShadowTag extends TagDefinition {
     return wrapper;
   }
 
-  private @Nullable Integer resolveColor(String color, double opacity) {
+  private @Nullable String resolveColor(String color, double opacity) {
     int colorLength = color.length();
 
     if (colorLength == 0)
@@ -80,42 +81,32 @@ public class ShadowTag extends TagDefinition {
     }
 
     if ((colorLength == 7 || colorLength == 9) && color.charAt(0) == '#') {
-      try {
-        int r = Integer.parseInt(color.substring(1, 3), 16);
-        int g = Integer.parseInt(color.substring(3, 5), 16);
-        int b = Integer.parseInt(color.substring(5, 7), 16);
-
-        if (opacity < 0 && colorLength == 9)
-          alpha = Integer.parseInt(color.substring(7, 9), 16);
-
-        return packRGBA(r, g, b, alpha);
-      } catch (Throwable e) {
-        return null;
+      for (int charIndex = 1; charIndex < colorLength; ++charIndex) {
+        if (!isHexadecimalChar(color.charAt(charIndex)))
+          return null;
       }
-    }
 
-    color = color.toLowerCase();
+      if (colorLength == 7)
+        return alpha == 255 ? color : color + String.format("%02X", alpha);
+
+      return color.substring(0, 9 - 2) + String.format("%02X", alpha);
+    }
 
     AnsiStyleColor ansiColor;
 
     if (color.charAt(0) == '&' && colorLength == 2)
-      ansiColor = AnsiStyleColor.fromChar(color.charAt(1));
+      ansiColor = AnsiStyleColor.fromCharOrNull(color.charAt(1));
 
     else
-      ansiColor = AnsiStyleColor.fromName(color);
+      ansiColor = AnsiStyleColor.fromNameLowerOrNull(color.toLowerCase());
 
     if (ansiColor == null)
       return null;
 
-    return packRGBA(
-      ansiColor.color.getRed(),
-      ansiColor.color.getGreen(),
-      ansiColor.color.getBlue(),
-      alpha
-    );
+    return ansiColor.name;
   }
 
-  private int packRGBA(int r, int g, int b, int a) {
-    return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+  private boolean isHexadecimalChar(char c) {
+    return (c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
   }
 }

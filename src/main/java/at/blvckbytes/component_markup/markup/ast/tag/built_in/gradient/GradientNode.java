@@ -6,14 +6,12 @@ import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.markup.interpreter.InterceptionFlag;
-import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.markup.interpreter.InterpreterInterceptor;
-import at.blvckbytes.component_markup.markup.interpreter.OutputBuilder;
+import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -108,9 +106,9 @@ public class GradientNode extends MarkupNode implements InterpreterInterceptor {
 
         // TODO: Compute color based on progression as well as start, end and intermediate colors
         double gradientProgression = (injectedComponentsIndex + 1D) / injectedComponentsCount;
-        String hexColor = "#000000";
+        ModernColor color = new ModernColor(Color.BLACK);
 
-        interpreter.getComponentConstructor().setColor(injectedComponent, hexColor);
+        interpreter.getComponentConstructor().setColor(injectedComponent, color);
       }
     }
   }

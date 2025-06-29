@@ -246,13 +246,25 @@ public class OutputBuilder {
       return;
 
     if (style.color != null) {
-      String color = interpreter.evaluateAsStringOrNull(style.color);
-      componentConstructor.setColor(component, color);
+      String colorString = interpreter.evaluateAsStringOrNull(style.color);
+
+      if (colorString != null) {
+        ComponentColor color = ComponentColor.tryParse(colorString);
+
+        if (color != null)
+          componentConstructor.setColor(component, color);
+      }
     }
 
     if (style.shadowColor != null) {
-      Long shadowColor = interpreter.evaluateAsLongOrNull(style.shadowColor);
-      componentConstructor.setShadowColor(component, shadowColor);
+      String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
+
+      if (colorString != null) {
+        ComponentColor color = ComponentColor.tryParse(colorString);
+
+        if (color != null)
+          componentConstructor.setShadowColor(component, color);
+      }
     }
 
     if (style.font != null) {
