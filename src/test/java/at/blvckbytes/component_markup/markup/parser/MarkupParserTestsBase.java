@@ -21,7 +21,7 @@ import java.util.List;
 
 public abstract class MarkupParserTestsBase {
 
-  protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
+  protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
   }
 

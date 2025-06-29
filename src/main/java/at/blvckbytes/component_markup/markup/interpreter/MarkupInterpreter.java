@@ -229,7 +229,8 @@ public class MarkupInterpreter implements Interpreter {
     Object iterable = expressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
-    environment.pushVariable(node.iterationVariable, null);
+    if (node.iterationVariable != null)
+      environment.pushVariable(node.iterationVariable, null);
 
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
@@ -252,7 +253,8 @@ public class MarkupInterpreter implements Interpreter {
 
       loopVariable.setIndex(index);
 
-      environment.updateVariable(node.iterationVariable, item);
+      if (node.iterationVariable != null)
+        environment.updateVariable(node.iterationVariable, item);
 
       if (node.separator != null) {
         if (reversed ? index != size - 1 : index != 0)
@@ -265,7 +267,9 @@ public class MarkupInterpreter implements Interpreter {
     if (introducedNames != null)
       environment.popVariables(introducedNames);
 
-    environment.popVariable(node.iterationVariable);
+    if (node.iterationVariable != null)
+      environment.popVariable(node.iterationVariable);
+
     environment.popVariable("loop");
   }
 

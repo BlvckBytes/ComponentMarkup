@@ -222,4 +222,23 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         .format(Format.ITALIC, true)
     );
   }
+
+  @Test
+  public void shouldAllowForLoopWithoutIterationVariable() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *for=\"members\">@Hello, world!"
+    );
+
+    makeCase(
+      text,
+      forLoop(
+        expr("members"),
+        null,
+        text(imm("Hello, world!"), text.anchor(0))
+          .color("red"),
+        null,
+        null
+      )
+    );
+  }
 }

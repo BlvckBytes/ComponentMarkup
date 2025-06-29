@@ -38,7 +38,7 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
   public @Nullable ExpressionNode forReversed;
-  public String forIterationVariable = "";
+  public @Nullable String forIterationVariable;
 
   public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {
     this.tag = tag;

@@ -75,11 +75,6 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
-      "<container @*for=\"\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.UNNAMED_FOR_LOOP,
       "<container @*for-=\"\">"
     );
   }

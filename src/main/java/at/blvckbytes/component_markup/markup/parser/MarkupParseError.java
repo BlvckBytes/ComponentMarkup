@@ -7,7 +7,7 @@ public enum MarkupParseError implements ErrorMessage {
   UNKNOWN_ATTRIBUTE("This attribute is not a member of its tag"),
   UNKNOWN_STRUCTURAL_ATTRIBUTE("This structural attribute does not exist"),
   UNNAMED_LET_BINDING("Let-bindings require a variable-name: let-<variable_name>"),
-  UNNAMED_FOR_LOOP("Fot-loops require an iteration-variable name: *for-<iteration_name>"),
+  UNNAMED_FOR_LOOP("For-loops with a dash require an iteration-variable name: *for-<iteration_name>"),
   BINDING_IN_USE("The name of this binding is already in use"),
   MALFORMED_IDENTIFIER("This name is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),
   UNBALANCED_ATTRIBUTE_BRACKETS("The brackets used to enable binding on this attribute are unbalanced: missing closing-bracket"),

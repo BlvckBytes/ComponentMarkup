@@ -426,26 +426,26 @@ public class MarkupParser implements XmlEventConsumer {
         currentLayer.conditionType = ConditionType.ELSE;
         return;
       }
-
-      case "*for":
-      case "*for-":
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_FOR_LOOP);
     }
 
-    if (name.startsWith("*for-")) {
+    if (name.equals("*for") || name.startsWith("*for-")) {
+      String iterationVariable = null;
+
       if (name.length() == 5)
         throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_FOR_LOOP);
+
+      if (name.length() > 5) {
+        iterationVariable = name.substring(5);
+
+        if (!isValidExpressionIdentifier(iterationVariable))
+          throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
+      }
 
       if (value == null)
         throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
       if (currentLayer.forIterable != null)
         throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_LOOPS);
-
-      String iterationVariable = name.substring(5);
-
-      if (!isValidExpressionIdentifier(iterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
 
       if (currentLayer.hasLetBinding(iterationVariable))
         throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
