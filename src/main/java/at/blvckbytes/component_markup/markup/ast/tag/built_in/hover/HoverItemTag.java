@@ -11,15 +11,18 @@ import java.util.List;
 
 public class HoverItemTag extends HoverTag {
 
+  private static final ExpressionAttributeDefinition ATTR_MATERIAL = new ExpressionAttributeDefinition("material");
+  private static final ExpressionAttributeDefinition ATTR_AMOUNT = new ExpressionAttributeDefinition("amount");
+  private static final MarkupAttributeDefinition ATTR_NAME = new MarkupAttributeDefinition("name");
+  private static final MarkupAttributeDefinition ATTR_LORE = new MarkupAttributeDefinition("lore");
+
   public HoverItemTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("material"),
-        new ExpressionAttributeDefinition("amount"),
-        new MarkupAttributeDefinition("name"),
-        new MarkupAttributeDefinition("lore")
-      },
-      "hover-item"
+      "hover-item",
+      ATTR_MATERIAL,
+      ATTR_AMOUNT,
+      ATTR_NAME,
+      ATTR_LORE
     );
   }
 
@@ -32,10 +35,10 @@ public class HoverItemTag extends HoverTag {
     List<MarkupNode> children
   ) {
     return new ItemHoverNode(
-      tryFindExpressionAttribute("material", attributes),
-      tryFindExpressionAttribute("amount", attributes),
-      tryFindMarkupAttribute("name", attributes),
-      tryFindMarkupAttribute("lore", attributes),
+      ATTR_MATERIAL.singleOrNull(attributes),
+      ATTR_AMOUNT.singleOrNull(attributes),
+      ATTR_NAME.singleOrNull(attributes),
+      ATTR_LORE.singleOrNull(attributes),
       position, children, letBindings
     );
   }

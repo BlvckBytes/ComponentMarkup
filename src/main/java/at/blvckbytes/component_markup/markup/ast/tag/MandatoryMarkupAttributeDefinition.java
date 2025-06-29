@@ -3,18 +3,17 @@ package at.blvckbytes.component_markup.markup.ast.tag;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MarkupAttributeDefinition extends AttributeDefinition {
+public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
 
-  public MarkupAttributeDefinition(String name, AttributeFlag... flags) {
+  public MandatoryMarkupAttributeDefinition(String name, AttributeFlag... flags) {
     super(name, MarkupAttribute.class, flags);
   }
 
-  public @Nullable MarkupNode singleOrNull(List<Attribute> attributes) {
+  public MarkupNode single(List<Attribute> attributes) {
     for (Attribute attribute : attributes) {
       if (!matches(attribute))
         continue;
@@ -22,7 +21,7 @@ public class MarkupAttributeDefinition extends AttributeDefinition {
       return ((MarkupAttribute) attribute).value;
     }
 
-    return null;
+    throw new IllegalStateException("Did not receive mandatory markup-attribute " + name);
   }
 
   public List<MarkupNode> multi(List<Attribute> attributes) {

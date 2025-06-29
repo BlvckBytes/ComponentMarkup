@@ -151,7 +151,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (attribute == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
-    if (attribute instanceof MarkupAttributeDefinition)
+    if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
       throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
 
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
@@ -227,7 +227,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
         throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-      if (!(attribute instanceof MarkupAttributeDefinition))
+      if (!(attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition))
         throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
     }
 
@@ -494,7 +494,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (attribute == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
 
-    if (attribute instanceof MarkupAttributeDefinition)
+    if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
       throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
 
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))

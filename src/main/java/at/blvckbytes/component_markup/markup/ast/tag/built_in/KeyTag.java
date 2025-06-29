@@ -13,14 +13,14 @@ public class KeyTag extends TagDefinition {
 
   private static final String TAG_NAME = "key";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
+
   public KeyTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("key", AttributeFlag.MANDATORY)
-      },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_KEY
     );
   }
 
@@ -37,6 +37,6 @@ public class KeyTag extends TagDefinition {
     List<LetBinding> letBindings,
     List<MarkupNode> children
   ) {
-    return new KeyNode(findExpressionAttribute("key", attributes), position, letBindings);
+    return new KeyNode(ATTR_KEY.single(attributes), position, letBindings);
   }
 }

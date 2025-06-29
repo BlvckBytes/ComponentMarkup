@@ -13,14 +13,14 @@ public class FontTag extends TagDefinition {
 
   private static final String TAG_NAME = "font";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_NAME = new MandatoryExpressionAttributeDefinition("name");
+
   public FontTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("name", AttributeFlag.MANDATORY)
-      },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_NAME
     );
   }
 
@@ -38,7 +38,7 @@ public class FontTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.getOrInstantiateStyle().font = findExpressionAttribute("name", attributes);
+    wrapper.getOrInstantiateStyle().font = ATTR_NAME.single(attributes);
     return wrapper;
   }
 }

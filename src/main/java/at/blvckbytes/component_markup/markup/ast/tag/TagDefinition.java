@@ -1,36 +1,28 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public abstract class TagDefinition {
 
-  public static final AttributeDefinition[] NO_ATTRIBUTES = new AttributeDefinition[0];
-
-  private final AttributeDefinition[] attributes;
+  public final Set<AttributeDefinition> attributes;
   public final Collection<String> staticPrefixes;
   public final TagClosing tagClosing;
   public final TagPriority tagPriority;
 
   protected TagDefinition(
-    AttributeDefinition[] attributes,
     String[] staticPrefixes,
     TagClosing tagClosing,
-    TagPriority tagPriority
+    TagPriority tagPriority,
+    AttributeDefinition... attributes
   ) {
-    this.attributes = attributes;
-    this.staticPrefixes = Arrays.asList(staticPrefixes);
+    this.attributes = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(attributes)));
+    this.staticPrefixes = Collections.unmodifiableList(Arrays.asList(staticPrefixes));
     this.tagClosing = tagClosing;
     this.tagPriority = tagPriority;
   }
@@ -53,87 +45,4 @@ public abstract class TagDefinition {
     List<LetBinding> letBindings,
     List<MarkupNode> children
   );
-
-  protected static MarkupNode findMarkupAttribute(String name, List<Attribute> attributes) {
-    MarkupNode value = tryFindMarkupAttribute(name, attributes);
-
-    if (value == null)
-      throw new IllegalStateException("Required attribute '" + name + "' to be present");
-
-    return value;
-  }
-
-  protected static @Nullable MarkupNode tryFindMarkupAttribute(String name, List<Attribute> attributes) {
-    Attribute attribute = tryFindAttribute(name, attributes);
-
-    if (attribute == null)
-      return null;
-
-    if (attribute instanceof MarkupAttribute)
-      return ((MarkupAttribute) attribute).value;
-
-    throw new IllegalStateException("Required attribute '" + name + "' to be of type markup");
-  }
-
-  protected static ExpressionNode findExpressionAttribute(String name, List<Attribute> attributes) {
-    ExpressionNode value = tryFindExpressionAttribute(name, attributes);
-
-    if (value == null)
-      throw new IllegalStateException("Required attribute '" + name + "' to be present");
-
-    return value;
-  }
-
-  protected static @Nullable ExpressionNode tryFindExpressionAttribute(String name, List<Attribute> attributes) {
-    Attribute attribute = tryFindAttribute(name, attributes);
-
-    if (attribute == null)
-      return null;
-
-    if (attribute instanceof ExpressionAttribute)
-      return ((ExpressionAttribute) attribute).value;
-
-    throw new IllegalStateException("Required attribute '" + name + "' to be of type expression");
-  }
-
-  private static @Nullable Attribute tryFindAttribute(String name, List<Attribute> attributes) {
-    for (Attribute attribute : attributes) {
-      if (attribute.name.equalsIgnoreCase(name))
-        return attribute;
-    }
-
-    return null;
-  }
-
-  protected static List<ExpressionNode> findExpressionAttributes(String name, List<Attribute> attributes) {
-    List<ExpressionNode> result = new ArrayList<>();
-
-    for (Attribute attribute : attributes) {
-      if (!attribute.name.equalsIgnoreCase(name))
-        continue;
-
-      if (!(attribute instanceof ExpressionAttribute))
-        throw new IllegalStateException("Required attribute '" + name + "' to be of type expression");
-
-      result.add(((ExpressionAttribute) attribute).value);
-    }
-
-    return result;
-  }
-
-  protected static List<MarkupNode> findMarkupAttributes(String name, List<Attribute> attributes) {
-    List<MarkupNode> result = new ArrayList<>();
-
-    for (Attribute attribute : attributes) {
-      if (!attribute.name.equalsIgnoreCase(name))
-        continue;
-
-      if (!(attribute instanceof MarkupAttribute))
-        throw new IllegalStateException("Required attribute '" + name + "' to be of type markup");
-
-      result.add(((MarkupAttribute) attribute).value);
-    }
-
-    return result;
-  }
 }

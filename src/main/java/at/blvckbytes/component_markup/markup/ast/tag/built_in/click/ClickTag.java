@@ -11,17 +11,17 @@ import java.util.List;
 
 public abstract class ClickTag extends TagDefinition {
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
+
   private final ClickAction action;
   private final String tagName;
 
   protected ClickTag(ClickAction action, String tagName) {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY)
-      },
       new String[] { tagName },
       TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_VALUE
     );
 
     this.tagName = tagName;
@@ -43,7 +43,7 @@ public abstract class ClickTag extends TagDefinition {
   ) {
     return new ClickNode(
       action,
-      findExpressionAttribute("value", attributes),
+      ATTR_VALUE.single(attributes),
       position, children, letBindings
     );
   }

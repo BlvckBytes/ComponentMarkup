@@ -57,7 +57,7 @@ public class ImmediateFormatTag extends TagDefinition {
   }
 
   public ImmediateFormatTag() {
-    super(NO_ATTRIBUTES, staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
+    super(staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   private boolean isFormatChar(char c, boolean allowReset) {

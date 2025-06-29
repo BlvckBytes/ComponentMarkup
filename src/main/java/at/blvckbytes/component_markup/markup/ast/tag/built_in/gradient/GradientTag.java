@@ -17,7 +17,6 @@ public class GradientTag extends TagDefinition {
 
   public GradientTag() {
     super(
-      NO_ATTRIBUTES,
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL

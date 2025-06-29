@@ -13,14 +13,14 @@ public class InsertTag extends TagDefinition {
 
   private static final String TAG_NAME = "insert";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
+
   public InsertTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY)
-      },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_VALUE
     );
   }
 
@@ -38,7 +38,7 @@ public class InsertTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     return new InsertNode(
-      findExpressionAttribute("value", attributes),
+      ATTR_VALUE.single(attributes),
       position, children, letBindings
     );
   }

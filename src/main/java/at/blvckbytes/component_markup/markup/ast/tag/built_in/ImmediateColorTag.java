@@ -28,7 +28,7 @@ public class ImmediateColorTag extends TagDefinition {
   }
 
   public ImmediateColorTag() {
-    super(NO_ATTRIBUTES, staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
+    super(staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override

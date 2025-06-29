@@ -13,14 +13,14 @@ public class ColorTag extends TagDefinition {
 
   private static final String TAG_NAME = "color";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
+
   public ColorTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY)
-      },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_VALUE
     );
   }
 
@@ -38,7 +38,7 @@ public class ColorTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    wrapper.getOrInstantiateStyle().color = findExpressionAttribute("value", attributes);
+    wrapper.getOrInstantiateStyle().color = ATTR_VALUE.single(attributes);
     return wrapper;
   }
 }

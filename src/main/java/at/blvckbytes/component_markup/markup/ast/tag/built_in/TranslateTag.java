@@ -13,16 +13,18 @@ public class TranslateTag extends TagDefinition {
 
   private static final String TAG_NAME = "translate";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
+  private static final MarkupAttributeDefinition ATTR_WITH = new MarkupAttributeDefinition("with", AttributeFlag.MULTI_VALUE);
+  private static final ExpressionAttributeDefinition ATTR_FALLBACK = new ExpressionAttributeDefinition("fallback");
+
   public TranslateTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("key", AttributeFlag.MANDATORY),
-        new MarkupAttributeDefinition("with", AttributeFlag.MULTI_VALUE),
-        new ExpressionAttributeDefinition("fallback")
-      },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_KEY,
+      ATTR_WITH,
+      ATTR_FALLBACK
     );
   }
 
@@ -40,9 +42,9 @@ public class TranslateTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     return new TranslateNode(
-      findExpressionAttribute("key", attributes),
-      findMarkupAttributes("with", attributes),
-      tryFindExpressionAttribute("fallback", attributes),
+      ATTR_KEY.single(attributes),
+      ATTR_WITH.multi(attributes),
+      ATTR_FALLBACK.singleOrNull(attributes),
       position, letBindings
     );
   }

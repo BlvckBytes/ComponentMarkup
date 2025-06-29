@@ -16,15 +16,16 @@ public class ShadowTag extends TagDefinition {
 
   private static final String TAG_NAME = "shadow";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
+  private static final ExpressionAttributeDefinition ATTR_OPACITY = new ExpressionAttributeDefinition("opacity");
+
   public ShadowTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("value", AttributeFlag.MANDATORY),
-        new ExpressionAttributeDefinition("opacity")
-      },
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_VALUE,
+      ATTR_OPACITY
     );
   }
 
@@ -42,10 +43,10 @@ public class ShadowTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    ExpressionNode opacity = tryFindExpressionAttribute("opacity", attributes);
+    ExpressionNode opacity = ATTR_OPACITY.singleOrNull(attributes);
 
     wrapper.getOrInstantiateStyle().shadowColor = new TransformerNode(
-      findExpressionAttribute("value", attributes),
+      ATTR_VALUE.single(attributes),
       (input, environment, interpreter) -> {
         String colorValue = environment.getValueInterpreter().asString(input);
 

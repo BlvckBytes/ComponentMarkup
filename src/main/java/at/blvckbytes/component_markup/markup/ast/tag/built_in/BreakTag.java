@@ -17,7 +17,7 @@ public class BreakTag extends TagDefinition {
   private static final String TAG_NAME = "br";
 
   public BreakTag() {
-    super(NO_ATTRIBUTES, new String[] { TAG_NAME }, TagClosing.SELF_CLOSE, TagPriority.NORMAL);
+    super(new String[] { TAG_NAME }, TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override

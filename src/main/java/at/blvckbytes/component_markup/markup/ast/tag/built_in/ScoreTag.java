@@ -13,16 +13,18 @@ public class ScoreTag extends TagDefinition {
 
   private static final String TAG_NAME = "score";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_NAME = new MandatoryExpressionAttributeDefinition("name");
+  private static final MandatoryExpressionAttributeDefinition ATTR_OBJECTIVE = new MandatoryExpressionAttributeDefinition("objective");
+  private static final ExpressionAttributeDefinition ATTR_VALUE = new ExpressionAttributeDefinition("value");
+
   public ScoreTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("name", AttributeFlag.MANDATORY),
-        new ExpressionAttributeDefinition("objective", AttributeFlag.MANDATORY),
-        new ExpressionAttributeDefinition("value")
-      },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_NAME,
+      ATTR_OBJECTIVE,
+      ATTR_VALUE
     );
   }
 
@@ -40,9 +42,9 @@ public class ScoreTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     return new ScoreNode(
-      findExpressionAttribute("name", attributes),
-      findExpressionAttribute("objective", attributes),
-      tryFindExpressionAttribute("value", attributes),
+      ATTR_NAME.single(attributes),
+      ATTR_OBJECTIVE.single(attributes),
+      ATTR_VALUE.singleOrNull(attributes),
       position, letBindings
     );
   }

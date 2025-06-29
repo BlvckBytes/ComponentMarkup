@@ -11,24 +11,28 @@ import java.util.List;
 
 public abstract class NbtTag extends TagDefinition {
 
+  protected static final MandatoryExpressionAttributeDefinition ATTR_PATH = new MandatoryExpressionAttributeDefinition("path");
+  protected static final ExpressionAttributeDefinition ATTR_INTERPRET = new ExpressionAttributeDefinition("interpret");
+  protected static final MarkupAttributeDefinition ATTR_SEPARATOR = new MarkupAttributeDefinition("separator");
+
   private final NbtSource source;
   private final String tagName;
+  private final MandatoryExpressionAttributeDefinition sourceAttribute;
 
-  protected NbtTag(NbtSource source, String tagName) {
+  protected NbtTag(NbtSource source, String tagName, MandatoryExpressionAttributeDefinition sourceAttribute) {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition(source.attributeName, AttributeFlag.MANDATORY),
-        new ExpressionAttributeDefinition("path", AttributeFlag.MANDATORY),
-        new ExpressionAttributeDefinition("interpret"),
-        new MarkupAttributeDefinition("separator")
-      },
       new String[] { tagName },
-      TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL
+      TagClosing.OPEN_CLOSE,
+      TagPriority.NORMAL,
+      ATTR_PATH,
+      ATTR_INTERPRET,
+      ATTR_SEPARATOR,
+      sourceAttribute
     );
 
     this.source = source;
     this.tagName = tagName;
+    this.sourceAttribute = sourceAttribute;
   }
 
   @Override
@@ -46,10 +50,10 @@ public abstract class NbtTag extends TagDefinition {
   ) {
     return new NbtNode(
       source,
-      findExpressionAttribute(source.attributeName, attributes),
-      findExpressionAttribute("path", attributes),
-      tryFindExpressionAttribute("interpret", attributes),
-      tryFindMarkupAttribute("separator", attributes),
+      sourceAttribute.single(attributes),
+      ATTR_PATH.single(attributes),
+      ATTR_INTERPRET.singleOrNull(attributes),
+      ATTR_SEPARATOR.singleOrNull(attributes),
       position, letBindings
     );
   }

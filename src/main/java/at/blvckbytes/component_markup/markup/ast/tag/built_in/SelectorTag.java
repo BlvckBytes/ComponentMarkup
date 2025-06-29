@@ -13,15 +13,16 @@ public class SelectorTag extends TagDefinition {
 
   private static final String TAG_NAME = "selector";
 
+  private static final MandatoryExpressionAttributeDefinition ATTR_SELECTOR = new MandatoryExpressionAttributeDefinition("selector");
+  private static final MarkupAttributeDefinition ATTR_SEPARATOR = new MarkupAttributeDefinition("separator");
+
   public SelectorTag() {
     super(
-      new AttributeDefinition[] {
-        new ExpressionAttributeDefinition("selector", AttributeFlag.MANDATORY),
-        new MarkupAttributeDefinition("separator")
-      },
       new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL
+      TagPriority.NORMAL,
+      ATTR_SELECTOR,
+      ATTR_SEPARATOR
     );
   }
 
@@ -39,8 +40,8 @@ public class SelectorTag extends TagDefinition {
     List<MarkupNode> children
   ) {
     return new SelectorNode(
-      findExpressionAttribute("selector", attributes),
-      tryFindMarkupAttribute("separator", attributes),
+      ATTR_SELECTOR.single(attributes),
+      ATTR_SEPARATOR.singleOrNull(attributes),
       position, letBindings
     );
   }
