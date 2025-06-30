@@ -521,7 +521,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3: />",
         "   -^",
-        "   Error: This tag requires a separate closing-tag as it expects content, and does not support self-closing <name />"
+        "   Error: This tag requires a separate closing-tag as it expects content, and does not support self-closing <red />"
       )
     );
 

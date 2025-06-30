@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 public class MarkupInterpreterTests {
@@ -262,24 +263,96 @@ public class MarkupInterpreterTests {
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
     );
 
-    makeCase(
+    makeColorizerCase(
       text,
+      "Hello, world!",
+      (index, letter) -> {
+        if (index >= 7 && index <= 11)
+          letter.bool("bold", true);
+      },
+      "#FF5555",
+      "#F05563",
+      "#E25571",
+      "#D4557F",
+      "#C6558D",
+      "#B8559B",
+      null,
+      "#AA55AA",
+      "#9B55B8",
+      "#8D55C6",
+      "#7F55D4",
+      "#7155E2",
+      "#6355F0"
+    );
+  }
+
+  @Test
+  public void shouldGenerateARainbow() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<rainbow>I am the <b>coolest rainbow</b> on earth"
+    );
+
+    makeColorizerCase(
+      text,
+      "I am the coolest rainbow on earth",
+      (index, letter) -> {
+        if (index >= 9 && index <= 23)
+          letter.bool("bold", true);
+      },
+      "#FF0000",
+      null,
+      "#FF3900",
+      "#FF7100",
+      null,
+      "#FFAA00",
+      "#FFE300",
+      "#E3FF00",
+      null,
+      "#AAFF00",
+      "#71FF00",
+      "#39FF00",
+      "#00FF00",
+      "#00FF39",
+      "#00FF71",
+      "#00FFAA",
+      null,
+      "#00FFE3",
+      "#00E3FF",
+      "#00AAFF",
+      "#0071FF",
+      "#0039FF",
+      "#0000FF",
+      "#3900FF",
+      null,
+      "#7100FF",
+      "#AA00FF",
+      null,
+      "#E300FF",
+      "#FF00E3",
+      "#FF00AA",
+      "#FF0071",
+      "#FF0039"
+    );
+  }
+
+  private void makeColorizerCase(
+    TextWithAnchors input,
+    String text,
+    BiConsumer<Integer, JsonObjectBuilder> letterAndIndexConsumer,
+    String... colors
+  ) {
+    makeCase(
+      input,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
       new JsonObjectBuilder()
         .string("text", "")
         .array("extra", extra -> {
-          //              v0     v7  v11
-          char[] chars = "Hello, world!".toCharArray();
-          String[] colors = {
-            "#F05563", "#E25571", "#D4557F", "#C6558D", "#B8559B", "#AA55AA",
-            null, // Space
-            "#9B55B8", "#8D55C6", "#7F55D4", "#7155E2", "#6355F0", "#5555FF",
-          };
+          char[] chars = text.toCharArray();
 
           for (int index = 0; index < chars.length; ++index) {
+            int charIndex = index;
             char currentChar = chars[index];
-            String currentColor = colors[index];
-            boolean isBold = index >= 7 && index <= 11; // "world"
+            String currentColor = index < colors.length ? colors[index] : "<undefined>";
 
             extra.object(letter -> {
               letter.string("text", String.valueOf(currentChar));
@@ -287,8 +360,8 @@ public class MarkupInterpreterTests {
               if (currentColor != null)
                 letter.string("color", currentColor);
 
-              if (isBold)
-                letter.bool("bold", true);
+              if (letterAndIndexConsumer != null)
+                letterAndIndexConsumer.accept(charIndex, letter);
 
               return letter;
             });

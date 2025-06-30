@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.tag.built_in.gradient;
+package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient;
 
 import java.awt.*;
 import java.util.Arrays;
