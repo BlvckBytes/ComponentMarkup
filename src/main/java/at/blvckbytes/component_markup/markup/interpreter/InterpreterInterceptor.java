@@ -6,10 +6,10 @@ import java.util.EnumSet;
 
 public interface InterpreterInterceptor {
 
-  EnumSet<InterceptionFlag> interceptInterpretation(MarkupNode node, Interpreter interpreter);
+  InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter);
 
   void afterInterpretation(MarkupNode node, Interpreter interpreter);
 
-  void onSkippedByOther(MarkupNode node, Interpreter interpreter);
+  void onSkippedByParent(MarkupNode node, Interpreter interpreter);
 
 }

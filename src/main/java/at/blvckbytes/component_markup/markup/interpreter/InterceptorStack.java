@@ -8,11 +8,11 @@ public class InterceptorStack {
 
   private static class InterceptorEntry {
     InterpreterInterceptor interceptor;
-    Stack<EnumSet<InterceptionFlag>> flagStack;
+    Stack<InterceptionResult> resultStack;
 
     InterceptorEntry(InterpreterInterceptor interceptor) {
       this.interceptor = interceptor;
-      this.flagStack = new Stack<>();
+      this.resultStack = new Stack<>();
     }
   }
 
@@ -29,27 +29,22 @@ public class InterceptorStack {
   }
 
   public boolean handleBeforeAndGetIfSkip(MarkupNode node) {
-    List<EnumSet<InterceptionFlag>> flagsList = new ArrayList<>();
-
     boolean skip = false;
 
     for (int i = 0; i < interceptorStack.size(); ++i) {
       InterceptorEntry entry = interceptorStack.get(i);
-      EnumSet<InterceptionFlag> flags = entry.interceptor.interceptInterpretation(node, interpreter);
+      InterceptionResult result = entry.interceptor.interceptInterpretation(node, interpreter);
 
-      if (flags.contains(InterceptionFlag.SKIP_PROCESSING)) {
+      if (result == InterceptionResult.DO_NOT_PROCESS) {
         while (interceptorStack.size() > i + 1)
-          interceptorStack.pop().interceptor.onSkippedByOther(node, interpreter);
+          interceptorStack.pop().interceptor.onSkippedByParent(node, interpreter);
 
         skip = true;
         break;
       }
 
-      flagsList.add(flags);
+      entry.resultStack.push(result);
     }
-
-    for (int i = 0; i < interceptorStack.size(); ++i)
-      interceptorStack.get(i).flagStack.push(flagsList.get(i));
 
     return skip;
   }
@@ -57,12 +52,12 @@ public class InterceptorStack {
   public void handleAfter(MarkupNode node) {
     for (Iterator<InterceptorEntry> iterator = interceptorStack.iterator(); iterator.hasNext();) {
       InterceptorEntry entry = iterator.next();
-      EnumSet<InterceptionFlag> flags = entry.flagStack.pop();
+      InterceptionResult result = entry.resultStack.pop();
 
-      if (flags.contains(InterceptionFlag.CALL_AFTER))
+      if (result == InterceptionResult.DO_PROCESS_AND_CALL_AFTER)
         entry.interceptor.afterInterpretation(node, interpreter);
 
-      if (entry.flagStack.isEmpty())
+      if (entry.resultStack.isEmpty())
         iterator.remove();
     }
   }
