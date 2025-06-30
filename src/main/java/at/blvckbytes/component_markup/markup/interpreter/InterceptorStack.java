@@ -3,6 +3,8 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class InterceptorStack {
 
@@ -17,11 +19,13 @@ public class InterceptorStack {
   }
 
   private final Interpreter interpreter;
+  private final Logger logger;
   private final Stack<InterceptorEntry> interceptorStack;
 
-  public InterceptorStack(Interpreter interpreter) {
+  public InterceptorStack(Interpreter interpreter, Logger logger) {
     this.interpreter = interpreter;
     this.interceptorStack = new Stack<>();
+    this.logger = logger;
   }
 
   public void add(InterpreterInterceptor interceptor) {
@@ -33,11 +37,27 @@ public class InterceptorStack {
 
     for (int i = 0; i < interceptorStack.size(); ++i) {
       InterceptorEntry entry = interceptorStack.get(i);
-      InterceptionResult result = entry.interceptor.interceptInterpretation(node, interpreter);
+
+      InterceptionResult result = InterceptionResult.DO_PROCESS;
+
+      try {
+        result = entry.interceptor.interceptInterpretation(node, interpreter);
+      } catch (Throwable thrownError) {
+        String className = entry.interceptor.getClass().getName();
+        logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
+      }
 
       if (result == InterceptionResult.DO_NOT_PROCESS) {
-        while (interceptorStack.size() > i + 1)
-          interceptorStack.pop().interceptor.onSkippedByParent(node, interpreter);
+        while (interceptorStack.size() > i + 1) {
+          InterpreterInterceptor interceptor = interceptorStack.pop().interceptor;
+
+          try {
+            interceptor.onSkippedByParent(node, interpreter);
+          } catch (Throwable thrownError) {
+            String className = entry.interceptor.getClass().getName();
+            logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#onSkippedByParent", thrownError);
+          }
+        }
 
         skip = true;
         break;
@@ -54,8 +74,14 @@ public class InterceptorStack {
       InterceptorEntry entry = iterator.next();
       InterceptionResult result = entry.resultStack.pop();
 
-      if (result == InterceptionResult.DO_PROCESS_AND_CALL_AFTER)
-        entry.interceptor.afterInterpretation(node, interpreter);
+      if (result == InterceptionResult.DO_PROCESS_AND_CALL_AFTER) {
+        try {
+          entry.interceptor.afterInterpretation(node, interpreter);
+        } catch (Throwable thrownError) {
+          String className = entry.interceptor.getClass().getName();
+          logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
+        }
+      }
 
       if (entry.resultStack.isEmpty())
         iterator.remove();

@@ -36,7 +36,7 @@ public class MarkupInterpreter implements Interpreter {
     this.expressionInterpreter = expressionInterpreter;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.logger = logger;
-    this.interceptors = new InterceptorStack(this);
+    this.interceptors = new InterceptorStack(this, logger);
     this.builderStack = new Stack<>();
   }
 
