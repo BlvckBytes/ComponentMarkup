@@ -13,10 +13,12 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
   public final CursorPosition position;
   public final MarkupParseError error;
+  public final Object[] messagePlaceholders;
 
-  public MarkupParseException(CursorPosition position, MarkupParseError error) {
+  public MarkupParseException(CursorPosition position, MarkupParseError error, Object... messagePlaceholders) {
     this.position = position;
     this.error = error;
+    this.messagePlaceholders = messagePlaceholders;
   }
 
   public MarkupParseException(CursorPosition position, XmlParseException xmlException) {
@@ -24,6 +26,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.XML_PARSE_ERROR;
+    this.messagePlaceholders = new Object[0];
   }
 
   public MarkupParseException(CursorPosition position, ExpressionParseException expressionParseException) {
@@ -31,6 +34,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.EXPRESSION_PARSE_ERROR;
+    this.messagePlaceholders = new Object[0];
   }
 
   public MarkupParseException(CursorPosition position, ExpressionTokenizeException expressionTokenizeException) {
@@ -38,22 +42,23 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.EXPRESSION_TOKENIZE_ERROR;
+    this.messagePlaceholders = new Object[0];
   }
 
   @Override
   public String getErrorMessage() {
     switch (this.error) {
       case XML_PARSE_ERROR:
-        return ((XmlParseException) getCause()).error.getErrorMessage();
+        return ((XmlParseException) getCause()).getErrorMessage();
 
       case EXPRESSION_PARSE_ERROR:
-        return ((ExpressionParseException) getCause()).error.getErrorMessage();
+        return ((ExpressionParseException) getCause()).getErrorMessage();
 
       case EXPRESSION_TOKENIZE_ERROR:
-        return ((ExpressionTokenizeException) getCause()).error.getErrorMessage();
+        return ((ExpressionTokenizeException) getCause()).getErrorMessage();
 
       default:
-        return this.error.getErrorMessage();
+        return String.format(this.error.getErrorMessage(), messagePlaceholders);
     }
   }
 

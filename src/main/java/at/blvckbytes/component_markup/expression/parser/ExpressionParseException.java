@@ -1,6 +1,8 @@
 package at.blvckbytes.component_markup.expression.parser;
 
-public class ExpressionParseException extends RuntimeException {
+import at.blvckbytes.component_markup.ErrorMessage;
+
+public class ExpressionParseException extends RuntimeException implements ErrorMessage {
 
   public final ExpressionParserError error;
   public final int charIndex;
@@ -8,5 +10,11 @@ public class ExpressionParseException extends RuntimeException {
   public ExpressionParseException(ExpressionParserError error, int charIndex) {
     this.error = error;
     this.charIndex = charIndex;
+  }
+
+  @Override
+  public String getErrorMessage() {
+    // TODO: Placeholders
+    return error.getErrorMessage();
   }
 }

@@ -121,6 +121,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     boolean isExpressionMode = false;
+    boolean isSpreadMode = false;
 
     if (nameLength > 2 && name.charAt(0) == '[') {
       if (name.charAt(nameLength - 1) != ']')
@@ -128,6 +129,15 @@ public class MarkupParser implements XmlEventConsumer {
 
       isExpressionMode = true;
       name = name.substring(1, nameLength - 1);
+    }
+
+    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
+      name = name.substring(3);
+      isSpreadMode = true;
+
+      // TODO: Proper exception
+      if (!isExpressionMode)
+        throw new IllegalStateException("Cannot apply the spread-operator to a non-expression attribute!");
     }
 
     ExpressionNode expression = isExpressionMode ? parseExpression(value, valueBeginPosition) : ImmediateExpression.of(value);
@@ -160,7 +170,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
+    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, isSpreadMode));
   }
 
   @Override
@@ -294,13 +304,13 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (!wasSelfClosing) {
       if (tagClosing == TagClosing.SELF_CLOSE)
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SELF_CLOSING_TAG);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SELF_CLOSING_TAG, currentLayer.tagNameLower);
 
       return;
     }
 
     if (tagClosing == TagClosing.OPEN_CLOSE)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG, currentLayer.tagNameLower);
 
     tagStack.pop();
     tagStack.peek().children.add(currentLayer);
@@ -479,6 +489,11 @@ public class MarkupParser implements XmlEventConsumer {
     if (name.charAt(0) == '[')
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
+    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
+      // TODO: Proper exception
+      throw new IllegalStateException("Can only use the spread-operator on expression-attributes!");
+    }
+
     if (name.equals("let") || name.startsWith("let-"))
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
 
@@ -512,7 +527,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
 
-    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression));
+    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, false));
   }
 
   private boolean isValidExpressionIdentifier(String identifier) {
