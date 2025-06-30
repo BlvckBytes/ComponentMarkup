@@ -27,6 +27,8 @@ public interface Interpreter {
 
   @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression);
 
+  @Nullable Object evaluateAsPlainObject(ExpressionNode expression);
+
   List<Object> interpret(MarkupNode node, char breakChar);
 
   OutputBuilder getCurrentBuilder();

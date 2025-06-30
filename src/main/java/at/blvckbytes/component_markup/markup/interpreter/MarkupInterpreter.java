@@ -158,6 +158,16 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
+  public @Nullable Object evaluateAsPlainObject(ExpressionNode expression) {
+    try {
+      return expressionInterpreter.interpret(expression, environment);
+    } catch (Throwable e) {
+      logger.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a plain object", e);
+      return null;
+    }
+  }
+
+  @Override
   public List<Object> interpret(MarkupNode node, char breakChar) {
     builderStack.push(new OutputBuilder(componentConstructor, this, breakChar));
     _interpret(node);
