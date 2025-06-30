@@ -21,11 +21,36 @@ public class ModernColor implements ComponentColor {
   }
 
   public String asNonAlphaHex() {
-    return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
+    char[] result = new char[7];
+
+    result[0] = '#';
+
+    toHex(result, 1, color.getRed());
+    toHex(result, 3, color.getGreen());
+    toHex(result, 5, color.getBlue());
+
+    return new String(result);
+  }
+
+  private void toHex(char[] output, int offset, int input) {
+    int firstDigit = (input >> 4) & 0xF;
+    int secondDigit = input & 0xF;
+
+    output[offset] = firstDigit < 10 ? (char) ('0' + firstDigit) : (char) ('A' + (firstDigit - 10));
+    output[offset + 1] = secondDigit < 10 ? (char) ('0' + secondDigit) : (char) ('A' + (secondDigit - 10));
   }
 
   public String asAlphaHex() {
-    return String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    char[] result = new char[9];
+
+    result[0] = '#';
+
+    toHex(result, 1, color.getRed());
+    toHex(result, 3, color.getGreen());
+    toHex(result, 5, color.getBlue());
+    toHex(result, 7, color.getAlpha());
+
+    return new String(result);
   }
 
   @Override
