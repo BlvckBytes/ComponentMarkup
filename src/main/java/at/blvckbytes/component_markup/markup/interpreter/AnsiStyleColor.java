@@ -166,4 +166,9 @@ public enum AnsiStyleColor implements ComponentColor {
         return null;
     }
   }
+
+  @Override
+  public Color getColor() {
+    return this.color;
+  }
 }

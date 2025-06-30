@@ -256,6 +256,49 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldGenerateAGradient() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> {
+          //              v0     v7  v11
+          char[] chars = "Hello, world!".toCharArray();
+          String[] colors = {
+            "#F05563", "#E25571", "#D4557F", "#C6558D", "#B8559B", "#AA55AA",
+            null, // Space
+            "#9B55B8", "#8D55C6", "#7F55D4", "#7155E2", "#6355F0", "#5555FF",
+          };
+
+          for (int index = 0; index < chars.length; ++index) {
+            char currentChar = chars[index];
+            String currentColor = colors[index];
+            boolean isBold = index >= 7 && index <= 11; // "world"
+
+            extra.object(letter -> {
+              letter.string("text", String.valueOf(currentChar));
+
+              if (currentColor != null)
+                letter.string("color", currentColor);
+
+              if (isBold)
+                letter.bool("bold", true);
+
+              return letter;
+            });
+          }
+
+          return extra;
+        })
+    );
+  }
+
   private JsonElement sortKeysRecursively(JsonElement input) {
     if (input instanceof JsonArray) {
       JsonArray jsonArray = (JsonArray) input;

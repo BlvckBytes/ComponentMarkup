@@ -233,9 +233,6 @@ public class OutputBuilder {
     else if (nonTerminalNode instanceof StyledNode)
       applyStyles(sequenceComponent, (StyledNode) nonTerminalNode);
 
-    else
-      throw new IllegalStateException("Unknown non-terminal: " + nonTerminalNode.getClass());
-
     return sequenceComponent;
   }
 

@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.gradient;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
@@ -13,52 +14,74 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Stack;
 
 public class GradientNode extends MarkupNode implements InterpreterInterceptor {
 
   @JsonifyIgnore
-  private final ThreadLocal<Stack<List<Object>>> threadLocalInjectedComponentsStack = ThreadLocal.withInitial(Stack::new);
+  private final ThreadLocal<@Nullable GradientNodeState> threadLocalState = ThreadLocal.withInitial(() -> null);
 
-  private final boolean affectSubtrees;
+  private final List<ExpressionNode> colors;
+  private final List<ExpressionNode> offsets;
+  private final @Nullable ExpressionNode deep;
 
   public GradientNode(
+    List<ExpressionNode> colors,
+    List<ExpressionNode> offsets,
+    @Nullable ExpressionNode deep,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 
-    // TODO: apply if requested
-    this.affectSubtrees = false;
+    this.colors = colors;
+    this.offsets = offsets;
+    this.deep = deep;
+  }
+
+  private GradientNodeState getState(Interpreter interpreter) {
+    GradientNodeState state;
+
+    if ((state = threadLocalState.get()) != null)
+      return state;
+
+    state = new GradientNodeState(colors, offsets, deep, interpreter);
+
+    threadLocalState.set(state);
+    return state;
   }
 
   @Override
-  public EnumSet<InterceptionFlag> interceptInterpretation(MarkupNode node, Interpreter interpreter) {
-    if (!affectSubtrees && interpreter.isInSubtree())
-      return EnumSet.noneOf(InterceptionFlag.class);
+  public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
+    GradientNodeState state = getState(interpreter);
+
+    if (!state.deep && interpreter.isInSubtree())
+      return InterceptionResult.DO_PROCESS;
 
     if (node instanceof GradientNode) {
-      threadLocalInjectedComponentsStack.get().push(new ArrayList<>());
-
-      return EnumSet.of(InterceptionFlag.CALL_AFTER);
+      state.injectedComponentsStack.push(new ArrayList<>());
+      return InterceptionResult.DO_PROCESS_AND_CALL_AFTER;
     }
 
-    List<Object> injectedNodes = threadLocalInjectedComponentsStack.get().peek();
+    List<Object> injectedNodes = state.injectedComponentsStack.peek();
 
     if (node instanceof ContentNode) {
       OutputBuilder builder = interpreter.getCurrentBuilder();
       NodeStyle nodeStyle = ((ContentNode) node).getStyle();
 
       if (nodeStyle != null) {
+        // Do not override established colors!
+        // TODO: Maybe add a flag to force colors despite?
         if (nodeStyle.color != null && interpreter.evaluateAsBooleanOrNull(nodeStyle.color) != null)
-          return EnumSet.noneOf(InterceptionFlag.class);
+          return InterceptionResult.DO_PROCESS;
       }
 
       if (node instanceof TextNode) {
-        String nodeText = interpreter.evaluateAsString(((TextNode) node).text);
+        TextNode textNode = (TextNode) node;
+        NodeStyle textStyle = textNode.getStyle();
+
+        String nodeText = interpreter.evaluateAsString(textNode.text);
         StringBuilder whitespaceAccumulator = new StringBuilder();
 
         for (int charIndex = 0; charIndex < nodeText.length(); ++charIndex) {
@@ -70,55 +93,73 @@ public class GradientNode extends MarkupNode implements InterpreterInterceptor {
           }
 
           if (whitespaceAccumulator.length() > 0) {
-            builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
+            TextNode whitespaceNode = new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null);
+
+            if (textStyle != null)
+              whitespaceNode.getOrInstantiateStyle().inheritFrom(textStyle);
+
+            builder.onContent(whitespaceNode);
             whitespaceAccumulator.setLength(0);
           }
 
           TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, null);
+
+          if (textStyle != null)
+            charNode.getOrInstantiateStyle().inheritFrom(textStyle);
+
           Object charComponent = builder.onContent(charNode);
           injectedNodes.add(charComponent);
         }
 
-        if (whitespaceAccumulator.length() > 0)
-          builder.onContent(new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null));
+        if (whitespaceAccumulator.length() > 0) {
+          TextNode whitespaceNode = new TextNode(ImmediateExpression.of(whitespaceAccumulator.toString()), node.position, null);
 
-        return EnumSet.of(InterceptionFlag.SKIP_PROCESSING);
+          if (textStyle != null)
+            whitespaceNode.getOrInstantiateStyle().inheritFrom(textStyle);
+
+          builder.onContent(whitespaceNode);
+        }
+
+        return InterceptionResult.DO_NOT_PROCESS;
       }
 
       Object otherComponent = builder.onContent((ContentNode) node);
       injectedNodes.add(otherComponent);
 
-      return EnumSet.of(InterceptionFlag.SKIP_PROCESSING);
+      return InterceptionResult.DO_NOT_PROCESS;
     }
 
-    return EnumSet.noneOf(InterceptionFlag.class);
+    return InterceptionResult.DO_PROCESS;
   }
 
   @Override
   public void afterInterpretation(MarkupNode node, Interpreter interpreter) {
-    if (node instanceof GradientNode) {
-      List<Object> injectedComponents = threadLocalInjectedComponentsStack.get().pop();
+    if (!(node instanceof GradientNode))
+      return;
 
-      int injectedComponentsCount = injectedComponents.size();
+    GradientNodeState state = getState(interpreter);
 
-      for (int injectedComponentsIndex = 0; injectedComponentsIndex < injectedComponentsCount; ++injectedComponentsIndex) {
-        Object injectedComponent = injectedComponents.get(injectedComponentsIndex);
+    List<Object> injectedComponents = state.injectedComponentsStack.pop();
 
-        // TODO: Compute color based on progression as well as start, end and intermediate colors
-        double gradientProgression = (injectedComponentsIndex + 1D) / injectedComponentsCount;
-        ModernColor color = new ModernColor(Color.BLACK);
+    int injectedComponentsCount = injectedComponents.size();
 
-        interpreter.getComponentConstructor().setColor(injectedComponent, color);
-      }
+    for (int injectedComponentsIndex = 0; injectedComponentsIndex < injectedComponentsCount; ++injectedComponentsIndex) {
+      Object injectedComponent = injectedComponents.get(injectedComponentsIndex);
+      double progressionPercentage = ((injectedComponentsIndex + 1D) / injectedComponentsCount) * 100.0;
+      Color currentColor = state.gradientGenerator.getColor(progressionPercentage);
+
+      interpreter.getComponentConstructor().setColor(injectedComponent, new ModernColor(currentColor));
     }
   }
 
   @Override
-  public void onSkippedByOther(MarkupNode node, Interpreter interpreter) {
-    if (!affectSubtrees && interpreter.isInSubtree())
+  public void onSkippedByParent(MarkupNode node, Interpreter interpreter) {
+    GradientNodeState state = getState(interpreter);
+
+    if (!state.deep && interpreter.isInSubtree())
       return;
 
     if (node instanceof GradientNode)
-      threadLocalInjectedComponentsStack.get().pop();
+      state.injectedComponentsStack.pop();
   }
 }

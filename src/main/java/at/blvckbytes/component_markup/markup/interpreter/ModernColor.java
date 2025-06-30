@@ -27,4 +27,9 @@ public class ModernColor implements ComponentColor {
   public String asAlphaHex() {
     return String.format("#%02X%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
   }
+
+  @Override
+  public Color getColor() {
+    return this.color;
+  }
 }

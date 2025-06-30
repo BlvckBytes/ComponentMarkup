@@ -42,4 +42,6 @@ public interface ComponentColor {
 
     return 0;
   }
+
+  Color getColor();
 }
