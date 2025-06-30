@@ -23,6 +23,7 @@ public class GradientNodeState extends ColorizeNodeState {
     String tagNameLower,
     ExpressionList colors,
     ExpressionList offsets,
+    ExpressionList zIndices,
     double phase,
     EnumSet<ColorizeFlag> flags,
     Interpreter interpreter
@@ -31,8 +32,20 @@ public class GradientNodeState extends ColorizeNodeState {
 
     this.gradientGenerator = new GradientGenerator(
       evaluateColors(colors, interpreter),
-      evaluateOffsets(offsets, interpreter)
+      evaluateOffsets(offsets, interpreter),
+      evaluateZIndices(zIndices, interpreter)
     );
+  }
+
+  private long[] evaluateZIndices(ExpressionList zIndices, Interpreter interpreter) {
+    List<ExpressionNode> offsetList = zIndices.get(interpreter);
+
+    long[] result = new long[offsetList.size()];
+
+    for (int index = 0; index < result.length; ++index)
+      result[index] = interpreter.evaluateAsLong(offsetList.get(index));
+
+    return result;
   }
 
   private double[] evaluateOffsets(ExpressionList offsets, Interpreter interpreter) {

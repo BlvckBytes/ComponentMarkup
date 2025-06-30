@@ -16,13 +16,15 @@ public class GradientTag extends ColorizeTag {
 
   private static final MandatoryExpressionAttributeDefinition ATTR_COLOR = new MandatoryExpressionAttributeDefinition("color", AttributeFlag.MULTI_VALUE);
   private static final MandatoryExpressionAttributeDefinition ATTR_OFFSET = new MandatoryExpressionAttributeDefinition("offset", AttributeFlag.MULTI_VALUE);
+  private static final MandatoryExpressionAttributeDefinition ATTR_Z_INDEX = new MandatoryExpressionAttributeDefinition("z-index", AttributeFlag.MULTI_VALUE);
 
   public GradientTag() {
     super(
       new String[] { TAG_NAME },
       TagPriority.NORMAL,
       ATTR_COLOR,
-      ATTR_OFFSET
+      ATTR_OFFSET,
+      ATTR_Z_INDEX
     );
   }
 
@@ -41,6 +43,7 @@ public class GradientTag extends ColorizeTag {
   ) {
     ExpressionList colors = ATTR_COLOR.multi(attributes);
     ExpressionList offsets = ATTR_OFFSET.multi(attributes);
+    ExpressionList zIndices = ATTR_Z_INDEX.multi(attributes);
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 
     return new ColorizeNode(
@@ -50,6 +53,7 @@ public class GradientTag extends ColorizeTag {
           tagNameLower,
           colors,
           offsets,
+          zIndices,
           baseAttributes.getPhase(interpreter),
           baseAttributes.getFlags(interpreter),
           interpreter
