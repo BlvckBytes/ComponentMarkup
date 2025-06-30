@@ -486,7 +486,7 @@ public class MarkupParserErrorTests {
         "1: <translate",
         "2:   let-a=\"b\"",
         "3:   [key]=\"my.expr[222 c.d.e\"",
-        "                     -^",
+        "----------------------^",
         "   Error: Expected a closing-bracket ] after the indexing-invocation",
         "4:   fallback={",
         "5:     hello, {{user}}",
@@ -505,7 +505,7 @@ public class MarkupParserErrorTests {
         "1: <red",
         "2:   let-a=\"b\"",
         "3: >{{ user.'name' }}",
-        "           -^",
+        "------------^",
         "   Error: The right-hand-side of a member-access (.) operation may only be an identifier"
       )
     );
@@ -520,7 +520,7 @@ public class MarkupParserErrorTests {
         "1: <red",
         "2:   let-a=\"b\"",
         "3: />",
-        "   -^",
+        "----^",
         "   Error: This tag requires a separate closing-tag as it expects content, and does not support self-closing <red />"
       )
     );
@@ -534,7 +534,7 @@ public class MarkupParserErrorTests {
       new TextWithAnchors(
         "1: <red",
         "2:   my-attr=trruee",
-        "    -^",
+        "-----^",
         "   Error: This true-literal is malformed",
         "3: />"
       )

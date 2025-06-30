@@ -116,14 +116,14 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
         if (targetCharIndex >= lineBegin && targetCharIndex < index) {
           int lineRelativeOffset = targetCharIndex - lineBegin;
           int charCountUntilTargetChar = lineRelativeOffset == 0 ? 0 : lineRelativeOffset + 1;
-          int spacerLength = lineNumber.length() + charCountUntilTargetChar - 2;
+          int spacerLength = lineNumber.length() + charCountUntilTargetChar - 1;
 
-          String spacer = makeIndent(spacerLength);
+          String spacer = makeIndent(spacerLength, '-');
 
-          spacer += "-^";
+          spacer += "^";
 
           result.add(spacer);
-          result.add(makeIndent(lineNumber.length()) + "Error: " + getErrorMessage());
+          result.add(makeIndent(lineNumber.length(), ' ') + "Error: " + getErrorMessage());
         }
 
         lineBegin = index + 1;
@@ -133,14 +133,14 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     return result;
   }
 
-  private String makeIndent(int count) {
+  private String makeIndent(int count, char c) {
     if (count <= 0)
       return "";
 
     StringBuilder result = new StringBuilder(count);
 
     for (int i = 0; i < count; ++i)
-      result.append(' ');
+      result.append(c);
 
     return result.toString();
   }
