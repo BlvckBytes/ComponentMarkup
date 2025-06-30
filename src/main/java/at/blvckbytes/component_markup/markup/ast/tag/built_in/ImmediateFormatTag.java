@@ -95,7 +95,12 @@ public class ImmediateFormatTag extends TagDefinition {
   }
 
   private void applyFormat(String tagNameLower, NodeStyle style) {
-    boolean isNegative = tagNameLower.charAt(0) == '!' || tagNameLower.charAt(1) == '!';
+    char firstChar = tagNameLower.charAt(0);
+
+    boolean isNegative = (
+      firstChar == '!'
+        || (firstChar == '&' && tagNameLower.length() > 1 && tagNameLower.charAt(1) == '!')
+    );
 
     Format format;
 
