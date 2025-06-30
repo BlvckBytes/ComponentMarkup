@@ -12,7 +12,7 @@ public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
   }
 
   public MarkupNode single(AttributeMap attributes) {
-    MarkupNode result = attributes.firstMarkupOrNull(name);
+    MarkupNode result = attributes.firstMarkupOrNull(this);
 
     if (result != null)
       return result;
@@ -21,6 +21,6 @@ public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
   }
 
   public List<MarkupNode> multi(AttributeMap attributes) {
-    return attributes.markups(name);
+    return attributes.markups(this);
   }
 }

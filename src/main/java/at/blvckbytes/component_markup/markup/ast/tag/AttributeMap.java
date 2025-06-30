@@ -22,9 +22,9 @@ public class AttributeMap {
     this.attributes.add(attribute);
   }
 
-  public @Nullable ExpressionNode firstExpressionOrNull(String name) {
+  public @Nullable ExpressionNode firstExpressionOrNull(AttributeDefinition attributeDefinition) {
     for (Attribute attribute : attributes) {
-      if (!attribute.name.equals(name))
+      if (!attribute.name.equals(attributeDefinition.name))
         continue;
 
       if (!(attribute instanceof ExpressionAttribute))
@@ -36,25 +36,25 @@ public class AttributeMap {
     return null;
   }
 
-  public List<ExpressionNode> expressions(String name) {
-    List<ExpressionNode> result = new ArrayList<>();
+  public ExpressionList expressions(AttributeDefinition attributeDefinition) {
+    ExpressionList result = new ExpressionList();
 
     for (Attribute attribute : attributes) {
-      if (!attribute.name.equals(name))
+      if (!attribute.name.equals(attributeDefinition.name))
         continue;
 
       if (!(attribute instanceof ExpressionAttribute))
         continue;
 
-      result.add(((ExpressionAttribute) attribute).value);
+      result.addAttributeValue(((ExpressionAttribute) attribute));
     }
 
     return result;
   }
 
-  public @Nullable MarkupNode firstMarkupOrNull(String name) {
+  public @Nullable MarkupNode firstMarkupOrNull(AttributeDefinition attributeDefinition) {
     for (Attribute attribute : attributes) {
-      if (!attribute.name.equals(name))
+      if (!attribute.name.equals(attributeDefinition.name))
         continue;
 
       if (!(attribute instanceof MarkupAttribute))
@@ -66,11 +66,11 @@ public class AttributeMap {
     return null;
   }
 
-  public List<MarkupNode> markups(String name) {
+  public List<MarkupNode> markups(AttributeDefinition attributeDefinition) {
     List<MarkupNode> result = new ArrayList<>();
 
     for (Attribute attribute : attributes) {
-      if (!attribute.name.equals(name))
+      if (!attribute.name.equals(attributeDefinition.name))
         continue;
 
       if (!(attribute instanceof MarkupAttribute))

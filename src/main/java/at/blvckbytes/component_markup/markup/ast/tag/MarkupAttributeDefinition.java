@@ -13,10 +13,10 @@ public class MarkupAttributeDefinition extends AttributeDefinition {
   }
 
   public @Nullable MarkupNode singleOrNull(AttributeMap attributes) {
-    return attributes.firstMarkupOrNull(name);
+    return attributes.firstMarkupOrNull(this);
   }
 
   public List<MarkupNode> multi(AttributeMap attributes) {
-    return attributes.markups(name);
+    return attributes.markups(this);
   }
 }
