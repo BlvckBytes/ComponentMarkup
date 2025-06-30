@@ -58,11 +58,11 @@ public abstract class ColorizeNodeState {
     injectedComponentsStack.pop();
   }
 
-  public void end(Interpreter interpreter) {
+  public boolean endAndGetIfStackIsEmpty(Interpreter interpreter) {
     List<Object> injectedComponents = injectedComponentsStack.pop();
 
     if (injectedComponents == null)
-      return;
+      return injectedComponentsStack.empty();
 
     int length = injectedComponents.size();
 
@@ -74,6 +74,8 @@ public abstract class ColorizeNodeState {
       if (color != null)
         interpreter.getComponentConstructor().setColor(injectedComponent, color);
     }
+
+    return injectedComponentsStack.empty();
   }
 
   public void addInjected(Object component) {

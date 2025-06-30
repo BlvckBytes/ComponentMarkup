@@ -137,7 +137,8 @@ public class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
     if (!(node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)))
       return;
 
-    state.end(interpreter);
+    if (state.endAndGetIfStackIsEmpty(interpreter))
+      threadLocalState.remove();
   }
 
   @Override

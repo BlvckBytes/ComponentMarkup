@@ -79,6 +79,9 @@ public class OutputBuilder {
 
     List<Object> sequence = sequencesStack.pop();
 
+    if (sequence.isEmpty())
+      return componentConstructor.createTextNode("");
+
     MarkupNode nonTerminalNode = null;
 
     if (sequence.get(0) instanceof MarkupNode)
