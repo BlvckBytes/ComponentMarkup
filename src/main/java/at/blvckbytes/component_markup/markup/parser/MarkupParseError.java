@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.ErrorMessage;
 public enum MarkupParseError implements ErrorMessage {
   UNKNOWN_TAG("This tag does not exist"),
   UNKNOWN_ATTRIBUTE("This attribute is not a member of its tag"),
+  MISSING_MANDATORY_ATTRIBUTES("The tag %s misses these mandatory attribute(s): %s"),
   UNKNOWN_STRUCTURAL_ATTRIBUTE("This structural attribute does not exist"),
   UNNAMED_LET_BINDING("Let-bindings require a variable-name: let-<variable_name>"),
   UNNAMED_FOR_LOOP("For-loops with a dash require an iteration-variable name: *for-<iteration_name>"),

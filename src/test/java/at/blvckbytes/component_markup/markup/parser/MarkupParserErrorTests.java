@@ -541,6 +541,19 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnMissingMandatoryAttributes() {
+    makeErrorCase(
+      MarkupParseError.MISSING_MANDATORY_ATTRIBUTES,
+      "@<score />"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MISSING_MANDATORY_ATTRIBUTES,
+      "@<score name=\"hello\"/>"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

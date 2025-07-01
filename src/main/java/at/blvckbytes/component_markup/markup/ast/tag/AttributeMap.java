@@ -8,18 +8,27 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AttributeMap {
 
   private final List<Attribute> attributes;
+  private final Set<String> names;
 
   public AttributeMap() {
     this.attributes = new ArrayList<>();
+    this.names = new HashSet<>();
   }
 
   public void add(Attribute attribute) {
     this.attributes.add(attribute);
+    this.names.add(attribute.name);
+  }
+
+  public boolean hasName(String name) {
+    return this.names.contains(name);
   }
 
   public @Nullable ExpressionNode firstExpressionOrNull(AttributeDefinition attributeDefinition) {

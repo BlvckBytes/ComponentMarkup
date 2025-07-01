@@ -256,6 +256,24 @@ public class TagAndBuffers implements ParserChildItem {
   }
 
   public MarkupNode construct() {
+    List<String> missingNames = null;
+
+    for (AttributeDefinition definition : tag.attributes) {
+      if (!(definition instanceof MandatoryExpressionAttributeDefinition || definition instanceof MandatoryMarkupAttributeDefinition))
+        continue;
+
+      if (attributes.hasName(definition.name))
+        continue;
+
+      if (missingNames == null)
+        missingNames = new ArrayList<>();
+
+      missingNames.add(definition.name);
+    }
+
+    if (missingNames != null)
+      throw new MarkupParseException(position, MarkupParseError.MISSING_MANDATORY_ATTRIBUTES, tagNameLower, String.join(", ", missingNames));
+
     MarkupNode result = constructTagOrNull(getProcessedChildren());
 
     if (result == null)
