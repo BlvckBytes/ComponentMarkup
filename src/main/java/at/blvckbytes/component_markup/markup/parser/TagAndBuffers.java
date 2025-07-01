@@ -35,8 +35,9 @@ public class TagAndBuffers implements ParserChildItem {
 
   public final List<ParserChildItem> children;
 
-  public @Nullable ExpressionNode condition;
-  public ConditionType conditionType = ConditionType.NONE;
+  public @Nullable ExpressionNode ifCondition;
+  public ConditionType ifConditionType = ConditionType.NONE;
+  public @Nullable ExpressionNode useCondition;
 
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
@@ -92,11 +93,11 @@ public class TagAndBuffers implements ParserChildItem {
         TagAndBuffers tagAndBuffers = (TagAndBuffers) child;
 
         currentNode = tagAndBuffers.construct();
-        currentConditionType = tagAndBuffers.conditionType;
+        currentConditionType = tagAndBuffers.ifConditionType;
 
-        if (tagAndBuffers.condition != null) {
+        if (tagAndBuffers.ifCondition != null) {
           currentNode = new ConditionalNode(
-            tagAndBuffers.condition,
+            tagAndBuffers.ifCondition,
             currentNode,
             tagAndBuffers.bindings
           );

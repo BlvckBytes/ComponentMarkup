@@ -417,11 +417,11 @@ public class MarkupParser implements XmlEventConsumer {
         if (value == null)
           throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
-        if (currentLayer.conditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
+        if (currentLayer.ifConditionType != ConditionType.NONE)
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
-        currentLayer.condition = parseExpression(value, valueBeginPosition);
-        currentLayer.conditionType = ConditionType.IF;
+        currentLayer.ifCondition = parseExpression(value, valueBeginPosition);
+        currentLayer.ifConditionType = ConditionType.IF;
         return;
       }
 
@@ -429,11 +429,22 @@ public class MarkupParser implements XmlEventConsumer {
         if (value == null)
           throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
-        if (currentLayer.conditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
+        if (currentLayer.ifConditionType != ConditionType.NONE)
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
-        currentLayer.condition = parseExpression(value, valueBeginPosition);
-        currentLayer.conditionType = ConditionType.ELSE_IF;
+        currentLayer.ifCondition = parseExpression(value, valueBeginPosition);
+        currentLayer.ifConditionType = ConditionType.ELSE_IF;
+        return;
+      }
+
+      case "*use": {
+        if (value == null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+
+        if (currentLayer.useCondition != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_USE_CONDITIONS);
+
+        currentLayer.useCondition = parseExpression(value, valueBeginPosition);
         return;
       }
 
@@ -441,10 +452,10 @@ public class MarkupParser implements XmlEventConsumer {
         if (value != null)
           throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
 
-        if (currentLayer.conditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
+        if (currentLayer.ifConditionType != ConditionType.NONE)
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
-        currentLayer.conditionType = ConditionType.ELSE;
+        currentLayer.ifConditionType = ConditionType.ELSE;
         return;
       }
     }

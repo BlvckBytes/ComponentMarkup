@@ -403,7 +403,7 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnMultipleConditions() {
+  public void shouldThrowOnMultipleIfElseConditions() {
     String[] conditionals = { "*if=\"true\"", "*else-if=\"true\"", "*else" };
 
     for (int i = 0; i < conditionals.length; ++i) {
@@ -412,16 +412,24 @@ public class MarkupParserErrorTests {
         String secondCondition = conditionals[j];
 
         makeErrorCase(
-          MarkupParseError.MULTIPLE_CONDITIONS,
+          MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS,
           "<red " + firstCondition + " @" + secondCondition + ">"
         );
       }
 
       makeErrorCase(
-        MarkupParseError.MULTIPLE_CONDITIONS,
+        MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS,
         "<red " + firstCondition + " @" + firstCondition + ">"
       );
     }
+  }
+
+  @Test
+  public void shouldThrowOnMultipleUseConditions() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_USE_CONDITIONS,
+      "<red *use=\"a\" @*use=\"b\">"
+    );
   }
 
   @Test
