@@ -135,9 +135,8 @@ public class MarkupParser implements XmlEventConsumer {
       name = name.substring(3);
       isSpreadMode = true;
 
-      // TODO: Proper exception
       if (!isExpressionMode)
-        throw new IllegalStateException("Cannot apply the spread-operator to a non-expression attribute!");
+        throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION);
     }
 
     ExpressionNode expression = isExpressionMode ? parseExpression(value, valueBeginPosition) : ImmediateExpression.of(value);
@@ -489,10 +488,8 @@ public class MarkupParser implements XmlEventConsumer {
     if (name.charAt(0) == '[')
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
-      // TODO: Proper exception
-      throw new IllegalStateException("Can only use the spread-operator on expression-attributes!");
-    }
+    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.')
+      throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION);
 
     if (name.equals("let") || name.startsWith("let-"))
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);

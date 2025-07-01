@@ -26,6 +26,7 @@ public enum MarkupParseError implements ErrorMessage {
   MULTIPLE_LOOPS("There has already been a prior loop on this tag, and loops may only occur once"),
   MISSING_PRECEDING_IF_SIBLING("Cannot use branching (else-if, else) without having specified a preceding if-sibling"),
   MISSING_ATTRIBUTE_VALUE("This attribute requires a value: name=..."),
+  SPREAD_DISALLOWED_ON_NON_EXPRESSION("The spread-operator ... is only allowed on expression-attributes: [attribute-name]=\"<expression>\""),
   XML_PARSE_ERROR("Encountered malformed XML"),
   EXPRESSION_PARSE_ERROR("Encountered a malformed expression"),
   EXPRESSION_TOKENIZE_ERROR("Encountered a malformed expression"),

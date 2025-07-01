@@ -554,6 +554,29 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnNonExpressionSpreadOperator() {
+    makeErrorCase(
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
+      "<gradient @...color=\"red\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
+      "<gradient @...color=5.5>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
+      "<gradient @...color=5>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
+      "<gradient @...color=true>"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
