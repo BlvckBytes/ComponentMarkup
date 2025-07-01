@@ -301,17 +301,15 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseBranchingOperator() {
     TextWithAnchors text = new TextWithAnchors(
-      "@a @? @b @: @c"
+      "@a ? @b : @c"
     );
 
     makeCase(
       text,
       branching(
         terminal("a", text.anchorIndex(0)),
-        token(InfixOperator.BRANCHING, text.anchorIndex(1)),
-        terminal("b", text.anchorIndex(2)),
-        token(Punctuation.COLON, text.anchorIndex(3)),
-        terminal("c", text.anchorIndex(4))
+        terminal("b", text.anchorIndex(1)),
+        terminal("c", text.anchorIndex(2))
       )
     );
   }
@@ -580,12 +578,10 @@ public class ExpressionParserTests {
 
   protected static ExpressionNode branching(
     ExpressionNode condition,
-    Token conditionSeparator,
     ExpressionNode branchTrue,
-    Token branchSeparator,
     ExpressionNode branchFalse
   ) {
-    return new BranchingNode(condition, (InfixOperatorToken) conditionSeparator, branchTrue, (PunctuationToken) branchSeparator, branchFalse);
+    return new BranchingNode(condition, branchTrue, branchFalse);
   }
 
   protected static ExpressionNode substring(

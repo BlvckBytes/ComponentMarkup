@@ -1,27 +1,21 @@
 package at.blvckbytes.component_markup.expression.ast;
 
-import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
-import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 
 public class BranchingNode extends ExpressionNode {
 
   public ExpressionNode condition;
-  public InfixOperatorToken conditionSeparator;
   public ExpressionNode branchTrue;
-  public PunctuationToken branchSeparator;
   public ExpressionNode branchFalse;
 
   public BranchingNode(
     ExpressionNode condition,
-    InfixOperatorToken conditionSeparator,
     ExpressionNode branchTrue,
-    PunctuationToken branchSeparator,
     ExpressionNode branchFalse
   ) {
     this.condition = condition;
-    this.conditionSeparator = conditionSeparator;
     this.branchTrue = branchTrue;
-    this.branchSeparator = branchSeparator;
     this.branchFalse = branchFalse;
   }
 
@@ -39,9 +33,9 @@ public class BranchingNode extends ExpressionNode {
   public String toExpression() {
     return parenthesise(
       condition.toExpression()
-        + " " + conditionSeparator.operator
+        + " " + InfixOperator.BRANCHING
         + " " + branchTrue.toExpression()
-        + " " + branchSeparator.punctuation
+        + " " + Punctuation.COLON
         + " " + branchFalse.toExpression()
     );
   }
