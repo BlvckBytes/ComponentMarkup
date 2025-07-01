@@ -1,10 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
@@ -15,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Function;
 
-public class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
+public abstract class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
 
   @JsonifyIgnore
   private final ThreadLocal<@Nullable ColorizeNodeState> threadLocalState = ThreadLocal.withInitial(() -> null);
@@ -50,6 +47,8 @@ public class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
     return state;
   }
 
+  protected abstract boolean handleContentAndGetIfDoProcess(ContentNode node, ColorizeNodeState state, Interpreter interpreter);
+
   @Override
   public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
     ColorizeNodeState state = getState(interpreter);
@@ -63,71 +62,21 @@ public class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
     }
 
     if (node instanceof ContentNode) {
-      OutputBuilder builder = interpreter.getCurrentBuilder();
-      NodeStyle nodeStyle = ((ContentNode) node).getStyle();
+      ContentNode contentNode = (ContentNode) node;
+      NodeStyle nodeStyle = contentNode.getStyle();
 
       if (nodeStyle != null) {
         if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsBooleanOrNull(nodeStyle.color) != null)
           return InterceptionResult.DO_PROCESS;
       }
 
-      if (node instanceof TextNode) {
-        TextNode textNode = (TextNode) node;
-
-        boolean skipWhitespace = state.flags.contains(ColorizeFlag.SKIP_WHITESPACE);
-        String nodeText = interpreter.evaluateAsString(textNode.text);
-        StringBuilder whitespaceAccumulator = skipWhitespace ? new StringBuilder() : null;
-
-        for (int charIndex = 0; charIndex < nodeText.length(); ++charIndex) {
-          char currentChar = nodeText.charAt(charIndex);
-
-          if (Character.isWhitespace(currentChar)) {
-            if (skipWhitespace) {
-              whitespaceAccumulator.append(currentChar);
-              continue;
-            }
-          }
-
-          if (skipWhitespace)
-            emitWhitespace(textNode, builder, whitespaceAccumulator);
-
-          TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, node.letBindings);
-
-          if (nodeStyle != null)
-            charNode.getOrInstantiateStyle().inheritFrom(nodeStyle);
-
-          state.addInjected(builder.onContent(charNode));
-        }
-
-        if (skipWhitespace)
-          emitWhitespace(textNode, builder, whitespaceAccumulator);
-
-        return InterceptionResult.DO_NOT_PROCESS;
-      }
-
-      if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
+      if (handleContentAndGetIfDoProcess(contentNode, state, interpreter))
         return InterceptionResult.DO_PROCESS;
-
-      state.addInjected(builder.onContent((ContentNode) node));
 
       return InterceptionResult.DO_NOT_PROCESS;
     }
 
     return InterceptionResult.DO_PROCESS;
-  }
-
-  private void emitWhitespace(StyledNode styleHolder, OutputBuilder builder, StringBuilder accumulator) {
-    if (accumulator.length() == 0)
-      return;
-
-    TextNode whitespaceNode = new TextNode(ImmediateExpression.of(accumulator.toString()), styleHolder.position, null);
-    NodeStyle nodeStyle = styleHolder.getStyle();
-
-    if (nodeStyle != null)
-      whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle);
-
-    builder.onContent(whitespaceNode);
-    accumulator.setLength(0);
   }
 
   @Override

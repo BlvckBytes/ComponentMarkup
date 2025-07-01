@@ -3,7 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeAttributes;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNode;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeCharsNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +36,7 @@ public class RainbowTag extends ColorizeTag {
   ) {
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 
-    return new ColorizeNode(
+    return new ColorizeCharsNode(
       tagNameLower,
       interpreter -> (
         new RainbowNodeState(
