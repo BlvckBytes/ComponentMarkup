@@ -3,8 +3,8 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
@@ -22,7 +22,7 @@ public class ColorizeCharsNode extends ColorizeNode {
   }
 
   @Override
-  protected boolean handleContentAndGetIfDoProcess(ContentNode node, ColorizeNodeState state, Interpreter interpreter) {
+  protected boolean handleTerminalAndGetIfDoProcess(TerminalNode node, ColorizeNodeState state, Interpreter interpreter) {
     OutputBuilder builder = interpreter.getCurrentBuilder();
     NodeStyle nodeStyle = node.getStyle();
 
@@ -51,7 +51,7 @@ public class ColorizeCharsNode extends ColorizeNode {
         if (nodeStyle != null)
           charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
-        state.addInjected(builder.onContent(charNode));
+        state.addInjected(builder.onTerminal(charNode));
       }
 
       if (skipWhitespace)
@@ -63,7 +63,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
       return true;
 
-    state.addInjected(builder.onContent(node));
+    state.addInjected(builder.onTerminal(node));
     return false;
   }
 
@@ -77,7 +77,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (nodeStyle != null)
       whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
-    builder.onContent(whitespaceNode);
+    builder.onTerminal(whitespaceNode);
     accumulator.setLength(0);
   }
 }

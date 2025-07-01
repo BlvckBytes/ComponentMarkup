@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.node.content;
+package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class NbtNode extends ContentNode {
+public class NbtNode extends TerminalNode {
 
   public final NbtSource source;
   public final ExpressionNode identifier;

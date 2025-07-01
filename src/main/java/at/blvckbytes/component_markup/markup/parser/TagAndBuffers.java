@@ -3,8 +3,8 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
@@ -114,8 +114,8 @@ public class TagAndBuffers implements ParserChildItem {
         }
       }
 
-      else if (child instanceof ContentNode)
-        currentNode = (ContentNode) child;
+      else if (child instanceof TerminalNode)
+        currentNode = (TerminalNode) child;
       else
         throw new IllegalStateException("Unknown child-type: " + child);
 

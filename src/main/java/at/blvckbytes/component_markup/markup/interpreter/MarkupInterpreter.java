@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
@@ -340,7 +340,7 @@ public class MarkupInterpreter implements Interpreter {
 
     // Terminal nodes always render, because since they do not bear any child-nodes,
     // the only sensible way to "toggle" them is via an if-condition
-    if (node instanceof ContentNode) {
+    if (node instanceof TerminalNode) {
       if (interceptors.handleBeforeAndGetIfSkip(node)) {
         if (introducedBindings != null)
           environment.popVariables(introducedBindings);
@@ -348,7 +348,7 @@ public class MarkupInterpreter implements Interpreter {
         return;
       }
 
-      builder.onContent((ContentNode) node);
+      builder.onTerminal((TerminalNode) node);
 
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);

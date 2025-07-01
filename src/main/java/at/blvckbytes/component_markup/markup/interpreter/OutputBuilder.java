@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.*;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
@@ -307,7 +307,7 @@ public class OutputBuilder {
     }
   }
 
-  public Object onContent(ContentNode node) {
+  public Object onTerminal(TerminalNode node) {
     Object result;
 
     if (node instanceof TextNode) {
@@ -393,7 +393,7 @@ public class OutputBuilder {
     }
 
     else
-      throw new IllegalStateException("Unknown content-node: " + node.getClass());
+      throw new IllegalStateException("Unknown terminal-node: " + node.getClass());
 
     applyStyles(result, node);
 

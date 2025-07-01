@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.node.content;
+package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
@@ -8,23 +8,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TranslateNode extends ContentNode {
+public class SelectorNode extends TerminalNode {
 
-  public final ExpressionNode key;
-  public final List<MarkupNode> with;
-  public final @Nullable ExpressionNode fallback;
+  public final ExpressionNode selector;
+  public final @Nullable MarkupNode separator;
 
-  public TranslateNode(
-    ExpressionNode key,
-    List<MarkupNode> with,
-    @Nullable ExpressionNode fallback,
+  public SelectorNode(
+    ExpressionNode selector,
+    @Nullable MarkupNode separator,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, letBindings);
 
-    this.key = key;
-    this.with = with;
-    this.fallback = fallback;
+    this.selector = selector;
+    this.separator = separator;
   }
 }

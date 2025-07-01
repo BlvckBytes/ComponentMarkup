@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.node.content;
+package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class ContentNode extends StyledNode implements ParserChildItem {
+public abstract class TerminalNode extends StyledNode implements ParserChildItem {
 
-  public ContentNode(
+  public TerminalNode(
     CursorPosition position,
     @Nullable List<LetBinding> letBindings
   ) {

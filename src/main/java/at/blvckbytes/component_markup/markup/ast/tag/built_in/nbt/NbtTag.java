@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.NbtNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.NbtNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;

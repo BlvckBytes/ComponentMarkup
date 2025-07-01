@@ -2,8 +2,8 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.TranslateNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;

@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
@@ -47,7 +47,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     return state;
   }
 
-  protected abstract boolean handleContentAndGetIfDoProcess(ContentNode node, ColorizeNodeState state, Interpreter interpreter);
+  protected abstract boolean handleTerminalAndGetIfDoProcess(TerminalNode node, ColorizeNodeState state, Interpreter interpreter);
 
   @Override
   public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
@@ -61,16 +61,16 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
       return InterceptionResult.DO_PROCESS_AND_CALL_AFTER;
     }
 
-    if (node instanceof ContentNode) {
-      ContentNode contentNode = (ContentNode) node;
-      NodeStyle nodeStyle = contentNode.getStyle();
+    if (node instanceof TerminalNode) {
+      TerminalNode terminalNode = (TerminalNode) node;
+      NodeStyle nodeStyle = terminalNode.getStyle();
 
       if (nodeStyle != null) {
         if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsBooleanOrNull(nodeStyle.color) != null)
           return InterceptionResult.DO_PROCESS;
       }
 
-      if (handleContentAndGetIfDoProcess(contentNode, state, interpreter))
+      if (handleTerminalAndGetIfDoProcess(terminalNode, state, interpreter))
         return InterceptionResult.DO_PROCESS;
 
       return InterceptionResult.DO_NOT_PROCESS;

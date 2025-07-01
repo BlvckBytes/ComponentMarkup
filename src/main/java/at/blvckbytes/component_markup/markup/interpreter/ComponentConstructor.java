@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface ComponentConstructor {
 
   // ================================================================================
-  // ContentNode
+  // TerminalNode
   // ================================================================================
 
   Object createTextNode(String text);

@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.ast.node.content;
+package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ScoreNode extends ContentNode {
+public class ScoreNode extends TerminalNode {
 
   public final ExpressionNode name;
   public final ExpressionNode objective;

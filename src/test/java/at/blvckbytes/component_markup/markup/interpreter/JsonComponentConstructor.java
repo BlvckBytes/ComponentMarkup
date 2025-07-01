@@ -12,7 +12,7 @@ import java.util.UUID;
 public class JsonComponentConstructor implements ComponentConstructor {
 
   // ================================================================================
-  // ContentNode
+  // TerminalNode
   // ================================================================================
 
   @Override
