@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FormatTag extends TagDefinition {
+public class StyleTag extends TagDefinition {
 
-  private static final String TAG_NAME = "format";
+  private static final String TAG_NAME = "style";
 
   private static final ExpressionAttributeDefinition ATTR_OBFUSCATED = new ExpressionAttributeDefinition("obfuscated");
   private static final ExpressionAttributeDefinition ATTR_STRIKETHROUGH = new ExpressionAttributeDefinition("strikethrough");
@@ -28,7 +28,7 @@ public class FormatTag extends TagDefinition {
   private static final ExpressionAttributeDefinition ATTR_SHADOW = new ExpressionAttributeDefinition("shadow");
   private static final ExpressionAttributeDefinition ATTR_SHADOW_OPACITY = new ExpressionAttributeDefinition("shadow-opacity");
 
-  public FormatTag() {
+  public StyleTag() {
     super(
       new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,

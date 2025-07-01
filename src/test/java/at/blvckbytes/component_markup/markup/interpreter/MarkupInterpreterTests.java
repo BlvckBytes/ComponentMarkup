@@ -394,9 +394,9 @@ public class MarkupInterpreterTests {
   }
 
   @Test
-  public void shouldSkipFormatItemsOnUseIsFalse() {
+  public void shouldSkipStyleTagAttributesOnUseIsFalse() {
     TextWithAnchors text = new TextWithAnchors(
-      "<format *use=\"a\" bold italic underlined>Hello, world!"
+      "<style *use=\"a\" bold italic underlined color=\"red\" font=\"my.font\">Hello, world!"
     );
 
     makeCase(
@@ -408,6 +408,8 @@ public class MarkupInterpreterTests {
         .bool("bold", true)
         .bool("italic", true)
         .bool("underlined", true)
+        .string("color", "red")
+        .string("font", "my.font")
     );
 
     makeCase(

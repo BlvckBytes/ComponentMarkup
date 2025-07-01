@@ -35,7 +35,7 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new StorageNbtTag());
     register(new BreakTag());
     register(ContainerTag.INSTANCE);
-    register(new FormatTag());
+    register(new StyleTag());
     register(new ImmediateColorTag());
     register(new ImmediateFormatTag());
     register(new InsertTag());

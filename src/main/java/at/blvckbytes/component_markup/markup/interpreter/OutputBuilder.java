@@ -268,8 +268,10 @@ public class OutputBuilder {
     }
 
     if (style.font != null) {
-      String font = interpreter.evaluateAsString(style.font);
-      componentConstructor.setFont(component, font);
+      String font = interpreter.evaluateAsStringOrNull(style.font);
+
+      if (font != null)
+        componentConstructor.setFont(component, font);
     }
 
     for (Format format : Format.VALUES) {
