@@ -32,7 +32,7 @@ public class ExpressionParser {
   }
 
   private ExpressionNode patchInfixIfApplicable(InfixOperationNode node) {
-    if (node.operatorToken.operator.precedence < InfixOperator.SUBSCRIPTING.precedence)
+    if (node.operator.precedence < InfixOperator.SUBSCRIPTING.precedence)
       return node;
 
     if (node.lhs instanceof InfixOperationNode)
@@ -158,7 +158,7 @@ public class ExpressionParser {
         throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.getEndIndex());
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
-        return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
+        return new InfixOperationNode(lhs, operatorToken.operator, rhs, delimiterToken);
 
       if (delimiterToken.punctuation == Punctuation.COLON)
         return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
@@ -188,7 +188,7 @@ public class ExpressionParser {
         throw new ExpressionParseException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex(), lhs.toExpression());
     }
 
-    return new InfixOperationNode(lhs, operatorToken, rhs, null);
+    return new InfixOperationNode(lhs, operatorToken.operator, rhs, null);
   }
 
   // ================================================================================

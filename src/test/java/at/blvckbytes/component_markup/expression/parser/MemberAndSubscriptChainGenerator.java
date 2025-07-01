@@ -40,7 +40,6 @@ public class MemberAndSubscriptChainGenerator {
     else
       lhs = make();
 
-    int operatorIndex = text.anchorIndex(anchorIndexOffset);
     ExpressionNode rhs = terminal(rhsIdentifier, text.anchorIndex(anchorIndexOffset + 1));
 
     InfixOperator operator;
@@ -62,7 +61,6 @@ public class MemberAndSubscriptChainGenerator {
     return infix(
       lhs,
       operator,
-      operatorIndex,
       rhs,
       terminator
     );

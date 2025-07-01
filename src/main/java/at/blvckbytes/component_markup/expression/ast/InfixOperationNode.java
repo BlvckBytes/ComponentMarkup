@@ -1,25 +1,24 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 import org.jetbrains.annotations.Nullable;
 
 public class InfixOperationNode extends ExpressionNode {
 
   public ExpressionNode lhs;
-  public InfixOperatorToken operatorToken;
+  public InfixOperator operator;
   public ExpressionNode rhs;
   public @Nullable PunctuationToken terminator;
 
   public InfixOperationNode(
     ExpressionNode lhs,
-    InfixOperatorToken operatorToken,
+    InfixOperator operator,
     ExpressionNode rhs,
     @Nullable PunctuationToken terminator
   ) {
     this.lhs = lhs;
-    this.operatorToken = operatorToken;
+    this.operator = operator;
     this.rhs = rhs;
     this.terminator = terminator;
   }
@@ -44,15 +43,15 @@ public class InfixOperationNode extends ExpressionNode {
     result.append(lhs.toExpression());
 
     boolean doSpaceOut = !(
-      operatorToken.operator == InfixOperator.MEMBER
-        || operatorToken.operator == InfixOperator.SUBSCRIPTING
-        || operatorToken.operator == InfixOperator.RANGE
+      operator == InfixOperator.MEMBER
+        || operator == InfixOperator.SUBSCRIPTING
+        || operator == InfixOperator.RANGE
     );
 
     if (doSpaceOut)
       result.append(' ');
 
-    result.append(operatorToken.operator);
+    result.append(operator);
 
     if (doSpaceOut)
       result.append(' ');
