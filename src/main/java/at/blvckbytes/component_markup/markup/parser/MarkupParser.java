@@ -169,7 +169,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
-    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, isSpreadMode));
+    currentLayer.addAttribute(new ExpressionAttribute(name, expression, isSpreadMode));
   }
 
   @Override
@@ -288,7 +288,8 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    throw new MarkupParseException(lastPosition, MarkupParseError.MISSING_ATTRIBUTE_VALUE, name);
+    TagAndBuffers currentLayer = tagStack.peek();
+    currentLayer.addAttribute(new ExpressionAttribute(name, ImmediateExpression.of(true), false));
   }
 
   @Override
@@ -535,7 +536,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
       throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
-    currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, false));
+    currentLayer.addAttribute(new ExpressionAttribute(name, expression, false));
   }
 
   private boolean isValidExpressionIdentifier(String identifier) {

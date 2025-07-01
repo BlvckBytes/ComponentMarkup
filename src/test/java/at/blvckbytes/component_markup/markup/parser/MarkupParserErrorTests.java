@@ -454,29 +454,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnMissingAttributeValue() {
-    makeErrorCase(
-      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
-      "<key @key />"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
-      "<container @[attr]>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
-      "<hover-text @value>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MISSING_ATTRIBUTE_VALUE,
-      "<container @let-my_var>"
-    );
-  }
-
-  @Test
   public void shouldCreateProperErrorScreens() {
     makeErrorScreenCase(
       new TextWithAnchors(

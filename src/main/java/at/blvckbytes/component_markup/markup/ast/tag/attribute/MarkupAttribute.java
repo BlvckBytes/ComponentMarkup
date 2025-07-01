@@ -7,7 +7,7 @@ public class MarkupAttribute extends Attribute {
   public final MarkupNode value;
 
   public MarkupAttribute(String name, MarkupNode value) {
-    super(name, value.position);
+    super(name);
 
     this.value = value;
   }
