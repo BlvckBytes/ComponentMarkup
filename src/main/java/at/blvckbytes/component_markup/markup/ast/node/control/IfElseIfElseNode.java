@@ -7,11 +7,11 @@ import java.util.List;
 
 public class IfElseIfElseNode extends MarkupNode {
 
-  public final List<ConditionalNode> conditions;
+  public final List<MarkupNode> conditions;
   public final @Nullable MarkupNode fallback;
 
   public IfElseIfElseNode(
-    List<ConditionalNode> conditions,
+    List<MarkupNode> conditions,
     @Nullable MarkupNode fallback
   ) {
     super(conditions.get(0).position, null, null);

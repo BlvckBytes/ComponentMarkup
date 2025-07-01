@@ -4,7 +4,6 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TranslateNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
@@ -31,10 +30,10 @@ public abstract class MarkupParserTestsBase {
   }
 
   @SafeVarargs
-  protected static NodeWrapper<IfElseIfElseNode> ifElseIfElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<ConditionalNode>... wrappedConditions) {
-    List<ConditionalNode> conditions = new ArrayList<>();
+  protected static NodeWrapper<IfElseIfElseNode> ifElseIfElse(@Nullable NodeWrapper<?> wrappedFallback, NodeWrapper<? extends MarkupNode>... wrappedConditions) {
+    List<MarkupNode> conditions = new ArrayList<>();
 
-    for (NodeWrapper<ConditionalNode> wrappedCondition : wrappedConditions)
+    for (NodeWrapper<? extends MarkupNode> wrappedCondition : wrappedConditions)
       conditions.add(wrappedCondition.get());
 
     return new NodeWrapper<>(new IfElseIfElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
@@ -50,10 +49,6 @@ public abstract class MarkupParserTestsBase {
 
   protected static ExpressionNode expr(String expression) {
     return ExpressionParser.parse(expression);
-  }
-
-  protected static NodeWrapper<ConditionalNode> conditional(ExpressionNode condition, NodeWrapper<?> wrappedBody) {
-    return new NodeWrapper<>(new ConditionalNode(condition, wrappedBody.get(), new ArrayList<>()));
   }
 
   protected static NodeWrapper<ContainerNode> container(CursorPosition position) {

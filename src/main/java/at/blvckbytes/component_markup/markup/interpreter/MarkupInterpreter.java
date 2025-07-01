@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
@@ -193,13 +192,18 @@ public class MarkupInterpreter implements Interpreter {
     if (node.conditions.isEmpty())
       throw new IllegalStateException("Expecting at least one condition!");
 
-    for (ConditionalNode conditional : node.conditions) {
-      Object result = expressionInterpreter.interpret(conditional.condition, environment);
+    for (MarkupNode conditional : node.conditions) {
+      if (conditional.ifCondition == null) {
+        _interpret(conditional);
+        return;
+      }
+
+      Object result = expressionInterpreter.interpret(conditional.ifCondition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(conditional.body);
+      _interpret(conditional);
       return;
     }
 
@@ -207,13 +211,6 @@ public class MarkupInterpreter implements Interpreter {
       return;
 
     _interpret(node.fallback);
-  }
-
-  private void interpretConditional(ConditionalNode node) {
-    Object result = expressionInterpreter.interpret(node.condition, environment);
-
-    if (environment.getValueInterpreter().asBoolean(result))
-      _interpret(node.body);
   }
 
   private @Nullable Set<String> introduceLetBindings(MarkupNode node) {
@@ -307,14 +304,13 @@ public class MarkupInterpreter implements Interpreter {
       return;
     }
 
-    if (node instanceof ConditionalNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
+    if (node.ifCondition != null) {
+      Object result = expressionInterpreter.interpret(node.ifCondition, environment);
+
+      if (!environment.getValueInterpreter().asBoolean(result)) {
+        interceptors.handleAfter(node);
         return;
-
-      interpretConditional((ConditionalNode) node);
-
-      interceptors.handleAfter(node);
-      return;
+      }
     }
 
     OutputBuilder builder = getCurrentBuilder();

@@ -29,6 +29,16 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
+  public NodeWrapper<T> ifCondition(ExpressionNode condition) {
+    node.ifCondition = condition;
+    return this;
+  }
+
+  public NodeWrapper<T> useCondition(ExpressionNode condition) {
+    node.ifCondition = condition;
+    return this;
+  }
+
   public NodeWrapper<T> color(String color) {
     return color(ImmediateExpression.of(color));
   }

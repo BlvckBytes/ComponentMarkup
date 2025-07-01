@@ -41,10 +41,8 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       container(CursorPosition.ZERO)
         .child(text(imm("before"), text.anchor(0)))
         .child(
-          conditional(
-            expr("a"),
-            text(imm("if contents"), text.anchor(1))
-          )
+          text(imm("if contents"), text.anchor(1))
+            .ifCondition(expr("a"))
         )
         .child(text(imm("after"), text.anchor(2)))
     );
@@ -86,13 +84,11 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       forLoop(
         expr("members"),
         "member",
-        conditional(
-          expr("member != null"),
-          container(text.anchor(0))
-            .child(text(imm("hello, "), text.anchor(1)))
-            .child(text(expr("member"), text.anchor(2)))
-            .child(text(imm("!"), text.anchor(3)))
-        ),
+        container(text.anchor(0))
+          .child(text(imm("hello, "), text.anchor(1)))
+          .child(text(expr("member"), text.anchor(2)))
+          .child(text(imm("!"), text.anchor(3)))
+          .ifCondition(expr("member != null")),
         null,
         null
       )
@@ -141,18 +137,12 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         .child(
           ifElseIfElse(
             text(imm("else contents"), text.anchor(4)),
-            conditional(
-              expr("a"),
-              text(imm("if contents"), text.anchor(1))
-            ),
-            conditional(
-              expr("b"),
-              text(imm("else-if b contents"), text.anchor(2))
-            ),
-            conditional(
-              expr("c"),
-              text(imm("else-if c contents"), text.anchor(3))
-            )
+            text(imm("if contents"), text.anchor(1))
+              .ifCondition(expr("a")),
+            text(imm("else-if b contents"), text.anchor(2))
+              .ifCondition(expr("b")),
+            text(imm("else-if c contents"), text.anchor(3))
+              .ifCondition(expr("c"))
           )
         )
         .child(text(imm("after"), text.anchor(5)))
@@ -183,25 +173,17 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           ifElseIfElse(
             ifElseIfElse(
               text(imm("if not a and not c"), text.anchor(5)),
-              conditional(
-                expr("c"),
-                text(imm("if not a and c"), text.anchor(4))
-              )
+              text(imm("if not a and c"), text.anchor(4))
+                .ifCondition(expr("c"))
             ),
-            conditional(
-              expr("a"),
-              ifElseIfElse(
-                text(imm("if a and not b"), text.anchor(3)),
-                conditional(
-                  expr("b"),
-                  text(imm("if a and b"), text.anchor(1))
-                ),
-                conditional(
-                  expr("d"),
-                  text(imm("if a and d"), text.anchor(2))
-                )
-              )
+            ifElseIfElse(
+              text(imm("if a and not b"), text.anchor(3)),
+              text(imm("if a and b"), text.anchor(1))
+                .ifCondition(expr("b")),
+              text(imm("if a and d"), text.anchor(2))
+                .ifCondition(expr("d"))
             )
+              .ifCondition(expr("a"))
           )
         )
         .child(text(imm("after"), text.anchor(6)))

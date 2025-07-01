@@ -5,7 +5,6 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.ContentNode;
 import at.blvckbytes.component_markup.markup.ast.node.content.TextNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ConditionalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
@@ -82,7 +81,7 @@ public class TagAndBuffers implements ParserChildItem {
     List<MarkupNode> result = new ArrayList<>(children.size());
 
     ConditionType priorConditionType = ConditionType.NONE;
-    List<ConditionalNode> conditions = null;
+    List<MarkupNode> conditions = null;
 
     for (ParserChildItem child : children) {
       MarkupNode currentNode;
@@ -95,13 +94,11 @@ public class TagAndBuffers implements ParserChildItem {
         currentNode = tagAndBuffers.construct();
         currentConditionType = tagAndBuffers.ifConditionType;
 
-        if (tagAndBuffers.ifCondition != null) {
-          currentNode = new ConditionalNode(
-            tagAndBuffers.ifCondition,
-            currentNode,
-            tagAndBuffers.bindings
-          );
-        }
+        if (tagAndBuffers.ifCondition != null)
+          currentNode.ifCondition = tagAndBuffers.ifCondition;
+
+        if (tagAndBuffers.useCondition != null)
+          currentNode.useCondition = tagAndBuffers.useCondition;
 
         if (tagAndBuffers.forIterable != null) {
           currentNode = new ForLoopNode(
@@ -131,7 +128,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case IF:
               conditions = new ArrayList<>();
-              conditions.add((ConditionalNode) currentNode);
+              conditions.add(currentNode);
               break;
 
             case ELSE_IF:
@@ -154,11 +151,11 @@ public class TagAndBuffers implements ParserChildItem {
 
             case IF:
               result.add(conditions.get(0));
-              conditions.set(0, (ConditionalNode) currentNode);
+              conditions.set(0, currentNode);
               break;
 
             case ELSE_IF:
-              conditions.add((ConditionalNode) currentNode);
+              conditions.add(currentNode);
               break;
 
             case ELSE:
@@ -182,11 +179,11 @@ public class TagAndBuffers implements ParserChildItem {
             case IF:
               result.add(new IfElseIfElseNode(conditions, null));
               conditions = new ArrayList<>();
-              conditions.add((ConditionalNode) currentNode);
+              conditions.add(currentNode);
               break;
 
             case ELSE_IF:
-              conditions.add((ConditionalNode) currentNode);
+              conditions.add(currentNode);
               break;
 
             case ELSE:
@@ -207,7 +204,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case IF:
               conditions = new ArrayList<>();
-              conditions.add((ConditionalNode) currentNode);
+              conditions.add(currentNode);
               break;
 
             case ELSE:
