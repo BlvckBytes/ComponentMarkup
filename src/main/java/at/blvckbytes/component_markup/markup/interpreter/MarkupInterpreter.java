@@ -281,7 +281,18 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void _interpret(MarkupNode node) {
-    if (node instanceof InterpreterInterceptor)
+    boolean doNotUse = false;
+
+    if (node.useCondition != null) {
+      Object result = expressionInterpreter.interpret(node.useCondition, environment);
+
+      if (!environment.getValueInterpreter().asBoolean(result))
+        doNotUse = true;
+    }
+
+    // Interceptors are what establish additional behaviour, thus do not invoke all
+    // of their call-sites in this method if the current node itself is not to be used
+    if (!doNotUse && node instanceof InterpreterInterceptor)
       interceptors.add((InterpreterInterceptor) node);
 
     if (node instanceof IfElseIfElseNode) {
@@ -327,20 +338,29 @@ public class MarkupInterpreter implements Interpreter {
 
     Set<String> introducedBindings = introduceLetBindings(node);
 
-    if (interceptors.handleBeforeAndGetIfSkip(node)) {
-      if (introducedBindings != null)
-        environment.popVariables(introducedBindings);
-
-      return;
-    }
-
+    // Terminal nodes always render, because since they do not bear any child-nodes,
+    // the only sensible way to "toggle" them is via an if-condition
     if (node instanceof ContentNode) {
+      if (interceptors.handleBeforeAndGetIfSkip(node)) {
+        if (introducedBindings != null)
+          environment.popVariables(introducedBindings);
+
+        return;
+      }
+
       builder.onContent((ContentNode) node);
 
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);
 
       interceptors.handleAfter(node);
+      return;
+    }
+
+    if (!doNotUse && interceptors.handleBeforeAndGetIfSkip(node)) {
+      if (introducedBindings != null)
+        environment.popVariables(introducedBindings);
+
       return;
     }
 
@@ -356,6 +376,7 @@ public class MarkupInterpreter implements Interpreter {
     if (introducedBindings != null)
       environment.popVariables(introducedBindings);
 
-    interceptors.handleAfter(node);
+    if (!doNotUse)
+      interceptors.handleAfter(node);
   }
 }

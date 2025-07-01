@@ -49,7 +49,7 @@ public class ColorizeCharsNode extends ColorizeNode {
         TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, node.letBindings);
 
         if (nodeStyle != null)
-          charNode.getOrInstantiateStyle().inheritFrom(nodeStyle);
+          charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
         state.addInjected(builder.onContent(charNode));
       }
@@ -75,7 +75,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     NodeStyle nodeStyle = styleHolder.getStyle();
 
     if (nodeStyle != null)
-      whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle);
+      whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
     builder.onContent(whitespaceNode);
     accumulator.setLength(0);

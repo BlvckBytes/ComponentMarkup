@@ -30,8 +30,4 @@ public abstract class StyledNode extends MarkupNode {
 
     return this.style;
   }
-
-  public void setStyle(@Nullable NodeStyle style) {
-    this.style = style;
-  }
 }

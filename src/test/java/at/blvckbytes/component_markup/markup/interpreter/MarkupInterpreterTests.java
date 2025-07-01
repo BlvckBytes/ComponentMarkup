@@ -335,6 +335,64 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldDifferentiateBetweenIfAndUse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *if=\"a\" *use=\"b\">Hello, world!"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", true)
+        .withStatic("b", true),
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .string("color", "red")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", true)
+        .withStatic("b", false),
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", false)
+        .withStatic("b", true),
+      new JsonObjectBuilder()
+        .string("text", "")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", false)
+        .withStatic("b", false),
+      new JsonObjectBuilder()
+        .string("text", "")
+    );
+  }
+
+  @Test
+  public void shouldSkipRainbowsOnUseIsFalse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<rainbow *use=\"false\">Hello, world!"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

@@ -293,13 +293,7 @@ public class TagAndBuffers implements ParserChildItem {
 
     if (onlyChild instanceof StyledNode) {
       StyledNode styledNode = (StyledNode) onlyChild;
-      NodeStyle childStyle = styledNode.getStyle();
-
-      if (childStyle == null)
-        styledNode.setStyle(containerStyle);
-      else
-        childStyle.inheritFrom(containerStyle);
-
+      styledNode.getOrInstantiateStyle().inheritFrom(containerStyle, useCondition);
       return styledNode;
     }
 
