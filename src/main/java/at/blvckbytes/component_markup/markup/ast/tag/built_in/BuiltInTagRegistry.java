@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.click.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient.GradientTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow.RainbowTag;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.transition.TransitionTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverAchievementTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverEntityTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverItemTag;
@@ -47,5 +48,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new TranslateTag());
     register(new GradientTag());
     register(new RainbowTag());
+    register(new TransitionTag());
   }
 }
