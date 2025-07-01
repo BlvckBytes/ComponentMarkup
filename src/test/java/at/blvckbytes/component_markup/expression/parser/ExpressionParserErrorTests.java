@@ -356,10 +356,7 @@ public class ExpressionParserErrorTests {
     StringWriter stringWriter = new StringWriter();
     thrownException.printStackTrace(new PrintWriter(stringWriter));
 
-    ExpressionParseException expectedException = new ExpressionParseException(error, charIndex);
-
-    Assertions.assertEquals(Jsonifiable.toString(expectedException), Jsonifiable.toString(thrownException), () -> (
-      "Mismatched on the exception thrown:\n" + stringWriter
-    ));
+    Assertions.assertEquals(error, thrownException.error, "Mismatched on the error-type");
+    Assertions.assertEquals(charIndex, thrownException.charIndex, "Mismatched on the char-index");
   }
 }

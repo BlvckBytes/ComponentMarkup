@@ -6,15 +6,16 @@ public class ExpressionParseException extends RuntimeException implements ErrorM
 
   public final ExpressionParserError error;
   public final int charIndex;
+  private final Object[] messagePlaceholders;
 
-  public ExpressionParseException(ExpressionParserError error, int charIndex) {
+  public ExpressionParseException(ExpressionParserError error, int charIndex, Object... messagePlaceholders) {
     this.error = error;
     this.charIndex = charIndex;
+    this.messagePlaceholders = messagePlaceholders;
   }
 
   @Override
   public String getErrorMessage() {
-    // TODO: Placeholders
-    return error.getErrorMessage();
+    return String.format(error.getErrorMessage(), messagePlaceholders);
   }
 }

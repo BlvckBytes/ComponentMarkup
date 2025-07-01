@@ -69,13 +69,13 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    String tagNameLower = lower(tagName);
-    TagDefinition tag = tagRegistry.locateTag(tagNameLower);
+    tagName = lower(tagName);
+    TagDefinition tag = tagRegistry.locateTag(tagName);
 
     if (tag == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
 
-    tagStack.push(new TagAndBuffers(tag, tagNameLower, lastPosition, logger));
+    tagStack.push(new TagAndBuffers(tag, tagName, lastPosition, logger));
   }
 
   @Override
@@ -106,16 +106,16 @@ public class MarkupParser implements XmlEventConsumer {
       String bindingName = name.substring(4);
 
       if (!isValidExpressionIdentifier(bindingName))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
 
       if (bindingName.equals(currentLayer.forIterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
 
       ExpressionNode bindingExpression = parseExpression(value, valueBeginPosition);
       LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
 
       return;
     }
@@ -136,7 +136,7 @@ public class MarkupParser implements XmlEventConsumer {
       isSpreadMode = true;
 
       if (!isExpressionMode)
-        throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION);
+        throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name);
     }
 
     ExpressionNode expression = isExpressionMode ? parseExpression(value, valueBeginPosition) : ImmediateExpression.of(value);
@@ -144,7 +144,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (currentLayer.forIterable != null) {
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
         currentLayer.forReversed = expression;
         return;
@@ -152,22 +152,22 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
       }
     }
 
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
 
     if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
 
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
     currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, isSpreadMode));
   }
@@ -224,23 +224,23 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (name.equals("for-separator") && currentLayer.forIterable != null) {
       if (currentLayer.forSeparator != null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
     }
 
     else if (name.equals("for-reversed"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE, name);
 
     else {
       AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
       if (attribute == null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
 
       if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
       if (!(attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition))
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE, name);
     }
 
     subtreeParser = new MarkupParser(tagRegistry, lastPosition, logger);
@@ -288,7 +288,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    throw new MarkupParseException(lastPosition, MarkupParseError.MISSING_ATTRIBUTE_VALUE);
+    throw new MarkupParseException(lastPosition, MarkupParseError.MISSING_ATTRIBUTE_VALUE, name);
   }
 
   @Override
@@ -346,7 +346,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (tagName == null) {
       if (tagStack.size() == 1)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK);
 
       TagAndBuffers openedTag = tagStack.pop();
       tagStack.peek().children.add(openedTag);
@@ -358,7 +358,7 @@ public class MarkupParser implements XmlEventConsumer {
     TagDefinition closedTag = tagRegistry.locateTag(tagName);
 
     if (closedTag == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
 
     TagAndBuffers openedTag;
 
@@ -366,7 +366,7 @@ public class MarkupParser implements XmlEventConsumer {
       openedTag = tagStack.pop();
 
       if (tagStack.isEmpty())
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG);
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName);
 
       tagStack.peek().children.add(openedTag);
     } while(!openedTag.tagNameLower.equals(tagName));
@@ -439,7 +439,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "*else": {
         if (value != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG);
+          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
 
         if (currentLayer.conditionType != ConditionType.NONE)
           throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CONDITIONS);
@@ -459,7 +459,7 @@ public class MarkupParser implements XmlEventConsumer {
         iterationVariable = name.substring(5);
 
         if (!isValidExpressionIdentifier(iterationVariable))
-          throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable);
       }
 
       if (value == null)
@@ -469,14 +469,14 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_LOOPS);
 
       if (currentLayer.hasLetBinding(iterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, iterationVariable);
 
       currentLayer.forIterable = parseExpression(value, valueBeginPosition);
       currentLayer.forIterationVariable = iterationVariable;
       return;
     }
 
-    throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE);
+    throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE, name);
   }
 
   private void handleScalarNonStringAttribute(String name, ExpressionNode expression) {
@@ -489,7 +489,7 @@ public class MarkupParser implements XmlEventConsumer {
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.')
-      throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION);
+      throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name.substring(3));
 
     if (name.equals("let") || name.startsWith("let-"))
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
@@ -499,14 +499,14 @@ public class MarkupParser implements XmlEventConsumer {
     if (currentLayer.forIterable != null) {
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
       }
 
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
         currentLayer.forReversed = expression;
         return;
@@ -516,13 +516,13 @@ public class MarkupParser implements XmlEventConsumer {
     AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
 
     if (attribute == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
 
     if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
 
     if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
 
     currentLayer.addAttribute(new ExpressionAttribute(name, lastPosition, expression, false));
   }

@@ -20,7 +20,7 @@ public enum PrefixOperator {
     UPPER_CASE, LOWER_CASE, TITLE_CASE, TOGGLE_CASE, SLUGIFY, ASCIIFY, TRIM, REVERSE
   );
 
-  private final String representation;
+  public final String representation;
   public final int length;
 
   PrefixOperator(String representation) {

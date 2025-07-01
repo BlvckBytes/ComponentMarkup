@@ -14,7 +14,6 @@ public class ExpressionTokenizeException extends RuntimeException implements Err
 
   @Override
   public String getErrorMessage() {
-    // TODO: Placeholders
     return error.getErrorMessage();
   }
 }

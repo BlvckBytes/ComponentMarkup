@@ -269,4 +269,17 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         )
     );
   }
+
+  @Test
+  public void shouldCloseVaryingCasingTags() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<aQua>@hello</aQUA>"
+    );
+
+    makeCase(
+      text,
+        text(imm("hello"), text.anchor(0))
+          .color("aqua")
+    );
+  }
 }

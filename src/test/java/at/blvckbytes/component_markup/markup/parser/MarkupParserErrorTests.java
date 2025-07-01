@@ -148,12 +148,12 @@ public class MarkupParserErrorTests {
     );
 
     makeErrorCase(
-      MarkupParseError.UNBALANCED_CLOSING_TAG,
+      MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
       "@</>"
     );
 
     makeErrorCase(
-      MarkupParseError.UNBALANCED_CLOSING_TAG,
+      MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
       "<red>hello</red>@</>"
     );
   }
@@ -487,7 +487,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3:   [key]=\"my.expr[222 c.d.e\"",
         "----------------------^",
-        "   Error: Expected a closing-bracket ] after the indexing-invocation",
+        "   Error: Expected a closing-bracket after the indexing-invocation: ]",
         "4:   fallback={",
         "5:     hello, {{user}}",
         "6:   }",
@@ -506,7 +506,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3: >{{ user.'name' }}",
         "------------^",
-        "   Error: The right-hand-side of a member-access (.) operation may only be an identifier"
+        "   Error: The right-hand-side of a member-access operation may only be an identifier: user.<identifier>"
       )
     );
 
@@ -521,7 +521,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3: />",
         "----^",
-        "   Error: This tag requires a separate closing-tag as it expects content, and does not support self-closing <red />"
+        "   Error: This tag requires a separate closing-tag </red>, as it expects content and does not support self-closing <red />"
       )
     );
 

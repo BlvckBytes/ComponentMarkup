@@ -12,7 +12,6 @@ public class XmlParseException extends RuntimeException implements ErrorMessage 
 
   @Override
   public String getErrorMessage() {
-    // TODO: Placeholders
     return error.getErrorMessage();
   }
 }

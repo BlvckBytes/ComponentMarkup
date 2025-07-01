@@ -5,8 +5,8 @@ import at.blvckbytes.component_markup.ErrorMessage;
 import java.util.stream.Collectors;
 
 public enum ExpressionTokenizeError implements ErrorMessage {
-  UNTERMINATED_STRING("This string misses its closing-sequence: '"),
-  MALFORMED_IDENTIFIER("This name is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),
+  UNTERMINATED_STRING("This string misses its closing-quote: '"),
+  MALFORMED_IDENTIFIER("The name is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),
   EXPECTED_DECIMAL_DIGITS("Expected there to be digits after the decimal-dot (.)"),
   SINGLE_EQUALS(
     "Encountered a single equals-sign (=); use one of: " +

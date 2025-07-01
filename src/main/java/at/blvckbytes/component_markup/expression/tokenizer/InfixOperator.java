@@ -38,7 +38,7 @@ public enum InfixOperator {
     EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL
   );
 
-  private final String representation;
+  public final String representation;
   public final int length;
 
   // Higher precedence means is evaluated *earlier*.

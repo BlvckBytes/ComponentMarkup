@@ -104,7 +104,7 @@ public class ExpressionParser {
           return rhs;
       }
 
-      throw new ExpressionParseException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingToken.endIndex, upcomingOperator.representation);
     }
 
     return makeInfixExpression(lhs, upcomingToken, rhs);
@@ -185,7 +185,7 @@ public class ExpressionParser {
 
     if (operatorToken.operator == InfixOperator.MEMBER) {
       if (!(rhs instanceof TerminalNode) || !(((TerminalNode) rhs).token instanceof IdentifierToken))
-        throw new ExpressionParseException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex());
+        throw new ExpressionParseException(ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, rhs.getBeginIndex(), lhs.toExpression());
     }
 
     return new InfixOperationNode(lhs, operatorToken, rhs, null);
@@ -271,7 +271,7 @@ public class ExpressionParser {
     ExpressionNode operand = parsePrefixExpression();
 
     if (operand == null)
-      throw new ExpressionParseException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex);
+      throw new ExpressionParseException(ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.endIndex, operatorToken.operator.representation);
 
     return new PrefixOperationNode(operatorToken, operand);
   }
