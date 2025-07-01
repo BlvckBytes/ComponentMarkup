@@ -393,6 +393,32 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldSkipFormatItemsOnUseIsFalse() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<format *use=\"a\" bold italic underlined>Hello, world!"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", true),
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .bool("bold", true)
+        .bool("italic", true)
+        .bool("underlined", true)
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", false),
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

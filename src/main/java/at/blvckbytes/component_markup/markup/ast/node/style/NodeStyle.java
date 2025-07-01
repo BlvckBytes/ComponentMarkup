@@ -2,9 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node.style;
 
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
 import at.blvckbytes.component_markup.util.Jsonifiable;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +59,7 @@ public class NodeStyle extends Jsonifiable {
         continue;
 
       if (condition != null)
-        otherValue = new InfixOperationNode(otherValue, InfixOperator.CONJUNCTION, condition, null);
+        otherValue = new BranchingNode(condition, otherValue, null);
 
       this.formatStates[format.ordinal()] = otherValue;
     }
