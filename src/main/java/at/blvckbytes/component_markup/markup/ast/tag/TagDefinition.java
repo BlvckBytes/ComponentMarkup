@@ -20,7 +20,14 @@ public abstract class TagDefinition {
     TagPriority tagPriority,
     AttributeDefinition... attributes
   ) {
-    this.attributes = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(attributes)));
+    Set<AttributeDefinition> definitions = new HashSet<>();
+
+    for (AttributeDefinition definition : attributes) {
+      if (!definitions.add(definition))
+        throw new IllegalStateException("Colliding attribute: " + definition.name);
+    }
+
+    this.attributes = Collections.unmodifiableSet(definitions);
     this.staticPrefixes = Collections.unmodifiableList(Arrays.asList(staticPrefixes));
     this.tagClosing = tagClosing;
     this.tagPriority = tagPriority;

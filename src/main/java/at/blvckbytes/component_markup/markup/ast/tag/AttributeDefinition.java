@@ -33,10 +33,6 @@ public abstract class AttributeDefinition {
     this.valueType = valueType;
   }
 
-  public boolean matches(Attribute attribute) {
-    return this.valueType.isInstance(attribute) && this.name.equals(attribute.name);
-  }
-
   @Override
   public int hashCode() {
     return name.hashCode();
@@ -44,8 +40,8 @@ public abstract class AttributeDefinition {
 
   @Override
   public boolean equals(Object other) {
-    if (!getClass().isInstance(other)) return false;
+    if (!(other instanceof AttributeDefinition)) return false;
     AttributeDefinition that = (AttributeDefinition) other;
-    return Objects.equals(name, that.name) && Objects.equals(flags, that.flags);
+    return Objects.equals(name, that.name);
   }
 }
