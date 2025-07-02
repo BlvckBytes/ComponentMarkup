@@ -12,6 +12,7 @@ public abstract class MarkupNode extends Jsonifiable {
 
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;
+  public boolean doesResetStyle;
 
   public final CursorPosition position;
   public final @Nullable List<MarkupNode> children;

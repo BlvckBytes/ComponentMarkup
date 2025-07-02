@@ -288,10 +288,13 @@ public class TagAndBuffers implements ParserChildItem {
     MarkupNode onlyChild = containerNode.children.get(0);
     NodeStyle containerStyle = containerNode.getStyle();
 
-    if (containerStyle == null || !containerStyle.hasEffect())
+    if (containerStyle == null || !containerStyle.hasEffect()) {
+      onlyChild.doesResetStyle |= containerNode.doesResetStyle;
       return onlyChild;
+    }
 
     if (onlyChild instanceof StyledNode) {
+      onlyChild.doesResetStyle |= containerNode.doesResetStyle;
       StyledNode styledNode = (StyledNode) onlyChild;
       styledNode.getOrInstantiateStyle().inheritFrom(containerStyle, useCondition);
       return styledNode;
