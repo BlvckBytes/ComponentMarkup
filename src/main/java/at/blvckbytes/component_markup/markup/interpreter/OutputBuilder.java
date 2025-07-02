@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
@@ -9,9 +8,6 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
-import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
-import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -38,7 +34,7 @@ public class OutputBuilder {
     this.interpreter = interpreter;
     this.breakChar = breakChar;
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(new ComponentSequence(null));
+    this.sequencesStack.push(new ComponentSequence(null, interpreter));
     this.result = new ArrayList<>();
   }
 
@@ -52,14 +48,14 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(new ComponentSequence(null));
+    sequencesStack.push(new ComponentSequence(null, interpreter));
 
     for (MarkupNode poppedNonTerminal : poppedNonTerminals)
       onNonTerminalBegin(poppedNonTerminal);
   }
 
   public void onNonTerminalBegin(MarkupNode node) {
-    sequencesStack.push(new ComponentSequence(node));
+    sequencesStack.push(new ComponentSequence(node, interpreter));
   }
 
   public void onNonTerminalEnd() {
@@ -84,6 +80,9 @@ public class OutputBuilder {
       sequenceComponent = componentConstructor.createTextNode("");
       componentConstructor.setChildren(sequenceComponent, sequence.members);
     }
+
+    if (sequence.computedStyle != null)
+      sequence.computedStyle.applyStyles(sequenceComponent, componentConstructor);
 
     if (sequence.nonTerminal == null)
       return sequenceComponent;
@@ -222,97 +221,7 @@ public class OutputBuilder {
       }
     }
 
-    else if (sequence.nonTerminal instanceof StyledNode)
-      applyStyles(sequenceComponent, (StyledNode) sequence.nonTerminal);
-
     return sequenceComponent;
-  }
-
-  private void applyStyles(Object component, StyledNode styleHolder) {
-    NodeStyle style = styleHolder.getStyle();
-
-    if (style == null)
-      return;
-
-    if (style.color != null) {
-      String colorString = interpreter.evaluateAsStringOrNull(style.color);
-
-      if (colorString != null) {
-        int packedColor = PackedColor.tryParse(colorString);
-
-        if (packedColor != PackedColor.NULL_SENTINEL)
-          componentConstructor.setColor(component, packedColor);
-      }
-    }
-
-    if (style.shadowColor != null || style.shadowColorOpacity != null) {
-      // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
-      int packedColor = AnsiStyleColor.BLACK.packedColor;
-      int opacity = 64;
-
-      if (style.shadowColor != null) {
-        String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
-
-        if (colorString != null) {
-          int parsedPackedColor = PackedColor.tryParse(colorString);
-
-          if (parsedPackedColor != PackedColor.NULL_SENTINEL)
-            packedColor = parsedPackedColor;
-        }
-      }
-
-      if (style.shadowColorOpacity != null) {
-        Double opacityValue = interpreter.evaluateAsDoubleOrNull(style.shadowColorOpacity);
-
-        if (opacityValue != null)
-          opacity = (int) Math.round((opacityValue / 100.0) * 255);
-      }
-
-      packedColor = PackedColor.setClampedA(packedColor, opacity);
-
-      componentConstructor.setShadowColor(component, packedColor);
-    }
-
-    if (style.font != null) {
-      String font = interpreter.evaluateAsStringOrNull(style.font);
-
-      if (font != null)
-        componentConstructor.setFont(component, font);
-    }
-
-    for (Format format : Format.VALUES) {
-      ExpressionNode formatExpression = style.formatStates[format.ordinal()];
-
-      if (formatExpression == null)
-        continue;
-
-      Boolean expression = interpreter.evaluateAsBooleanOrNull(formatExpression);
-
-      switch (format) {
-        case BOLD:
-          componentConstructor.setBoldFormat(component, expression);
-          break;
-
-        case ITALIC:
-          componentConstructor.setItalicFormat(component, expression);
-          break;
-
-        case OBFUSCATED:
-          componentConstructor.setObfuscatedFormat(component, expression);
-          break;
-
-        case UNDERLINED:
-          componentConstructor.setUnderlinedFormat(component, expression);
-          break;
-
-        case STRIKETHROUGH:
-          componentConstructor.setStrikethroughFormat(component, expression);
-          break;
-
-        default:
-          throw new IllegalStateException("Unknown format: " + format.name());
-      }
-    }
   }
 
   public Object onTerminal(TerminalNode node) {
@@ -403,7 +312,7 @@ public class OutputBuilder {
     else
       throw new IllegalStateException("Unknown terminal-node: " + node.getClass());
 
-    applyStyles(result, node);
+    new ComputedStyle(node, interpreter).applyStyles(result, componentConstructor);
 
     sequencesStack.peek().members.add(result);
 
