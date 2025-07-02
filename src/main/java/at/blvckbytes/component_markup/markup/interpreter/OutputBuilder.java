@@ -249,10 +249,10 @@ public class OutputBuilder {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
 
       if (colorString != null) {
-        int color = PackedColor.tryParse(colorString);
+        int packedColor = PackedColor.tryParse(colorString);
 
-        if (color != PackedColor.NULL_SENTINEL)
-          componentConstructor.setColor(component, color);
+        if (packedColor != PackedColor.NULL_SENTINEL)
+          componentConstructor.setColor(component, packedColor);
       }
     }
 
@@ -262,10 +262,10 @@ public class OutputBuilder {
       String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
 
       if (colorString != null) {
-        int color = PackedColor.tryParse(colorString);
+        int packedColor = PackedColor.tryParse(colorString);
 
-        if (color != PackedColor.NULL_SENTINEL)
-          componentConstructor.setShadowColor(component, color);
+        if (packedColor != PackedColor.NULL_SENTINEL)
+          componentConstructor.setShadowColor(component, packedColor);
       }
     }
 

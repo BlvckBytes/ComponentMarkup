@@ -2,28 +2,27 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
 public enum AnsiStyleColor {
 
-  BLACK       ('0', new Color(  0,   0,   0)),
-  DARK_BLUE   ('1', new Color(  0,   0, 170)),
-  DARK_GREEN  ('2', new Color(  0, 170,   0)),
-  DARK_AQUA   ('3', new Color(  0, 170, 170)),
-  DARK_RED    ('4', new Color(170,   0,   0)),
-  DARK_PURPLE ('5', new Color(170,   0, 170)),
-  GOLD        ('6', new Color(255, 170,   0)),
-  GRAY        ('7', new Color(170, 170, 170), "grey"),
-  DARK_GRAY   ('8', new Color( 85,  85,  85), "dark_grey"),
-  BLUE        ('9', new Color( 85,  85, 255)),
-  GREEN       ('a', new Color( 85, 255,  85)),
-  AQUA        ('b', new Color( 85, 255, 255)),
-  RED         ('c', new Color(255,  85,  85)),
-  LIGHT_PURPLE('d', new Color(255,  85, 255)),
-  YELLOW      ('e', new Color(255, 255,  85)),
-  WHITE       ('f', new Color(255, 255, 255)),
+  BLACK       ('0',   0,   0,   0),
+  DARK_BLUE   ('1',   0,   0, 170),
+  DARK_GREEN  ('2',   0, 170,   0),
+  DARK_AQUA   ('3',   0, 170, 170),
+  DARK_RED    ('4', 170,   0,   0),
+  DARK_PURPLE ('5', 170,   0, 170),
+  GOLD        ('6', 255, 170,   0),
+  GRAY        ('7', 170, 170, 170, "grey"),
+  DARK_GRAY   ('8',  85,  85,  85, "dark_grey"),
+  BLUE        ('9',  85,  85, 255),
+  GREEN       ('a',  85, 255,  85),
+  AQUA        ('b',  85, 255, 255),
+  RED         ('c', 255,  85,  85),
+  LIGHT_PURPLE('d', 255,  85, 255),
+  YELLOW      ('e', 255, 255,  85),
+  WHITE       ('f', 255, 255, 255),
   ;
 
   public static final List<AnsiStyleColor> VALUES;
@@ -44,19 +43,17 @@ public enum AnsiStyleColor {
 
   public final String name;
   public final char colorChar;
-  public final Color color;
   public final List<String> aliases;
   public final int packedColor;
 
   private final float[] labColor;
 
-  AnsiStyleColor(char colorChar, Color color, String... aliases) {
+  AnsiStyleColor(char colorChar, int r, int g, int b, String... aliases) {
     this.name = name().toLowerCase();
-    this.color = color;
     this.colorChar = colorChar;
     this.aliases = Collections.unmodifiableList(Arrays.asList(aliases));
-    this.packedColor = PackedColor.of(color.getRed(), color.getGreen(), color.getBlue(), 255);
-    this.labColor = CIELabColorSpace.getInstance().fromRGB(color.getRGBComponents(null));
+    this.packedColor = PackedColor.of(r, g, b, 255);
+    this.labColor = CIELabColorSpace.getInstance().fromRGB(new float[] {r / 255f, g / 255f, b / 255f});
   }
 
   public static @Nullable AnsiStyleColor fromColor(int packedColor) {

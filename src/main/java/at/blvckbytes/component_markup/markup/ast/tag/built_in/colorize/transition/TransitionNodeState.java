@@ -22,7 +22,7 @@ public class TransitionNodeState extends GradientNodeState {
   }
 
   @Override
-  protected int getColor(int index, int length) {
-    return super.getColor(0, 1);
+  protected int getPackedColor(int index, int length) {
+    return super.getPackedColor(0, 1);
   }
 }

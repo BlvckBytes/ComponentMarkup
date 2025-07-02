@@ -240,37 +240,37 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setColor(Object component, int color) {
-    if (color == PackedColor.NULL_SENTINEL) {
+  public void setColor(Object component, int packedColor) {
+    if (packedColor == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("color");
       return;
     }
 
     AnsiStyleColor ansiColor;
 
-    if ((ansiColor = AnsiStyleColor.fromColor(color)) != null) {
+    if ((ansiColor = AnsiStyleColor.fromColor(packedColor)) != null) {
       ((JsonObject) component).addProperty("color", ansiColor.name);
       return;
     }
 
-    ((JsonObject) component).addProperty("color", PackedColor.asNonAlphaHex(color));
+    ((JsonObject) component).addProperty("color", PackedColor.asNonAlphaHex(packedColor));
   }
 
   @Override
-  public void setShadowColor(Object component, int color) {
-    if (color == PackedColor.NULL_SENTINEL) {
+  public void setShadowColor(Object component, int packedColor) {
+    if (packedColor == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("shadow_color");
       return;
     }
 
     AnsiStyleColor ansiColor;
 
-    if ((ansiColor = AnsiStyleColor.fromColor(color)) != null) {
+    if ((ansiColor = AnsiStyleColor.fromColor(packedColor)) != null) {
       ((JsonObject) component).addProperty("shadow_color", ansiColor.name);
       return;
     }
 
-    ((JsonObject) component).addProperty("shadow_color", PackedColor.asNonAlphaHex(color));
+    ((JsonObject) component).addProperty("shadow_color", PackedColor.asNonAlphaHex(packedColor));
   }
 
   @Override

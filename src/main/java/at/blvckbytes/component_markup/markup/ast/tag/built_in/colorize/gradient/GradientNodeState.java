@@ -27,7 +27,7 @@ public class GradientNodeState extends ColorizeNodeState {
     super(tagNameLower, phase, flags);
 
     this.gradientGenerator = new GradientGenerator(
-      evaluateColors(colors, interpreter),
+      evaluatePackedColors(colors, interpreter),
       evaluateOffsets(offsets, interpreter),
       evaluateZIndices(zIndices, interpreter)
     );
@@ -55,7 +55,7 @@ public class GradientNodeState extends ColorizeNodeState {
     return result;
   }
 
-  private int[] evaluateColors(ExpressionList colors, Interpreter interpreter) {
+  private int[] evaluatePackedColors(ExpressionList colors, Interpreter interpreter) {
     List<ExpressionNode> colorList = colors.get(interpreter);
     int[] result = new int[colorList.size()];
 
@@ -77,7 +77,7 @@ public class GradientNodeState extends ColorizeNodeState {
   }
 
   @Override
-  protected int getColor(double progressionPercentage) {
-    return gradientGenerator.getColor(progressionPercentage);
+  protected int getPackedColor(double progressionPercentage) {
+    return gradientGenerator.getPackedColor(progressionPercentage);
   }
 }

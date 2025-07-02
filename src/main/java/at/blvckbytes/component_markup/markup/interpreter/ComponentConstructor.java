@@ -66,9 +66,9 @@ public interface ComponentConstructor {
   // Styling
   // ================================================================================
 
-  void setColor(Object component, int color);
+  void setColor(Object component, int packedColor);
 
-  void setShadowColor(Object component, int color);
+  void setShadowColor(Object component, int packedColor);
 
   void setFont(Object component, @Nullable String font);
 
