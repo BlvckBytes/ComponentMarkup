@@ -382,7 +382,7 @@ public class MarkupParser implements XmlEventConsumer {
       TagAndBuffers currentLayer = tagStack.pop();
 
       if (tagStack.isEmpty()) {
-        this.result = currentLayer.construct();
+        this.result = currentLayer.createNode();
         break;
       }
 

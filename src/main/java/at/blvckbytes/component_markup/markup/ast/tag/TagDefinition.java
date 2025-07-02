@@ -44,7 +44,7 @@ public abstract class TagDefinition {
 
   public abstract boolean matchName(String tagNameLower);
 
-  public abstract @NotNull MarkupNode construct(
+  public abstract @NotNull MarkupNode createNode(
     String tagNameLower,
     CursorPosition position,
     AttributeMap attributes,

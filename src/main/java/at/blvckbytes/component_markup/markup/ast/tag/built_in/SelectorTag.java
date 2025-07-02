@@ -31,7 +31,7 @@ public class SelectorTag extends TagDefinition {
   }
 
   @Override
-  public @NotNull MarkupNode construct(
+  public @NotNull MarkupNode createNode(
     String tagNameLower,
     CursorPosition position,
     AttributeMap attributes,

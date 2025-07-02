@@ -22,7 +22,7 @@ public class TagDefinitionTests {
     }
 
     @Override
-    public @NotNull MarkupNode construct(String tagNameLower, CursorPosition position, AttributeMap attributes, List<LetBinding> letBindings, List<MarkupNode> children) {
+    public @NotNull MarkupNode createNode(String tagNameLower, CursorPosition position, AttributeMap attributes, List<LetBinding> letBindings, List<MarkupNode> children) {
       throw new UnsupportedOperationException();
     }
   }

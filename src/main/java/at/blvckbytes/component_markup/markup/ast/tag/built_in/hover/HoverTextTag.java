@@ -20,7 +20,7 @@ public class HoverTextTag extends HoverTag {
   }
 
   @Override
-  public @NotNull MarkupNode construct(
+  public @NotNull MarkupNode createNode(
     String tagNameLower,
     CursorPosition position,
     AttributeMap attributes,

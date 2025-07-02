@@ -91,7 +91,7 @@ public class TagAndBuffers implements ParserChildItem {
       if (child instanceof TagAndBuffers) {
         TagAndBuffers tagAndBuffers = (TagAndBuffers) child;
 
-        currentNode = tagAndBuffers.construct();
+        currentNode = tagAndBuffers.createNode();
         currentConditionType = tagAndBuffers.ifConditionType;
 
         if (tagAndBuffers.ifCondition != null)
@@ -233,9 +233,9 @@ public class TagAndBuffers implements ParserChildItem {
     return result;
   }
 
-  private @Nullable MarkupNode constructTagOrNull(List<MarkupNode> processedChildren) {
+  private @Nullable MarkupNode createNodeOrNull(List<MarkupNode> processedChildren) {
     try {
-      return tag.construct(tagNameLower, position, attributes, bindings, processedChildren);
+      return tag.createNode(tagNameLower, position, attributes, bindings, processedChildren);
     } catch (Throwable thrownError) {
       String className = tag.getClass().getName();
 
@@ -248,12 +248,12 @@ public class TagAndBuffers implements ParserChildItem {
         }
       }
 
-      logger.log(Level.SEVERE, "An error occurred while trying to construct <" + tagNameLower + "> via " + className + "#construct", thrownError);
+      logger.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + className + "#createNode", thrownError);
       return null;
     }
   }
 
-  public MarkupNode construct() {
+  public MarkupNode createNode() {
     List<String> missingNames = null;
 
     for (AttributeDefinition definition : tag.attributes) {
@@ -272,7 +272,7 @@ public class TagAndBuffers implements ParserChildItem {
     if (missingNames != null)
       throw new MarkupParseException(position, MarkupParseError.MISSING_MANDATORY_ATTRIBUTES, tagNameLower, String.join(", ", missingNames));
 
-    MarkupNode result = constructTagOrNull(getProcessedChildren());
+    MarkupNode result = createNodeOrNull(getProcessedChildren());
 
     if (result == null)
       return new TextNode(ImmediateExpression.of("<error>"), position, null);
