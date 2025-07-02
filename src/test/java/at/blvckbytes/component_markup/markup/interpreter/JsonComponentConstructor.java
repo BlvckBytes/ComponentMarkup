@@ -240,41 +240,37 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setColor(Object component, @Nullable ComponentColor color) {
-    if (color == null) {
+  public void setColor(Object component, int color) {
+    if (color == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("color");
       return;
     }
 
-    String colorValue;
+    AnsiStyleColor ansiColor;
 
-    if (color instanceof AnsiStyleColor)
-      colorValue = ((AnsiStyleColor) color).name;
-    else if (color instanceof ModernColor)
-      colorValue = ((ModernColor) color).asNonAlphaHex();
-    else
+    if ((ansiColor = AnsiStyleColor.fromColor(color)) != null) {
+      ((JsonObject) component).addProperty("color", ansiColor.name);
       return;
+    }
 
-    ((JsonObject) component).addProperty("color", colorValue);
+    ((JsonObject) component).addProperty("color", PackedColor.asNonAlphaHex(color));
   }
 
   @Override
-  public void setShadowColor(Object component, @Nullable ComponentColor color) {
-    if (color == null) {
+  public void setShadowColor(Object component, int color) {
+    if (color == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("shadow_color");
       return;
     }
 
-    String colorValue;
+    AnsiStyleColor ansiColor;
 
-    if (color instanceof AnsiStyleColor)
-      colorValue = ((AnsiStyleColor) color).name;
-    else if (color instanceof ModernColor)
-      colorValue = ((ModernColor) color).asNonAlphaHex();
-    else
+    if ((ansiColor = AnsiStyleColor.fromColor(color)) != null) {
+      ((JsonObject) component).addProperty("shadow_color", ansiColor.name);
       return;
+    }
 
-    ((JsonObject) component).addProperty("shadow_color", colorValue);
+    ((JsonObject) component).addProperty("shadow_color", PackedColor.asNonAlphaHex(color));
   }
 
   @Override

@@ -1,8 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
-import at.blvckbytes.component_markup.markup.interpreter.ComponentColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import org.jetbrains.annotations.Nullable;
+import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -25,7 +24,7 @@ public abstract class ColorizeNodeState {
     this.injectedComponentsStack = new Stack<>();
   }
 
-  protected @Nullable ComponentColor getColor(int index, int length) {
+  protected int getColor(int index, int length) {
     double progressionPercentage = (index / (double) length) * 100;
 
     if (progressionPercentage > 100)
@@ -39,7 +38,7 @@ public abstract class ColorizeNodeState {
     return getColor(progressionPercentage);
   }
 
-  protected abstract @Nullable ComponentColor getColor(double progressionPercentage);
+  protected abstract int getColor(double progressionPercentage);
 
   public boolean doesTargetNode(ColorizeNode node) {
     return node.tagNameLower.equals(this.tagNameLower);
@@ -69,9 +68,9 @@ public abstract class ColorizeNodeState {
     for (int index = 0; index < length; ++index) {
       Object injectedComponent = injectedComponents.get(index);
 
-      ComponentColor color = getColor(index, length);
+      int color = getColor(index, length);
 
-      if (color != null)
+      if (color != PackedColor.NULL_SENTINEL)
         interpreter.getComponentConstructor().setColor(injectedComponent, color);
     }
 

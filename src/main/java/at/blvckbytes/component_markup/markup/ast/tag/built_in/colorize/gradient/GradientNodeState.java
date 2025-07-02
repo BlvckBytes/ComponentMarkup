@@ -5,13 +5,9 @@ import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
 import at.blvckbytes.component_markup.markup.interpreter.AnsiStyleColor;
-import at.blvckbytes.component_markup.markup.interpreter.ComponentColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.markup.interpreter.ModernColor;
-import org.jetbrains.annotations.Nullable;
+import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -59,29 +55,29 @@ public class GradientNodeState extends ColorizeNodeState {
     return result;
   }
 
-  private List<Color> evaluateColors(ExpressionList colors, Interpreter interpreter) {
+  private int[] evaluateColors(ExpressionList colors, Interpreter interpreter) {
     List<ExpressionNode> colorList = colors.get(interpreter);
-    List<Color> result = new ArrayList<>();
+    int[] result = new int[colorList.size()];
 
-    for (ExpressionNode item : colorList) {
-      String colorString = interpreter.evaluateAsStringOrNull(item);
+    for (int i = 0; i < result.length; ++i) {
+      String colorString = interpreter.evaluateAsStringOrNull(colorList.get(i));
 
       if (colorString == null)
         continue;
 
-      ComponentColor componentColor = ComponentColor.tryParse(colorString);
+      int componentColor = PackedColor.tryParse(colorString);
 
-      if (componentColor == null)
-        componentColor = AnsiStyleColor.BLACK;
+      if (componentColor == PackedColor.NULL_SENTINEL)
+        componentColor = AnsiStyleColor.BLACK.packedColor;
 
-      result.add(componentColor.getColor());
+      result[i] = componentColor;
     }
 
     return result;
   }
 
   @Override
-  protected @Nullable ComponentColor getColor(double progressionPercentage) {
-    return new ModernColor(gradientGenerator.getColor(progressionPercentage));
+  protected int getColor(double progressionPercentage) {
+    return gradientGenerator.getColor(progressionPercentage);
   }
 }

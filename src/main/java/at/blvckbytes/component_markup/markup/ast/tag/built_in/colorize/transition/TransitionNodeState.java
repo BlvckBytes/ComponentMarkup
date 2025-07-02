@@ -3,9 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.transiti
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient.GradientNodeState;
-import at.blvckbytes.component_markup.markup.interpreter.ComponentColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
@@ -24,7 +22,7 @@ public class TransitionNodeState extends GradientNodeState {
   }
 
   @Override
-  protected @Nullable ComponentColor getColor(int index, int length) {
+  protected int getColor(int index, int length) {
     return super.getColor(0, 1);
   }
 }

@@ -2,8 +2,6 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow;
 
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
-import at.blvckbytes.component_markup.markup.interpreter.ComponentColor;
-import at.blvckbytes.component_markup.markup.interpreter.ModernColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -17,7 +15,7 @@ public class RainbowNodeState extends ColorizeNodeState {
   }
 
   @Override
-  protected @Nullable ComponentColor getColor(double progressionPercentage) {
-    return new ModernColor(rainbowGenerator.getColor(progressionPercentage));
+  protected int getColor(double progressionPercentage) {
+    return rainbowGenerator.getColor(progressionPercentage);
   }
 }

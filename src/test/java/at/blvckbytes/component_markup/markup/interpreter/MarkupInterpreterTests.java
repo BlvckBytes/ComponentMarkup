@@ -476,8 +476,18 @@ public class MarkupInterpreterTests {
       List<String> jsonKeys = new ArrayList<>(jsonObject.keySet());
       jsonKeys.sort(String::compareTo);
 
-      for (String key : jsonKeys)
-        result.add(key, sortKeysRecursively(jsonObject.get(key)));
+      for (String key : jsonKeys) {
+        JsonElement value = sortKeysRecursively(jsonObject.get(key));
+
+        if (value instanceof JsonPrimitive && key.equals("color")) {
+          AnsiStyleColor ansiColor = AnsiStyleColor.fromNameLowerOrNull(value.getAsString().toLowerCase());
+
+          if (ansiColor != null)
+            value = new JsonPrimitive(PackedColor.asNonAlphaHex(ansiColor.packedColor));
+        }
+
+        result.add(key, value);
+      }
 
       return result;
     }

@@ -249,20 +249,22 @@ public class OutputBuilder {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
 
       if (colorString != null) {
-        ComponentColor color = ComponentColor.tryParse(colorString);
+        int color = PackedColor.tryParse(colorString);
 
-        if (color != null)
+        if (color != PackedColor.NULL_SENTINEL)
           componentConstructor.setColor(component, color);
       }
     }
 
+    // TODO: Account for shadowColorOpacity
+    // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
     if (style.shadowColor != null) {
       String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
 
       if (colorString != null) {
-        ComponentColor color = ComponentColor.tryParse(colorString);
+        int color = PackedColor.tryParse(colorString);
 
-        if (color != null)
+        if (color != PackedColor.NULL_SENTINEL)
           componentConstructor.setShadowColor(component, color);
       }
     }

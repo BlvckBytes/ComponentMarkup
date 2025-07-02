@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public enum AnsiStyleColor implements ComponentColor {
+public enum AnsiStyleColor {
 
   BLACK       ('0', new Color(  0,   0,   0)),
   DARK_BLUE   ('1', new Color(  0,   0, 170)),
@@ -46,6 +46,7 @@ public enum AnsiStyleColor implements ComponentColor {
   public final char colorChar;
   public final Color color;
   public final List<String> aliases;
+  public final int packedColor;
 
   private final float[] labColor;
 
@@ -54,14 +55,60 @@ public enum AnsiStyleColor implements ComponentColor {
     this.color = color;
     this.colorChar = colorChar;
     this.aliases = Collections.unmodifiableList(Arrays.asList(aliases));
+    this.packedColor = PackedColor.of(color.getRed(), color.getGreen(), color.getBlue(), 255);
     this.labColor = CIELabColorSpace.getInstance().fromRGB(color.getRGBComponents(null));
   }
 
-  public static AnsiStyleColor getNearestColor(Color color) {
-    float[] inputLab = CIELabColorSpace.getInstance().fromRGB(color.getRGBComponents(null));
+  public static @Nullable AnsiStyleColor fromColor(int packedColor) {
+    switch (packedColor) {
+      case -16777216:
+        return AnsiStyleColor.BLACK;
+      case -5636096:
+        return AnsiStyleColor.DARK_BLUE;
+      case -16733696:
+        return AnsiStyleColor.DARK_GREEN;
+      case -5592576:
+        return AnsiStyleColor.DARK_AQUA;
+      case -16777046:
+        return AnsiStyleColor.DARK_RED;
+      case -5635926:
+        return AnsiStyleColor.DARK_PURPLE;
+      case -16733441:
+        return AnsiStyleColor.GOLD;
+      case -5592406:
+        return AnsiStyleColor.GRAY;
+      case -11184811:
+        return AnsiStyleColor.DARK_GRAY;
+      case -43691:
+        return AnsiStyleColor.BLUE;
+      case -11141291:
+        return AnsiStyleColor.GREEN;
+      case -171:
+        return AnsiStyleColor.AQUA;
+      case -11184641:
+        return AnsiStyleColor.RED;
+      case -43521:
+        return AnsiStyleColor.LIGHT_PURPLE;
+      case -11141121:
+        return AnsiStyleColor.YELLOW;
+      case -1:
+        return AnsiStyleColor.WHITE;
+    }
+
+    return null;
+  }
+
+  public static AnsiStyleColor getNearestColor(int packedColor) {
+    AnsiStyleColor closestItem;
+
+    if ((closestItem = fromColor(packedColor)) != null)
+      return closestItem;
+
+    float[] inputLab = CIELabColorSpace.getInstance().fromRGB(new float[] {
+      PackedColor.getR(packedColor), PackedColor.getG(packedColor), PackedColor.getB(packedColor)
+    });
 
     double minDistanceSquared = 0;
-    AnsiStyleColor closestItem = null;
 
     for (AnsiStyleColor candidate : VALUES) {
       float[] candidateLab = candidate.labColor;
@@ -165,10 +212,5 @@ public enum AnsiStyleColor implements ComponentColor {
       default:
         return null;
     }
-  }
-
-  @Override
-  public Color getColor() {
-    return this.color;
   }
 }

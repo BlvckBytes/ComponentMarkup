@@ -1,19 +1,20 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient;
 
-import java.awt.*;
+import at.blvckbytes.component_markup.markup.interpreter.AnsiStyleColor;
+import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
+
 import java.util.Arrays;
-import java.util.List;
 
 public class GradientGenerator {
 
-  public final List<Color> colors;
+  public final int[] colors;
   public final double[] offsets;
   public final long[] zIndices;
 
-  public GradientGenerator(List<Color> colors, double[] offsets, long[] zIndices) {
+  public GradientGenerator(int[] colors, double[] offsets, long[] zIndices) {
     this.colors = colors;
     this.zIndices = zIndices;
-    this.offsets = clampAndPossiblyExtendOffsets(colors.size(), offsets);
+    this.offsets = clampAndPossiblyExtendOffsets(colors.length, offsets);
   }
 
   private double[] clampAndPossiblyExtendOffsets(int colorCount, double[] offsets) {
@@ -77,32 +78,32 @@ public class GradientGenerator {
     return offsets;
   }
 
-  public Color getColor(double progressionPercentage) {
-    int colorCount = colors.size();
+  public int getColor(double progressionPercentage) {
+    int colorCount = colors.length;
 
     if (colorCount == 0)
-      return Color.BLACK;
+      return AnsiStyleColor.BLACK.packedColor;
 
-    Color firstColor = colors.get(0);
+    int firstColor = colors[0];
 
     if (colorCount == 1)
       return firstColor;
 
     double firstOffset = offsets[0];
 
-    int lastIndex = colors.size() - 1;
-    Color lastColor = colors.get(lastIndex);
+    int lastIndex = colors.length - 1;
+    int lastColor = colors[lastIndex];
     double lastOffset = offsets[lastIndex];
 
     long firstZIndex = zIndices.length == 0 ? 0 : zIndices[0];
     long lastZIndex = lastIndex >= zIndices.length ? 0 : zIndices[lastIndex];
 
-    Color aColor = firstColor, bColor = lastColor;
+    int aColor = firstColor, bColor = lastColor;
     double aOffset = firstOffset, bOffset = lastOffset;
     long aZIndex = firstZIndex, bZIndex = lastZIndex;
 
     for (int i = 1; i < colorCount - 1; i++) {
-      Color currentColor = colors.get(i);
+      int currentColor = colors[i];
       double currentOffset = offsets[i];
       long currentZIndex = i >= zIndices.length ? 0 : zIndices[i];
 
@@ -133,14 +134,19 @@ public class GradientGenerator {
     progressionPercentage = (progressionPercentage - aOffset) / (bOffset - aOffset);
     progressionPercentage = Math.max(0, Math.min(1, progressionPercentage));
 
-    double resultRed   = aColor.getRed()   + progressionPercentage * (bColor.getRed()   - aColor.getRed());
-    double resultGreen = aColor.getGreen() + progressionPercentage * (bColor.getGreen() - aColor.getGreen());
-    double resultBlue  = aColor.getBlue()  + progressionPercentage * (bColor.getBlue()  - aColor.getBlue());
+    double resultRed   = PackedColor.getR(aColor);
+    double resultGreen = PackedColor.getG(aColor);
+    double resultBlue  = PackedColor.getB(aColor);
 
-    return new Color(
+    resultRed   += progressionPercentage * (PackedColor.getR(bColor) - resultRed);
+    resultGreen += progressionPercentage * (PackedColor.getG(bColor) - resultGreen);
+    resultBlue  += progressionPercentage * (PackedColor.getB(bColor) - resultBlue);
+
+    return PackedColor.of(
       (int) Math.floor(resultRed),
       (int) Math.floor(resultGreen),
-      (int) Math.floor(resultBlue)
+      (int) Math.floor(resultBlue),
+      255
     );
   }
 }
