@@ -82,7 +82,7 @@ public class GradientGenerator {
     int colorCount = colors.length;
 
     if (colorCount == 0)
-      return AnsiStyleColor.BLACK.packedColor;
+      return AnsiStyleColor.WHITE.packedColor;
 
     int firstColor = colors[0];
 

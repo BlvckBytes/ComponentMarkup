@@ -68,7 +68,7 @@ public class GradientNodeState extends ColorizeNodeState {
       int componentColor = PackedColor.tryParse(colorString);
 
       if (componentColor == PackedColor.NULL_SENTINEL)
-        componentColor = AnsiStyleColor.BLACK.packedColor;
+        componentColor = AnsiStyleColor.WHITE.packedColor;
 
       result[i] = componentColor;
     }
