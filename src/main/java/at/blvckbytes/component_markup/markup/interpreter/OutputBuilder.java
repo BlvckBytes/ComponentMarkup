@@ -256,17 +256,32 @@ public class OutputBuilder {
       }
     }
 
-    // TODO: Account for shadowColorOpacity
-    // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
-    if (style.shadowColor != null) {
-      String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
+    if (style.shadowColor != null || style.shadowColorOpacity != null) {
+      // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
+      int packedColor = AnsiStyleColor.BLACK.packedColor;
+      int opacity = 64;
 
-      if (colorString != null) {
-        int packedColor = PackedColor.tryParse(colorString);
+      if (style.shadowColor != null) {
+        String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
 
-        if (packedColor != PackedColor.NULL_SENTINEL)
-          componentConstructor.setShadowColor(component, packedColor);
+        if (colorString != null) {
+          int parsedPackedColor = PackedColor.tryParse(colorString);
+
+          if (parsedPackedColor != PackedColor.NULL_SENTINEL)
+            packedColor = parsedPackedColor;
+        }
       }
+
+      if (style.shadowColorOpacity != null) {
+        Double opacityValue = interpreter.evaluateAsDoubleOrNull(style.shadowColorOpacity);
+
+        if (opacityValue != null)
+          opacity = (int) Math.round((opacityValue / 100.0) * 255);
+      }
+
+      packedColor = PackedColor.setClampedA(packedColor, opacity);
+
+      componentConstructor.setShadowColor(component, packedColor);
     }
 
     if (style.font != null) {

@@ -5,15 +5,19 @@ public class PackedColor {
   public static final int NULL_SENTINEL = -1;
 
   public static int of(int r, int g, int b, int a) {
-    return (r & 0xFF) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) | ((a & 0xFF) << 24);
+    return (b & 0xFF) | ((g & 0xFF) << 8) | ((r & 0xFF) << 16) | ((a & 0xFF) << 24);
   }
 
   public static int of(float r, float g, float b) {
     return of((int) (r * 255 + .5), (int) (g * 255 + .5), (int) (b * 255 + .5), 255);
   }
 
+  public static int getA(int packedColor) {
+    return (packedColor >> 24) & 0xFF;
+  }
+
   public static int getR(int packedColor) {
-    return packedColor & 0xFF;
+    return (packedColor >> 16) & 0xFF;
   }
 
   public static int getG(int packedColor) {
@@ -21,11 +25,14 @@ public class PackedColor {
   }
 
   public static int getB(int packedColor) {
-    return (packedColor >> 16) & 0xFF;
+    return packedColor & 0xFF;
   }
 
-  public static int getA(int packedColor) {
-    return (packedColor >> 24) & 0xFF;
+  public static int setClampedA(int packedColor, int a) {
+    if (a < 0)
+      a = 0;
+
+    return (packedColor & 0xFFFFFF) | ((a & 0xFF) << 24);
   }
 
   public static String asNonAlphaHex(int packedColor) {
@@ -96,30 +103,32 @@ public class PackedColor {
     return ansiColor == null ? NULL_SENTINEL : ansiColor.packedColor;
   }
 
+  private static int hexCharToIntOrMinusOne(char c) {
+    if (c >= 'a' && c <= 'f')
+      return 10 + (c - 'a');
+
+    if (c >= 'A' && c <= 'F')
+      return 10 + (c - 'A');
+
+    if (c >= '0' && c <= '9')
+      return (c - '0');
+
+    return -1;
+  }
+
   private static int fromHexOrMinusOne(String input, int offset) {
-    int result = 0;
+    int result;
+    int charValue;
 
-    char firstDigit = input.charAt(offset);
-
-    if (firstDigit >= 'a' && firstDigit <= 'f')
-      result += (firstDigit - 'a') << 4;
-
-    else if (firstDigit >= 'A' && firstDigit <= 'F')
-      result += (firstDigit - 'A') << 4;
-
-    else
+    if ((charValue = hexCharToIntOrMinusOne(input.charAt(offset))) < 0)
       return -1;
 
-    char secondDigit = input.charAt(offset + 1);
+    result = charValue;
 
-    if (secondDigit >= 'a' && secondDigit <= 'f')
-      result += (secondDigit - 'a');
-
-    else if (secondDigit >= 'A' && secondDigit <= 'F')
-      result += (secondDigit - 'A');
-
-    else
+    if ((charValue = hexCharToIntOrMinusOne(input.charAt(offset + 1))) < 0)
       return -1;
+
+    result += charValue << 4;
 
     return result;
   }

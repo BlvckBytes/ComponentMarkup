@@ -59,37 +59,37 @@ public enum AnsiStyleColor {
   public static @Nullable AnsiStyleColor fromColor(int packedColor) {
     switch (packedColor) {
       case -16777216:
-        return AnsiStyleColor.BLACK;
-      case -5636096:
-        return AnsiStyleColor.DARK_BLUE;
-      case -16733696:
-        return AnsiStyleColor.DARK_GREEN;
-      case -5592576:
-        return AnsiStyleColor.DARK_AQUA;
+        return BLACK;
       case -16777046:
-        return AnsiStyleColor.DARK_RED;
+        return DARK_BLUE;
+      case -16733696:
+        return DARK_GREEN;
+      case -16733526:
+        return DARK_AQUA;
+      case -5636096:
+        return DARK_RED;
       case -5635926:
-        return AnsiStyleColor.DARK_PURPLE;
-      case -16733441:
-        return AnsiStyleColor.GOLD;
+        return DARK_PURPLE;
+      case -22016:
+        return GOLD;
       case -5592406:
-        return AnsiStyleColor.GRAY;
+        return GRAY;
       case -11184811:
-        return AnsiStyleColor.DARK_GRAY;
-      case -43691:
-        return AnsiStyleColor.BLUE;
-      case -11141291:
-        return AnsiStyleColor.GREEN;
-      case -171:
-        return AnsiStyleColor.AQUA;
+        return DARK_GRAY;
       case -11184641:
-        return AnsiStyleColor.RED;
-      case -43521:
-        return AnsiStyleColor.LIGHT_PURPLE;
+        return BLUE;
+      case -11141291:
+        return GREEN;
       case -11141121:
-        return AnsiStyleColor.YELLOW;
+        return AQUA;
+      case -43691:
+        return RED;
+      case -43521:
+        return LIGHT_PURPLE;
+      case -171:
+        return YELLOW;
       case -1:
-        return AnsiStyleColor.WHITE;
+        return WHITE;
     }
 
     return null;
