@@ -27,7 +27,7 @@ public class OutputBuilder {
   private final char breakChar;
 
   private final List<Object> result;
-  private final Stack<List<Object>> sequencesStack;
+  private final Stack<ComponentSequence> sequencesStack;
 
   public OutputBuilder(
     ComponentConstructor componentConstructor,
@@ -38,13 +38,13 @@ public class OutputBuilder {
     this.interpreter = interpreter;
     this.breakChar = breakChar;
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(new ArrayList<>());
+    this.sequencesStack.push(new ComponentSequence(null));
     this.result = new ArrayList<>();
   }
 
   public void onBreak() {
     if (breakChar != 0) {
-      sequencesStack.peek().add(componentConstructor.createKeyNode(String.valueOf(breakChar)));
+      sequencesStack.peek().members.add(componentConstructor.createKeyNode(String.valueOf(breakChar)));
       return;
     }
 
@@ -52,58 +52,47 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(new ArrayList<>());
+    sequencesStack.push(new ComponentSequence(null));
 
     for (MarkupNode poppedNonTerminal : poppedNonTerminals)
       onNonTerminalBegin(poppedNonTerminal);
   }
 
   public void onNonTerminalBegin(MarkupNode node) {
-    List<Object> sequence = new ArrayList<>();
-    sequence.add(node);
-    sequencesStack.push(sequence);
+    sequencesStack.push(new ComponentSequence(node));
   }
 
   public void onNonTerminalEnd() {
-    Object item = popAndCombineSequence(null);
-
-    if (item == null)
+    if (sequencesStack.isEmpty())
       throw new IllegalStateException("Encountered unbalanced non-terminal-stack");
 
-    sequencesStack.peek().add(item);
+    Object item = popAndCombineSequence(null);
+    sequencesStack.peek().members.add(item);
   }
 
-  private @Nullable Object popAndCombineSequence(@Nullable List<MarkupNode> nonTerminalCollector) {
-    if (sequencesStack.isEmpty())
-      return null;
+  private Object popAndCombineSequence(@Nullable List<MarkupNode> nonTerminalCollector) {
+    ComponentSequence sequence = sequencesStack.pop();
 
-    List<Object> sequence = sequencesStack.pop();
-
-    if (sequence.isEmpty())
+    if (sequence.members.isEmpty())
       return componentConstructor.createTextNode("");
-
-    MarkupNode nonTerminalNode = null;
-
-    if (sequence.get(0) instanceof MarkupNode)
-      nonTerminalNode = (MarkupNode) sequence.remove(0);
 
     Object sequenceComponent;
 
-    if (sequence.size() == 1)
-      sequenceComponent = sequence.get(0);
-    else {
+    if (sequence.members.size() == 1) {
+      sequenceComponent = sequence.members.get(0);
+    } else {
       sequenceComponent = componentConstructor.createTextNode("");
-      componentConstructor.setChildren(sequenceComponent, sequence);
+      componentConstructor.setChildren(sequenceComponent, sequence.members);
     }
 
-    if (nonTerminalNode == null)
+    if (sequence.nonTerminal == null)
       return sequenceComponent;
 
     if (nonTerminalCollector != null)
-      nonTerminalCollector.add(nonTerminalNode);
+      nonTerminalCollector.add(sequence.nonTerminal);
 
-    if (nonTerminalNode instanceof ClickNode) {
-      ClickNode clickNode = (ClickNode) nonTerminalNode;
+    if (sequence.nonTerminal instanceof ClickNode) {
+      ClickNode clickNode = (ClickNode) sequence.nonTerminal;
 
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
@@ -160,20 +149,20 @@ public class OutputBuilder {
       }
     }
 
-    else if (nonTerminalNode instanceof InsertNode) {
-      InsertNode insertNode = (InsertNode) nonTerminalNode;
+    else if (sequence.nonTerminal instanceof InsertNode) {
+      InsertNode insertNode = (InsertNode) sequence.nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
       componentConstructor.setInsertAction(sequenceComponent, value);
     }
 
-    else if (nonTerminalNode instanceof AchievementHoverNode) {
-      AchievementHoverNode achievementHoverNode = (AchievementHoverNode) nonTerminalNode;
+    else if (sequence.nonTerminal instanceof AchievementHoverNode) {
+      AchievementHoverNode achievementHoverNode = (AchievementHoverNode) sequence.nonTerminal;
       String value = interpreter.evaluateAsString(achievementHoverNode.value);
       componentConstructor.setHoverAchievementAction(sequenceComponent, value);
     }
 
-    else if (nonTerminalNode instanceof EntityHoverNode) {
-      EntityHoverNode entityHoverNode = (EntityHoverNode) nonTerminalNode;
+    else if (sequence.nonTerminal instanceof EntityHoverNode) {
+      EntityHoverNode entityHoverNode = (EntityHoverNode) sequence.nonTerminal;
       String type = interpreter.evaluateAsString(entityHoverNode.type);
       String id = interpreter.evaluateAsString(entityHoverNode.id);
 
@@ -194,8 +183,8 @@ public class OutputBuilder {
       componentConstructor.setHoverEntityAction(sequenceComponent, type, uuid, name);
     }
 
-    else if (nonTerminalNode instanceof ItemHoverNode) {
-      ItemHoverNode itemHoverNode = (ItemHoverNode) nonTerminalNode;
+    else if (sequence.nonTerminal instanceof ItemHoverNode) {
+      ItemHoverNode itemHoverNode = (ItemHoverNode) sequence.nonTerminal;
 
       String material = null;
 
@@ -220,8 +209,8 @@ public class OutputBuilder {
       componentConstructor.setHoverItemAction(sequenceComponent, material, count, name, lore);
     }
 
-    else if (nonTerminalNode instanceof TextHoverNode) {
-      TextHoverNode textHoverNode = (TextHoverNode) nonTerminalNode;
+    else if (sequence.nonTerminal instanceof TextHoverNode) {
+      TextHoverNode textHoverNode = (TextHoverNode) sequence.nonTerminal;
 
       List<Object> text = interpreter.interpret(textHoverNode.value, (char) 0);
 
@@ -233,8 +222,8 @@ public class OutputBuilder {
       }
     }
 
-    else if (nonTerminalNode instanceof StyledNode)
-      applyStyles(sequenceComponent, (StyledNode) nonTerminalNode);
+    else if (sequence.nonTerminal instanceof StyledNode)
+      applyStyles(sequenceComponent, (StyledNode) sequence.nonTerminal);
 
     return sequenceComponent;
   }
@@ -416,21 +405,21 @@ public class OutputBuilder {
 
     applyStyles(result, node);
 
-    sequencesStack.peek().add(result);
+    sequencesStack.peek().members.add(result);
 
     return result;
   }
 
   private void popAllSequencesAndAddToResult(@Nullable List<MarkupNode> nonTerminalCollector) {
-    while (true) {
-      Object item = popAndCombineSequence(nonTerminalCollector);
+    while (!sequencesStack.isEmpty()) {
+      Object sequenceComponent = popAndCombineSequence(nonTerminalCollector);
 
-      if (sequencesStack.isEmpty()) {
-        result.add(item);
-        break;
+      if (!sequencesStack.isEmpty()) {
+        sequencesStack.peek().members.add(sequenceComponent);
+        continue;
       }
 
-      sequencesStack.peek().add(item);
+      result.add(sequenceComponent);
     }
   }
 
