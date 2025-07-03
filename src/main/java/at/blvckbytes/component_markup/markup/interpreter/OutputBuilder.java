@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
@@ -34,7 +35,7 @@ public class OutputBuilder {
     this.interpreter = interpreter;
     this.breakChar = breakChar;
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(new ComponentSequence(null, interpreter));
+    this.sequencesStack.push(ComponentSequence.initial());
     this.result = new ArrayList<>();
   }
 
@@ -48,14 +49,15 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(new ComponentSequence(null, interpreter));
+    sequencesStack.push(ComponentSequence.initial());
 
     for (MarkupNode poppedNonTerminal : poppedNonTerminals)
       onNonTerminalBegin(poppedNonTerminal);
   }
 
-  public void onNonTerminalBegin(MarkupNode node) {
-    sequencesStack.push(new ComponentSequence(node, interpreter));
+  public void onNonTerminalBegin(MarkupNode nonTerminal) {
+    ComponentSequence parentSequence = sequencesStack.isEmpty() ? null : sequencesStack.peek();
+    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence));
   }
 
   public void onNonTerminalEnd() {

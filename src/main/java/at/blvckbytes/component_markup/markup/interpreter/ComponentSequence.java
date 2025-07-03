@@ -13,14 +13,22 @@ public class ComponentSequence {
   public final List<Object> members;
   public final @Nullable ComputedStyle computedStyle;
 
-  public ComponentSequence(@Nullable MarkupNode nonTerminal, Interpreter interpreter) {
-    this.nonTerminal = nonTerminal;
+  public static ComponentSequence initial() {
+    return new ComponentSequence(null, null);
+  }
+
+  public static ComponentSequence next(MarkupNode nonTerminal, Interpreter interpreter, ComponentSequence parentSequence) {
+    ComputedStyle computedStyle = null;
 
     if (nonTerminal instanceof StyledNode)
-      this.computedStyle = new ComputedStyle((StyledNode) nonTerminal, interpreter);
-    else
-      this.computedStyle = null;
+      computedStyle = new ComputedStyle((StyledNode) nonTerminal, interpreter);
 
+    return new ComponentSequence(nonTerminal, computedStyle);
+  }
+
+  public ComponentSequence(@Nullable MarkupNode nonTerminal, @Nullable ComputedStyle computedStyle) {
+    this.nonTerminal = nonTerminal;
     this.members = new ArrayList<>();
+    this.computedStyle = computedStyle;
   }
 }
