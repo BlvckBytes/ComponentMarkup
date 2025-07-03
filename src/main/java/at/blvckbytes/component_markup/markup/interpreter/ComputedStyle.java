@@ -99,6 +99,57 @@ public class ComputedStyle extends Jsonifiable {
     return this;
   }
 
+  public ComputedStyle applyDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
+    if (mask == null)
+      return this;
+
+    ComputedStyle defaultStyle = slotContext.defaultStyle;
+
+    if (this.packedColor == PackedColor.NULL_SENTINEL) {
+      if (mask.packedColor != PackedColor.NULL_SENTINEL && mask.packedColor != defaultStyle.packedColor) {
+        this.packedColor = defaultStyle.packedColor;
+      }
+    }
+
+    if (this.packedShadowColor == PackedColor.NULL_SENTINEL) {
+      if (mask.packedShadowColor != PackedColor.NULL_SENTINEL && mask.packedShadowColor != defaultStyle.packedShadowColor)
+        this.packedShadowColor = defaultStyle.packedShadowColor;
+    }
+
+    if (this.font == null) {
+      if (mask.font != null && !mask.font.equals(defaultStyle.font))
+        this.font = defaultStyle.font;
+    }
+
+    // Nothing to set to default or no default value provided
+    if (mask.formats == null || defaultStyle.formats == null)
+      return this;
+
+    for (Format format : Format.VALUES) {
+      Boolean thisFormat = this.formats == null ? null : this.formats[format.ordinal()];
+
+      if (thisFormat != null)
+        continue;
+
+      Boolean maskFormat = mask.formats[format.ordinal()];
+
+      if (maskFormat == null)
+        continue;
+
+      Boolean defaultFormat = defaultStyle.formats[format.ordinal()];
+
+      if (maskFormat.equals(defaultFormat))
+        continue;
+
+      if (this.formats == null)
+        this.formats = new Boolean[mask.formats.length];
+
+      this.formats[format.ordinal()] = defaultFormat;
+    }
+
+    return this;
+  }
+
   public ComputedStyle copy() {
     ComputedStyle result = new ComputedStyle();
     result.packedColor = this.packedColor;

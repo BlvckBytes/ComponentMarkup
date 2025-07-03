@@ -476,6 +476,56 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldResetUnwantedInheritedStyle() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red>",
+      "  <bold>",
+      "    I am bold and red!",
+      "    <reset>",
+      "      <red>I am just red!"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .string("color", "red")
+        .bool("bold", true)
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "I am bold and red!")
+            ))
+            .object(item -> (
+              item
+                .string("text", "I am just red!")
+                .bool("bold", false)
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldResetLoreStyle() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<reset>Hello, world!"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.ITEM_LORE,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .bool("italic", false)
+        .string("color", "white")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

@@ -21,6 +21,7 @@ public class OutputBuilder {
   private final ComponentConstructor componentConstructor;
   private final Interpreter interpreter;
   private final SlotContext slotContext;
+  private final SlotContext chatContext;
 
   private final List<Object> result;
   private final Stack<ComponentSequence> sequencesStack;
@@ -33,6 +34,7 @@ public class OutputBuilder {
     this.componentConstructor = componentConstructor;
     this.interpreter = interpreter;
     this.slotContext = slotContext;
+    this.chatContext = componentConstructor.getSlotContext(SlotType.CHAT);
     this.sequencesStack = new Stack<>();
     this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
     this.result = new ArrayList<>();
@@ -56,7 +58,7 @@ public class OutputBuilder {
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
     ComponentSequence parentSequence = sequencesStack.isEmpty() ? null : sequencesStack.peek();
-    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence));
+    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence, chatContext));
   }
 
   public void onNonTerminalEnd() {
@@ -339,7 +341,7 @@ public class OutputBuilder {
     ComponentSequence parentSequence = sequencesStack.peek();
 
     // Reusing existing machinery to compute style - should remain on the stack
-    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence).styleToApply;
+    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext).styleToApply;
 
     if (style != null)
       style.applyStyles(result, componentConstructor);

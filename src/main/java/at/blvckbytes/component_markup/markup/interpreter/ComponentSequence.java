@@ -38,7 +38,12 @@ public class ComponentSequence {
     return new ComponentSequence(null, null, defaultStyle, null);
   }
 
-  public static ComponentSequence next(MarkupNode styleProvider, Interpreter interpreter, ComponentSequence parentSequence) {
+  public static ComponentSequence next(
+    MarkupNode styleProvider,
+    Interpreter interpreter,
+    ComponentSequence parentSequence,
+    SlotContext chatContext
+  ) {
     ComputedStyle computedStyle = null;
 
     if (styleProvider instanceof StyledNode)
@@ -55,6 +60,14 @@ public class ComponentSequence {
 
       // Add the inherited style to what's currently effective
       effectiveStyle = effectiveStyle == null ? inheritedStyle : effectiveStyle.copy().addMissing(inheritedStyle);
+
+      // Add explicit properties to invert unwanted inherited style
+      // By definition, a reset means resetting to chat-state; thus,
+      // that's the context to get defaults from
+      if (styleProvider != null && styleProvider.doesResetStyle) {
+        ComputedStyle mask = inheritedStyle.copy().subtractCommonalities(computedStyle);
+        styleToApply = styleToApply.applyDefaults(mask, chatContext);
+      }
     }
 
     return new ComponentSequence(styleProvider, computedStyle, effectiveStyle, styleToApply);
