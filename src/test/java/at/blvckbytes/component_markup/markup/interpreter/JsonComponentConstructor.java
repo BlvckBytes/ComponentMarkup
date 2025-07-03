@@ -12,6 +12,15 @@ import java.util.UUID;
 public class JsonComponentConstructor implements ComponentConstructor {
 
   // ================================================================================
+  // SlotContext
+  // ================================================================================
+
+  @Override
+  public SlotContext getSlotContext(SlotType slot) {
+    return SlotContext.getForSlot(slot);
+  }
+
+  // ================================================================================
   // TerminalNode
   // ================================================================================
 

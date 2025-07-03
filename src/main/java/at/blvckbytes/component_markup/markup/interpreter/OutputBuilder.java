@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
@@ -21,7 +20,7 @@ public class OutputBuilder {
 
   private final ComponentConstructor componentConstructor;
   private final Interpreter interpreter;
-  private final char breakChar;
+  private final SlotContext slotContext;
 
   private final List<Object> result;
   private final Stack<ComponentSequence> sequencesStack;
@@ -29,19 +28,19 @@ public class OutputBuilder {
   public OutputBuilder(
     ComponentConstructor componentConstructor,
     Interpreter interpreter,
-    char breakChar
+    SlotContext slotContext
   ) {
     this.componentConstructor = componentConstructor;
     this.interpreter = interpreter;
-    this.breakChar = breakChar;
+    this.slotContext = slotContext;
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial());
+    this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
     this.result = new ArrayList<>();
   }
 
   public void onBreak() {
-    if (breakChar != 0) {
-      sequencesStack.peek().members.add(componentConstructor.createKeyNode(String.valueOf(breakChar)));
+    if (slotContext.breakChar != 0) {
+      sequencesStack.peek().members.add(componentConstructor.createKeyNode(String.valueOf(slotContext.breakChar)));
       return;
     }
 
@@ -49,7 +48,7 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(ComponentSequence.initial());
+    sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
 
     for (MarkupNode poppedNonTerminal : poppedNonTerminals)
       onNonTerminalBegin(poppedNonTerminal);
@@ -169,8 +168,14 @@ public class OutputBuilder {
 
       Object name = null;
 
-      if (entityHoverNode.name != null)
-        name = interpreter.interpret(entityHoverNode.name, ' ').get(0);
+      if (entityHoverNode.name != null) {
+        List<Object> components = interpreter.interpret(
+          entityHoverNode.name,
+          componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
+        );
+
+        name = components.isEmpty() ? null : components.get(0);
+      }
 
       UUID uuid;
 
@@ -199,13 +204,23 @@ public class OutputBuilder {
 
       Object name = null;
 
-      if (itemHoverNode.name != null)
-        name = interpreter.interpret(itemHoverNode.name, ' ').get(0);
+      if (itemHoverNode.name != null) {
+        List<Object> components = interpreter.interpret(
+          itemHoverNode.name,
+          componentConstructor.getSlotContext(SlotType.ITEM_NAME)
+        );
+
+        name = components.isEmpty() ? null : components.get(0);
+      }
 
       List<Object> lore = null;
 
-      if (itemHoverNode.lore != null)
-        lore = interpreter.interpret(itemHoverNode.lore, (char) 0);
+      if (itemHoverNode.lore != null) {
+        lore = interpreter.interpret(
+          itemHoverNode.lore,
+          componentConstructor.getSlotContext(SlotType.ITEM_LORE)
+        );
+      }
 
       componentConstructor.setHoverItemAction(sequenceComponent, material, count, name, lore);
     }
@@ -213,14 +228,13 @@ public class OutputBuilder {
     else if (sequence.nonTerminal instanceof TextHoverNode) {
       TextHoverNode textHoverNode = (TextHoverNode) sequence.nonTerminal;
 
-      List<Object> text = interpreter.interpret(textHoverNode.value, (char) 0);
+      List<Object> components = interpreter.interpret(
+        textHoverNode.value,
+        componentConstructor.getSlotContext(SlotType.TEXT_TOOLTIP)
+      );
 
-      if (text.size() == 1)
-        componentConstructor.setHoverTextAction(sequenceComponent, text.get(0));
-      else {
-        Object name = text.remove(0);
-        componentConstructor.setHoverItemAction(sequenceComponent, "dirt", null, name, text);
-      }
+      if (!components.isEmpty())
+        componentConstructor.setHoverTextAction(sequenceComponent, components.get(0));
     }
 
     return sequenceComponent;
@@ -253,8 +267,14 @@ public class OutputBuilder {
 
       Object separator = null;
 
-      if (selectorNode.separator != null)
-        separator = interpreter.interpret(selectorNode.separator, ' ').get(0);
+      if (selectorNode.separator != null) {
+        List<Object> components = interpreter.interpret(
+          selectorNode.separator,
+          componentConstructor.getSlotContext(SlotType.SELECTOR_SEPARATOR)
+        );
+
+        separator = components.isEmpty() ? null : components.get(0);
+      }
 
       result = componentConstructor.createSelectorNode(selector, separator);
     }
@@ -272,8 +292,14 @@ public class OutputBuilder {
 
       Object separator = null;
 
-      if (nbtNode.separator != null)
-        separator = interpreter.interpret(nbtNode.separator, ' ').get(0);
+      if (nbtNode.separator != null) {
+        List<Object> components = interpreter.interpret(
+          nbtNode.separator,
+          componentConstructor.getSlotContext(SlotType.NBT_SEPARATOR)
+        );
+
+        separator = components.isEmpty() ? null : components.get(0);
+      }
 
       switch (nbtNode.source) {
         case BLOCK:
@@ -300,8 +326,15 @@ public class OutputBuilder {
 
       List<Object> with = new ArrayList<>();
 
-      for (MarkupNode withNode : translateNode.with)
-        with.add(interpreter.interpret(withNode, ' ').get(0));
+      for (MarkupNode withNode : translateNode.with) {
+        List<Object> components = interpreter.interpret(
+          withNode,
+          componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)
+        );
+
+        if (!components.isEmpty())
+          with.add(components.get(0));
+      }
 
       String fallback = null;
 

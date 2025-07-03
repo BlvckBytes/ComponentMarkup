@@ -13,7 +13,7 @@ public class ComponentSequence {
   public final List<Object> members;
   public final @Nullable ComputedStyle computedStyle;
 
-  public static ComponentSequence initial() {
+  public static ComponentSequence initial(ComputedStyle defaultStyle) {
     return new ComponentSequence(null, null);
   }
 

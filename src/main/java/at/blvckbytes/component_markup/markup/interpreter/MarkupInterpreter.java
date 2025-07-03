@@ -44,11 +44,11 @@ public class MarkupInterpreter implements Interpreter {
     ExpressionInterpreter expressionInterpreter,
     InterpretationEnvironment baseEnvironment,
     Logger logger,
-    char breakChar,
+    SlotContext slotContext,
     MarkupNode node
   ) {
     return new MarkupInterpreter(componentConstructor, expressionInterpreter, baseEnvironment, logger)
-      .interpret(node, breakChar);
+      .interpret(node, slotContext);
   }
 
   @Override
@@ -167,8 +167,8 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public List<Object> interpret(MarkupNode node, char breakChar) {
-    builderStack.push(new OutputBuilder(componentConstructor, this, breakChar));
+  public List<Object> interpret(MarkupNode node, SlotContext slotContext) {
+    builderStack.push(new OutputBuilder(componentConstructor, this, slotContext));
     _interpret(node);
     return builderStack.pop().build();
   }

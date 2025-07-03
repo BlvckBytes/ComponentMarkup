@@ -8,10 +8,49 @@ import org.jetbrains.annotations.Nullable;
 
 public class ComputedStyle {
 
-  private int packedColor = PackedColor.NULL_SENTINEL;
-  private int packedShadowColor = PackedColor.NULL_SENTINEL;
-  private @Nullable String font;
-  private @Nullable Boolean @Nullable[] formats;
+  public int packedColor = PackedColor.NULL_SENTINEL;
+  public int packedShadowColor = PackedColor.NULL_SENTINEL;
+  public @Nullable String font;
+  public @Nullable Boolean @Nullable[] formats;
+
+  public ComputedStyle() {}
+
+  public ComputedStyle setFormat(Format format, @Nullable Boolean value) {
+    if (this.formats == null)
+      this.formats = new Boolean[Format.VALUES.size()];
+
+    this.formats[format.ordinal()] = value;
+    return this;
+  }
+
+  public ComputedStyle setFont(@Nullable String font) {
+    this.font = font;
+    return this;
+  }
+
+  public ComputedStyle setColor(int packedColor) {
+    this.packedColor = packedColor;
+    return this;
+  }
+
+  public ComputedStyle setShadowColor(int packedShadowColor) {
+    this.packedShadowColor = packedShadowColor;
+    return this;
+  }
+
+  public ComputedStyle copy() {
+    ComputedStyle result = new ComputedStyle();
+    result.packedColor = this.packedColor;
+    result.packedShadowColor = this.packedShadowColor;
+    result.font = this.font;
+
+    if (this.formats != null) {
+      result.formats = new Boolean[this.formats.length];
+      System.arraycopy(this.formats, 0, result.formats, 0, this.formats.length);
+    }
+
+    return result;
+  }
 
   public ComputedStyle(StyledNode styleHolder, Interpreter interpreter) {
     NodeStyle style = styleHolder.getStyle();

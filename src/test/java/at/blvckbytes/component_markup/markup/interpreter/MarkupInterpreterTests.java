@@ -35,6 +35,7 @@ public class MarkupInterpreterTests {
     makeCase(
       text,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world! :)")
         .string("color", "red")
@@ -54,6 +55,7 @@ public class MarkupInterpreterTests {
       text,
       new EnvironmentBuilder()
         .withStatic("my_flag", true),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "My flag is true!")
         .string("color", "red")
@@ -64,6 +66,7 @@ public class MarkupInterpreterTests {
       text,
       new EnvironmentBuilder()
         .withStatic("my_flag", false),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "My flag is false!")
         .string("color", "blue")
@@ -83,6 +86,7 @@ public class MarkupInterpreterTests {
         .withStatic("my_prefix", "prefix ")
         .withStatic("my_name", "Steve")
         .withStatic("my_suffix", " suffix"),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
         .string("color", "red")
@@ -121,6 +125,7 @@ public class MarkupInterpreterTests {
       text,
       new EnvironmentBuilder()
         .withStatic("my_chars", Arrays.asList("A", "S", "T")),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
         .array("extra", extra -> (
@@ -209,6 +214,7 @@ public class MarkupInterpreterTests {
     makeCase(
       text,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hover over me!")
         .string("color", "aqua")
@@ -234,6 +240,7 @@ public class MarkupInterpreterTests {
     makeCase(
       text,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
         .array("extra", extra -> (
@@ -346,6 +353,7 @@ public class MarkupInterpreterTests {
       new EnvironmentBuilder()
         .withStatic("a", true)
         .withStatic("b", true),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
         .string("color", "red")
@@ -356,6 +364,7 @@ public class MarkupInterpreterTests {
       new EnvironmentBuilder()
         .withStatic("a", true)
         .withStatic("b", false),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
     );
@@ -365,6 +374,7 @@ public class MarkupInterpreterTests {
       new EnvironmentBuilder()
         .withStatic("a", false)
         .withStatic("b", true),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
     );
@@ -374,6 +384,7 @@ public class MarkupInterpreterTests {
       new EnvironmentBuilder()
         .withStatic("a", false)
         .withStatic("b", false),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
     );
@@ -388,6 +399,7 @@ public class MarkupInterpreterTests {
     makeCase(
       text,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
     );
@@ -403,6 +415,7 @@ public class MarkupInterpreterTests {
       text,
       new EnvironmentBuilder()
         .withStatic("a", true),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
         .bool("bold", true)
@@ -416,6 +429,7 @@ public class MarkupInterpreterTests {
       text,
       new EnvironmentBuilder()
         .withStatic("a", false),
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
     );
@@ -430,6 +444,7 @@ public class MarkupInterpreterTests {
     makeCase(
       input,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
         .array("extra", extra -> {
@@ -498,29 +513,30 @@ public class MarkupInterpreterTests {
     throw new IllegalStateException("Unaccounted-for json-element: " + input.getClass());
   }
 
-  private void makeCase(TextWithAnchors input, InterpretationEnvironment baseEnvironment, JsonBuilder expectedResult) {
+  private void makeCase(
+    TextWithAnchors input,
+    InterpretationEnvironment baseEnvironment,
+    SlotType slot,
+    JsonBuilder expectedResult
+  ) {
     MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry, logger);
 
-    char breakChar;
     JsonElement expectedJson;
 
     if (expectedResult instanceof JsonObjectBuilder) {
       JsonArray array = new JsonArray();
       array.add(expectedResult.build());
       expectedJson = array;
-      breakChar = '\n';
     }
-    else if (expectedResult instanceof JsonArrayBuilder) {
+    else if (expectedResult instanceof JsonArrayBuilder)
       expectedJson = expectedResult.build();
-      breakChar = 0;
-    }
     else
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
     List<Object> resultItems = MarkupInterpreter.interpret(
       componentConstructor, expressionInterpreter,
       baseEnvironment,
-      logger, breakChar, actualNode
+      logger, SlotContext.getForSlot(slot), actualNode
     );
 
     JsonArray actualJson = new JsonArray();

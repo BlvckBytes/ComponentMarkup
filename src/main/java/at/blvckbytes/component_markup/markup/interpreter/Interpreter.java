@@ -29,7 +29,7 @@ public interface Interpreter {
 
   @Nullable Object evaluateAsPlainObject(ExpressionNode expression);
 
-  List<Object> interpret(MarkupNode node, char breakChar);
+  List<Object> interpret(MarkupNode node, SlotContext slotContext);
 
   OutputBuilder getCurrentBuilder();
 
