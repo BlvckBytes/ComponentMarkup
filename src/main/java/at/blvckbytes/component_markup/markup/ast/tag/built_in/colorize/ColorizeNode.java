@@ -61,6 +61,9 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
       return InterceptionResult.DO_PROCESS_AND_CALL_AFTER;
     }
 
+    if (node.doesResetStyle)
+      return InterceptionResult.DO_PROCESS;
+
     if (node instanceof TerminalNode) {
       TerminalNode terminalNode = (TerminalNode) node;
       NodeStyle nodeStyle = terminalNode.getStyle();
@@ -92,14 +95,17 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
 
   @Override
   public void onSkippedByParent(MarkupNode node, Interpreter interpreter) {
-    ColorizeNodeState state = getState(interpreter);
-
-    if (!(node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)))
-      return;
-
-    if (!state.flags.contains(ColorizeFlag.DEEP) && interpreter.isInSubtree())
-      return;
-
-    state.discard();
+    // TODO: Do I need to discard state of a >parent< has skipped? Then, intercept
+    //       has never been called, and thus state never began. Leaving the code here as
+    //       a mental note, as I haven't experimented with this exact situation yet.
+//    ColorizeNodeState state = getState(interpreter);
+//
+//    if (!(node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)))
+//      return;
+//
+//    if (!state.flags.contains(ColorizeFlag.DEEP) && interpreter.isInSubtree())
+//      return;
+//
+//    state.discard();
   }
 }

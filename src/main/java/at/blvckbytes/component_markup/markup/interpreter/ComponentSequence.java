@@ -66,6 +66,10 @@ public class ComponentSequence {
       // that's the context to get defaults from
       if (styleProvider != null && styleProvider.doesResetStyle) {
         ComputedStyle mask = inheritedStyle.copy().subtractCommonalities(computedStyle);
+
+        if (styleToApply == null)
+          styleToApply = new ComputedStyle();
+
         styleToApply = styleToApply.applyDefaults(mask, chatContext);
       }
     }
