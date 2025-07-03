@@ -40,7 +40,6 @@ public class ImmediateFormatTag extends TagDefinition {
     namedFormats.add("obfuscated");
     namedFormats.add("!obf");
     namedFormats.add("!obfuscated");
-    namedFormats.add("reset");
 
     staticPrefixes = new String[namedFormats.size() + 1];
 
@@ -149,11 +148,6 @@ public class ImmediateFormatTag extends TagDefinition {
       case "!obfuscated":
         format = Format.OBFUSCATED;
         break;
-
-      case "&r":
-      case "reset":
-        style.reset();
-        return;
 
       default:
         return;
