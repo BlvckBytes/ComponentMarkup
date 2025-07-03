@@ -62,8 +62,10 @@ public class OutputBuilder {
   }
 
   public void onNonTerminalEnd() {
-    if (sequencesStack.isEmpty())
+    if (sequencesStack.isEmpty()) {
+      // TODO: Rather log than crash
       throw new IllegalStateException("Encountered unbalanced non-terminal-stack");
+    }
 
     Object item = popAndCombineSequence(null);
     sequencesStack.peek().addMember(item);
@@ -136,6 +138,7 @@ public class OutputBuilder {
         }
 
         default:
+          // TODO: Rather log than crash
           throw new IllegalStateException("Unknown click-action: " + clickNode.action);
       }
     }
@@ -306,6 +309,7 @@ public class OutputBuilder {
           break;
 
         default:
+          // TODO: Rather log than crash
           throw new IllegalStateException("Unknown nbt-source: " + nbtNode.source);
       }
     }
@@ -336,6 +340,7 @@ public class OutputBuilder {
     }
 
     else
+      // TODO: Rather log than crash
       throw new IllegalStateException("Unknown terminal-node: " + node.getClass());
 
     ComponentSequence parentSequence = sequencesStack.peek();

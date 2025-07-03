@@ -42,7 +42,14 @@ public class TemporaryMemberEnvironment implements InterpretationEnvironment {
   }
 
   public void popVariable(String name) {
-    shadowingStaticVariables.computeIfAbsent(name, k -> new Stack<>()).pop();
+    Stack<Object> valueStack = shadowingStaticVariables.computeIfAbsent(name, k -> new Stack<>());
+
+    if (valueStack.isEmpty()) {
+      // TODO: Log about unbalanced stack
+      return;
+    }
+
+    valueStack.pop();
   }
 
   @Override

@@ -189,8 +189,10 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
-    if (node.conditions.isEmpty())
+    if (node.conditions.isEmpty()) {
+      // TODO: Rather log than crash
       throw new IllegalStateException("Expecting at least one condition!");
+    }
 
     for (MarkupNode conditional : node.conditions) {
       if (conditional.ifCondition == null) {
@@ -222,8 +224,10 @@ public class MarkupInterpreter implements Interpreter {
     for (LetBinding letBinding : node.letBindings) {
       Object value = expressionInterpreter.interpret(letBinding.expression, environment);
 
-      if (boundVariables.put(letBinding.name, value) != null)
+      if (boundVariables.put(letBinding.name, value) != null) {
+        // TODO: Rather log than crash
         throw new IllegalStateException("Duplicate let-binding " + letBinding.name);
+      }
     }
 
     // Set them after evaluating all bindings, such that bindings cannot access each others

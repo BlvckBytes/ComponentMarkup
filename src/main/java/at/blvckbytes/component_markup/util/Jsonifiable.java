@@ -43,6 +43,7 @@ public abstract class Jsonifiable {
           field.setAccessible(true);
           result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
+          // TODO: Rather log than crash
           throw new IllegalStateException("Could not access field " + fieldName + " of " + currentClass, e);
         }
       }
@@ -54,6 +55,7 @@ public abstract class Jsonifiable {
         if (!method.isAnnotationPresent(JsonifyGetter.class))
           continue;
 
+        // TODO: Rather log than crash
         if (method.getParameterCount() > 0)
           throw new IllegalStateException("Can only call getters which require no arguments");
 
@@ -63,6 +65,7 @@ public abstract class Jsonifiable {
           method.setAccessible(true);
           result.add(methodName, jsonifyObject(method.getReturnType(), method.invoke(instance)));
         } catch (Exception e) {
+          // TODO: Rather log than crash
           throw new IllegalStateException("Could not access method " + methodName + " of " + currentClass, e);
         }
       }
@@ -121,6 +124,7 @@ public abstract class Jsonifiable {
       return result;
     }
 
+    // TODO: Rather log than crash
     throw new IllegalStateException("Don't know how to stringify " + item.getClass().getSimpleName());
   }
 
