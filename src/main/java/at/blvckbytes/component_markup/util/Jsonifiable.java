@@ -103,6 +103,9 @@ public abstract class Jsonifiable {
     if (item instanceof String)
       return new JsonPrimitive((String) item);
 
+    if (item instanceof Character)
+      return new JsonPrimitive(String.valueOf(item));
+
     if (item instanceof Boolean)
       return new JsonPrimitive((Boolean) item);
 

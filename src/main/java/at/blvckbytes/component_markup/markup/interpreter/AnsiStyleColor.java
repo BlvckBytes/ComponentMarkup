@@ -44,7 +44,7 @@ public enum AnsiStyleColor {
   public final String name;
   public final char colorChar;
   public final List<String> aliases;
-  public final int packedColor;
+  public final long packedColor;
 
   private final float[] labColor;
 
@@ -56,8 +56,11 @@ public enum AnsiStyleColor {
     this.labColor = CIELabColorSpace.getInstance().fromRGB(new float[] {r / 255f, g / 255f, b / 255f});
   }
 
-  public static @Nullable AnsiStyleColor fromColor(int packedColor) {
-    switch (packedColor) {
+  public static @Nullable AnsiStyleColor fromColor(long packedColor) {
+    if (packedColor == PackedColor.NULL_SENTINEL)
+      return null;
+
+    switch ((int) packedColor) {
       case -16777216:
         return BLACK;
       case -16777046:
@@ -95,7 +98,7 @@ public enum AnsiStyleColor {
     return null;
   }
 
-  public static AnsiStyleColor getNearestColor(int packedColor) {
+  public static AnsiStyleColor getNearestColor(long packedColor) {
     AnsiStyleColor closestItem;
 
     if ((closestItem = fromColor(packedColor)) != null)

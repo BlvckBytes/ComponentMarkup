@@ -1,11 +1,12 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
+import at.blvckbytes.component_markup.util.Jsonifiable;
 
-public class SlotContext {
+public class SlotContext extends Jsonifiable {
 
   private static final String DEFAULT_FONT = "minecraft:default";
-  private static final int DEFAULT_SHADOW_COLOR = PackedColor.setClampedA(AnsiStyleColor.BLACK.packedColor, 64);
+  private static final long DEFAULT_SHADOW_COLOR = PackedColor.setClampedA(AnsiStyleColor.BLACK.packedColor, 64);
 
   private static final SlotContext SLOT_CHAT = new SlotContext(
     '\n',

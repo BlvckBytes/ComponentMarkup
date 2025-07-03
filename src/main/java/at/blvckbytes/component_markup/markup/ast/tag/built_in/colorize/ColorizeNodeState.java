@@ -24,7 +24,7 @@ public abstract class ColorizeNodeState {
     this.injectedComponentsStack = new Stack<>();
   }
 
-  protected int getPackedColor(int index, int length) {
+  protected long getPackedColor(int index, int length) {
     double progressionPercentage = (index / (double) length) * 100;
 
     if (progressionPercentage > 100)
@@ -38,7 +38,7 @@ public abstract class ColorizeNodeState {
     return getPackedColor(progressionPercentage);
   }
 
-  protected abstract int getPackedColor(double progressionPercentage);
+  protected abstract long getPackedColor(double progressionPercentage);
 
   public boolean doesTargetNode(ColorizeNode node) {
     return node.tagNameLower.equals(this.tagNameLower);
@@ -68,7 +68,7 @@ public abstract class ColorizeNodeState {
     for (int index = 0; index < length; ++index) {
       Object injectedComponent = injectedComponents.get(index);
 
-      int color = getPackedColor(index, length);
+      long color = getPackedColor(index, length);
 
       if (color != PackedColor.NULL_SENTINEL)
         interpreter.getComponentConstructor().setColor(injectedComponent, color);

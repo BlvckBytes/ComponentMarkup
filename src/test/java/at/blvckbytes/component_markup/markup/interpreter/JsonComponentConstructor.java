@@ -249,7 +249,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setColor(Object component, int packedColor) {
+  public void setColor(Object component, long packedColor) {
     if (packedColor == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("color");
       return;
@@ -266,7 +266,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setShadowColor(Object component, int packedColor) {
+  public void setShadowColor(Object component, long packedColor) {
     if (packedColor == PackedColor.NULL_SENTINEL) {
       ((JsonObject) component).remove("shadow_color");
       return;

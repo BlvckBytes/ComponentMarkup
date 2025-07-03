@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
 
 public class RainbowGenerator {
 
-  public int getPackedColor(double progressionPercentage) {
+  public long getPackedColor(double progressionPercentage) {
     float h = (float) ((progressionPercentage / 100) * 6);
 
     int i = (int) Math.floor(h);

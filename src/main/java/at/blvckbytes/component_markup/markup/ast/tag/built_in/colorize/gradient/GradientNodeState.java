@@ -55,9 +55,9 @@ public class GradientNodeState extends ColorizeNodeState {
     return result;
   }
 
-  private int[] evaluatePackedColors(ExpressionList colors, Interpreter interpreter) {
+  private long[] evaluatePackedColors(ExpressionList colors, Interpreter interpreter) {
     List<ExpressionNode> colorList = colors.get(interpreter);
-    int[] result = new int[colorList.size()];
+    long[] result = new long[colorList.size()];
 
     for (int i = 0; i < result.length; ++i) {
       String colorString = interpreter.evaluateAsStringOrNull(colorList.get(i));
@@ -65,7 +65,7 @@ public class GradientNodeState extends ColorizeNodeState {
       if (colorString == null)
         continue;
 
-      int componentColor = PackedColor.tryParse(colorString);
+      long componentColor = PackedColor.tryParse(colorString);
 
       if (componentColor == PackedColor.NULL_SENTINEL)
         componentColor = AnsiStyleColor.WHITE.packedColor;
@@ -77,7 +77,7 @@ public class GradientNodeState extends ColorizeNodeState {
   }
 
   @Override
-  protected int getPackedColor(double progressionPercentage) {
+  protected long getPackedColor(double progressionPercentage) {
     return gradientGenerator.getPackedColor(progressionPercentage);
   }
 }

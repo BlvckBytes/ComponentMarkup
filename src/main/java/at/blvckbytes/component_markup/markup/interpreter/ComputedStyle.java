@@ -4,12 +4,13 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.util.Jsonifiable;
 import org.jetbrains.annotations.Nullable;
 
-public class ComputedStyle {
+public class ComputedStyle extends Jsonifiable {
 
-  public int packedColor = PackedColor.NULL_SENTINEL;
-  public int packedShadowColor = PackedColor.NULL_SENTINEL;
+  public long packedColor = PackedColor.NULL_SENTINEL;
+  public long packedShadowColor = PackedColor.NULL_SENTINEL;
   public @Nullable String font;
   public @Nullable Boolean @Nullable[] formats;
 
@@ -28,12 +29,12 @@ public class ComputedStyle {
     return this;
   }
 
-  public ComputedStyle setColor(int packedColor) {
+  public ComputedStyle setColor(long packedColor) {
     this.packedColor = packedColor;
     return this;
   }
 
-  public ComputedStyle setShadowColor(int packedShadowColor) {
+  public ComputedStyle setShadowColor(long packedShadowColor) {
     this.packedShadowColor = packedShadowColor;
     return this;
   }
@@ -122,7 +123,7 @@ public class ComputedStyle {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
 
       if (colorString != null) {
-        int packedColor = PackedColor.tryParse(colorString);
+        long packedColor = PackedColor.tryParse(colorString);
 
         if (packedColor != PackedColor.NULL_SENTINEL)
           this.packedColor = packedColor;
@@ -131,14 +132,14 @@ public class ComputedStyle {
 
     if (style.shadowColor != null || style.shadowColorOpacity != null) {
       // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
-      int packedColor = AnsiStyleColor.BLACK.packedColor;
+      long packedColor = AnsiStyleColor.BLACK.packedColor;
       int opacity = 64;
 
       if (style.shadowColor != null) {
         String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
 
         if (colorString != null) {
-          int parsedPackedColor = PackedColor.tryParse(colorString);
+          long parsedPackedColor = PackedColor.tryParse(colorString);
 
           if (parsedPackedColor != PackedColor.NULL_SENTINEL)
             packedColor = parsedPackedColor;

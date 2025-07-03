@@ -14,7 +14,7 @@ public class RainbowNodeState extends ColorizeNodeState {
   }
 
   @Override
-  protected int getPackedColor(double progressionPercentage) {
+  protected long getPackedColor(double progressionPercentage) {
     return rainbowGenerator.getPackedColor(progressionPercentage);
   }
 }

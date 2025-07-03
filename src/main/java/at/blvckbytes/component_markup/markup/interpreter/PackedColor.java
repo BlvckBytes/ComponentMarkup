@@ -2,40 +2,40 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 public class PackedColor {
 
-  public static final int NULL_SENTINEL = -1;
+  public static final long NULL_SENTINEL = -1;
 
-  public static int of(int r, int g, int b, int a) {
-    return (b & 0xFF) | ((g & 0xFF) << 8) | ((r & 0xFF) << 16) | ((a & 0xFF) << 24);
+  public static long of(int r, int g, int b, int a) {
+    return (b & 0xFF) | ((g & 0xFF) << 8) | ((r & 0xFF) << 16) | ((long) (a & 0xFF) << 24);
   }
 
-  public static int of(float r, float g, float b) {
+  public static long of(float r, float g, float b) {
     return of((int) (r * 255 + .5), (int) (g * 255 + .5), (int) (b * 255 + .5), 255);
   }
 
-  public static int getA(int packedColor) {
+  public static long getA(long packedColor) {
     return (packedColor >> 24) & 0xFF;
   }
 
-  public static int getR(int packedColor) {
+  public static long getR(long packedColor) {
     return (packedColor >> 16) & 0xFF;
   }
 
-  public static int getG(int packedColor) {
+  public static long getG(long packedColor) {
     return (packedColor >> 8) & 0xFF;
   }
 
-  public static int getB(int packedColor) {
+  public static long getB(long packedColor) {
     return packedColor & 0xFF;
   }
 
-  public static int setClampedA(int packedColor, int a) {
+  public static long setClampedA(long packedColor, int a) {
     if (a < 0)
       a = 0;
 
-    return (packedColor & 0xFFFFFF) | ((a & 0xFF) << 24);
+    return (packedColor & 0xFFFFFF) | ((long) (a & 0xFF) << 24);
   }
 
-  public static String asNonAlphaHex(int packedColor) {
+  public static String asNonAlphaHex(long packedColor) {
     char[] result = new char[7];
 
     result[0] = '#';
@@ -47,7 +47,7 @@ public class PackedColor {
     return new String(result);
   }
 
-  public static String asAlphaHex(int packedColor) {
+  public static String asAlphaHex(long packedColor) {
     char[] result = new char[9];
 
     result[0] = '#';
@@ -60,7 +60,7 @@ public class PackedColor {
     return new String(result);
   }
 
-  public static int tryParse(String input) {
+  public static long tryParse(String input) {
     int inputLength = input.length();
 
     if (inputLength < 2)
@@ -133,9 +133,9 @@ public class PackedColor {
     return result;
   }
 
-  private static void toHex(char[] output, int offset, int input) {
-    int firstDigit = (input >> 4) & 0xF;
-    int secondDigit = input & 0xF;
+  private static void toHex(char[] output, int offset, long input) {
+    long firstDigit = (input >> 4) & 0xF;
+    long secondDigit = input & 0xF;
 
     output[offset] = firstDigit < 10 ? (char) ('0' + firstDigit) : (char) ('A' + (firstDigit - 10));
     output[offset + 1] = secondDigit < 10 ? (char) ('0' + secondDigit) : (char) ('A' + (secondDigit - 10));

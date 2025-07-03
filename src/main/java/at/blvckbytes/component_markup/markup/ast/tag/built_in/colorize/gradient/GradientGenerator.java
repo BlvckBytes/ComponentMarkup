@@ -7,11 +7,11 @@ import java.util.Arrays;
 
 public class GradientGenerator {
 
-  public final int[] packedColors;
+  public final long[] packedColors;
   public final double[] offsets;
   public final long[] zIndices;
 
-  public GradientGenerator(int[] packedColors, double[] offsets, long[] zIndices) {
+  public GradientGenerator(long[] packedColors, double[] offsets, long[] zIndices) {
     this.packedColors = packedColors;
     this.zIndices = zIndices;
     this.offsets = clampAndPossiblyExtendOffsets(packedColors.length, offsets);
@@ -78,13 +78,13 @@ public class GradientGenerator {
     return offsets;
   }
 
-  public int getPackedColor(double progressionPercentage) {
+  public long getPackedColor(double progressionPercentage) {
     int colorCount = packedColors.length;
 
     if (colorCount == 0)
       return AnsiStyleColor.WHITE.packedColor;
 
-    int firstColor = packedColors[0];
+    long firstColor = packedColors[0];
 
     if (colorCount == 1)
       return firstColor;
@@ -92,18 +92,18 @@ public class GradientGenerator {
     double firstOffset = offsets[0];
 
     int lastIndex = packedColors.length - 1;
-    int lastColor = packedColors[lastIndex];
+    long lastColor = packedColors[lastIndex];
     double lastOffset = offsets[lastIndex];
 
     long firstZIndex = zIndices.length == 0 ? 0 : zIndices[0];
     long lastZIndex = lastIndex >= zIndices.length ? 0 : zIndices[lastIndex];
 
-    int aColor = firstColor, bColor = lastColor;
+    long aColor = firstColor, bColor = lastColor;
     double aOffset = firstOffset, bOffset = lastOffset;
     long aZIndex = firstZIndex, bZIndex = lastZIndex;
 
     for (int i = 1; i < colorCount - 1; i++) {
-      int currentColor = packedColors[i];
+      long currentColor = packedColors[i];
       double currentOffset = offsets[i];
       long currentZIndex = i >= zIndices.length ? 0 : zIndices[i];
 
