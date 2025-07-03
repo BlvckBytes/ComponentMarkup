@@ -435,6 +435,47 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldNotRepeatInheritedStyle() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red><bold>hello</><italic>world <red>test</>"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .string("color", "red")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .bool("bold", true)
+                .string("text", "hello")
+            ))
+            .object(item -> (
+              item
+                .string("text", "")
+                // TODO: These should be joined, of course, but that's another TODO on my list
+                .array("extra", innerExtra -> (
+                  innerExtra
+                    .object(innerItem -> (
+                      innerItem
+                        .string("text", "world ")
+                    ))
+                    .object(innerItem -> (
+                      innerItem
+                        .string("text", "test")
+                    ))
+                ))
+                .bool("italic", true)
+            ))
+        ))
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

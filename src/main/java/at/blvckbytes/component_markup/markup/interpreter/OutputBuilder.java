@@ -40,7 +40,7 @@ public class OutputBuilder {
 
   public void onBreak() {
     if (slotContext.breakChar != 0) {
-      sequencesStack.peek().members.add(componentConstructor.createKeyNode(String.valueOf(slotContext.breakChar)));
+      sequencesStack.peek().addMember(componentConstructor.createKeyNode(String.valueOf(slotContext.breakChar)));
       return;
     }
 
@@ -64,26 +64,15 @@ public class OutputBuilder {
       throw new IllegalStateException("Encountered unbalanced non-terminal-stack");
 
     Object item = popAndCombineSequence(null);
-    sequencesStack.peek().members.add(item);
+    sequencesStack.peek().addMember(item);
   }
 
   private Object popAndCombineSequence(@Nullable List<MarkupNode> nonTerminalCollector) {
     ComponentSequence sequence = sequencesStack.pop();
+    Object sequenceComponent = sequence.combine(componentConstructor);
 
-    if (sequence.members.isEmpty())
-      return componentConstructor.createTextNode("");
-
-    Object sequenceComponent;
-
-    if (sequence.members.size() == 1) {
-      sequenceComponent = sequence.members.get(0);
-    } else {
-      sequenceComponent = componentConstructor.createTextNode("");
-      componentConstructor.setChildren(sequenceComponent, sequence.members);
-    }
-
-    if (sequence.computedStyle != null)
-      sequence.computedStyle.applyStyles(sequenceComponent, componentConstructor);
+    if (sequence.styleToApply != null)
+      sequence.styleToApply.applyStyles(sequenceComponent, componentConstructor);
 
     if (sequence.nonTerminal == null)
       return sequenceComponent;
@@ -347,9 +336,15 @@ public class OutputBuilder {
     else
       throw new IllegalStateException("Unknown terminal-node: " + node.getClass());
 
-    new ComputedStyle(node, interpreter).applyStyles(result, componentConstructor);
+    ComponentSequence parentSequence = sequencesStack.peek();
 
-    sequencesStack.peek().members.add(result);
+    // Reusing existing machinery to compute style - should remain on the stack
+    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence).styleToApply;
+
+    if (style != null)
+      style.applyStyles(result, componentConstructor);
+
+    parentSequence.addMember(result);
 
     return result;
   }
@@ -359,7 +354,7 @@ public class OutputBuilder {
       Object sequenceComponent = popAndCombineSequence(nonTerminalCollector);
 
       if (!sequencesStack.isEmpty()) {
-        sequencesStack.peek().members.add(sequenceComponent);
+        sequencesStack.peek().addMember(sequenceComponent);
         continue;
       }
 

@@ -38,6 +38,66 @@ public class ComputedStyle {
     return this;
   }
 
+  public ComputedStyle addMissing(@Nullable ComputedStyle other) {
+    if (other == null)
+      return this;
+
+    if (this.packedColor == PackedColor.NULL_SENTINEL)
+      this.packedColor = other.packedColor;
+
+    if (this.packedShadowColor == PackedColor.NULL_SENTINEL)
+      this.packedShadowColor = other.packedShadowColor;
+
+    if (this.font == null)
+      this.font = other.font;
+
+    if (this.formats == null) {
+      if (other.formats != null) {
+        this.formats = new Boolean[other.formats.length];
+        System.arraycopy(other.formats, 0, this.formats, 0, other.formats.length);
+      }
+
+      return this;
+    }
+
+    if (other.formats != null) {
+      for (Format format : Format.VALUES) {
+        if (this.formats[format.ordinal()] != null)
+          continue;
+
+        this.formats[format.ordinal()] = other.formats[format.ordinal()];
+      }
+    }
+
+    return this;
+  }
+
+  public ComputedStyle subtractCommonalities(@Nullable ComputedStyle other) {
+    if (other == null)
+      return this;
+
+    if (this.font != null && this.font.equals(other.font))
+      this.font = null;
+
+    if (this.packedColor != PackedColor.NULL_SENTINEL && this.packedColor == other.packedColor)
+      this.packedColor = PackedColor.NULL_SENTINEL;
+
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && this.packedShadowColor == other.packedShadowColor)
+      this.packedShadowColor = PackedColor.NULL_SENTINEL;
+
+    if (this.formats == null || other.formats == null)
+      return this;
+
+    for (Format format : Format.VALUES) {
+      Boolean thisFormat = this.formats[format.ordinal()];
+
+      if (thisFormat != null && thisFormat.equals(other.formats[format.ordinal()]))
+        this.formats[format.ordinal()] = null;
+    }
+
+    return this;
+  }
+
   public ComputedStyle copy() {
     ComputedStyle result = new ComputedStyle();
     result.packedColor = this.packedColor;
