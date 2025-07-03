@@ -10,11 +10,9 @@ import java.util.List;
 
 public class ResetTag extends TagDefinition {
 
-  private static final String TAG_NAME = "reset";
-
   protected ResetTag() {
     super(
-      new String[]{ TAG_NAME },
+      new String[]{ "r", "reset" },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL
     );
@@ -22,7 +20,7 @@ public class ResetTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("r") || tagNameLower.equals("reset");
   }
 
   @Override
