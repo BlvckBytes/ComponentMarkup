@@ -13,7 +13,7 @@ import java.util.Map;
 
 public abstract class Jsonifiable {
 
-  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
+  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
 
   public JsonObject jsonify() {
     return jsonify(this);
