@@ -1,8 +1,8 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.markup.xml.SubstringBuilder;
-import at.blvckbytes.component_markup.markup.xml.SubstringFlag;
+import at.blvckbytes.component_markup.util.SubstringBuilder;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;

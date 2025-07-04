@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.util.SubstringBuilder;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;

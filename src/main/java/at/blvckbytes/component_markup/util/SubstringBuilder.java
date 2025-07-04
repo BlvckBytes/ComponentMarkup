@@ -1,4 +1,4 @@
-package at.blvckbytes.component_markup.markup.xml;
+package at.blvckbytes.component_markup.util;
 
 import java.util.EnumSet;
 
