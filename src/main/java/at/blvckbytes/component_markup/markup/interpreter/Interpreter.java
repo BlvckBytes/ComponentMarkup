@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +26,7 @@ public interface Interpreter {
 
   boolean evaluateAsBoolean(ExpressionNode expression);
 
-  @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression);
+  TriState evaluateAsTriState(ExpressionNode expression);
 
   @Nullable Object evaluateAsPlainObject(ExpressionNode expression);
 

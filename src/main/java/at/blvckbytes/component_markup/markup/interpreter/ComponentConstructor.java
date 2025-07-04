@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -78,15 +79,15 @@ public interface ComponentConstructor {
 
   void setFont(Object component, @Nullable String font);
 
-  void setObfuscatedFormat(Object component, @Nullable Boolean value);
+  void setObfuscatedFormat(Object component, TriState value);
 
-  void setBoldFormat(Object component, @Nullable Boolean value);
+  void setBoldFormat(Object component, TriState value);
 
-  void setStrikethroughFormat(Object component, @Nullable Boolean value);
+  void setStrikethroughFormat(Object component, TriState value);
 
-  void setUnderlinedFormat(Object component, @Nullable Boolean value);
+  void setUnderlinedFormat(Object component, TriState value);
 
-  void setItalicFormat(Object component, @Nullable Boolean value);
+  void setItalicFormat(Object component, TriState value);
 
   // ================================================================================
   // Miscellaneous

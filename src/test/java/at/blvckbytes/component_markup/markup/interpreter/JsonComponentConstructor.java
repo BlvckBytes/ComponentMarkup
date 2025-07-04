@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.util.TriState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -293,37 +294,37 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setObfuscatedFormat(Object component, @Nullable Boolean value) {
+  public void setObfuscatedFormat(Object component, TriState value) {
     setFormat(component, "obfuscated", value);
   }
 
   @Override
-  public void setBoldFormat(Object component, @Nullable Boolean value) {
+  public void setBoldFormat(Object component, TriState value) {
     setFormat(component, "bold", value);
   }
 
   @Override
-  public void setStrikethroughFormat(Object component, @Nullable Boolean value) {
+  public void setStrikethroughFormat(Object component, TriState value) {
     setFormat(component, "strikethrough", value);
   }
 
   @Override
-  public void setUnderlinedFormat(Object component, @Nullable Boolean value) {
+  public void setUnderlinedFormat(Object component, TriState value) {
     setFormat(component, "underlined", value);
   }
 
   @Override
-  public void setItalicFormat(Object component, @Nullable Boolean value) {
+  public void setItalicFormat(Object component, TriState value) {
     setFormat(component, "italic", value);
   }
 
-  private void setFormat(Object component, String formatKey, @Nullable Boolean value) {
-    if (value == null) {
+  private void setFormat(Object component, String formatKey, TriState value) {
+    if (value == TriState.NULL) {
       ((JsonObject) component).remove(formatKey);
       return;
     }
 
-    ((JsonObject) component).addProperty(formatKey, value);
+    ((JsonObject) component).addProperty(formatKey, value == TriState.TRUE);
   }
 
   // ================================================================================

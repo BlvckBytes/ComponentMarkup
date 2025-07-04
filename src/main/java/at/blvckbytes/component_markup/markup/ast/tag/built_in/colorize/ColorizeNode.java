@@ -69,7 +69,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
       NodeStyle nodeStyle = terminalNode.getStyle();
 
       if (nodeStyle != null) {
-        if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsBooleanOrNull(nodeStyle.color) != null)
+        if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsPlainObject(nodeStyle.color) != null)
           return InterceptionResult.DO_PROCESS;
       }
 

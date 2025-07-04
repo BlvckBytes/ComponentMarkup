@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -38,24 +39,19 @@ public class ColorizeAttributes {
   public EnumSet<ColorizeFlag> getFlags(Interpreter interpreter) {
     EnumSet<ColorizeFlag> result = EnumSet.noneOf(ColorizeFlag.class);
 
-    Boolean ret = null;
-
-    if (this.deep != null && (ret = interpreter.evaluateAsBooleanOrNull(this.deep)) != null && ret)
+    if (this.deep != null && interpreter.evaluateAsTriState(this.deep) == TriState.TRUE)
       result.add(ColorizeFlag.DEEP);
 
-    if (this.overrideColors != null && (ret = interpreter.evaluateAsBooleanOrNull(this.overrideColors)) != null && ret)
+    if (this.overrideColors != null && interpreter.evaluateAsTriState(this.overrideColors) == TriState.TRUE)
       result.add(ColorizeFlag.OVERRIDE_COLORS);
 
-    if (this.skipWhitespace != null)
-      ret = interpreter.evaluateAsBooleanOrNull(this.skipWhitespace);
-
-    if (ret == null || ret)
+    if (this.skipWhitespace == null || interpreter.evaluateAsTriState(this.skipWhitespace) != TriState.FALSE)
       result.add(ColorizeFlag.SKIP_WHITESPACE);
 
-    if (this.skipNonText != null && (ret = interpreter.evaluateAsBooleanOrNull(this.skipNonText)) != null && ret)
+    if (this.skipNonText != null && interpreter.evaluateAsTriState(this.skipNonText) == TriState.TRUE)
       result.add(ColorizeFlag.SKIP_NON_TEXT);
 
-    if (this.mergeInner != null && (ret = interpreter.evaluateAsBooleanOrNull(this.mergeInner)) != null && ret)
+    if (this.mergeInner != null && interpreter.evaluateAsTriState(this.mergeInner) == TriState.TRUE)
       result.add(ColorizeFlag.MERGE_INNER);
 
     return result;

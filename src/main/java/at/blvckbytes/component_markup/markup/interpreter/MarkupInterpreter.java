@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -129,23 +130,23 @@ public class MarkupInterpreter implements Interpreter {
 
   @Override
   public boolean evaluateAsBoolean(ExpressionNode expression) {
-    Boolean value = evaluateAsBooleanOrNull(expression);
+    TriState value = evaluateAsTriState(expression);
 
-    if (value == null)
+    if (value == TriState.NULL)
       return false;
 
-    return value;
+    return value == TriState.TRUE;
   }
 
   @Override
-  public @Nullable Boolean evaluateAsBooleanOrNull(ExpressionNode expression) {
+  public TriState evaluateAsTriState(ExpressionNode expression) {
     try {
       Object result = expressionInterpreter.interpret(expression, environment);
 
       if (result == null)
-        return null;
+        return TriState.NULL;
 
-      return environment.getValueInterpreter().asBoolean(result);
+      return environment.getValueInterpreter().asBoolean(result) ? TriState.TRUE : TriState.FALSE;
     } catch (Throwable e) {
       LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a boolean", e);
       return null;

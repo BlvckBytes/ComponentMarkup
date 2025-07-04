@@ -12,4 +12,5 @@ public enum Format {
   ITALIC;
 
   public static final List<Format> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
+  public static final int COUNT = VALUES.size();
 }

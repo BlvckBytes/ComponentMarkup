@@ -2,6 +2,8 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.util.Jsonifiable;
+import at.blvckbytes.component_markup.util.TriState;
+import at.blvckbytes.component_markup.util.TriStateBitFlags;
 
 public class SlotContext extends Jsonifiable {
 
@@ -18,7 +20,7 @@ public class SlotContext extends Jsonifiable {
     ' ',
     applyCommonDefaults(
       new ComputedStyle()
-        .setFormat(Format.ITALIC, true)
+        .setFormat(Format.ITALIC, TriState.TRUE)
     )
   );
 
@@ -27,7 +29,7 @@ public class SlotContext extends Jsonifiable {
     applyCommonDefaults(
       new ComputedStyle()
         .setColor(AnsiStyleColor.DARK_PURPLE.packedColor)
-        .setFormat(Format.ITALIC, true)
+        .setFormat(Format.ITALIC, TriState.TRUE)
     )
   );
 
@@ -73,12 +75,9 @@ public class SlotContext extends Jsonifiable {
     if (input.font == null)
       input.font = DEFAULT_FONT;
 
-    if (input.formats == null)
-      input.formats = new Boolean[Format.VALUES.size()];
-
-    for (Format format : Format.VALUES) {
-      if (input.formats[format.ordinal()] == null)
-        input.formats[format.ordinal()] = false;
+    for (int index = 0; index < Format.COUNT; ++index) {
+      if (TriStateBitFlags.read(input.formats, index) == TriState.NULL)
+        input.formats = TriStateBitFlags.write(input.formats, index, TriState.FALSE);
     }
 
     return input;

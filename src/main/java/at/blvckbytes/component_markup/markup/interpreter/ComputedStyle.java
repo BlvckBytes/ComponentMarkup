@@ -6,6 +6,8 @@ import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.TriState;
+import at.blvckbytes.component_markup.util.TriStateBitFlags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
@@ -15,15 +17,12 @@ public class ComputedStyle extends Jsonifiable {
   public long packedColor = PackedColor.NULL_SENTINEL;
   public long packedShadowColor = PackedColor.NULL_SENTINEL;
   public @Nullable String font;
-  public @Nullable Boolean @Nullable[] formats;
+  public int formats;
 
   public ComputedStyle() {}
 
-  public ComputedStyle setFormat(Format format, @Nullable Boolean value) {
-    if (this.formats == null)
-      this.formats = new Boolean[Format.VALUES.size()];
-
-    this.formats[format.ordinal()] = value;
+  public ComputedStyle setFormat(Format format, TriState value) {
+    this.formats = TriStateBitFlags.write(formats, format.ordinal(), value);
     return this;
   }
 
@@ -55,22 +54,21 @@ public class ComputedStyle extends Jsonifiable {
     if (this.font == null)
       this.font = other.font;
 
-    if (this.formats == null) {
-      if (other.formats != null) {
-        this.formats = new Boolean[other.formats.length];
-        System.arraycopy(other.formats, 0, this.formats, 0, other.formats.length);
-      }
-
+    if (TriStateBitFlags.isAllNulls(this.formats)) {
+      this.formats = other.formats;
       return this;
     }
 
-    if (other.formats != null) {
-      for (Format format : Format.VALUES) {
-        if (this.formats[format.ordinal()] != null)
-          continue;
+    if (TriStateBitFlags.isAllNulls(other.formats))
+      return this;
 
-        this.formats[format.ordinal()] = other.formats[format.ordinal()];
-      }
+    for (int index = 0; index < Format.COUNT; ++index) {
+      if (TriStateBitFlags.read(this.formats, index) != TriState.NULL)
+        continue;
+
+      TriState otherState = TriStateBitFlags.read(other.formats, index);
+
+      this.formats = TriStateBitFlags.write(this.formats, index, otherState);
     }
 
     return this;
@@ -80,23 +78,28 @@ public class ComputedStyle extends Jsonifiable {
     if (other == null)
       return;
 
-    if ((this.font == null) == (other.font != null))
+    if (this.font != null && other.font == null)
       this.font = null;
 
-    if ((this.packedColor == PackedColor.NULL_SENTINEL) == (other.packedColor != PackedColor.NULL_SENTINEL))
+    if (this.packedColor != PackedColor.NULL_SENTINEL && other.packedColor == PackedColor.NULL_SENTINEL)
       this.packedColor = PackedColor.NULL_SENTINEL;
 
-    if ((this.packedShadowColor == PackedColor.NULL_SENTINEL) == (other.packedShadowColor != PackedColor.NULL_SENTINEL))
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && other.packedShadowColor == PackedColor.NULL_SENTINEL)
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
 
-    if (this.formats == null || other.formats == null)
+    if (TriStateBitFlags.isAllNulls(this.formats))
       return;
 
-    for (Format format : Format.VALUES) {
-      Boolean thisFormat = this.formats[format.ordinal()];
+    for (int index = 0; index < Format.COUNT; ++index) {
+      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
 
-      if ((thisFormat == null) == (other.formats[format.ordinal()] != null))
-        this.formats[format.ordinal()] = null;
+      if (thisFormat == TriState.NULL)
+        continue;
+
+      TriState otherFormat = TriStateBitFlags.read(other.formats, index);
+
+      if (otherFormat == TriState.NULL)
+        this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
     }
   }
 
@@ -113,14 +116,18 @@ public class ComputedStyle extends Jsonifiable {
     if (this.packedShadowColor != PackedColor.NULL_SENTINEL && other.packedShadowColor != PackedColor.NULL_SENTINEL)
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
 
-    if (this.formats == null || other.formats == null)
+    if (TriStateBitFlags.isAllNulls(this.formats) || TriStateBitFlags.isAllNulls(other.formats))
       return;
 
-    for (Format format : Format.VALUES) {
-      Boolean thisFormat = this.formats[format.ordinal()];
+    for (int index = 0; index < Format.COUNT; ++index) {
+      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
 
-      if (thisFormat != null && other.formats[format.ordinal()] != null)
-        this.formats[format.ordinal()] = null;
+      if (thisFormat != TriState.NULL) {
+        TriState otherFormat = TriStateBitFlags.read(other.formats, index);
+
+        if (otherFormat != TriState.NULL)
+          this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
+      }
     }
   }
 
@@ -137,14 +144,18 @@ public class ComputedStyle extends Jsonifiable {
     if (this.packedShadowColor != PackedColor.NULL_SENTINEL && this.packedShadowColor == other.packedShadowColor)
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
 
-    if (this.formats == null || other.formats == null)
+    if (TriStateBitFlags.isAllNulls(this.formats) || TriStateBitFlags.isAllNulls(other.formats))
       return this;
 
-    for (Format format : Format.VALUES) {
-      Boolean thisFormat = this.formats[format.ordinal()];
+    for (int index = 0; index < Format.COUNT; ++index) {
+      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
 
-      if (thisFormat != null && thisFormat.equals(other.formats[format.ordinal()]))
-        this.formats[format.ordinal()] = null;
+      if (thisFormat != TriState.NULL) {
+        TriState otherFormat = TriStateBitFlags.read(other.formats, index);
+
+        if (thisFormat == otherFormat)
+          this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
+      }
     }
 
     return this;
@@ -173,29 +184,26 @@ public class ComputedStyle extends Jsonifiable {
     }
 
     // Nothing to set to default or no default value provided
-    if (mask.formats == null || defaultStyle.formats == null)
+    if (TriStateBitFlags.isAllNulls(mask.formats) || TriStateBitFlags.isAllNulls(defaultStyle.formats))
       return this;
 
-    for (Format format : Format.VALUES) {
-      Boolean thisFormat = this.formats == null ? null : this.formats[format.ordinal()];
+    for (int index = 0; index < Format.COUNT; ++index) {
+      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
 
-      if (thisFormat != null)
+      if (thisFormat != TriState.NULL)
         continue;
 
-      Boolean maskFormat = mask.formats[format.ordinal()];
+      TriState maskFormat = TriStateBitFlags.read(mask.formats, index);
 
-      if (maskFormat == null)
+      if (maskFormat == TriState.NULL)
         continue;
 
-      Boolean defaultFormat = defaultStyle.formats[format.ordinal()];
+      TriState defaultFormat = TriStateBitFlags.read(defaultStyle.formats, index);
 
-      if (maskFormat.equals(defaultFormat))
+      if (maskFormat == defaultFormat)
         continue;
 
-      if (this.formats == null)
-        this.formats = new Boolean[mask.formats.length];
-
-      this.formats[format.ordinal()] = defaultFormat;
+      this.formats = TriStateBitFlags.write(this.formats, index, defaultFormat);
     }
 
     return this;
@@ -206,12 +214,7 @@ public class ComputedStyle extends Jsonifiable {
     result.packedColor = this.packedColor;
     result.packedShadowColor = this.packedShadowColor;
     result.font = this.font;
-
-    if (this.formats != null) {
-      result.formats = new Boolean[this.formats.length];
-      System.arraycopy(this.formats, 0, result.formats, 0, this.formats.length);
-    }
-
+    result.formats = this.formats;
     return result;
   }
 
@@ -261,21 +264,18 @@ public class ComputedStyle extends Jsonifiable {
     if (style.font != null)
       this.font = interpreter.evaluateAsStringOrNull(style.font);
 
-    for (Format format : Format.VALUES) {
-      ExpressionNode formatExpression = style.formatStates[format.ordinal()];
+    for (int index = 0; index < Format.COUNT; ++index) {
+      ExpressionNode formatExpression = style.formatStates[index];
 
       if (formatExpression == null)
         continue;
 
-      Boolean value = interpreter.evaluateAsBooleanOrNull(formatExpression);
+      TriState value = interpreter.evaluateAsTriState(formatExpression);
 
-      if (value == null)
+      if (value == TriState.NULL)
         continue;
 
-      if (this.formats == null)
-        this.formats = new Boolean[style.formatStates.length];
-
-      this.formats[format.ordinal()] = value;
+      this.formats = TriStateBitFlags.write(this.formats, index, value);
     }
   }
 
@@ -289,37 +289,39 @@ public class ComputedStyle extends Jsonifiable {
     if (font != null)
       componentConstructor.setFont(component, font);
 
-    if (formats != null) {
-      for (Format format : Format.VALUES) {
-        Boolean value = formats[format.ordinal()];
+    if (TriStateBitFlags.isAllNulls(formats))
+      return;
 
-        if (value == null)
-          continue;
+    for (Format format : Format.VALUES) {
+      TriState state = TriStateBitFlags.read(formats, format.ordinal());
 
-        switch (format) {
-          case BOLD:
-            componentConstructor.setBoldFormat(component, value);
-            break;
+      // As of now, there's no need to ever remove formats again, so don't call into the constructor
+      if (state == TriState.NULL)
+        continue;
 
-          case ITALIC:
-            componentConstructor.setItalicFormat(component, value);
-            break;
+      switch (format) {
+        case BOLD:
+          componentConstructor.setBoldFormat(component, state);
+          break;
 
-          case OBFUSCATED:
-            componentConstructor.setObfuscatedFormat(component, value);
-            break;
+        case ITALIC:
+          componentConstructor.setItalicFormat(component, state);
+          break;
 
-          case UNDERLINED:
-            componentConstructor.setUnderlinedFormat(component, value);
-            break;
+        case OBFUSCATED:
+          componentConstructor.setObfuscatedFormat(component, state);
+          break;
 
-          case STRIKETHROUGH:
-            componentConstructor.setStrikethroughFormat(component, value);
-            break;
+        case UNDERLINED:
+          componentConstructor.setUnderlinedFormat(component, state);
+          break;
 
-          default:
-            LoggerProvider.get().log(Level.WARNING, "Encountered unknown format: " + format.name());
-        }
+        case STRIKETHROUGH:
+          componentConstructor.setStrikethroughFormat(component, state);
+          break;
+
+        default:
+          LoggerProvider.get().log(Level.WARNING, "Encountered unknown format: " + format.name());
       }
     }
   }
