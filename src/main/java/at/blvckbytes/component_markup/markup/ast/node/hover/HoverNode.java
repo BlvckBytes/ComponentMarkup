@@ -12,7 +12,7 @@ public abstract class HoverNode extends MarkupNode {
   public HoverNode(
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
   }

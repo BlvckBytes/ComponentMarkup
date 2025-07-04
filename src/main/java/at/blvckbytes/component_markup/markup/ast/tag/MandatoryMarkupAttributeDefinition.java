@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -11,7 +12,10 @@ public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
     super(name, MarkupAttribute.class, flags);
   }
 
-  public MarkupNode single(AttributeMap attributes) {
+  public MarkupNode single(@Nullable AttributeMap attributes) {
+    if (attributes == null)
+      throw new AbsentMandatoryAttributeException(this);
+
     MarkupNode result = attributes.firstMarkupOrNull(this);
 
     if (result != null)
@@ -20,7 +24,10 @@ public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
     throw new AbsentMandatoryAttributeException(this);
   }
 
-  public List<MarkupNode> multi(AttributeMap attributes) {
+  public List<MarkupNode> multi(@Nullable AttributeMap attributes) {
+    if (attributes == null)
+      throw new AbsentMandatoryAttributeException(this);
+
     return attributes.markups(this);
   }
 }

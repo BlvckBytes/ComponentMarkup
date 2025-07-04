@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -11,8 +12,8 @@ public class ContainerNode extends StyledNode {
 
   public ContainerNode(
     CursorPosition position,
-    List<MarkupNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<MarkupNode> children,
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
   }

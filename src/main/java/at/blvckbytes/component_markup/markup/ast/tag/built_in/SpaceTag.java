@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -28,11 +29,11 @@ public class SpaceTag extends TagDefinition {
 
   @Override
   public @NotNull MarkupNode createNode(
-    String tagNameLower,
-    CursorPosition position,
-    AttributeMap attributes,
-    List<LetBinding> letBindings,
-    List<MarkupNode> children
+    @NotNull String tagNameLower,
+    @NotNull CursorPosition position,
+    @Nullable AttributeMap attributes,
+    @Nullable List<LetBinding> letBindings,
+    @Nullable List<MarkupNode> children
   ) {
     return new TextNode(SPACE_TEXT, position, letBindings);
   }

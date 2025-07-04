@@ -15,7 +15,7 @@ public class InsertNode extends MarkupNode {
   public InsertNode(
     ExpressionNode value,
     CursorPosition position,
-    List<MarkupNode> children,
+    @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);

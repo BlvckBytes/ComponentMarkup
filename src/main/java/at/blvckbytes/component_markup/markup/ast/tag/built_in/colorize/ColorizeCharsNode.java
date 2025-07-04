@@ -18,7 +18,13 @@ import java.util.function.Function;
 
 public class ColorizeCharsNode extends ColorizeNode {
 
-  public ColorizeCharsNode(String tagNameLower, Function<Interpreter, ColorizeNodeState> stateCreator, CursorPosition position, @Nullable List<MarkupNode> children, @Nullable List<LetBinding> letBindings) {
+  public ColorizeCharsNode(
+    String tagNameLower,
+    Function<Interpreter, ColorizeNodeState> stateCreator,
+    CursorPosition position,
+    @Nullable List<MarkupNode> children,
+    @Nullable List<LetBinding> letBindings
+  ) {
     super(tagNameLower, stateCreator, position, children, letBindings);
   }
 

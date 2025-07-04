@@ -45,10 +45,10 @@ public abstract class TagDefinition {
   public abstract boolean matchName(String tagNameLower);
 
   public abstract @NotNull MarkupNode createNode(
-    String tagNameLower,
-    CursorPosition position,
-    AttributeMap attributes,
-    List<LetBinding> letBindings,
-    List<MarkupNode> children
+    @NotNull String tagNameLower,
+    @NotNull CursorPosition position,
+    @Nullable AttributeMap attributes,
+    @Nullable List<LetBinding> letBindings,
+    @Nullable List<MarkupNode> children
   );
 }

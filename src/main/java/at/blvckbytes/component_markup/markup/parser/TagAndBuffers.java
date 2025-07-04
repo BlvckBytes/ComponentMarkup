@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TagAndBuffers implements ParserChildItem {
 
@@ -26,13 +25,12 @@ public class TagAndBuffers implements ParserChildItem {
   public final String tagNameLower;
   public final CursorPosition position;
 
-  private final List<LetBinding> bindings;
-  private final Set<String> bindingNames;
+  private @Nullable List<LetBinding> bindings;
+  private @Nullable Set<String> bindingNames;
 
-  private final AttributeMap attributes;
-  private final Set<String> attributeNames;
+  private @Nullable AttributeMap attributes;
 
-  public final List<ParserChildItem> children;
+  private @Nullable List<ParserChildItem> children;
 
   public @Nullable ExpressionNode ifCondition;
   public ConditionType ifConditionType = ConditionType.NONE;
@@ -47,28 +45,40 @@ public class TagAndBuffers implements ParserChildItem {
     this.tag = tag;
     this.tagNameLower = tagNameLower;
     this.position = position;
-
-    this.bindings = new ArrayList<>();
-    this.bindingNames = new HashSet<>();
-    this.attributes = new AttributeMap();
-    this.attributeNames = new HashSet<>();
-    this.children = new ArrayList<>();
   }
 
   public boolean hasAttribute(String name) {
-    return this.attributeNames.contains(name);
+    if (this.attributes == null)
+      return false;
+
+    return this.attributes.hasName(name);
   }
 
   public void addAttribute(Attribute attribute) {
+    if (this.attributes == null)
+      this.attributes = new AttributeMap();
+
     this.attributes.add(attribute);
-    this.attributeNames.add(attribute.name);
   }
 
   public boolean hasLetBinding(String name) {
+    if (this.bindingNames == null)
+      return false;
+
     return this.bindingNames.contains(name);
   }
 
   public boolean addLetBinding(LetBinding letBinding) {
+    if (this.bindings == null) {
+      this.bindings = new ArrayList<>();
+      this.bindings.add(letBinding);
+      this.bindingNames = new HashSet<>();
+      this.bindingNames.add(letBinding.name);
+      return true;
+    }
+
+    assert this.bindingNames != null;
+
     if (!this.bindingNames.add(letBinding.name))
       return false;
 
@@ -76,7 +86,17 @@ public class TagAndBuffers implements ParserChildItem {
     return true;
   }
 
-  private List<MarkupNode> getProcessedChildren() {
+  public void addChild(ParserChildItem childItem) {
+    if (this.children == null)
+      this.children = new ArrayList<>();
+
+    this.children.add(childItem);
+  }
+
+  private @Nullable List<MarkupNode> getProcessedChildren() {
+    if (this.children == null)
+      return null;
+
     List<MarkupNode> result = new ArrayList<>(children.size());
 
     ConditionType priorConditionType = ConditionType.NONE;
@@ -232,7 +252,7 @@ public class TagAndBuffers implements ParserChildItem {
     return result;
   }
 
-  private @Nullable MarkupNode createNodeOrNull(List<MarkupNode> processedChildren) {
+  private @Nullable MarkupNode createNodeOrNull(@Nullable List<MarkupNode> processedChildren) {
     try {
       return tag.createNode(tagNameLower, position, attributes, bindings, processedChildren);
     } catch (Throwable thrownError) {
@@ -259,7 +279,7 @@ public class TagAndBuffers implements ParserChildItem {
       if (!(definition instanceof MandatoryExpressionAttributeDefinition || definition instanceof MandatoryMarkupAttributeDefinition))
         continue;
 
-      if (attributes.hasName(definition.name))
+      if (attributes != null && attributes.hasName(definition.name))
         continue;
 
       if (missingNames == null)

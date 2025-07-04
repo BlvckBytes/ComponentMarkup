@@ -38,11 +38,11 @@ public class ImmediateColorTag extends TagDefinition {
 
   @Override
   public @NotNull MarkupNode createNode(
-    String tagNameLower,
-    CursorPosition position,
-    AttributeMap attributes,
-    List<LetBinding> letBindings,
-    List<MarkupNode> children
+    @NotNull String tagNameLower,
+    @NotNull CursorPosition position,
+    @Nullable AttributeMap attributes,
+    @Nullable List<LetBinding> letBindings,
+    @Nullable List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
 

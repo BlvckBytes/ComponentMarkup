@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class ColorizeTag extends TagDefinition {
 
@@ -27,7 +28,7 @@ public abstract class ColorizeTag extends TagDefinition {
     );
   }
 
-  protected ColorizeAttributes getBaseAttributes(AttributeMap attributes) {
+  protected ColorizeAttributes getBaseAttributes(@Nullable AttributeMap attributes) {
     return new ColorizeAttributes(
       ATTR_PHASE.singleOrNull(attributes),
       ATTR_DEEP.singleOrNull(attributes),

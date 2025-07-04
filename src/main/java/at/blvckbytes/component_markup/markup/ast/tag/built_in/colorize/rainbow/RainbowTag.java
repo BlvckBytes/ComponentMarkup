@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeC
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -28,11 +29,11 @@ public class RainbowTag extends ColorizeTag {
 
   @Override
   public @NotNull MarkupNode createNode(
-    String tagNameLower,
-    CursorPosition position,
-    AttributeMap attributes,
-    List<LetBinding> letBindings,
-    List<MarkupNode> children
+    @NotNull String tagNameLower,
+    @NotNull CursorPosition position,
+    @Nullable AttributeMap attributes,
+    @Nullable List<LetBinding> letBindings,
+    @Nullable List<MarkupNode> children
   ) {
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 

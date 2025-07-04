@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeA
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,11 +35,11 @@ public class TransitionTag extends ColorizeTag {
 
   @Override
   public @NotNull MarkupNode createNode(
-    String tagNameLower,
-    CursorPosition position,
-    AttributeMap attributes,
-    List<LetBinding> letBindings,
-    List<MarkupNode> children
+    @NotNull String tagNameLower,
+    @NotNull CursorPosition position,
+    @Nullable AttributeMap attributes,
+    @Nullable List<LetBinding> letBindings,
+    @Nullable List<MarkupNode> children
   ) {
     ExpressionList colors = ATTR_COLOR.multi(attributes);
     ExpressionList offsets = ATTR_OFFSET.multi(attributes);

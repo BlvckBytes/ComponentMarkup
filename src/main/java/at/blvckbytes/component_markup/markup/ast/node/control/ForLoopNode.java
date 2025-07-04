@@ -21,7 +21,7 @@ public class ForLoopNode extends MarkupNode {
     MarkupNode body,
     @Nullable MarkupNode separator,
     @Nullable ExpressionNode reversed,
-    List<LetBinding> letBindings
+    @Nullable List<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
 

@@ -21,8 +21,8 @@ public class ItemHoverNode extends HoverNode {
     @Nullable MarkupNode name,
     @Nullable MarkupNode lore,
     CursorPosition position,
-    List<MarkupNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<MarkupNode> children,
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

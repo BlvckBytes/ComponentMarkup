@@ -310,7 +310,7 @@ public class MarkupParser implements XmlEventConsumer {
       throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG, currentLayer.tagNameLower);
 
     tagStack.pop();
-    tagStack.peek().children.add(currentLayer);
+    tagStack.peek().addChild(currentLayer);
   }
 
   @Override
@@ -321,7 +321,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.children.add(new TextNode(ImmediateExpression.of(text), lastPosition, null));
+    currentLayer.addChild(new TextNode(ImmediateExpression.of(text), lastPosition, null));
   }
 
   @Override
@@ -332,7 +332,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.children.add(new TextNode(parseExpression(expression, valueBeginPosition), lastPosition, null));
+    currentLayer.addChild(new TextNode(parseExpression(expression, valueBeginPosition), lastPosition, null));
   }
 
   @Override
@@ -347,7 +347,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK);
 
       TagAndBuffers openedTag = tagStack.pop();
-      tagStack.peek().children.add(openedTag);
+      tagStack.peek().addChild(openedTag);
       return;
     }
 
@@ -357,7 +357,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       while (tagStack.size() > 1) {
         TagAndBuffers openedTag = tagStack.pop();
-        tagStack.peek().children.add(openedTag);
+        tagStack.peek().addChild(openedTag);
       }
 
       return;
@@ -378,7 +378,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (tagStack.isEmpty())
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName);
 
-      tagStack.peek().children.add(openedTag);
+      tagStack.peek().addChild(openedTag);
     } while(!openedTag.tagNameLower.equals(tagName));
   }
 
@@ -395,7 +395,7 @@ public class MarkupParser implements XmlEventConsumer {
         break;
       }
 
-      tagStack.peek().children.add(currentLayer);
+      tagStack.peek().addChild(currentLayer);
     }
   }
 

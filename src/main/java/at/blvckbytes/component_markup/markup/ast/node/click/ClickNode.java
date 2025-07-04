@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -17,8 +18,8 @@ public class ClickNode extends MarkupNode {
     ClickAction action,
     ExpressionNode value,
     CursorPosition position,
-    List<MarkupNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<MarkupNode> children,
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

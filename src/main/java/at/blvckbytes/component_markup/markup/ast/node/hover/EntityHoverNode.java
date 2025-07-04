@@ -19,8 +19,8 @@ public class EntityHoverNode extends HoverNode {
     ExpressionNode id,
     @Nullable MarkupNode name,
     CursorPosition position,
-    List<MarkupNode> children,
-    List<LetBinding> letBindings
+    @Nullable List<MarkupNode> children,
+    @Nullable List<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

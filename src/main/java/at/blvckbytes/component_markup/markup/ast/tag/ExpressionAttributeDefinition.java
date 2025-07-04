@@ -6,15 +6,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class ExpressionAttributeDefinition extends AttributeDefinition {
 
+  private static final ExpressionList EMPTY_LIST = new ExpressionList();
+
   public ExpressionAttributeDefinition(String name, AttributeFlag... flags) {
     super(name, ExpressionAttribute.class, flags);
   }
 
-  public @Nullable ExpressionNode singleOrNull(AttributeMap attributes) {
+  public @Nullable ExpressionNode singleOrNull(@Nullable AttributeMap attributes) {
+    if (attributes == null)
+      return null;
+
     return attributes.firstExpressionOrNull(this);
   }
 
-  public ExpressionList multi(AttributeMap attributes) {
+  public ExpressionList multi(@Nullable AttributeMap attributes) {
+    if (attributes == null)
+      return EMPTY_LIST;
+
     return attributes.expressions(this);
   }
 }
