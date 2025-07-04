@@ -6,13 +6,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ComponentSequence {
 
   private final ComponentConstructor componentConstructor;
   public final @Nullable MarkupNode nonTerminal;
   private @Nullable List<Object> members;
-  private @Nullable List<String> unstyledTexts;
+
+  private @Nullable List<String> bufferedTexts;
+  private @Nullable ComputedStyle bufferedTextsStyle;
+
   public final @Nullable ComputedStyle computedStyle;
   public final @Nullable ComputedStyle effectiveStyle;
   public final @Nullable ComputedStyle styleToApply;
@@ -35,42 +39,53 @@ public class ComponentSequence {
     return commonStyle;
   }
 
-  public void addUnstyledText(String text) {
-    if (this.unstyledTexts == null)
-      this.unstyledTexts = new ArrayList<>();
+  public void addBufferedText(String text, @Nullable ComputedStyle style) {
+    if (this.bufferedTexts == null)
+      this.bufferedTexts = new ArrayList<>();
 
-    this.unstyledTexts.add(text);
+    if (!Objects.equals(style, bufferedTextsStyle))
+      concatAndInstantiateBufferedTexts();
+
+    this.bufferedTexts.add(text);
+    bufferedTextsStyle = style;
 
     if (commonStyle == null)
-      commonStyle = new ComputedStyle();
+      commonStyle = style == null ? new ComputedStyle() : style;
   }
 
-  private void concatAndInstantiateUnstyledTexts() {
-    if (unstyledTexts == null || unstyledTexts.isEmpty())
+  private void concatAndInstantiateBufferedTexts() {
+    if (bufferedTexts == null || bufferedTexts.isEmpty())
       return;
 
-    int unstyledCount = unstyledTexts.size();
+    int unstyledCount = bufferedTexts.size();
 
     if (this.members == null)
       this.members = new ArrayList<>();
 
+    Object result;
+
     if (unstyledCount == 1)
-      members.add(componentConstructor.createTextNode(unstyledTexts.get(0)));
+      result = componentConstructor.createTextNode(bufferedTexts.get(0));
 
     else {
       StringBuilder accumulator = new StringBuilder();
 
-      for (String unstyledText : unstyledTexts)
+      for (String unstyledText : bufferedTexts)
         accumulator.append(unstyledText);
 
-      members.add(componentConstructor.createTextNode(accumulator.toString()));
+      result = componentConstructor.createTextNode(accumulator.toString());
     }
 
-    unstyledTexts.clear();
+    if (bufferedTextsStyle != null)
+      bufferedTextsStyle.applyStyles(result, componentConstructor);
+
+    members.add(result);
+
+    bufferedTexts.clear();
   }
 
   public void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
-    concatAndInstantiateUnstyledTexts();
+    concatAndInstantiateBufferedTexts();
 
     if (this.members == null)
       this.members = new ArrayList<>();
@@ -86,7 +101,7 @@ public class ComponentSequence {
   }
 
   public Object combine(ComponentConstructor componentConstructor) {
-    concatAndInstantiateUnstyledTexts();
+    concatAndInstantiateBufferedTexts();
 
     if (this.members == null || this.members.isEmpty())
      return componentConstructor.createTextNode("");

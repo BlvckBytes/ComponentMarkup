@@ -176,7 +176,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldUpdateLetBindingOnLoopNode() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red *for=\"1..3\" let-number=\"loop.index + 1\">{{number}}"
+      "<container *for=\"1..3\" let-number=\"loop.index + 1\">{{number}}"
     );
 
     makeCase(
@@ -184,25 +184,7 @@ public class MarkupInterpreterTests {
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
       SlotType.CHAT,
       new JsonObjectBuilder()
-        .string("text", "")
-        .array("extra", extra -> (
-          extra
-            .object(item -> (
-              item
-                .string("text", "1")
-                .string("color", "red")
-            ))
-            .object(item -> (
-              item
-                .string("text", "2")
-                .string("color", "red")
-            ))
-            .object(item -> (
-              item
-                .string("text", "3")
-                .string("color", "red")
-            ))
-        ))
+        .string("text", "123")
     );
   }
 
@@ -515,6 +497,22 @@ public class MarkupInterpreterTests {
                 .string("color", "blue")
             ))
         ))
+    );
+  }
+
+  @Test
+  public void shouldJoinSubsequentTextsOfEqualStyle() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *for=\"1..5\">A</red>"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "AAAAA")
+        .string("color", "red")
     );
   }
 

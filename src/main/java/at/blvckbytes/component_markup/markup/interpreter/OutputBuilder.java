@@ -247,8 +247,8 @@ public class OutputBuilder {
     if (node instanceof TextNode) {
       String text = interpreter.evaluateAsString(((TextNode) node).text);
 
-      if (!forceImmediateCreation && (style == null || !style.hasEffect())) {
-        parentSequence.addUnstyledText(text);
+      if (!forceImmediateCreation) {
+        parentSequence.addBufferedText(text, style);
         return null;
       }
 

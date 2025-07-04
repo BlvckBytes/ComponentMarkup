@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.logging.Level;
 
 public class ComputedStyle extends Jsonifiable {
@@ -21,17 +22,16 @@ public class ComputedStyle extends Jsonifiable {
 
   public ComputedStyle() {}
 
-  public boolean hasEffect() {
-    if (packedColor != PackedColor.NULL_SENTINEL)
-      return true;
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ComputedStyle)) return false;
+    ComputedStyle that = (ComputedStyle) o;
+    return packedColor == that.packedColor && packedShadowColor == that.packedShadowColor && formats == that.formats && Objects.equals(font, that.font);
+  }
 
-    if (packedShadowColor != PackedColor.NULL_SENTINEL)
-      return true;
-
-    if(font != null)
-      return true;
-
-    return !TriStateBitFlags.isAllNulls(formats);
+  @Override
+  public int hashCode() {
+    return Objects.hash(packedColor, packedShadowColor, font, formats);
   }
 
   public ComputedStyle setFormat(Format format, TriState value) {
