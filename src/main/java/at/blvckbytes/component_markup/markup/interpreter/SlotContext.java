@@ -23,7 +23,7 @@ public class SlotContext extends Jsonifiable {
   );
 
   private static final SlotContext SLOT_ITEM_LORE = new SlotContext(
-    ' ',
+    '\0',
     applyCommonDefaults(
       new ComputedStyle()
         .setColor(AnsiStyleColor.DARK_PURPLE.packedColor)
