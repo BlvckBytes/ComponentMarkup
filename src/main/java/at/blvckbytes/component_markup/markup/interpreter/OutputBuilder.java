@@ -72,12 +72,12 @@ public class OutputBuilder {
       return;
     }
 
-    Object item = popAndCombineSequence(null);
+    ComponentSequence sequence = sequencesStack.pop();
+    Object item = combineSequenceAndApplyNonTerminal(sequence);
     sequencesStack.peek().addMember(item);
   }
 
-  private Object popAndCombineSequence(@Nullable List<MarkupNode> nonTerminalCollector) {
-    ComponentSequence sequence = sequencesStack.pop();
+  private Object combineSequenceAndApplyNonTerminal(ComponentSequence sequence) {
     Object sequenceComponent = sequence.combine(componentConstructor);
 
     if (sequence.styleToApply != null)
@@ -85,9 +85,6 @@ public class OutputBuilder {
 
     if (sequence.nonTerminal == null)
       return sequenceComponent;
-
-    if (nonTerminalCollector != null)
-      nonTerminalCollector.add(sequence.nonTerminal);
 
     if (sequence.nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) sequence.nonTerminal;
@@ -345,7 +342,6 @@ public class OutputBuilder {
 
     ComponentSequence parentSequence = sequencesStack.peek();
 
-    // Reusing existing machinery to compute style - should remain on the stack
     ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext).styleToApply;
 
     if (style != null)
@@ -358,7 +354,12 @@ public class OutputBuilder {
 
   private void popAllSequencesAndAddToResult(@Nullable List<MarkupNode> nonTerminalCollector) {
     while (!sequencesStack.isEmpty()) {
-      Object sequenceComponent = popAndCombineSequence(nonTerminalCollector);
+      ComponentSequence sequence = sequencesStack.pop();
+
+      if (sequence.nonTerminal != null && nonTerminalCollector != null)
+        nonTerminalCollector.add(sequence.nonTerminal);
+
+      Object sequenceComponent = combineSequenceAndApplyNonTerminal(sequence);
 
       if (!sequencesStack.isEmpty()) {
         sequencesStack.peek().addMember(sequenceComponent);
