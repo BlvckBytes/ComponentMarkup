@@ -176,7 +176,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldUpdateLetBindingOnLoopNode() {
     TextWithAnchors text = new TextWithAnchors(
-      "<container *for=\"1..3\" let-number=\"loop.index + 1\">{{number}}"
+      "<container *for=\"1..3\" for-separator={<space/>} let-number=\"loop.index + 1\">{{number}}"
     );
 
     makeCase(
@@ -184,7 +184,7 @@ public class MarkupInterpreterTests {
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
       SlotType.CHAT,
       new JsonObjectBuilder()
-        .string("text", "123")
+        .string("text", "1 2 3")
     );
   }
 

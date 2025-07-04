@@ -47,5 +47,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new RainbowTag());
     register(new TransitionTag());
     register(new ResetTag());
+    register(new SpaceTag());
   }
 }
