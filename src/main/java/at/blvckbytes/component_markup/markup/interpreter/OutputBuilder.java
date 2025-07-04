@@ -238,7 +238,7 @@ public class OutputBuilder {
     return sequenceComponent;
   }
 
-  public @Nullable Object onTerminal(TerminalNode node, boolean forceImmediateCreation) {
+  public @Nullable Object onTerminal(TerminalNode node, DelayedCreationHandler creationHandler) {
     Object result = null;
 
     ComponentSequence parentSequence = sequencesStack.peek();
@@ -247,8 +247,8 @@ public class OutputBuilder {
     if (node instanceof TextNode) {
       String text = interpreter.evaluateAsString(((TextNode) node).text);
 
-      if (!forceImmediateCreation) {
-        parentSequence.addBufferedText(text, style);
+      if (creationHandler != DelayedCreationHandler.IMMEDIATE_SENTINEL) {
+        parentSequence.addBufferedText(text, style, creationHandler);
         return null;
       }
 

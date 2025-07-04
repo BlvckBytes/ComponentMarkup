@@ -112,10 +112,10 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   }
 
   protected void addInjected(ColorizeNodeState state, OutputBuilder builder, TerminalNode terminal) {
-    Object created = builder.onTerminal(terminal, true);
+    Object created = builder.onTerminal(terminal, DelayedCreationHandler.IMMEDIATE_SENTINEL);
 
     if (created == null) {
-      LoggerProvider.get().log(Level.WARNING, "Received null-result from " + builder.getClass().getSimpleName() + "#onTerminal despite setting immediate to true");
+      LoggerProvider.get().log(Level.WARNING, "Received null-result from " + builder.getClass().getSimpleName() + "#onTerminal despite signalling immediate");
       return;
     }
 

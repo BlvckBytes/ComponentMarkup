@@ -535,6 +535,24 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldJoinSubsequentTextsInATransition() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<transition color=\"red\" color=\"blue\">Hello {{a}} world {{b}}!"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", "first")
+        .withStatic("b", "second"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello first world second!")
+        .string("color", "red")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

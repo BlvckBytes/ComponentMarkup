@@ -345,7 +345,7 @@ public class MarkupInterpreter implements Interpreter {
         return;
       }
 
-      builder.onTerminal((TerminalNode) node, false);
+      builder.onTerminal((TerminalNode) node, DelayedCreationHandler.NONE_SENTINEL);
 
       if (introducedBindings != null)
         environment.popVariables(introducedBindings);

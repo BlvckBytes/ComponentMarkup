@@ -7,15 +7,14 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.markup.interpreter.DelayedCreationHandler;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.OutputBuilder;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 public class ColorizeCharsNode extends ColorizeNode {
 
@@ -79,8 +78,8 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (nodeStyle != null)
       whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
-    // No need to delay creation, as there will be a colorized node right after
-    builder.onTerminal(whitespaceNode, true);
+    // No need to delay creation, as there will be a differently colorized node right after
+    builder.onTerminal(whitespaceNode, DelayedCreationHandler.NONE_SENTINEL);
     accumulator.setLength(0);
   }
 }

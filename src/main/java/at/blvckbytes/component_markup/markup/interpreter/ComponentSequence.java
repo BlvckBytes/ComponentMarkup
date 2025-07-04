@@ -16,6 +16,7 @@ public class ComponentSequence {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
+  private DelayedCreationHandler creationHandler;
 
   public final @Nullable ComputedStyle computedStyle;
   public final @Nullable ComputedStyle effectiveStyle;
@@ -39,7 +40,9 @@ public class ComponentSequence {
     return commonStyle;
   }
 
-  public void addBufferedText(String text, @Nullable ComputedStyle style) {
+  public void addBufferedText(String text, @Nullable ComputedStyle style, DelayedCreationHandler creationHandler) {
+    this.creationHandler = creationHandler;
+
     if (this.bufferedTexts == null)
       this.bufferedTexts = new ArrayList<>();
 
@@ -78,6 +81,9 @@ public class ComponentSequence {
 
     if (bufferedTextsStyle != null)
       bufferedTextsStyle.applyStyles(result, componentConstructor);
+
+    if (creationHandler != DelayedCreationHandler.NONE_SENTINEL)
+      creationHandler.handle(result);
 
     members.add(result);
 
