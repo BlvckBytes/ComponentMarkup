@@ -1,8 +1,11 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.markup.xml.SubstringBuilder;
+import at.blvckbytes.component_markup.markup.xml.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.Stack;
 
 public class ExpressionTokenizer {
@@ -11,11 +14,13 @@ public class ExpressionTokenizer {
   private final String input;
   private int nextCharIndex;
   private boolean dashIsPrefix;
+  private final SubstringBuilder substringBuilder;
 
   public ExpressionTokenizer(String input) {
     this.pendingStack = new Stack<>();
     this.input = input;
     this.nextCharIndex = 0;
+    this.substringBuilder = new SubstringBuilder(input);
 
     // The only purpose of a dash at the very beginning is to flip a sign
     this.dashIsPrefix = true;
@@ -38,18 +43,29 @@ public class ExpressionTokenizer {
   private Token parseStringToken() {
     int beginIndex = nextCharIndex;
 
-    char priorChar;
+    char quoteChar;
 
-    if ((priorChar = nextChar()) != '\'')
-      throw new IllegalStateException("Expected to only be called if nextChar() = '\\''");
+    if ((quoteChar = nextChar()) != '\'' && quoteChar != '"')
+      throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
+
+    substringBuilder.setStartInclusive(beginIndex + 1);
+
+    char priorChar = quoteChar;
 
     char upcomingChar;
     boolean isTerminated = false;
 
     while ((upcomingChar = nextChar()) != 0) {
-      if (upcomingChar == '\n' || (upcomingChar == '\'' && priorChar != '\\')) {
-        isTerminated = upcomingChar == '\'';
+      if (upcomingChar == '\n')
         break;
+
+      if (upcomingChar == quoteChar) {
+        if (priorChar != '\\') {
+          isTerminated = true;
+          break;
+        }
+
+        substringBuilder.addIndexToBeRemoved(nextCharIndex - 2);
       }
 
       priorChar = upcomingChar;
@@ -58,7 +74,9 @@ public class ExpressionTokenizer {
     if (!isTerminated)
       throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.UNTERMINATED_STRING);
 
-    String contents = input.substring(beginIndex + 1, nextCharIndex - 1);
+    substringBuilder.setEndExclusive(nextCharIndex - 1);
+
+    String contents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
 
     return new StringToken(beginIndex, contents);
   }
@@ -387,7 +405,7 @@ public class ExpressionTokenizer {
       if (upcomingChar == 0)
         return null;
 
-      if (upcomingChar == '\'')
+      if (upcomingChar == '\'' || upcomingChar == '"')
         result = parseStringToken();
 
       else if (upcomingChar >= '0' && upcomingChar <= '9')

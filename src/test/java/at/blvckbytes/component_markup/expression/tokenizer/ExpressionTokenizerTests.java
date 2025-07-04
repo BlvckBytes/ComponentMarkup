@@ -181,6 +181,19 @@ public class ExpressionTokenizerTests {
   }
 
   @Test
+  public void shouldTokenizeValidStrings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@'hello, \" world \\' \\\"' @\"double ' quotes \\' \\\"\""
+    );
+
+    makeCase(
+      text,
+      "'hello, \" world ' \\\"'",
+      "\"double ' quotes \\' \"\""
+    );
+  }
+
+  @Test
   public void shouldThrowOnMalformedIdentifier() {
     String[] malformedIdentifiers = {
       "my_IDEntifier",
@@ -312,8 +325,10 @@ public class ExpressionTokenizerTests {
       if (stringLength == 0)
         throw new IllegalStateException("An empty string cannot represent a token");
 
-      if (stringValue.charAt(0) == '\'') {
-        if (stringValue.charAt(stringLength - 1) != '\'')
+      char quoteChar;
+
+      if ((quoteChar = stringValue.charAt(0)) == '\'' || quoteChar == '"') {
+        if (stringValue.charAt(stringLength - 1) != quoteChar)
           throw new IllegalStateException("Invalid string: " + stringValue);
 
         token = new StringToken(beginIndex, stringValue.substring(1, stringLength - 1));
