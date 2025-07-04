@@ -8,13 +8,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MarkupParserErrorTests {
 
-  private static final Logger logger = Logger.getAnonymousLogger();
-  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry();
 
   @Test
   public void shouldThrowOnUnknownTag() {
@@ -565,7 +562,7 @@ public class MarkupParserErrorTests {
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
-      () -> MarkupParser.parse(input.text, builtInTagRegistry, logger)
+      () -> MarkupParser.parse(input.text, builtInTagRegistry)
     );
 
     List<String> screenLines = exception.makeErrorScreen(input.text);
@@ -577,7 +574,7 @@ public class MarkupParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      MarkupParser.parse(input.text, builtInTagRegistry, logger);
+      MarkupParser.parse(input.text, builtInTagRegistry);
     } catch (Throwable e) {
       thrownError = e;
     }
@@ -586,10 +583,8 @@ public class MarkupParserErrorTests {
 
     Throwable finalThrownError = thrownError;
 
-    if (!(thrownError instanceof MarkupParseException)) {
-      logger.log(Level.SEVERE, "Expected an ast parse exception, but got " + finalThrownError.getClass(), finalThrownError);
-      throw new AssertionError();
-    }
+    if (!(thrownError instanceof MarkupParseException))
+      throw new AssertionError("Expected an ast parse exception, but got " + finalThrownError.getClass(), finalThrownError);
 
     CursorPosition position = input.anchor(0);
 

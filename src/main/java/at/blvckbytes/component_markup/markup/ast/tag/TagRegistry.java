@@ -1,13 +1,13 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.util.AsciiOptimizedCharMap;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class TagRegistry {
 
@@ -18,16 +18,14 @@ public abstract class TagRegistry {
 
   private final CharTree charTree;
   private final int maxCharTreeDepth;
-  private final Logger logger;
 
-  public TagRegistry(Logger logger) {
-    this(2, logger);
+  public TagRegistry() {
+    this(2);
   }
 
-  public TagRegistry(int maxCharTreeDepth, Logger logger) {
+  public TagRegistry(int maxCharTreeDepth) {
     this.charTree = new CharTree();
     this.maxCharTreeDepth = maxCharTreeDepth;
-    this.logger = logger;
   }
 
   public @Nullable TagDefinition locateTag(String nameLower) {
@@ -51,7 +49,7 @@ public abstract class TagRegistry {
         if (member.matchName(nameLower))
           candidates.add(member);
       } catch (Throwable thrownError) {
-        logger.log(Level.SEVERE, "An error occurred while trying to match via " + member.getClass().getName() + "#matchName", thrownError);
+        LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to match via " + member.getClass().getName() + "#matchName", thrownError);
       }
     }
 

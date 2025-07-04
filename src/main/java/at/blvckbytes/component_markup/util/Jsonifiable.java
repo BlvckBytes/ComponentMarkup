@@ -3,13 +3,12 @@ package at.blvckbytes.component_markup.util;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 public abstract class Jsonifiable {
 
@@ -43,8 +42,7 @@ public abstract class Jsonifiable {
           field.setAccessible(true);
           result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
-          // TODO: Rather log than crash
-          throw new IllegalStateException("Could not access field " + fieldName + " of " + currentClass, e);
+          LoggerProvider.get().log(Level.WARNING, "Could not access field " + fieldName + " of " + currentClass, e);
         }
       }
 
@@ -52,12 +50,13 @@ public abstract class Jsonifiable {
         if (Modifier.isStatic(method.getModifiers()))
           continue;
 
-        if (!method.isAnnotationPresent(JsonifyGetter.class))
+        Class<? extends Annotation> annotationClass = JsonifyGetter.class;
+
+        if (!method.isAnnotationPresent(annotationClass))
           continue;
 
-        // TODO: Rather log than crash
         if (method.getParameterCount() > 0)
-          throw new IllegalStateException("Can only call getters which require no arguments");
+          LoggerProvider.get().log(Level.WARNING, "Method " + method + " requires parameters and thus isn't a valid " + annotationClass);
 
         String methodName = method.getName();
 
@@ -65,8 +64,7 @@ public abstract class Jsonifiable {
           method.setAccessible(true);
           result.add(methodName, jsonifyObject(method.getReturnType(), method.invoke(instance)));
         } catch (Exception e) {
-          // TODO: Rather log than crash
-          throw new IllegalStateException("Could not access method " + methodName + " of " + currentClass, e);
+          LoggerProvider.get().log(Level.WARNING, "Could not access method " + methodName + " of " + currentClass, e);
         }
       }
 
@@ -124,8 +122,9 @@ public abstract class Jsonifiable {
       return result;
     }
 
-    // TODO: Rather log than crash
-    throw new IllegalStateException("Don't know how to stringify " + item.getClass().getSimpleName());
+    LoggerProvider.get().log(Level.WARNING, "Don't know how to stringify " + item.getClass().getSimpleName());
+
+    return JsonNull.INSTANCE;
   }
 
   @Override

@@ -18,12 +18,10 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public abstract class MarkupParserTestsBase {
 
-  private static final Logger logger = Logger.getAnonymousLogger();
-  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry();
 
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
@@ -69,7 +67,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {
-    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry, logger);
+    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry);
     Assertions.assertEquals(wrappedExpectedNode.get().toString(), actualNode.toString());
   }
 }

@@ -13,6 +13,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -24,7 +25,6 @@ public class TagAndBuffers implements ParserChildItem {
   public final TagDefinition tag;
   public final String tagNameLower;
   public final CursorPosition position;
-  public final Logger logger;
 
   private final List<LetBinding> bindings;
   private final Set<String> bindingNames;
@@ -43,11 +43,10 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable ExpressionNode forReversed;
   public @Nullable String forIterationVariable;
 
-  public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position, Logger logger) {
+  public TagAndBuffers(TagDefinition tag, String tagNameLower, CursorPosition position) {
     this.tag = tag;
     this.tagNameLower = tagNameLower;
     this.position = position;
-    this.logger = logger;
 
     this.bindings = new ArrayList<>();
     this.bindingNames = new HashSet<>();
@@ -243,12 +242,12 @@ public class TagAndBuffers implements ParserChildItem {
         AttributeDefinition absentAttribute = ((AbsentMandatoryAttributeException) thrownError).attribute;
 
         if (!tag.attributes.contains(absentAttribute)) {
-          logger.log(Level.SEVERE, "Tag " + className + " (<" + tagNameLower + ">) tried to require an unregistered attribute called \"" + absentAttribute.name + "\"", thrownError);
+          LoggerProvider.get().log(Level.SEVERE, "Tag " + className + " (<" + tagNameLower + ">) tried to require an unregistered attribute called \"" + absentAttribute.name + "\"", thrownError);
           return null;
         }
       }
 
-      logger.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + className + "#createNode", thrownError);
+      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + className + "#createNode", thrownError);
       return null;
     }
   }

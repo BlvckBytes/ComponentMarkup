@@ -2,9 +2,11 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class TemporaryMemberEnvironment implements InterpretationEnvironment {
 
@@ -45,7 +47,7 @@ public class TemporaryMemberEnvironment implements InterpretationEnvironment {
     Stack<Object> valueStack = shadowingStaticVariables.computeIfAbsent(name, k -> new Stack<>());
 
     if (valueStack.isEmpty()) {
-      // TODO: Log about unbalanced stack
+      LoggerProvider.get().log(Level.WARNING, "The temporary variable-stack for variable " + name + " was unbalanced");
       return;
     }
 

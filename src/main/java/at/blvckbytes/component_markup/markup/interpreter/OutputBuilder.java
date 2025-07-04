@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class OutputBuilder {
 
@@ -63,8 +65,8 @@ public class OutputBuilder {
 
   public void onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
-      // TODO: Rather log than crash
-      throw new IllegalStateException("Encountered unbalanced non-terminal-stack");
+      LoggerProvider.get().log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
+      return;
     }
 
     Object item = popAndCombineSequence(null);
@@ -124,22 +126,20 @@ public class OutputBuilder {
           break;
 
         case OPEN_URL: {
-          URI uri;
+          String urlValue = interpreter.evaluateAsString(clickNode.value);
 
           try {
-            uri = URI.create(interpreter.evaluateAsString(clickNode.value));
+            URI uri = URI.create(urlValue);
+            componentConstructor.setClickOpenUrlAction(sequenceComponent, uri);
           } catch (Throwable e) {
-            uri = URI.create("https://google.com");
-            // TODO: Log about encountering malformed URI
+            LoggerProvider.get().log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
           }
 
-          componentConstructor.setClickOpenUrlAction(sequenceComponent, uri);
           break;
         }
 
         default:
-          // TODO: Rather log than crash
-          throw new IllegalStateException("Unknown click-action: " + clickNode.action);
+          LoggerProvider.get().log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
     }
 
@@ -171,16 +171,12 @@ public class OutputBuilder {
         name = components.isEmpty() ? null : components.get(0);
       }
 
-      UUID uuid;
-
       try {
-        uuid = UUID.fromString(id);
+        UUID uuid = UUID.fromString(id);
+        componentConstructor.setHoverEntityAction(sequenceComponent, type, uuid, name);
       } catch (Throwable e) {
-        uuid = UUID.randomUUID();
-        // TODO: Log about encountering malformed URI
+        LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
       }
-
-      componentConstructor.setHoverEntityAction(sequenceComponent, type, uuid, name);
     }
 
     else if (sequence.nonTerminal instanceof ItemHoverNode) {
@@ -235,7 +231,7 @@ public class OutputBuilder {
   }
 
   public Object onTerminal(TerminalNode node) {
-    Object result;
+    Object result = null;
 
     if (node instanceof TextNode) {
       String text = interpreter.evaluateAsString(((TextNode) node).text);
@@ -309,8 +305,7 @@ public class OutputBuilder {
           break;
 
         default:
-          // TODO: Rather log than crash
-          throw new IllegalStateException("Unknown nbt-source: " + nbtNode.source);
+          LoggerProvider.get().log(Level.WARNING, "Encountered unknown nbt-source: " + nbtNode.source);
       }
     }
 
@@ -340,8 +335,10 @@ public class OutputBuilder {
     }
 
     else
-      // TODO: Rather log than crash
-      throw new IllegalStateException("Unknown terminal-node: " + node.getClass());
+      LoggerProvider.get().log(Level.WARNING, "Unknown terminal-node: " + node.getClass());
+
+    if (result == null)
+      result = componentConstructor.createTextNode("<error>");
 
     ComponentSequence parentSequence = sequencesStack.peek();
 

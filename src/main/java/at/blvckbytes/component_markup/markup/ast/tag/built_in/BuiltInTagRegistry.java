@@ -17,8 +17,8 @@ import java.util.logging.Logger;
 
 public class BuiltInTagRegistry extends TagRegistry {
 
-  public BuiltInTagRegistry(Logger logger) {
-    super(logger);
+  public BuiltInTagRegistry() {
+    super();
 
     register(new ChangePageTag());
     register(new OpenFileTag());

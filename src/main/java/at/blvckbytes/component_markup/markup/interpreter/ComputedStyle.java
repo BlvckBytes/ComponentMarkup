@@ -5,7 +5,10 @@ import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.util.Jsonifiable;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.logging.Level;
 
 public class ComputedStyle extends Jsonifiable {
 
@@ -266,9 +269,8 @@ public class ComputedStyle extends Jsonifiable {
             componentConstructor.setStrikethroughFormat(component, value);
             break;
 
-          // TODO: Rather log than crash
           default:
-            throw new IllegalStateException("Unknown format: " + format.name());
+            LoggerProvider.get().log(Level.WARNING, "Encountered unknown format: " + format.name());
         }
       }
     }

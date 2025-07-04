@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -19,13 +20,11 @@ public class InterceptorStack {
   }
 
   private final Interpreter interpreter;
-  private final Logger logger;
   private final Stack<InterceptorEntry> interceptorStack;
 
-  public InterceptorStack(Interpreter interpreter, Logger logger) {
+  public InterceptorStack(Interpreter interpreter) {
     this.interpreter = interpreter;
     this.interceptorStack = new Stack<>();
-    this.logger = logger;
   }
 
   public void add(InterpreterInterceptor interceptor) {
@@ -44,7 +43,7 @@ public class InterceptorStack {
         result = entry.interceptor.interceptInterpretation(node, interpreter);
       } catch (Throwable thrownError) {
         String className = entry.interceptor.getClass().getName();
-        logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
+        LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
       }
 
       if (result == InterceptionResult.DO_NOT_PROCESS) {
@@ -55,7 +54,7 @@ public class InterceptorStack {
             interceptor.onSkippedByParent(node, interpreter);
           } catch (Throwable thrownError) {
             String className = entry.interceptor.getClass().getName();
-            logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#onSkippedByParent", thrownError);
+            LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to call " + className + "#onSkippedByParent", thrownError);
           }
         }
 
@@ -79,7 +78,7 @@ public class InterceptorStack {
           entry.interceptor.afterInterpretation(node, interpreter);
         } catch (Throwable thrownError) {
           String className = entry.interceptor.getClass().getName();
-          logger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
+          LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
         }
       }
 

@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.logging.Logger;
 
 public class MarkupInterpreterTests {
 
-  private static final Logger logger = Logger.getAnonymousLogger();
-  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry(logger);
-  private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter(logger);
+  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry();
+  private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter();
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
   private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
 
@@ -610,7 +608,7 @@ public class MarkupInterpreterTests {
     SlotType slot,
     JsonBuilder expectedResult
   ) {
-    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry, logger);
+    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry);
 
     JsonElement expectedJson;
 
@@ -627,7 +625,7 @@ public class MarkupInterpreterTests {
     List<Object> resultItems = MarkupInterpreter.interpret(
       componentConstructor, expressionInterpreter,
       baseEnvironment,
-      logger, SlotContext.getForSlot(slot), actualNode
+      SlotContext.getForSlot(slot), actualNode
     );
 
     JsonArray actualJson = new JsonArray();

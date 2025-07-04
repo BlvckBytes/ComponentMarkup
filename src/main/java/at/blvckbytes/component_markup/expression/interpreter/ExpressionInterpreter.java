@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
@@ -14,7 +15,6 @@ import java.text.BreakIterator;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ExpressionInterpreter {
@@ -26,10 +26,7 @@ public class ExpressionInterpreter {
 
   private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
 
-  private final Logger logger;
-
-  public ExpressionInterpreter(Logger logger) {
-    this.logger = logger;
+  public ExpressionInterpreter() {
   }
 
   public @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment) {
@@ -87,7 +84,7 @@ public class ExpressionInterpreter {
           return new StringBuilder(valueInterpreter.asString(operandValue)).reverse().toString();
 
         default:
-          logger.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
+          LoggerProvider.get().log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;
       }
     }
@@ -212,7 +209,7 @@ public class ExpressionInterpreter {
           return performSubscripting(lhsValue, rhsValue, environment);
 
         default:
-          logger.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
+          LoggerProvider.get().log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
           return null;
       }
     }
@@ -246,7 +243,7 @@ public class ExpressionInterpreter {
       return result;
     }
 
-    logger.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
+    LoggerProvider.get().log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
   }
 
@@ -308,7 +305,7 @@ public class ExpressionInterpreter {
     try {
       return field.get(source);
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Could not access field " + field, e);
+      LoggerProvider.get().log(Level.SEVERE, "Could not access field " + field, e);
       return null;
     }
   }
