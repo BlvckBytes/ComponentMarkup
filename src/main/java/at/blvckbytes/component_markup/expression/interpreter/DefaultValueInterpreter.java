@@ -40,7 +40,7 @@ public class DefaultValueInterpreter implements ValueInterpreter {
   }
 
   @Override
-  public @NotNull Boolean asBoolean(@Nullable Object value) {
+  public boolean asBoolean(@Nullable Object value) {
     if (value == null)
       return false;
 

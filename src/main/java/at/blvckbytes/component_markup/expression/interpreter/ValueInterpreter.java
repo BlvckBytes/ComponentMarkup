@@ -13,7 +13,7 @@ public interface ValueInterpreter {
 
   @NotNull Number asLongOrDouble(@Nullable Object value);
 
-  @NotNull Boolean asBoolean(@Nullable Object value);
+  boolean asBoolean(@Nullable Object value);
 
   @NotNull String asString(@Nullable Object value);
 
