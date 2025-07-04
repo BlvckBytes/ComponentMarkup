@@ -44,7 +44,8 @@ public class OutputBuilder {
 
   public void onBreak() {
     if (slotContext.breakChar != 0) {
-      sequencesStack.peek().addMember(componentConstructor.createKeyNode(String.valueOf(slotContext.breakChar)));
+      Object separatorNode = componentConstructor.createTextNode(String.valueOf(slotContext.breakChar));
+      sequencesStack.peek().addMember(separatorNode, null);
       return;
     }
 
@@ -54,8 +55,10 @@ public class OutputBuilder {
 
     sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
 
-    for (MarkupNode poppedNonTerminal : poppedNonTerminals)
-      onNonTerminalBegin(poppedNonTerminal);
+    int size;
+
+    while ((size = poppedNonTerminals.size()) != 0)
+      onNonTerminalBegin(poppedNonTerminals.remove(size - 1));
   }
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
