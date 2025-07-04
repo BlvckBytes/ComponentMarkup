@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import java.util.EnumSet;
+
 public class SubstringBuilder {
 
   private int startInclusive;
@@ -48,7 +50,7 @@ public class SubstringBuilder {
     this.endExclusive = index;
   }
 
-  public String build(StringBuilderMode mode) {
+  public String build(EnumSet<SubstringFlag> flags) {
     if (this.startInclusive < 0)
       throw new IllegalStateException("Cannot build a substring without a determined start");
 
@@ -76,49 +78,32 @@ public class SubstringBuilder {
 
       char currentChar = input.charAt(inputIndex);
 
-      if (mode.textMode) {
-        if (currentChar == '\n') {
-          if (nextResultIndex > 0) {
-            if (result[nextResultIndex - 1] == '\\')
-              --nextResultIndex;
-            else {
-              while (result[nextResultIndex - 1] == ' ')
-                --nextResultIndex;
-            }
-          }
+      if (currentChar == '\n' && flags.contains(SubstringFlag.REMOVE_NEWLINES_INDENT)) {
+        while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
+          --nextResultIndex;
 
-          doIgnoreWhitespace = true;
+        doIgnoreWhitespace = true;
+        continue;
+      }
+
+      if (doIgnoreWhitespace) {
+        if (Character.isWhitespace(currentChar))
           continue;
-        }
 
-        if (doIgnoreWhitespace) {
-          if (Character.isWhitespace(currentChar))
-            continue;
+        doIgnoreWhitespace = false;
+      }
 
-          doIgnoreWhitespace = false;
-
-          // Do not append a space at the very beginning of results
-          if (nextResultIndex > 0) {
-            // Also, collapse spaces
-            if (result[nextResultIndex - 1] != ' ') {
-              result[nextResultIndex++] = ' ';
-            }
-          }
-        }
+      if (currentChar == ' ' && flags.contains(SubstringFlag.REMOVE_LEADING_SPACE) && nextResultIndex == 0) {
+        doIgnoreWhitespace = true;
+        continue;
       }
 
       result[nextResultIndex++] = currentChar;
     }
 
-    if (mode.trimTrailingSpaces) {
-      if (nextResultIndex > 0) {
-        if (result[nextResultIndex - 1] == '\\')
-          --nextResultIndex;
-        else {
-          while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
-            --nextResultIndex;
-        }
-      }
+    if (flags.contains(SubstringFlag.REMOVE_TRAILING_SPACE)) {
+      while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
+        --nextResultIndex;
     }
 
     this.resetIndices();

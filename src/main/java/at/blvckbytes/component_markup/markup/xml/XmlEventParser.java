@@ -2,7 +2,15 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+
 public class XmlEventParser {
+
+  private static final EnumSet<SubstringFlag> SUBSTRING_NOT_TEXT = EnumSet.noneOf(SubstringFlag.class);
+  private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
+  private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
+  private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
+  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
   private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
@@ -26,6 +34,7 @@ public class XmlEventParser {
   private void parseInput(boolean isWithinCurlyBrackets) {
     char priorChar = 0;
     CursorPosition textContentBeginPosition = null;
+    boolean wasPriorTagOrInterpolation = false;
 
     while (cursor.peekChar() != 0) {
       if (cursor.peekChar() == '}' && priorChar != '\\') {
@@ -49,7 +58,14 @@ public class XmlEventParser {
           if (substringBuilder.hasStartSet()) {
             substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
             consumer.onCursorPosition(textContentBeginPosition);
-            consumer.onText(substringBuilder.build(StringBuilderMode.TEXT_MODE));
+
+            consumer.onText(
+              substringBuilder.build(
+                wasPriorTagOrInterpolation
+                  ? SUBSTRING_INNER_TEXT
+                  : SUBSTRING_FIRST_TEXT
+              )
+            );
           }
 
           substringBuilder.setStartInclusive(cursor.getNextCharIndex());
@@ -87,9 +103,8 @@ public class XmlEventParser {
 
           inStringDetector.reset();
 
-          String expression = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
-
-          consumer.onInterpolation(expression, valueBeginPosition);
+          consumer.onInterpolation(substringBuilder.build(SUBSTRING_NOT_TEXT), valueBeginPosition);
+          wasPriorTagOrInterpolation = true;
           continue;
         }
 
@@ -102,10 +117,18 @@ public class XmlEventParser {
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
           consumer.onCursorPosition(textContentBeginPosition);
-          consumer.onText(substringBuilder.build(StringBuilderMode.TEXT_MODE));
+
+          consumer.onText(
+            substringBuilder.build(
+              wasPriorTagOrInterpolation
+                ? SUBSTRING_INNER_TEXT
+                : SUBSTRING_FIRST_TEXT
+            )
+          );
         }
 
         parseOpeningOrClosingTag();
+        wasPriorTagOrInterpolation = true;
         priorChar = 0;
         continue;
       }
@@ -140,11 +163,15 @@ public class XmlEventParser {
 
     if (substringBuilder.hasStartSet()) {
       substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
-      String trailingText = substringBuilder.build(StringBuilderMode.TEXT_MODE_TRIM_TRAILING_SPACES);
-
       consumer.onCursorPosition(textContentBeginPosition);
-      consumer.onText(trailingText);
+
+      consumer.onText(
+        substringBuilder.build(
+          wasPriorTagOrInterpolation
+            ? SUBSTRING_LAST_TEXT
+            : SUBSTRING_ONLY_TEXT
+        )
+      );
     }
 
     if (!isWithinCurlyBrackets)
@@ -167,7 +194,7 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    return substringBuilder.build(StringBuilderMode.NORMAL_MODE);
+    return substringBuilder.build(SUBSTRING_NOT_TEXT);
   }
 
   private void parseAndEmitStringAttributeValue(String attributeName) {
@@ -206,7 +233,7 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    String value = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
+    String value = substringBuilder.build(SUBSTRING_NOT_TEXT);
 
     consumer.onStringAttribute(attributeName, valueBeginPosition, value);
   }
@@ -262,7 +289,7 @@ public class XmlEventParser {
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-    String numberString = substringBuilder.build(StringBuilderMode.NORMAL_MODE);
+    String numberString = substringBuilder.build(SUBSTRING_NOT_TEXT);
 
     if (encounteredDecimalPoint) {
       try {
@@ -354,7 +381,7 @@ public class XmlEventParser {
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
 
-        consumer.onBooleanAttribute(attributeName, substringBuilder.build(StringBuilderMode.NORMAL_MODE), true);
+        consumer.onBooleanAttribute(attributeName, substringBuilder.build(SUBSTRING_NOT_TEXT), true);
         return true;
       }
 
@@ -372,7 +399,7 @@ public class XmlEventParser {
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
 
-        consumer.onBooleanAttribute(attributeName, substringBuilder.build(StringBuilderMode.NORMAL_MODE), false);
+        consumer.onBooleanAttribute(attributeName, substringBuilder.build(SUBSTRING_NOT_TEXT), false);
         return true;
 
       case '0':

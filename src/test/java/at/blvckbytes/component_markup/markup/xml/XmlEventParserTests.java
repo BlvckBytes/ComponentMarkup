@@ -128,7 +128,7 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldKeepTextWhitespace() {
+  public void shouldRemoveTrailingWhitespace() {
     TextWithAnchors text = new TextWithAnchors(
       "@<red@>@Hello ",
       "world ",
@@ -140,7 +140,7 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
-      new TextEvent("Hello world test"),
+      new TextEvent("Helloworldtest"),
       new TagOpenBeginEvent("bold"),
       new TagOpenEndEvent("bold", false),
       new TextEvent("test2"),
@@ -277,18 +277,20 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldStripTrailingTextBackslash() {
+  public void shouldHandleAllTypesOfTextLocations() {
     TextWithAnchors text = new TextWithAnchors(
-      "@Online players: \\",
-      "@<red@>@test"
+      "@  abcde @<red@>@ hello @<blue@>@ world!  "
     );
 
     makeCaseWithInterleavedAnchors(
       text,
-      new TextEvent("Online players: "),
+      new TextEvent("abcde "),
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
-      new TextEvent("test"),
+      new TextEvent(" hello "),
+      new TagOpenBeginEvent("blue"),
+      new TagOpenEndEvent("blue", false),
+      new TextEvent(" world!"),
       new InputEndEvent()
     );
   }
@@ -311,7 +313,7 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldCollapseNewlineTrailingSpaces() {
+  public void shouldRemoveNewlineTrailingSpaces() {
     TextWithAnchors text = new TextWithAnchors(
       "@  hello",
       "    world",
@@ -320,7 +322,7 @@ public class XmlEventParserTests {
 
     makeCaseWithInterleavedAnchors(
       text,
-      new TextEvent("  hello world test"),
+      new TextEvent("helloworldtest"),
       new InputEndEvent()
     );
   }
@@ -554,7 +556,7 @@ public class XmlEventParserTests {
       new TagAttributeBeginEvent("my-attr"),
       new TagOpenBeginEvent("green"),
       new TagOpenEndEvent("green", false),
-      new TextEvent("Hello, } world! >"),
+      new TextEvent("Hello, } world!>"),
       text.auxAnchorEvent(0)
     );
   }
