@@ -151,7 +151,25 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
+      "@</*>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
       "<red>hello</red>@</>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
+      "<red>hello</red>@</*>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnCloseAfterCloseAll() {
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CLOSING_TAG,
+      "<red><bold>hello, world!</*>@</red>"
     );
   }
 
