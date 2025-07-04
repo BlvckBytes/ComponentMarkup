@@ -115,7 +115,7 @@ public class SubstringBuilder {
         if (result[nextResultIndex - 1] == '\\')
           --nextResultIndex;
         else {
-          while (result[nextResultIndex - 1] == ' ')
+          while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
             --nextResultIndex;
         }
       }
