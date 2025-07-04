@@ -524,6 +524,68 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldAlwaysUseNearestValues() {
+    TextWithAnchors text = new TextWithAnchors(
+      // No color/font is terminated, so they nest
+      "<red><style font=\"a\">first line<br/>",
+      "<green><style font=\"b\">second line<br/>",
+      "<blue><style font=\"c\">third line"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(line -> (
+          line
+            .string("text", "first line")
+            .string("font", "a")
+            .string("color", "red")
+        ))
+        .object(line -> (
+          line
+            .string("text", "second line")
+            .string("font", "b")
+            .string("color", "green")
+        ))
+        .object(line -> (
+          line
+            .string("text", "third line")
+            .string("font", "c")
+            .string("color", "blue")
+        ))
+    );
+  }
+
+  @Test
+  public void shouldNotAddUnnecessaryStyles() {
+    makeCase(
+      new TextWithAnchors(
+        "<red><italic><green><italic>hello, world</green><blue><italic>test me out</blue>"
+      ),
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .bool("italic", true)
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "hello, world")
+                .string("color", "green")
+            ))
+            .object(item -> (
+              item
+                .string("text", "test me out")
+                .string("color", "blue")
+            ))
+        ))
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

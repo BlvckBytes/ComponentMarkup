@@ -76,7 +76,55 @@ public class ComputedStyle extends Jsonifiable {
     return this;
   }
 
-  public ComputedStyle subtractCommonalities(@Nullable ComputedStyle other) {
+  public void subtractUncommonProperties(@Nullable ComputedStyle other) {
+    if (other == null)
+      return;
+
+    if ((this.font == null) == (other.font != null))
+      this.font = null;
+
+    if ((this.packedColor == PackedColor.NULL_SENTINEL) == (other.packedColor != PackedColor.NULL_SENTINEL))
+      this.packedColor = PackedColor.NULL_SENTINEL;
+
+    if ((this.packedShadowColor == PackedColor.NULL_SENTINEL) == (other.packedShadowColor != PackedColor.NULL_SENTINEL))
+      this.packedShadowColor = PackedColor.NULL_SENTINEL;
+
+    if (this.formats == null || other.formats == null)
+      return;
+
+    for (Format format : Format.VALUES) {
+      Boolean thisFormat = this.formats[format.ordinal()];
+
+      if ((thisFormat == null) == (other.formats[format.ordinal()] != null))
+        this.formats[format.ordinal()] = null;
+    }
+  }
+
+  public void subtractCommonStyles(@Nullable ComputedStyle other) {
+    if (other == null)
+      return;
+
+    if (this.font != null && other.font != null)
+      this.font = null;
+
+    if (this.packedColor != PackedColor.NULL_SENTINEL && other.packedColor != PackedColor.NULL_SENTINEL)
+      this.packedColor = PackedColor.NULL_SENTINEL;
+
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && other.packedShadowColor != PackedColor.NULL_SENTINEL)
+      this.packedShadowColor = PackedColor.NULL_SENTINEL;
+
+    if (this.formats == null || other.formats == null)
+      return;
+
+    for (Format format : Format.VALUES) {
+      Boolean thisFormat = this.formats[format.ordinal()];
+
+      if (thisFormat != null && other.formats[format.ordinal()] != null)
+        this.formats[format.ordinal()] = null;
+    }
+  }
+
+  public ComputedStyle subtractEqualStyles(@Nullable ComputedStyle other) {
     if (other == null)
       return this;
 

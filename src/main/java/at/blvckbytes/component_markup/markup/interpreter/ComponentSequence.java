@@ -15,9 +15,34 @@ public class ComponentSequence {
   public final @Nullable ComputedStyle effectiveStyle;
   public final @Nullable ComputedStyle styleToApply;
 
-  public void addMember(Object member) {
+  private @Nullable ComputedStyle commonStyle;
+
+  public void possiblyUpdateCommonStyleToOnlyElement() {
+    if (members == null || members.size() != 1)
+      return;
+
+    if (this.commonStyle == null) {
+      this.commonStyle = this.styleToApply;
+      return;
+    }
+
+    this.commonStyle.addMissing(this.styleToApply);
+  }
+
+  public @Nullable ComputedStyle getCommonStyle() {
+    return commonStyle;
+  }
+
+  public void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
     if (this.members == null)
       this.members = new ArrayList<>();
+
+    if (memberCommonStyle != null) {
+      if (this.commonStyle == null)
+        this.commonStyle = memberCommonStyle.copy();
+      else
+        this.commonStyle.subtractUncommonProperties(memberCommonStyle);;
+    }
 
     this.members.add(member);
   }
@@ -56,7 +81,7 @@ public class ComponentSequence {
     if (inheritedStyle != null) {
       // Do not specify styles explicitly which are already active due to inheritance
       if (styleToApply != null)
-        styleToApply = styleToApply.copy().subtractCommonalities(inheritedStyle);
+        styleToApply = styleToApply.copy().subtractEqualStyles(inheritedStyle);
 
       // Add the inherited style to what's currently effective
       effectiveStyle = effectiveStyle == null ? inheritedStyle : effectiveStyle.copy().addMissing(inheritedStyle);
@@ -65,7 +90,7 @@ public class ComponentSequence {
       // By definition, a reset means resetting to chat-state; thus,
       // that's the context to get defaults from
       if (styleProvider != null && styleProvider.doesResetStyle) {
-        ComputedStyle mask = inheritedStyle.copy().subtractCommonalities(computedStyle);
+        ComputedStyle mask = inheritedStyle.copy().subtractEqualStyles(computedStyle);
 
         if (styleToApply == null)
           styleToApply = new ComputedStyle();

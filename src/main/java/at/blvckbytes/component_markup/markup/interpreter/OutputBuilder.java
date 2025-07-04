@@ -74,14 +74,22 @@ public class OutputBuilder {
 
     ComponentSequence sequence = sequencesStack.pop();
     Object item = combineSequenceAndApplyNonTerminal(sequence);
-    sequencesStack.peek().addMember(item);
+    sequencesStack.peek().addMember(item, sequence.getCommonStyle());
   }
 
   private Object combineSequenceAndApplyNonTerminal(ComponentSequence sequence) {
     Object sequenceComponent = sequence.combine(componentConstructor);
 
-    if (sequence.styleToApply != null)
+    if (sequence.styleToApply != null) {
+      ComputedStyle commonStyle;
+
+      if ((commonStyle = sequence.getCommonStyle()) != null)
+        sequence.styleToApply.subtractCommonStyles(commonStyle);
+
       sequence.styleToApply.applyStyles(sequenceComponent, componentConstructor);
+    }
+
+    sequence.possiblyUpdateCommonStyleToOnlyElement();
 
     if (sequence.nonTerminal == null)
       return sequenceComponent;
@@ -347,7 +355,7 @@ public class OutputBuilder {
     if (style != null)
       style.applyStyles(result, componentConstructor);
 
-    parentSequence.addMember(result);
+    parentSequence.addMember(result, style);
 
     return result;
   }
@@ -362,7 +370,7 @@ public class OutputBuilder {
       Object sequenceComponent = combineSequenceAndApplyNonTerminal(sequence);
 
       if (!sequencesStack.isEmpty()) {
-        sequencesStack.peek().addMember(sequenceComponent);
+        sequencesStack.peek().addMember(sequenceComponent, sequence.getCommonStyle());
         continue;
       }
 
