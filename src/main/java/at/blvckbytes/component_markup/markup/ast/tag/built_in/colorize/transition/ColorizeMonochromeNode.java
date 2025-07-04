@@ -35,7 +35,7 @@ public class ColorizeMonochromeNode extends ColorizeNode {
     }
 
     OutputBuilder builder = interpreter.getCurrentBuilder();
-    state.addInjected(builder.onTerminal(node));
+    addInjected(state, builder, node);
     return false;
   }
 }

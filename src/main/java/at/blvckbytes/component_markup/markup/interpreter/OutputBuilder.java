@@ -38,7 +38,7 @@ public class OutputBuilder {
     this.slotContext = slotContext;
     this.chatContext = componentConstructor.getSlotContext(SlotType.CHAT);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
+    this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle, componentConstructor));
     this.result = new ArrayList<>();
   }
 
@@ -53,7 +53,7 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle));
+    sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle, componentConstructor));
 
     int size;
 
@@ -63,7 +63,7 @@ public class OutputBuilder {
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
     ComponentSequence parentSequence = sequencesStack.isEmpty() ? null : sequencesStack.peek();
-    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence, chatContext));
+    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence, chatContext, componentConstructor));
   }
 
   public void onNonTerminalEnd() {
@@ -238,11 +238,20 @@ public class OutputBuilder {
     return sequenceComponent;
   }
 
-  public Object onTerminal(TerminalNode node) {
+  public @Nullable Object onTerminal(TerminalNode node, boolean forceImmediateCreation) {
     Object result = null;
+
+    ComponentSequence parentSequence = sequencesStack.peek();
+    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext, componentConstructor).styleToApply;
 
     if (node instanceof TextNode) {
       String text = interpreter.evaluateAsString(((TextNode) node).text);
+
+      if (!forceImmediateCreation && (style == null || !style.hasEffect())) {
+        parentSequence.addUnstyledText(text);
+        return null;
+      }
+
       result = componentConstructor.createTextNode(text);
     }
 
@@ -347,10 +356,6 @@ public class OutputBuilder {
 
     if (result == null)
       result = componentConstructor.createTextNode("<error>");
-
-    ComponentSequence parentSequence = sequencesStack.peek();
-
-    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext).styleToApply;
 
     if (style != null)
       style.applyStyles(result, componentConstructor);

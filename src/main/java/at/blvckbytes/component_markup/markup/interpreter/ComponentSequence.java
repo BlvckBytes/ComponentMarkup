@@ -9,8 +9,10 @@ import java.util.List;
 
 public class ComponentSequence {
 
+  private final ComponentConstructor componentConstructor;
   public final @Nullable MarkupNode nonTerminal;
   private @Nullable List<Object> members;
+  private @Nullable List<String> unstyledTexts;
   public final @Nullable ComputedStyle computedStyle;
   public final @Nullable ComputedStyle effectiveStyle;
   public final @Nullable ComputedStyle styleToApply;
@@ -33,7 +35,43 @@ public class ComponentSequence {
     return commonStyle;
   }
 
+  public void addUnstyledText(String text) {
+    if (this.unstyledTexts == null)
+      this.unstyledTexts = new ArrayList<>();
+
+    this.unstyledTexts.add(text);
+
+    if (commonStyle == null)
+      commonStyle = new ComputedStyle();
+  }
+
+  private void concatAndInstantiateUnstyledTexts() {
+    if (unstyledTexts == null || unstyledTexts.isEmpty())
+      return;
+
+    int unstyledCount = unstyledTexts.size();
+
+    if (this.members == null)
+      this.members = new ArrayList<>();
+
+    if (unstyledCount == 1)
+      members.add(componentConstructor.createTextNode(unstyledTexts.get(0)));
+
+    else {
+      StringBuilder accumulator = new StringBuilder();
+
+      for (String unstyledText : unstyledTexts)
+        accumulator.append(unstyledText);
+
+      members.add(componentConstructor.createTextNode(accumulator.toString()));
+    }
+
+    unstyledTexts.clear();
+  }
+
   public void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
+    concatAndInstantiateUnstyledTexts();
+
     if (this.members == null)
       this.members = new ArrayList<>();
 
@@ -48,6 +86,8 @@ public class ComponentSequence {
   }
 
   public Object combine(ComponentConstructor componentConstructor) {
+    concatAndInstantiateUnstyledTexts();
+
     if (this.members == null || this.members.isEmpty())
      return componentConstructor.createTextNode("");
 
@@ -59,15 +99,16 @@ public class ComponentSequence {
     return sequenceComponent;
   }
 
-  public static ComponentSequence initial(ComputedStyle defaultStyle) {
-    return new ComponentSequence(null, null, defaultStyle, null);
+  public static ComponentSequence initial(ComputedStyle defaultStyle, ComponentConstructor componentConstructor) {
+    return new ComponentSequence(null, null, defaultStyle, null, componentConstructor);
   }
 
   public static ComponentSequence next(
     MarkupNode styleProvider,
     Interpreter interpreter,
     ComponentSequence parentSequence,
-    SlotContext chatContext
+    SlotContext chatContext,
+    ComponentConstructor componentConstructor
   ) {
     ComputedStyle computedStyle = null;
 
@@ -99,19 +140,21 @@ public class ComponentSequence {
       }
     }
 
-    return new ComponentSequence(styleProvider, computedStyle, effectiveStyle, styleToApply);
+    return new ComponentSequence(styleProvider, computedStyle, effectiveStyle, styleToApply, componentConstructor);
   }
 
   public ComponentSequence(
     @Nullable MarkupNode nonTerminal,
     @Nullable ComputedStyle computedStyle,
     @Nullable ComputedStyle effectiveStyle,
-    @Nullable ComputedStyle styleToApply
+    @Nullable ComputedStyle styleToApply,
+    ComponentConstructor componentConstructor
   ) {
     this.nonTerminal = nonTerminal;
     this.members = new ArrayList<>();
     this.computedStyle = computedStyle;
     this.effectiveStyle = effectiveStyle;
     this.styleToApply = styleToApply;
+    this.componentConstructor = componentConstructor;
   }
 }

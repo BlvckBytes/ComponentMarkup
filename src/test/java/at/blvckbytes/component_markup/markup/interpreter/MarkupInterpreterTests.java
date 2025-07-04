@@ -86,19 +86,8 @@ public class MarkupInterpreterTests {
         .withStatic("my_suffix", " suffix"),
       SlotType.CHAT,
       new JsonObjectBuilder()
-        .string("text", "")
+        .string("text", "Hello, prefix Steve suffix")
         .string("color", "red")
-        .array("extra", extra -> (
-          extra
-            .object(interpolation -> (
-              interpolation
-                .string("text", "Hello, ")
-            ))
-            .object(interpolation -> (
-              interpolation
-                .string("text", "prefix Steve suffix")
-            ))
-        ))
     );
   }
 
@@ -130,23 +119,8 @@ public class MarkupInterpreterTests {
           extra
             .object(container -> (
               container
-                .string("text", "")
+                .string("text", "A at index 0")
                 .string("color", "red")
-                .array("extra", containerExtra -> (
-                  containerExtra
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", "A")
-                    ))
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", " at index ")
-                    ))
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", "0")
-                    ))
-                ))
             ))
             .object(interpolation -> (
               interpolation
@@ -155,23 +129,8 @@ public class MarkupInterpreterTests {
             ))
             .object(container -> (
               container
-                .string("text", "")
+                .string("text", "S at index 1")
                 .string("color", "red")
-                .array("extra", containerExtra -> (
-                  containerExtra
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", "S")
-                    ))
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", " at index ")
-                    ))
-                    .object(interpolation -> (
-                      interpolation
-                        .string("text", "1")
-                    ))
-                ))
             ))
             .object(interpolation -> (
               interpolation
@@ -180,23 +139,8 @@ public class MarkupInterpreterTests {
             ))
             .object(container -> (
               container
-                .string("text", "")
+                .string("text", "T at index 2")
                 .string("color", "red")
-                .array("extra", containerExtra -> (
-                  containerExtra
-                  .object(interpolation -> (
-                    interpolation
-                      .string("text", "T")
-                  ))
-                  .object(interpolation -> (
-                    interpolation
-                      .string("text", " at index ")
-                  ))
-                  .object(interpolation -> (
-                    interpolation
-                      .string("text", "2")
-                  ))
-                ))
             ))
             .reverse(reversed)
         ))
@@ -455,19 +399,7 @@ public class MarkupInterpreterTests {
             ))
             .object(item -> (
               item
-                .string("text", "")
-                // TODO: These should be joined, of course, but that's another TODO on my list
-                .array("extra", innerExtra -> (
-                  innerExtra
-                    .object(innerItem -> (
-                      innerItem
-                        .string("text", "world ")
-                    ))
-                    .object(innerItem -> (
-                      innerItem
-                        .string("text", "test")
-                    ))
-                ))
+                .string("text", "world test")
                 .bool("italic", true)
             ))
         ))
@@ -583,6 +515,25 @@ public class MarkupInterpreterTests {
                 .string("color", "blue")
             ))
         ))
+    );
+  }
+
+  @Test
+  public void shouldJoinSubsequentTexts() {
+    TextWithAnchors text = new TextWithAnchors(
+      // Non-effective styled passages should also be interpreted as raw text
+      "<red>Hello, <style [color]=\"null\">{{a}}</style> and {{b}}!"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", "first")
+        .withStatic("b", "second"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, first and second!")
+        .string("color", "red")
     );
   }
 

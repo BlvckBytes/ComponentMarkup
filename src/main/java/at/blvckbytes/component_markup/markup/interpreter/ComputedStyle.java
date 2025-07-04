@@ -21,6 +21,19 @@ public class ComputedStyle extends Jsonifiable {
 
   public ComputedStyle() {}
 
+  public boolean hasEffect() {
+    if (packedColor != PackedColor.NULL_SENTINEL)
+      return true;
+
+    if (packedShadowColor != PackedColor.NULL_SENTINEL)
+      return true;
+
+    if(font != null)
+      return true;
+
+    return !TriStateBitFlags.isAllNulls(formats);
+  }
+
   public ComputedStyle setFormat(Format format, TriState value) {
     this.formats = TriStateBitFlags.write(formats, format.ordinal(), value);
     return this;

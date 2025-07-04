@@ -10,10 +10,12 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.OutputBuilder;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 public class ColorizeCharsNode extends ColorizeNode {
 
@@ -51,7 +53,7 @@ public class ColorizeCharsNode extends ColorizeNode {
         if (nodeStyle != null)
           charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
-        state.addInjected(builder.onTerminal(charNode));
+        addInjected(state, builder, charNode);
       }
 
       if (skipWhitespace)
@@ -63,7 +65,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
       return true;
 
-    state.addInjected(builder.onTerminal(node));
+    addInjected(state, builder, node);
     return false;
   }
 
@@ -77,7 +79,8 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (nodeStyle != null)
       whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
-    builder.onTerminal(whitespaceNode);
+    // No need to delay creation, as there will be a colorized node right after
+    builder.onTerminal(whitespaceNode, true);
     accumulator.setLength(0);
   }
 }

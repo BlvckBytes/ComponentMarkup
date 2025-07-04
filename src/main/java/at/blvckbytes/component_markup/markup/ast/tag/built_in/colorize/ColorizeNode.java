@@ -7,10 +7,12 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 public abstract class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
 
@@ -107,5 +109,16 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
 //      return;
 //
 //    state.discard();
+  }
+
+  protected void addInjected(ColorizeNodeState state, OutputBuilder builder, TerminalNode terminal) {
+    Object created = builder.onTerminal(terminal, true);
+
+    if (created == null) {
+      LoggerProvider.get().log(Level.WARNING, "Received null-result from " + builder.getClass().getSimpleName() + "#onTerminal despite setting immediate to true");
+      return;
+    }
+
+    state.addInjected(created);
   }
 }
