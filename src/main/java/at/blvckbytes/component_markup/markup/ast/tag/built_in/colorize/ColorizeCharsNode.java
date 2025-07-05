@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
@@ -34,14 +33,13 @@ public class ColorizeCharsNode extends ColorizeNode {
     NodeStyle nodeStyle = node.getStyle();
 
     if (node instanceof TextNode) {
-      TextNode textNode = (TextNode) node;
+      String text = ((TextNode) node).text;
 
       boolean skipWhitespace = state.flags.contains(ColorizeFlag.SKIP_WHITESPACE);
-      String nodeText = interpreter.evaluateAsString(textNode.text);
       StringBuilder whitespaceAccumulator = skipWhitespace ? new StringBuilder() : null;
 
-      for (int charIndex = 0; charIndex < nodeText.length(); ++charIndex) {
-        char currentChar = nodeText.charAt(charIndex);
+      for (int charIndex = 0; charIndex < text.length(); ++charIndex) {
+        char currentChar = text.charAt(charIndex);
 
         if (Character.isWhitespace(currentChar)) {
           if (skipWhitespace) {
@@ -51,9 +49,9 @@ public class ColorizeCharsNode extends ColorizeNode {
         }
 
         if (skipWhitespace)
-          emitWhitespace(textNode, builder, whitespaceAccumulator);
+          emitWhitespace(node, builder, whitespaceAccumulator);
 
-        TextNode charNode = new TextNode(ImmediateExpression.of(String.valueOf(currentChar)), node.position, node.letBindings);
+        TextNode charNode = new TextNode(String.valueOf(currentChar), node.position);
 
         if (nodeStyle != null)
           charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
@@ -62,7 +60,7 @@ public class ColorizeCharsNode extends ColorizeNode {
       }
 
       if (skipWhitespace)
-        emitWhitespace(textNode, builder, whitespaceAccumulator);
+        emitWhitespace(node, builder, whitespaceAccumulator);
 
       return false;
     }
@@ -78,7 +76,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (accumulator.length() == 0)
       return;
 
-    TextNode whitespaceNode = new TextNode(ImmediateExpression.of(accumulator.toString()), styleHolder.position, null);
+    TextNode whitespaceNode = new TextNode(accumulator.toString(), styleHolder.position);
     NodeStyle nodeStyle = styleHolder.getStyle();
 
     if (nodeStyle != null)

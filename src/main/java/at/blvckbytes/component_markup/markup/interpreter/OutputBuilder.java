@@ -245,7 +245,7 @@ public class OutputBuilder {
     ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext, componentConstructor).styleToApply;
 
     if (node instanceof TextNode) {
-      String text = interpreter.evaluateAsString(((TextNode) node).text);
+      String text = ((TextNode) node).text;
 
       if (creationHandler != DelayedCreationHandler.IMMEDIATE_SENTINEL) {
         parentSequence.addBufferedText(text, style, creationHandler);

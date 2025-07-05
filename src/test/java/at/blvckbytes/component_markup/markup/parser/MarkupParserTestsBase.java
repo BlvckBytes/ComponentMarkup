@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
@@ -86,8 +87,12 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new TranslateNode(key, withs, fallback, position, new ArrayList<>()));
   }
 
-  protected static NodeWrapper<TextNode> text(ExpressionNode value, CursorPosition position) {
-    return new NodeWrapper<>(new TextNode(value, position, new ArrayList<>()));
+  protected static NodeWrapper<InterpolationNode> interpolation(String expression, CursorPosition position) {
+    return new NodeWrapper<>(new InterpolationNode(expr(expression), position));
+  }
+
+  protected static NodeWrapper<TextNode> text(String value, CursorPosition position) {
+    return new NodeWrapper<>(new TextNode(value, position));
   }
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {

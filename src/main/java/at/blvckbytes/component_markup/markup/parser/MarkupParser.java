@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
@@ -25,8 +26,6 @@ import java.util.Stack;
 
 public class MarkupParser implements XmlEventConsumer {
 
-  private static final ExpressionNode EMPTY_TEXT = ImmediateExpression.of("");
-
   private final TagRegistry tagRegistry;
   private final Stack<TagAndBuffers> tagStack;
 
@@ -42,7 +41,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.lastPosition = initialPosition;
-    this.result = new TextNode(EMPTY_TEXT, lastPosition, null);
+    this.result = new TextNode("", lastPosition);
 
     this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition, null));
   }
@@ -323,7 +322,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addChild(new TextNode(ImmediateExpression.of(text), lastPosition, null));
+    currentLayer.addChild(new TextNode(text, lastPosition));
   }
 
   @Override
@@ -334,7 +333,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addChild(new TextNode(parseExpression(expression, valueBeginPosition), lastPosition, null));
+    currentLayer.addChild(new InterpolationNode(parseExpression(expression, valueBeginPosition), lastPosition));
   }
 
   @Override

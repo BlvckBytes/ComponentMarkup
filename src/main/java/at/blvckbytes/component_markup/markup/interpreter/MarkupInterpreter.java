@@ -1,11 +1,9 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
@@ -353,6 +351,24 @@ public class MarkupInterpreter implements Interpreter {
         return;
 
       builder.onBreak();
+
+      interceptors.handleAfter(node);
+      return;
+    }
+
+    if (node instanceof InterpolationNode) {
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
+
+      ExpressionNode contents = ((InterpolationNode) node).contents;
+      Object interpolationValue = evaluateAsPlainObject(contents);
+
+      if (interpolationValue instanceof MarkupNode)
+        _interpret((MarkupNode) interpolationValue);
+      else {
+        String textValue = environment.getValueInterpreter().asString(interpolationValue);
+        _interpret(new TextNode(textValue, node.position));
+      }
 
       interceptors.handleAfter(node);
       return;

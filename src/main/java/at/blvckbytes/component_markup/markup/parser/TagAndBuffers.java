@@ -1,10 +1,8 @@
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
-import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
@@ -173,13 +171,13 @@ public class TagAndBuffers implements ParserChildItem {
         }
       }
 
-      else if (child instanceof TerminalNode) {
-        TerminalNode terminalNode = (TerminalNode) child;
+      else if (child instanceof MarkupNode) {
+        MarkupNode node = (MarkupNode) child;
 
         if (whenInput != null)
-          throw new MarkupParseException(terminalNode.position, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+          throw new MarkupParseException(node.position, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
-        currentNode = terminalNode;
+        currentNode = node;
       } else
         throw new IllegalStateException("Unknown child-type: " + child);
 
@@ -350,7 +348,7 @@ public class TagAndBuffers implements ParserChildItem {
     MarkupNode result = createNodeOrNull(getProcessedChildren());
 
     if (result == null)
-      return new TextNode(ImmediateExpression.of("<error>"), position, null);
+      return new TextNode("<error>", position);
 
     if (!(result instanceof ContainerNode))
       return result;

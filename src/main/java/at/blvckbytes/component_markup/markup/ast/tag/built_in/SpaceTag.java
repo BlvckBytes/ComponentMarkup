@@ -1,9 +1,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
-import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
@@ -13,8 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class SpaceTag extends TagDefinition {
-
-  private static final ExpressionNode SPACE_TEXT = ImmediateExpression.of(" ");
 
   private static final String TAG_NAME = "space";
 
@@ -35,6 +30,6 @@ public class SpaceTag extends TagDefinition {
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    return new TextNode(SPACE_TEXT, position, letBindings);
+    return new TextNode(" ", position);
   }
 }

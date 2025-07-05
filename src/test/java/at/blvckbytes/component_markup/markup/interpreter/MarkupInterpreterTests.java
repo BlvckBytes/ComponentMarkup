@@ -636,6 +636,47 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldInterpolateMarkupValues() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red>before</> {{markup_value}} <blue>after</> {{scalar_value}}"
+    );
+
+    MarkupNode node = MarkupParser.parse("<bold><gold>I am a markup-value!", BuiltInTagRegistry.INSTANCE);
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("markup_value", node)
+        .withStatic("scalar_value", "Hello, world!"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "before")
+                .string("color", "red")
+            ))
+            .object(item -> item.string("text", " "))
+            .object(item -> (
+              item
+                .string("text", "I am a markup-value!")
+                .string("color", "gold")
+                .bool("bold", true)
+            ))
+            .object(item -> item.string("text", " "))
+            .object(item -> (
+              item
+                .string("text", "after")
+                .string("color", "blue")
+            ))
+            .object(item -> item.string("text", " Hello, world!"))
+        ))
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

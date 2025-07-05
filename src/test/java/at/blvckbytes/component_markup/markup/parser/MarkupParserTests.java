@@ -39,12 +39,12 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       container(CursorPosition.ZERO)
-        .child(text(imm("before"), text.anchor(0)))
+        .child(text("before", text.anchor(0)))
         .child(
-          text(imm("if contents"), text.anchor(1))
+          text("if contents", text.anchor(1))
             .ifCondition(expr("a"))
         )
-        .child(text(imm("after"), text.anchor(2)))
+        .child(text("after", text.anchor(2)))
     );
   }
 
@@ -62,9 +62,9 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         expr("members"),
         "member",
         container(text.anchor(0))
-          .child(text(imm("hello, "), text.anchor(1)))
-          .child(text(expr("member"), text.anchor(2)))
-          .child(text(imm("!"), text.anchor(3))),
+          .child(text("hello, ", text.anchor(1)))
+          .child(interpolation("member", text.anchor(2)))
+          .child(text("!", text.anchor(3))),
         null,
         null
       )
@@ -85,9 +85,9 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         expr("members"),
         "member",
         container(text.anchor(0))
-          .child(text(imm("hello, "), text.anchor(1)))
-          .child(text(expr("member"), text.anchor(2)))
-          .child(text(imm("!"), text.anchor(3)))
+          .child(text("hello, ", text.anchor(1)))
+          .child(interpolation("member", text.anchor(2)))
+          .child(text("!", text.anchor(3)))
           .ifCondition(expr("member != null")),
         null,
         null
@@ -110,9 +110,9 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       forLoop(
         expr("members"),
         "member",
-        text(imm("Hello, world"), text.anchor(1))
+        text("Hello, world", text.anchor(1))
           .color("red"),
-        text(imm("separator"), text.anchor(0))
+        text("separator", text.anchor(0))
           .color("aqua"),
         imm(true)
       )
@@ -133,19 +133,19 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       container(CursorPosition.ZERO)
-        .child(text(imm("before"), text.anchor(0)))
+        .child(text("before", text.anchor(0)))
         .child(
           ifElseIfElse(
-            text(imm("else contents"), text.anchor(4)),
-            text(imm("if contents"), text.anchor(1))
+            text("else contents", text.anchor(4)),
+            text("if contents", text.anchor(1))
               .ifCondition(expr("a")),
-            text(imm("else-if b contents"), text.anchor(2))
+            text("else-if b contents", text.anchor(2))
               .ifCondition(expr("b")),
-            text(imm("else-if c contents"), text.anchor(3))
+            text("else-if c contents", text.anchor(3))
               .ifCondition(expr("c"))
           )
         )
-        .child(text(imm("after"), text.anchor(5)))
+        .child(text("after", text.anchor(5)))
     );
   }
 
@@ -168,25 +168,25 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       container(CursorPosition.ZERO)
-        .child(text(imm("before"), text.anchor(0)))
+        .child(text("before", text.anchor(0)))
         .child(
           ifElseIfElse(
             ifElseIfElse(
-              text(imm("if not a and not c"), text.anchor(5)),
-              text(imm("if not a and c"), text.anchor(4))
+              text("if not a and not c", text.anchor(5)),
+              text("if not a and c", text.anchor(4))
                 .ifCondition(expr("c"))
             ),
             ifElseIfElse(
-              text(imm("if a and not b"), text.anchor(3)),
-              text(imm("if a and b"), text.anchor(1))
+              text("if a and not b", text.anchor(3)),
+              text("if a and b", text.anchor(1))
                 .ifCondition(expr("b")),
-              text(imm("if a and d"), text.anchor(2))
+              text("if a and d", text.anchor(2))
                 .ifCondition(expr("d"))
             )
               .ifCondition(expr("a"))
           )
         )
-        .child(text(imm("after"), text.anchor(6)))
+        .child(text("after", text.anchor(6)))
     );
   }
 
@@ -209,16 +209,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       container(CursorPosition.ZERO)
-        .child(text(imm("before"), text.anchor(0)))
+        .child(text("before", text.anchor(0)))
         .child(
           when(
             text.anchor(1),
             expr("my.expression"),
-            text(imm("Fallback Case"), text.anchor(7))
+            text("Fallback Case", text.anchor(7))
               .color("gray"),
             whenMap(
-              "A", text(imm("Case A"), text.anchor(2)).color("red"),
-              "B", text(imm("Case B"), text.anchor(3)).color("green"),
+              "A", text("Case A", text.anchor(2)).color("red"),
+              "B", text("Case B", text.anchor(3)).color("green"),
               "C",
               container(text.anchor(4))
                 .color("blue")
@@ -228,15 +228,15 @@ public class MarkupParserTests extends MarkupParserTestsBase {
                     expr("another.expression"),
                     null,
                     whenMap(
-                      "D", text(imm("Case D"), text.anchor(5)).color("gold"),
-                      "E", text(imm("Case E"), text.anchor(6)).color("yellow")
+                      "D", text("Case D", text.anchor(5)).color("gold"),
+                      "E", text("Case E", text.anchor(6)).color("yellow")
                     )
                   )
                 )
             )
           )
         )
-        .child(text(imm("after"), text.anchor(8)))
+        .child(text("after", text.anchor(8)))
     );
   }
 
@@ -248,7 +248,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      text(imm("Hello, world!"), text.anchor(0))
+      text("Hello, world!", text.anchor(0))
         .color("red")
         .format(Format.BOLD, true)
         .format(Format.ITALIC, true)
@@ -266,7 +266,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       forLoop(
         expr("members"),
         null,
-        text(imm("Hello, world!"), text.anchor(0))
+        text("Hello, world!", text.anchor(0))
           .color("red"),
         null,
         null
@@ -286,16 +286,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       text,
       container(CursorPosition.ZERO)
         .child(
-          text(imm("hello"), text.anchor(0))
+          text("hello", text.anchor(0))
             .color("aqua")
         )
         .child(
-          text(imm("world"), text.anchor(1))
+          text("world", text.anchor(1))
             .format(Format.BOLD, true)
             .color("red")
         )
         .child(
-          text(imm("test"), text.anchor(2))
+          text("test", text.anchor(2))
             .format(Format.ITALIC, true)
             .color("green")
         )
@@ -310,7 +310,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-        text(imm("hello"), text.anchor(0))
+        text("hello", text.anchor(0))
           .color("aqua")
     );
   }
@@ -325,14 +325,14 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       text,
       container(CursorPosition.ZERO)
         .child(
-          text(imm("hello"), text.anchor(0))
+          text("hello", text.anchor(0))
             .color("red")
         )
         .child(
-          text(imm(" "), text.anchor(1))
+          text(" ", text.anchor(1))
         )
         .child(
-          text(expr("test"), text.anchor(2))
+          interpolation("test", text.anchor(2))
         )
     );
 
@@ -345,16 +345,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       container(text.anchor(0))
         .color("gray")
         .child(
-          text(imm("#"), text.anchor(1))
+          text("#", text.anchor(1))
         )
         .child(
-          text(expr("loop.index + 1"), text.anchor(2))
+          interpolation("loop.index + 1", text.anchor(2))
         )
         .child(
-          text(imm(" "), text.anchor(3))
+          text(" ", text.anchor(3))
         )
         .child(
-          text(expr("word"), text.anchor(4))
+          interpolation("word", text.anchor(4))
             .color("red")
         )
     );
@@ -369,15 +369,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       container(text.anchor(0))
         .color("gray")
         .child(
-          text(imm("#"), text.anchor(1))
+          text("#", text.anchor(1))
         )
         .child(
-          text(expr("loop.index + 1"), text.anchor(2))
+          interpolation("loop.index + 1", text.anchor(2))
         )
         .child(
-          text(expr("word"), text.anchor(3))
+          interpolation("word", text.anchor(3))
             .color("red")
         )
     );
   }
+
 }
