@@ -122,6 +122,15 @@ public abstract class Jsonifiable {
       return result;
     }
 
+    if (item instanceof Map<?, ?>) {
+      JsonObject result = new JsonObject();
+
+      for (Map.Entry<?, ?> entry : ((Map<?, ?>) item).entrySet())
+        result.add(jsonifyObject(null, entry.getKey()).getAsString(), jsonifyObject(null, entry.getValue()));
+
+      return result;
+    }
+
     LoggerProvider.get().log(Level.WARNING, "Don't know how to stringify " + item.getClass().getSimpleName());
 
     return JsonNull.INSTANCE;
