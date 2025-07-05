@@ -171,7 +171,7 @@ public class OutputBuilder {
       Object name = null;
 
       if (entityHoverNode.name != null) {
-        List<Object> components = interpreter.interpret(
+        List<Object> components = interpreter.interpretSubtree(
           entityHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
         );
@@ -203,7 +203,7 @@ public class OutputBuilder {
       Object name = null;
 
       if (itemHoverNode.name != null) {
-        List<Object> components = interpreter.interpret(
+        List<Object> components = interpreter.interpretSubtree(
           itemHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ITEM_NAME)
         );
@@ -214,7 +214,7 @@ public class OutputBuilder {
       List<Object> lore = null;
 
       if (itemHoverNode.lore != null) {
-        lore = interpreter.interpret(
+        lore = interpreter.interpretSubtree(
           itemHoverNode.lore,
           componentConstructor.getSlotContext(SlotType.ITEM_LORE)
         );
@@ -226,7 +226,7 @@ public class OutputBuilder {
     else if (sequence.nonTerminal instanceof TextHoverNode) {
       TextHoverNode textHoverNode = (TextHoverNode) sequence.nonTerminal;
 
-      List<Object> components = interpreter.interpret(
+      List<Object> components = interpreter.interpretSubtree(
         textHoverNode.value,
         componentConstructor.getSlotContext(SlotType.TEXT_TOOLTIP)
       );
@@ -275,7 +275,7 @@ public class OutputBuilder {
       Object separator = null;
 
       if (selectorNode.separator != null) {
-        List<Object> components = interpreter.interpret(
+        List<Object> components = interpreter.interpretSubtree(
           selectorNode.separator,
           componentConstructor.getSlotContext(SlotType.SELECTOR_SEPARATOR)
         );
@@ -300,7 +300,7 @@ public class OutputBuilder {
       Object separator = null;
 
       if (nbtNode.separator != null) {
-        List<Object> components = interpreter.interpret(
+        List<Object> components = interpreter.interpretSubtree(
           nbtNode.separator,
           componentConstructor.getSlotContext(SlotType.NBT_SEPARATOR)
         );
@@ -334,7 +334,7 @@ public class OutputBuilder {
       List<Object> with = new ArrayList<>();
 
       for (MarkupNode withNode : translateNode.with) {
-        List<Object> components = interpreter.interpret(
+        List<Object> components = interpreter.interpretSubtree(
           withNode,
           componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)
         );

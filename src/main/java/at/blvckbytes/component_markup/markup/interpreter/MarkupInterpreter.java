@@ -36,7 +36,7 @@ public class MarkupInterpreter implements Interpreter {
     SlotType slot, MarkupNode node
   ) {
     return new MarkupInterpreter(componentConstructor, baseEnvironment)
-      .interpret(node, componentConstructor.getSlotContext(slot));
+      .interpretSubtree(node, componentConstructor.getSlotContext(slot));
   }
 
   @Override
@@ -49,7 +49,7 @@ public class MarkupInterpreter implements Interpreter {
     String value = evaluateAsStringOrNull(expression);
 
     if (value == null)
-      return "";
+      return environment.getValueInterpreter().asString(null);
 
     return value;
   }
@@ -74,7 +74,7 @@ public class MarkupInterpreter implements Interpreter {
     Long value = evaluateAsLongOrNull(expression);
 
     if (value == null)
-      return 0L;
+      return environment.getValueInterpreter().asLong(null);
 
     return value;
   }
@@ -99,7 +99,7 @@ public class MarkupInterpreter implements Interpreter {
     Double value = evaluateAsDoubleOrNull(expression);
 
     if (value == null)
-      return 0D;
+      return environment.getValueInterpreter().asDouble(null);
 
     return value;
   }
@@ -124,7 +124,7 @@ public class MarkupInterpreter implements Interpreter {
     TriState value = evaluateAsTriState(expression);
 
     if (value == TriState.NULL)
-      return false;
+      return environment.getValueInterpreter().asBoolean(null);
 
     return value == TriState.TRUE;
   }
@@ -155,7 +155,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public List<Object> interpret(MarkupNode node, SlotContext slotContext) {
+  public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
     builderStack.push(new OutputBuilder(componentConstructor, this, slotContext));
     _interpret(node);
     return builderStack.pop().build();

@@ -30,7 +30,7 @@ public interface Interpreter {
 
   @Nullable Object evaluateAsPlainObject(ExpressionNode expression);
 
-  List<Object> interpret(MarkupNode node, SlotContext slotContext);
+  List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext);
 
   OutputBuilder getCurrentBuilder();
 
