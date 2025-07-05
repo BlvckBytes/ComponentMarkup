@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.List;
 public class MandatoryMarkupAttributeDefinition extends AttributeDefinition {
 
   public MandatoryMarkupAttributeDefinition(String name, AttributeFlag... flags) {
-    super(name, MarkupAttribute.class, flags);
+    super(name, flags);
   }
 
   public MarkupNode single(@Nullable AttributeMap attributes) {

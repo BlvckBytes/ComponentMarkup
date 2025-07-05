@@ -1,7 +1,5 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
-
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -12,9 +10,8 @@ public abstract class AttributeDefinition {
 
   public final String name;
   public final EnumSet<AttributeFlag> flags;
-  public final Class<? extends Attribute> valueType;
 
-  protected AttributeDefinition(String name, Class<? extends Attribute> valueType, AttributeFlag... flags) {
+  protected AttributeDefinition(String name, AttributeFlag... flags) {
     this.name = name.toLowerCase();
 
     if (!NAME_PATTERN.matcher(this.name).matches())
@@ -30,7 +27,6 @@ public abstract class AttributeDefinition {
       throw new IllegalStateException("The for- namespace is reserved as to pass parameters to loops");
 
     this.flags = flags.length == 0 ? EnumSet.noneOf(AttributeFlag.class) : EnumSet.of(flags[0], flags);
-    this.valueType = valueType;
   }
 
   @Override
