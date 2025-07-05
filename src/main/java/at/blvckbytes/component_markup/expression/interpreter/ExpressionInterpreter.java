@@ -26,10 +26,9 @@ public class ExpressionInterpreter {
 
   private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
 
-  public ExpressionInterpreter() {
-  }
+  private ExpressionInterpreter() {}
 
-  public @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment) {
+  public static @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment) {
     if (expression == null)
       return null;
 
@@ -40,7 +39,7 @@ public class ExpressionInterpreter {
 
     if (expression instanceof TransformerNode) {
       TransformerNode node = (TransformerNode) expression;
-      return node.transformer.transform(interpret(node.wrapped, environment), environment, this);
+      return node.transformer.transform(interpret(node.wrapped, environment), environment);
     }
 
     if (expression instanceof PrefixOperationNode) {
@@ -247,7 +246,7 @@ public class ExpressionInterpreter {
     return null;
   }
 
-  private @Nullable Object performSubscripting(@Nullable Object source, @Nullable Object key, InterpretationEnvironment environment) {
+  private static @Nullable Object performSubscripting(@Nullable Object source, @Nullable Object key, InterpretationEnvironment environment) {
     if (source == null)
       return null;
 
@@ -310,7 +309,7 @@ public class ExpressionInterpreter {
     }
   }
 
-  private @Nullable String extractStringTerminal(@Nullable ExpressionNode node) {
+  private static @Nullable String extractStringTerminal(@Nullable ExpressionNode node) {
     if (node instanceof TerminalNode) {
       TerminalNode terminal = (TerminalNode) node;
 
@@ -321,7 +320,7 @@ public class ExpressionInterpreter {
     return null;
   }
 
-  private @Nullable Long decideSubstringIndex(
+  private static @Nullable Long decideSubstringIndex(
     String input,
     InterpretationEnvironment environment,
     ExpressionNode node,
@@ -355,7 +354,7 @@ public class ExpressionInterpreter {
     return environment.getValueInterpreter().asLong(interpret(node, environment));
   }
 
-  public String performSubstring(String input, SubstringNode node, InterpretationEnvironment environment) {
+  private static String performSubstring(String input, SubstringNode node, InterpretationEnvironment environment) {
     int len = input.length();
 
     if (len == 0)
@@ -377,11 +376,11 @@ public class ExpressionInterpreter {
     return input.substring((int) beginIndex, (int) endIndex + 1);
   }
 
-  private long clampZeroAndMax(long value, long max) {
+  private static long clampZeroAndMax(long value, long max) {
     return Math.max(0, Math.min(max, value));
   }
 
-  private boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue) {
+  private static boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue) {
     if (lhsValue == null && rhsValue == null)
       return true;
 
@@ -391,7 +390,7 @@ public class ExpressionInterpreter {
     return lhsValue.equals(rhsValue);
   }
 
-  private Number flipSignOf(Number input) {
+  private static Number flipSignOf(Number input) {
     if (input instanceof Double)
       return input.doubleValue() * -1;
 
@@ -401,7 +400,7 @@ public class ExpressionInterpreter {
     return flipSignOf(input.longValue());
   }
 
-  private String toTitleCase(String input) {
+  private static String toTitleCase(String input) {
     if (input.isEmpty())
       return input;
 
@@ -430,7 +429,7 @@ public class ExpressionInterpreter {
     return result.toString();
   }
 
-  private String toggleCase(String input) {
+  private static String toggleCase(String input) {
     StringBuilder result = new StringBuilder(input.length());
 
     for (int index = 0; index < input.length(); ++index) {
@@ -448,13 +447,13 @@ public class ExpressionInterpreter {
     return result.toString();
   }
 
-  private String slugify(String input) {
+  private static String slugify(String input) {
     String slug = NON_WORDS.matcher(input).replaceAll("-");
     slug = DASHES.matcher(slug).replaceAll("");
     return slug.toLowerCase();
   }
 
-  private String asciify(String input) {
+  private static String asciify(String input) {
     String decomposed = Normalizer.normalize(input, Normalizer.Form.NFD);
     String withoutDiacritics = DIACRITICS.matcher(decomposed).replaceAll("");
     return NON_ASCII.matcher(withoutDiacritics).replaceAll("");

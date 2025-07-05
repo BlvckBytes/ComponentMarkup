@@ -20,18 +20,12 @@ import java.util.logging.Level;
 public class MarkupInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
-  private final ExpressionInterpreter expressionInterpreter;
   private final TemporaryMemberEnvironment environment;
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
 
-  private MarkupInterpreter(
-    ComponentConstructor componentConstructor,
-    ExpressionInterpreter expressionInterpreter,
-    InterpretationEnvironment baseEnvironment
-  ) {
+  private MarkupInterpreter(ComponentConstructor componentConstructor, InterpretationEnvironment baseEnvironment) {
     this.componentConstructor = componentConstructor;
-    this.expressionInterpreter = expressionInterpreter;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
@@ -39,13 +33,11 @@ public class MarkupInterpreter implements Interpreter {
 
   public static List<Object> interpret(
     ComponentConstructor componentConstructor,
-    ExpressionInterpreter expressionInterpreter,
     InterpretationEnvironment baseEnvironment,
-    SlotContext slotContext,
-    MarkupNode node
+    SlotType slot, MarkupNode node
   ) {
-    return new MarkupInterpreter(componentConstructor, expressionInterpreter, baseEnvironment)
-      .interpret(node, slotContext);
+    return new MarkupInterpreter(componentConstructor, baseEnvironment)
+      .interpret(node, componentConstructor.getSlotContext(slot));
   }
 
   @Override
@@ -66,7 +58,7 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public @Nullable String evaluateAsStringOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -91,7 +83,7 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public @Nullable Long evaluateAsLongOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -116,7 +108,7 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public @Nullable Double evaluateAsDoubleOrNull(ExpressionNode expression) {
     try {
-      Object result = expressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return null;
@@ -141,7 +133,7 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public TriState evaluateAsTriState(ExpressionNode expression) {
     try {
-      Object result = expressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment);
 
       if (result == null)
         return TriState.NULL;
@@ -156,7 +148,7 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public @Nullable Object evaluateAsPlainObject(ExpressionNode expression) {
     try {
-      return expressionInterpreter.interpret(expression, environment);
+      return ExpressionInterpreter.interpret(expression, environment);
     } catch (Throwable e) {
       LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a plain object", e);
       return null;
@@ -195,7 +187,7 @@ public class MarkupInterpreter implements Interpreter {
         return;
       }
 
-      Object result = expressionInterpreter.interpret(conditional.ifCondition, environment);
+      Object result = ExpressionInterpreter.interpret(conditional.ifCondition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
@@ -217,7 +209,7 @@ public class MarkupInterpreter implements Interpreter {
     Map<String, Object> boundVariables = new HashMap<>();
 
     for (LetBinding letBinding : node.letBindings) {
-      Object value = expressionInterpreter.interpret(letBinding.expression, environment);
+      Object value = ExpressionInterpreter.interpret(letBinding.expression, environment);
 
       if (boundVariables.put(letBinding.name, value) != null)
         LoggerProvider.get().log(Level.WARNING, "Duplicate let-binding " + letBinding.name);
@@ -230,7 +222,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretForLoop(ForLoopNode node) {
-    Object iterable = expressionInterpreter.interpret(node.iterable, environment);
+    Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
     if (node.iterationVariable != null)
@@ -244,7 +236,7 @@ public class MarkupInterpreter implements Interpreter {
     if (node.reversed == null)
       reversed = false;
     else {
-      Object reversedValue = expressionInterpreter.interpret(node.reversed, environment);
+      Object reversedValue = ExpressionInterpreter.interpret(node.reversed, environment);
       reversed = environment.getValueInterpreter().asBoolean(reversedValue);
     }
 
@@ -281,7 +273,7 @@ public class MarkupInterpreter implements Interpreter {
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
-      Object result = expressionInterpreter.interpret(node.useCondition, environment);
+      Object result = ExpressionInterpreter.interpret(node.useCondition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result))
         doNotUse = true;
@@ -313,7 +305,7 @@ public class MarkupInterpreter implements Interpreter {
     }
 
     if (node.ifCondition != null) {
-      Object result = expressionInterpreter.interpret(node.ifCondition, environment);
+      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result)) {
         interceptors.handleAfter(node);

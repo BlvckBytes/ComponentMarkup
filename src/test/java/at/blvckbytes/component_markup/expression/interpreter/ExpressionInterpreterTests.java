@@ -11,8 +11,6 @@ import java.util.List;
 
 public class ExpressionInterpreterTests {
 
-  private static final ExpressionInterpreter interpreter = new ExpressionInterpreter();
-
   @Test
   public void shouldTransformUpperCase() {
     makeCase(
@@ -211,6 +209,6 @@ public class ExpressionInterpreterTests {
 
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
     ExpressionNode node = ExpressionParser.parse(expression);
-    Assertions.assertEquals(expectedResult, interpreter.interpret(node, environment));
+    Assertions.assertEquals(expectedResult, ExpressionInterpreter.interpret(node, environment));
   }
 }

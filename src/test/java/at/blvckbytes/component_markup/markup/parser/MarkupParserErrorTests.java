@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
@@ -10,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 public class MarkupParserErrorTests {
-
-  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry();
 
   @Test
   public void shouldThrowOnUnknownTag() {
@@ -580,7 +577,7 @@ public class MarkupParserErrorTests {
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
-      () -> MarkupParser.parse(input.text, builtInTagRegistry)
+      () -> MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE)
     );
 
     List<String> screenLines = exception.makeErrorScreen(input.text);
@@ -592,7 +589,7 @@ public class MarkupParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      MarkupParser.parse(input.text, builtInTagRegistry);
+      MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
     } catch (Throwable e) {
       thrownError = e;
     }

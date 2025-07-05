@@ -1,10 +1,8 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.interpreter.EnvironmentBuilder;
-import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
@@ -19,8 +17,6 @@ import java.util.function.BiConsumer;
 
 public class MarkupInterpreterTests {
 
-  private static final TagRegistry builtInTagRegistry = new BuiltInTagRegistry();
-  private static final ExpressionInterpreter expressionInterpreter = new ExpressionInterpreter();
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
   private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
 
@@ -637,7 +633,7 @@ public class MarkupInterpreterTests {
     SlotType slot,
     JsonBuilder expectedResult
   ) {
-    MarkupNode actualNode = MarkupParser.parse(input.text, builtInTagRegistry);
+    MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
 
     JsonElement expectedJson;
 
@@ -652,9 +648,9 @@ public class MarkupInterpreterTests {
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
     List<Object> resultItems = MarkupInterpreter.interpret(
-      componentConstructor, expressionInterpreter,
+      componentConstructor,
       baseEnvironment,
-      SlotContext.getForSlot(slot), actualNode
+      slot, actualNode
     );
 
     JsonArray actualJson = new JsonArray();
