@@ -298,13 +298,15 @@ public class ExpressionInterpreter {
     String stringKey = environment.getValueInterpreter().asString(key);
     Field field = publicFieldsByClass.computeIfAbsent(source.getClass(), PublicFieldMap::new).locateField(stringKey);
 
-    if (field == null)
+    if (field == null) {
+      LoggerProvider.get().log(Level.WARNING, "Could not locate field " + stringKey);
       return null;
+    }
 
     try {
       return field.get(source);
     } catch (Exception e) {
-      LoggerProvider.get().log(Level.SEVERE, "Could not access field " + field, e);
+      LoggerProvider.get().log(Level.WARNING, "Could not access field " + field, e);
       return null;
     }
   }
