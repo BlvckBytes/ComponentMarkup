@@ -574,6 +574,142 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnIsCaseOutsideOfWhenParent() {
+    makeErrorCase(
+      MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT,
+      "<red @*is=\"A\">Hello, world!"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnOtherCaseOutsideOfWhenParent() {
+    makeErrorCase(
+      MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT,
+      "<red @*other>Hello, world!"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnNonStringWhenAttributes() {
+    String[] values = { "=true", "=false", "=5", "=5.5", "" };
+
+    for (String value : values) {
+      makeErrorCase(
+        MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+        "<red @*is" + value + ">"
+      );
+
+      makeErrorCase(
+        MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+        "<red @*when" + value + ">"
+      );
+
+      if (!value.isEmpty()) {
+        makeErrorCase(
+          MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+          "<red @*other" + value + ">"
+        );
+      }
+    }
+  }
+
+  @Test
+  public void shouldThrowOnDuplicateWhenInput() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT,
+      "<container *when=\"my.expr\" @*when=\"your.expr\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnNoCases() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_NO_CASES,
+      "@<container *when=\"my.expr\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_NO_CASES,
+      "@<container *when=\"my.expr\">",
+      "  <red *other>Fallback"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnDuplicateFallback() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK,
+      "<container *when=\"my.expr\">",
+      "  <red *other>Fallback 1</>",
+      "  @<green *other>Fallback 2</>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnDuplicateCase() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE,
+      "<container *when=\"my.expr\">",
+      "  <red *is=\"ABC\">Case 1</>",
+      "  @<green *is=\"abc\">Case 2</>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleWhenCaseAttributes() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
+      "<container *when=\"my.expr\">",
+      "  <red *is=\"ABC\" @*is=\"D\">Case"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
+      "<container *when=\"my.expr\">",
+      "  <red *is=\"ABC\" @*other>Case"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
+      "<container *when=\"my.expr\">",
+      "  <red *other @*is=\"ABC\">Case"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
+      "<container *when=\"my.expr\">",
+      "  <red *other @*other>Case"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnDisallowedMatchingMembers() {
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
+      "<container *when=\"my.expr\">",
+      "  @Static content"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
+      "<container *when=\"my.expr\">",
+      "  @<red>Static content"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
+      "<container *when=\"my.expr\">",
+      "  <red *is=\"A\" @*if=\"b\">Static content"
+    );
+
+    makeErrorCase(
+      MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
+      "<container *when=\"my.expr\">",
+      "  <red *is=\"A\" @*else-if=\"b\">Static content"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

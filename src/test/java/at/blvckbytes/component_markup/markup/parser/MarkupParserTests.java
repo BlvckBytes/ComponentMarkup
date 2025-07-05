@@ -191,6 +191,56 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   }
 
   @Test
+  public void shouldParseWhenMatching() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@before",
+      "@<container *when=\"my.expression\">",
+      "  <red *is=\"A\">@Case A</>",
+      "  <green *is=\"B\">@Case B</>",
+      "  @<blue *is=\"C\" *when=\"another.expression\">",
+      "    <gold *is=\"D\">@Case D</>",
+      "    <yellow *is=\"E\">@Case E</>",
+      "  </>",
+      "  <gray *other>@Fallback Case</>",
+      "</>",
+      "@after"
+    );
+
+    makeCase(
+      text,
+      container(CursorPosition.ZERO)
+        .child(text(imm("before"), text.anchor(0)))
+        .child(
+          when(
+            text.anchor(1),
+            expr("my.expression"),
+            text(imm("Fallback Case"), text.anchor(7))
+              .color("gray"),
+            whenMap(
+              "A", text(imm("Case A"), text.anchor(2)).color("red"),
+              "B", text(imm("Case B"), text.anchor(3)).color("green"),
+              "C",
+              container(text.anchor(4))
+                .color("blue")
+                .child(
+                  when(
+                    text.anchor(4),
+                    expr("another.expression"),
+                    null,
+                    whenMap(
+                      "D", text(imm("Case D"), text.anchor(5)).color("gold"),
+                      "E", text(imm("Case E"), text.anchor(6)).color("yellow")
+                    )
+                  )
+                )
+            )
+          )
+        )
+        .child(text(imm("after"), text.anchor(8)))
+    );
+  }
+
+  @Test
   public void shouldCollapseStyleContainers() {
     TextWithAnchors text = new TextWithAnchors(
       "<red><bold><italic>@Hello, world!"

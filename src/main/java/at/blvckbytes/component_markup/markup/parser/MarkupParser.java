@@ -44,7 +44,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.lastPosition = initialPosition;
     this.result = new TextNode(EMPTY_TEXT, lastPosition, null);
 
-    this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition));
+    this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition, null));
   }
 
   // ================================================================================
@@ -72,7 +72,9 @@ public class MarkupParser implements XmlEventConsumer {
     if (tag == null)
       throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
 
-    tagStack.push(new TagAndBuffers(tag, tagName, lastPosition));
+    TagAndBuffers parent = tagStack.isEmpty() ? null : tagStack.peek();
+
+    tagStack.push(new TagAndBuffers(tag, tagName, lastPosition, parent));
   }
 
   @Override
@@ -424,6 +426,9 @@ public class MarkupParser implements XmlEventConsumer {
 
     switch (name) {
       case "*if": {
+        if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+
         if (value == null)
           throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
@@ -436,6 +441,9 @@ public class MarkupParser implements XmlEventConsumer {
       }
 
       case "*else-if": {
+        if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+
         if (value == null)
           throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
 
@@ -458,6 +466,20 @@ public class MarkupParser implements XmlEventConsumer {
         return;
       }
 
+      case "*other": {
+        if (value != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
+
+        if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT);
+
+        if (currentLayer.isWhenOther || currentLayer.whenIsValue != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+
+        currentLayer.isWhenOther = true;
+        return;
+      }
+
       case "*else": {
         if (value != null)
           throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
@@ -466,6 +488,31 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
         currentLayer.ifConditionType = ConditionType.ELSE;
+        return;
+      }
+
+      case "*when": {
+        if (value == null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+
+        if (currentLayer.whenInput != null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT);
+
+        currentLayer.whenInput = parseExpression(value, valueBeginPosition);
+        return;
+      }
+
+      case "*is": {
+        if (value == null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+
+        if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
+          throw new MarkupParseException(lastPosition, MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT);
+
+        if (currentLayer.whenIsValue != null || currentLayer.isWhenOther)
+          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+
+        currentLayer.whenIsValue = value;
         return;
       }
     }

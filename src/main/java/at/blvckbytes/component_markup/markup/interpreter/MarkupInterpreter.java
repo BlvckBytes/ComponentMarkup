@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
@@ -177,6 +178,28 @@ public class MarkupInterpreter implements Interpreter {
     return builderStack.size() > 1;
   }
 
+  private void interpretWhenMatching(WhenMatchingNode node, TemporaryMemberEnvironment environment) {
+    if (node.casesLower.isEmpty())
+      LoggerProvider.get().log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
+
+    Object result = ExpressionInterpreter.interpret(node.input, environment);
+
+    if (result != null) {
+      String inputLower = environment.getValueInterpreter().asString(result).toLowerCase();
+      MarkupNode caseNode = node.casesLower.get(inputLower);
+
+      if (caseNode != null) {
+        _interpret(caseNode);
+        return;
+      }
+    }
+
+    if (node.other == null)
+      return;
+
+    _interpret(node.other);
+  }
+
   private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
     if (node.conditions.isEmpty())
       LoggerProvider.get().log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
@@ -289,6 +312,16 @@ public class MarkupInterpreter implements Interpreter {
         return;
 
       interpretIfElseIfElse((IfElseIfElseNode) node, environment);
+
+      interceptors.handleAfter(node);
+      return;
+    }
+
+    if (node instanceof WhenMatchingNode) {
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
+
+      interpretWhenMatching((WhenMatchingNode) node, environment);
 
       interceptors.handleAfter(node);
       return;

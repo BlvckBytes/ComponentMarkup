@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
@@ -16,12 +17,38 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
+  }
+
+  protected static Map<String, NodeWrapper<? extends MarkupNode>> whenMap(Object... items) {
+    Map<String, NodeWrapper<? extends MarkupNode>> result = new HashMap<>();
+
+    if (items.length % 2 != 0)
+      throw new IllegalStateException("Expected an even number of items");
+
+    for (int i = 0; i < items.length; i += 2) {
+      String key = (String) items[i];
+      NodeWrapper<?> value = (NodeWrapper<?>) items[i + 1];
+      result.put(key, value);
+    }
+
+    return result;
+  }
+
+  protected static NodeWrapper<WhenMatchingNode> when(CursorPosition position, ExpressionNode input, @Nullable NodeWrapper<?> wrappedFallback, Map<String, NodeWrapper<? extends MarkupNode>> wrappedCases) {
+    Map<String, MarkupNode> cases = new HashMap<>();
+
+    for (Map.Entry<String, NodeWrapper<? extends MarkupNode>> entry : wrappedCases.entrySet())
+      cases.put(entry.getKey().toLowerCase(), entry.getValue().get());
+
+    return new NodeWrapper<>(new WhenMatchingNode(position, input, cases, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
   @SafeVarargs

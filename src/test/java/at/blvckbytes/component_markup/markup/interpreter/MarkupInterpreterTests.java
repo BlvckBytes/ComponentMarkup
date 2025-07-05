@@ -69,6 +69,93 @@ public class MarkupInterpreterTests {
   }
 
   @Test
+  public void shouldRenderWhenMatching() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container *when=\"input\">",
+      "  <red *is=\"A\">Case A</>",
+      "  <green *is=\"B\">Case B</>",
+      "  <container *is=\"null\" *when=\"other_input\">",
+      "    <gold *is=\"C\">Nested case C</>",
+      "    <yellow *is=\"D\">Nested case D</>",
+      "  </>",
+      "  <gray *other>Fallback Case</>",
+      "</>"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "a"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Case A")
+        .string("color", "red")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "b"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Case B")
+        .string("color", "green")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "null")
+        .withStatic("other_input", "C"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Nested case C")
+        .string("color", "gold")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "null")
+        .withStatic("other_input", "D"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Nested case D")
+        .string("color", "yellow")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "null")
+        .withStatic("other_input", "E"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", "asd"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Fallback Case")
+        .string("color", "gray")
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("input", null),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Fallback Case")
+        .string("color", "gray")
+    );
+  }
+
+  @Test
   public void shouldRenderInterpolationWithBinding() {
     TextWithAnchors text = new TextWithAnchors(
       "<red let-my_var=\"my_prefix & my_name & my_suffix\">Hello, {{my_var}}"
