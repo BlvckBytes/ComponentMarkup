@@ -264,4 +264,70 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .color("aqua")
     );
   }
+
+  @Test
+  public void shouldPreserveWhitespaceInBetweenTagsAndOrInterpolation() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red>@hello</red>@ @{{test}}"
+    );
+
+    makeCase(
+      text,
+      container(CursorPosition.ZERO)
+        .child(
+          text(imm("hello"), text.anchor(0))
+            .color("red")
+        )
+        .child(
+          text(imm(" "), text.anchor(1))
+        )
+        .child(
+          text(expr("test"), text.anchor(2))
+        )
+    );
+
+    text = new TextWithAnchors(
+      "@<gray>@\\#@{{loop.index + 1}}@ <red>@{{word}}"
+    );
+
+    makeCase(
+      text,
+      container(text.anchor(0))
+        .color("gray")
+        .child(
+          text(imm("#"), text.anchor(1))
+        )
+        .child(
+          text(expr("loop.index + 1"), text.anchor(2))
+        )
+        .child(
+          text(imm(" "), text.anchor(3))
+        )
+        .child(
+          text(expr("word"), text.anchor(4))
+            .color("red")
+        )
+    );
+
+    text = new TextWithAnchors(
+      "@<gray>@\\#@{{loop.index + 1}} ",
+      " <red>@{{word}}"
+    );
+
+    makeCase(
+      text,
+      container(text.anchor(0))
+        .color("gray")
+        .child(
+          text(imm("#"), text.anchor(1))
+        )
+        .child(
+          text(expr("loop.index + 1"), text.anchor(2))
+        )
+        .child(
+          text(expr("word"), text.anchor(3))
+            .color("red")
+        )
+    );
+  }
 }

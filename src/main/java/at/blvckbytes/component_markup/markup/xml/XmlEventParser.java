@@ -113,6 +113,13 @@ public class XmlEventParser {
         cursor.restoreState(preConsumePosition);
       }
 
+      CursorPosition firstSpacePosition = null;
+
+      if (cursor.peekChar() == ' ') {
+        cursor.nextChar();
+        firstSpacePosition = cursor.getPosition();
+      }
+
       cursor.consumeWhitespace();
 
       if (cursor.peekChar() == '<') {
@@ -127,6 +134,14 @@ public class XmlEventParser {
                 : SUBSTRING_FIRST_TEXT
             )
           );
+        }
+
+        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && firstSpacePosition.lineNumber == cursor.getLineNumber()) {
+          substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
+          substringBuilder.setEndExclusive(cursor.getNextCharIndex());
+
+          consumer.onCursorPosition(firstSpacePosition);
+          consumer.onText(substringBuilder.build(SUBSTRING_NOT_TEXT));
         }
 
         parseOpeningOrClosingTag();

@@ -34,6 +34,7 @@ public class TextWithAnchors {
           if (isEscaped) {
             result.deleteCharAt(result.length() - 1);
             --charIndex;
+            --columnNumber;
           }
 
           else {
@@ -46,6 +47,7 @@ public class TextWithAnchors {
           if (isEscaped) {
             result.deleteCharAt(result.length() - 1);
             --charIndex;
+            --columnNumber;
           }
 
           else {

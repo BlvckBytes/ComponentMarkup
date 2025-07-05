@@ -15,6 +15,10 @@ public class InputCursor {
     return this.nextCharIndex;
   }
 
+  public int getLineNumber() {
+    return this.lineNumber;
+  }
+
   public char nextChar() {
     if (this.nextCharIndex == input.length())
       return 0;
