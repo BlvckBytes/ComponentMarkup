@@ -1,8 +1,8 @@
 package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
-import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,12 +11,12 @@ import java.util.List;
 public class TranslateNode extends TerminalNode {
 
   public final ExpressionNode key;
-  public final List<MarkupNode> with;
+  public final MarkupList with;
   public final @Nullable ExpressionNode fallback;
 
   public TranslateNode(
     ExpressionNode key,
-    List<MarkupNode> with,
+    MarkupList with,
     @Nullable ExpressionNode fallback,
     CursorPosition position,
     @Nullable List<LetBinding> letBindings

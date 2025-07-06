@@ -677,6 +677,103 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldEvaluateBoundMarkupAttributeExpressionsWithAndWithoutSpread() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<translate key=\"my.key\" [with]=\"first_node\"/>"
+    );
+
+    MarkupNode firstNode = MarkupParser.parse("<bold><gold>I am the first!", BuiltInTagRegistry.INSTANCE);
+
+    JsonObjectBuilder firstNodeJson = new JsonObjectBuilder()
+      .string("text", "I am the first!")
+      .string("color", "gold")
+      .bool("bold", true);
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("first_node", firstNode),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("translate", "my.key")
+        .array("with", with -> (
+          with.object(item -> firstNodeJson)
+        ))
+    );
+
+    MarkupNode secondNode = MarkupParser.parse("<italic><red>I am the second!", BuiltInTagRegistry.INSTANCE);
+
+    JsonObjectBuilder secondNodeJson = new JsonObjectBuilder()
+      .string("text", "I am the second!")
+      .string("color", "red")
+      .bool("italic", true);
+
+    text = new TextWithAnchors(
+      "<translate key=\"my.key\" [with]=\"first_node\" [with]=\"second_node\"/>"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("first_node", firstNode)
+        .withStatic("second_node", secondNode),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("translate", "my.key")
+        .array("with", with -> (
+          with
+            .object(item -> firstNodeJson)
+            .object(item -> secondNodeJson)
+        ))
+    );
+
+    text = new TextWithAnchors(
+      "<translate key=\"my.key\" [...with]=\"[first_node, second_node]\"/>"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("first_node", firstNode)
+        .withStatic("second_node", secondNode),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("translate", "my.key")
+        .array("with", with -> (
+          with
+            .object(item -> firstNodeJson)
+            .object(item -> secondNodeJson)
+        ))
+    );
+
+    text = new TextWithAnchors(
+      "<translate key=\"my.key\" [with]=\"[first_node, second_node]\"/>"
+    );
+
+    makeCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("first_node", firstNode)
+        .withStatic("second_node", secondNode),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("translate", "my.key")
+        .array("with", with -> (
+          with
+            .object(withItem -> (
+              withItem
+                .string("text", "")
+                .array("extra", extra -> (
+                  extra
+                    .object(item -> firstNodeJson)
+                    .object(item -> secondNodeJson)
+                ))
+            ))
+        ))
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

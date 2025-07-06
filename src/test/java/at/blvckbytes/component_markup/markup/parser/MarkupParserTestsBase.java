@@ -10,18 +10,17 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class MarkupParserTestsBase {
 
@@ -63,6 +62,10 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new IfElseIfElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
+  protected static ExpressionNode imm(String value) {
+    return ImmediateExpression.of(value);
+  }
+
   protected static ExpressionNode imm(boolean value) {
     return ImmediateExpression.of(value);
   }
@@ -85,7 +88,16 @@ public abstract class MarkupParserTestsBase {
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
 
-    return new NodeWrapper<>(new TranslateNode(key, withs, fallback, position, new ArrayList<>()));
+    return new NodeWrapper<>(new TranslateNode(key, toMarkupList(withs), fallback, position, new ArrayList<>()));
+  }
+
+  private static MarkupList toMarkupList(List<MarkupNode> markupNodes) {
+    return new MarkupList(Collections.emptyList()) {
+      @Override
+      public List<MarkupNode> get(Interpreter interpreter) {
+        return markupNodes;
+      }
+    };
   }
 
   protected static NodeWrapper<InterpolationNode> interpolation(String expression, CursorPosition position) {

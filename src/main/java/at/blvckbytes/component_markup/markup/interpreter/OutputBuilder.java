@@ -333,7 +333,7 @@ public class OutputBuilder {
 
       List<Object> with = new ArrayList<>();
 
-      for (MarkupNode withNode : translateNode.with) {
+      for (MarkupNode withNode : translateNode.with.get(interpreter)) {
         List<Object> components = interpreter.interpretSubtree(
           withNode,
           componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)

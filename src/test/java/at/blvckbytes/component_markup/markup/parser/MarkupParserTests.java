@@ -381,4 +381,44 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     );
   }
 
+  @Test
+  public void shouldAllowToBindExpressionsToMarkupAttributes() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<translate key=\"my.key\" @[with]=\"a\"/>"
+    );
+
+    makeCase(
+      text,
+      translate(
+        imm("my.key"),
+        text.anchor(0),
+        null,
+        exprDriven(
+          text.anchor(1),
+          expr("a")
+        )
+      )
+    );
+
+    text = new TextWithAnchors(
+      "@<translate key=\"my.key\" @[with]=\"a\" @[with]=\"b\"/>"
+    );
+
+    makeCase(
+      text,
+      translate(
+        imm("my.key"),
+        text.anchor(0),
+        null,
+        exprDriven(
+          text.anchor(1),
+          expr("a")
+        ),
+        exprDriven(
+          text.anchor(2),
+          expr("b")
+        )
+      )
+    );
+  }
 }

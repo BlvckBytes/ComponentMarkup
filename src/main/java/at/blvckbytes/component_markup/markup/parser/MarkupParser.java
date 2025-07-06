@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
+import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.ContainerTag;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
@@ -159,7 +160,15 @@ public class MarkupParser implements XmlEventConsumer {
       }
     }
 
-    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, expression, isSpreadMode));
+    ExpressionAttribute attribute = new ExpressionAttribute(lastPosition, name, expression);
+
+    if (!isExpressionMode)
+      attribute.flags.add(ExpressionFlag.IMMEDIATE_VALUE);
+
+    if (isSpreadMode)
+      attribute.flags.add(ExpressionFlag.SPREAD_MODE);
+
+    currentLayer.attributeMap.add(attribute);
   }
 
   @Override
@@ -271,7 +280,14 @@ public class MarkupParser implements XmlEventConsumer {
 
     TagAndBuffers currentLayer = tagStack.peek();
 
-    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, ImmediateExpression.of(true), false));
+    currentLayer.attributeMap.add(
+      new ExpressionAttribute(
+        lastPosition,
+        name,
+        ImmediateExpression.of(true),
+        ExpressionFlag.IMMEDIATE_VALUE
+      )
+    );
   }
 
   @Override
@@ -564,7 +580,14 @@ public class MarkupParser implements XmlEventConsumer {
       }
     }
 
-    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, expression, false));
+    currentLayer.attributeMap.add(
+      new ExpressionAttribute(
+        lastPosition,
+        name,
+        expression,
+        ExpressionFlag.IMMEDIATE_VALUE
+      )
+    );
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

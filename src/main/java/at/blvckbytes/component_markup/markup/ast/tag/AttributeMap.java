@@ -5,8 +5,6 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 public interface AttributeMap {
 
   @NotNull ExpressionNode getMandatoryExpressionNode(String name);
@@ -21,8 +19,8 @@ public interface AttributeMap {
 
   @Nullable MarkupNode getOptionalMarkupNode(String name);
 
-  @NotNull List<MarkupNode> getMandatoryMarkupList(String name);
+  @NotNull MarkupList getMandatoryMarkupList(String name);
 
-  @NotNull List<MarkupNode> getOptionalMarkupList(String name);
+  @NotNull MarkupList getOptionalMarkupList(String name);
 
 }

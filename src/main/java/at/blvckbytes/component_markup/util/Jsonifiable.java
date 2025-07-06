@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.util;
 
+import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,7 +115,7 @@ public abstract class Jsonifiable {
     if (item instanceof Enum<?>)
       return new JsonPrimitive(((Enum<?>) item).name());
 
-    if (item instanceof List<?>) {
+    if (item instanceof Collection<?>) {
       JsonArray result = new JsonArray();
 
       for (Object listItem : ((List<?>) item))
@@ -121,6 +123,12 @@ public abstract class Jsonifiable {
 
       return result;
     }
+
+    if (item instanceof ExpressionList)
+      return jsonifyObject(null, ((ExpressionList) item).get(null));
+
+    if (item instanceof MarkupList)
+      return jsonifyObject(null, ((MarkupList) item).get(null));
 
     if (item instanceof Map<?, ?>) {
       JsonObject result = new JsonObject();
@@ -131,7 +139,7 @@ public abstract class Jsonifiable {
       return result;
     }
 
-    LoggerProvider.get().log(Level.WARNING, "Don't know how to stringify " + item.getClass().getSimpleName());
+    LoggerProvider.get().log(Level.WARNING, "Don't know how to stringify " + item.getClass());
 
     return JsonNull.INSTANCE;
   }

@@ -11,15 +11,13 @@ public class JsonArrayBuilder implements JsonBuilder {
 
   public JsonArrayBuilder object(Function<JsonObjectBuilder, JsonObjectBuilder> handler) {
     JsonObjectBuilder builder = new JsonObjectBuilder();
-    handler.apply(builder);
-    result.add(builder.build());
+    result.add(handler.apply(builder).build());
     return this;
   }
 
   public JsonArrayBuilder array(Function<JsonArrayBuilder, JsonArrayBuilder> handler) {
     JsonArrayBuilder builder = new JsonArrayBuilder();
-    handler.apply(builder);
-    result.add(builder.build());
+    result.add(handler.apply(builder).build());
     return this;
   }
 
