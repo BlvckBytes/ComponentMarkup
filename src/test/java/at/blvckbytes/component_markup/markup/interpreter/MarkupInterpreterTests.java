@@ -818,6 +818,22 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldAllowToUseLetBindingsOnUnpackedNode() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red let-a=\"'a'\">{{a ** 10}}"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "aaaaaaaaaa")
+        .string("color", "red")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

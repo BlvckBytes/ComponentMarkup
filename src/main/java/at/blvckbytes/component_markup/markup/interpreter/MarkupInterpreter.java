@@ -330,6 +330,25 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void _interpret(MarkupNode node) {
+    Set<String> introducedBindings = introduceLetBindings(node);
+
+    // Because Java doesn't support defer...
+    __interpret(node);
+
+    if (introducedBindings != null)
+      environment.popVariables(introducedBindings);
+  }
+
+  private void __interpret(MarkupNode node) {
+    if (node.ifCondition != null) {
+      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
+
+      if (!environment.getValueInterpreter().asBoolean(result)) {
+        interceptors.handleAfter(node);
+        return;
+      }
+    }
+
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
@@ -384,15 +403,6 @@ public class MarkupInterpreter implements Interpreter {
       return;
     }
 
-    if (node.ifCondition != null) {
-      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
-
-      if (!environment.getValueInterpreter().asBoolean(result)) {
-        interceptors.handleAfter(node);
-        return;
-      }
-    }
-
     OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
@@ -412,44 +422,40 @@ public class MarkupInterpreter implements Interpreter {
       ExpressionNode contents = ((InterpolationNode) node).contents;
       Object interpolationValue = evaluateAsPlainObject(contents);
 
+      MarkupNode interpolatedNode;
+
       if (interpolationValue instanceof MarkupNode)
-        _interpret((MarkupNode) interpolationValue);
-      else {
-        String textValue = environment.getValueInterpreter().asString(interpolationValue);
-        _interpret(new TextNode(textValue, node.position));
+        interpolatedNode = (MarkupNode) interpolationValue;
+      else
+        interpolatedNode = new TextNode(environment.getValueInterpreter().asString(interpolationValue), node.position);
+
+      if (!interpolatedNode.canBeUnpackedFromAndIfSoInherit(node)) {
+        interpolatedNode = new ContainerNode(interpolatedNode.position, Collections.singletonList(interpolatedNode), null);
+
+        if (!interpolatedNode.canBeUnpackedFromAndIfSoInherit(node))
+          LoggerProvider.get().log(Level.WARNING, "Could not inherit from InterpolationNode despite containerizing");
       }
+
+      _interpret(interpolatedNode);
 
       interceptors.handleAfter(node);
       return;
     }
-
-    Set<String> introducedBindings = introduceLetBindings(node);
 
     // Terminal nodes always render, because since they do not bear any child-nodes,
     // the only sensible way to "toggle" them is via an if-condition
     if (node instanceof TerminalNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node)) {
-        if (introducedBindings != null)
-          environment.popVariables(introducedBindings);
-
+      if (interceptors.handleBeforeAndGetIfSkip(node))
         return;
-      }
 
       builder.onTerminal((TerminalNode) node, DelayedCreationHandler.NONE_SENTINEL);
-
-      if (introducedBindings != null)
-        environment.popVariables(introducedBindings);
 
       interceptors.handleAfter(node);
       return;
     }
 
-    if (!doNotUse && interceptors.handleBeforeAndGetIfSkip(node)) {
-      if (introducedBindings != null)
-        environment.popVariables(introducedBindings);
-
+    if (!doNotUse && interceptors.handleBeforeAndGetIfSkip(node))
       return;
-    }
 
     if (node.children != null && !node.children.isEmpty()) {
       builder.onNonTerminalBegin(node);
@@ -459,9 +465,6 @@ public class MarkupInterpreter implements Interpreter {
 
       builder.onNonTerminalEnd();
     }
-
-    if (introducedBindings != null)
-      environment.popVariables(introducedBindings);
 
     if (!doNotUse)
       interceptors.handleAfter(node);

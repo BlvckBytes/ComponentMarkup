@@ -1,13 +1,11 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
-import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
@@ -64,6 +62,7 @@ public class TagAndBuffers implements ParserChildItem {
     return this.bindingNames.contains(name);
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean addLetBinding(LetBinding letBinding) {
     if (this.bindings == null) {
       this.bindings = new ArrayList<>();
@@ -114,12 +113,6 @@ public class TagAndBuffers implements ParserChildItem {
 
         currentNode = childTag.createNode();
         currentConditionType = childTag.ifConditionType;
-
-        if (childTag.ifCondition != null)
-          currentNode.ifCondition = childTag.ifCondition;
-
-        if (childTag.useCondition != null)
-          currentNode.useCondition = childTag.useCondition;
 
         if (childTag.forIterable != null) {
           currentNode = new ForLoopNode(
@@ -316,6 +309,12 @@ public class TagAndBuffers implements ParserChildItem {
     if (result == null)
       return new TextNode("<error>", position);
 
+    if (ifCondition != null)
+      result.ifCondition = ifCondition;
+
+    if (useCondition != null)
+      result.useCondition = useCondition;
+
     if (!(result instanceof ContainerNode))
       return result;
 
@@ -325,20 +324,10 @@ public class TagAndBuffers implements ParserChildItem {
       return result;
 
     MarkupNode onlyChild = containerNode.children.get(0);
-    NodeStyle containerStyle = containerNode.getStyle();
 
-    if (containerStyle == null || !containerStyle.hasEffect()) {
-      onlyChild.doesResetStyle |= containerNode.doesResetStyle;
-      return onlyChild;
-    }
+    if (!onlyChild.canBeUnpackedFromAndIfSoInherit(containerNode))
+      return result;
 
-    if (onlyChild instanceof StyledNode) {
-      onlyChild.doesResetStyle |= containerNode.doesResetStyle;
-      StyledNode styledNode = (StyledNode) onlyChild;
-      styledNode.getOrInstantiateStyle().inheritFrom(containerStyle, useCondition);
-      return styledNode;
-    }
-
-    return result;
+    return onlyChild;
   }
 }

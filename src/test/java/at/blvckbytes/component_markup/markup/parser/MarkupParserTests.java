@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
+import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
@@ -252,6 +253,27 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         .color("red")
         .format(Format.BOLD, true)
         .format(Format.ITALIC, true)
+    );
+  }
+
+  @Test
+  public void shouldUnpackButInheritAll() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red *if=\"a\" *use=\"b\" @let-c=\"d\">@{{'test'}}"
+    );
+
+    makeCase(
+      text,
+      interpolation("'test'", text.anchor(1))
+        .color(
+          new BranchingNode(
+            expr("b"),
+            expr("'red'"),
+            expr("null")
+          )
+        )
+        .ifCondition(expr("a"))
+        .let("c", expr("d"), text.anchor(0))
     );
   }
 

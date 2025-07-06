@@ -9,6 +9,8 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 public class NodeWrapper<T extends MarkupNode> {
 
   private final T node;
@@ -18,13 +20,17 @@ public class NodeWrapper<T extends MarkupNode> {
   }
 
   public NodeWrapper<T> child(NodeWrapper<?> wrappedChild) {
-    assert node.children != null;
+    if(node.children == null)
+      node.children = new ArrayList<>();
+
     node.children.add(wrappedChild.get());
     return this;
   }
 
   public NodeWrapper<T> let(String name, ExpressionNode expression, CursorPosition position) {
-    assert node.letBindings != null;
+    if(node.letBindings == null)
+      node.letBindings = new ArrayList<>();
+
     node.letBindings.add(new ExpressionLetBinding(expression, name, position));
     return this;
   }

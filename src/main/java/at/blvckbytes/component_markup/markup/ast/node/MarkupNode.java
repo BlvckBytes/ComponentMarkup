@@ -1,6 +1,9 @@
 package at.blvckbytes.component_markup.markup.ast.node;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
+import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
@@ -15,8 +18,9 @@ public abstract class MarkupNode extends Jsonifiable {
   public boolean doesResetStyle;
 
   public final CursorPosition position;
-  public final @Nullable List<MarkupNode> children;
-  public final @Nullable List<LetBinding> letBindings;
+
+  public @Nullable List<MarkupNode> children;
+  public @Nullable List<LetBinding> letBindings;
 
   public MarkupNode(
     CursorPosition position,
@@ -26,5 +30,37 @@ public abstract class MarkupNode extends Jsonifiable {
     this.position = position;
     this.children = children;
     this.letBindings = letBindings;
+  }
+
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  public boolean canBeUnpackedFromAndIfSoInherit(MarkupNode other) {
+    if (other instanceof StyledNode) {
+      NodeStyle otherStyle = ((StyledNode) other).getStyle();
+
+      if (otherStyle != null && otherStyle.hasEffect()) {
+        if (!(this instanceof StyledNode))
+          return false;
+
+        ((StyledNode) this).getOrInstantiateStyle().inheritFrom(otherStyle, other.useCondition);
+      }
+    }
+
+    this.doesResetStyle |= other.doesResetStyle;
+
+    if (other.ifCondition != null) {
+      if (this.ifCondition == null)
+        this.ifCondition = other.ifCondition;
+      else
+        this.ifCondition = new InfixOperationNode(this.ifCondition, InfixOperator.CONJUNCTION, other.ifCondition, null);
+    }
+
+    if (other.letBindings != null && !other.letBindings.isEmpty()) {
+      if (this.letBindings == null)
+        this.letBindings = other.letBindings;
+      else
+        this.letBindings.addAll(other.letBindings);
+    }
+
+    return true;
   }
 }
