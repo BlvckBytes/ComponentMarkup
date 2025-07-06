@@ -12,8 +12,13 @@ import java.util.logging.Level;
 public abstract class TagRegistry {
 
   private static class CharTree {
+    final @Nullable CharTree parent;
     final List<TagDefinition> members = new ArrayList<>();
     final AsciiOptimizedCharMap<CharTree> charMap = new AsciiOptimizedCharMap<>();
+
+    CharTree(@Nullable CharTree parent) {
+      this.parent = parent;
+    }
   }
 
   private final CharTree charTree;
@@ -24,46 +29,52 @@ public abstract class TagRegistry {
   }
 
   public TagRegistry(int maxCharTreeDepth) {
-    this.charTree = new CharTree();
+    this.charTree = new CharTree(null);
     this.maxCharTreeDepth = maxCharTreeDepth;
   }
 
   public @Nullable TagDefinition locateTag(String nameLower) {
     int maxLength = Math.min(maxCharTreeDepth, nameLower.length());
-    CharTree currentTree = charTree;
+    CharTree innermostTree = charTree;
 
     for (int charIndex = 0; charIndex < maxLength; ++charIndex) {
       char currentChar = nameLower.charAt(charIndex);
-      CharTree nextTree = currentTree.charMap.get(currentChar);
+      CharTree nextTree = innermostTree.charMap.get(currentChar);
 
       if (nextTree == null)
         break;
 
-      currentTree = nextTree;
+      innermostTree = nextTree;
     }
 
-    List<TagDefinition> candidates = new ArrayList<>();
+    CharTree currentTree = innermostTree;
 
-    for (TagDefinition member : currentTree.members) {
-      try {
-        if (member.matchName(nameLower))
-          candidates.add(member);
-      } catch (Throwable thrownError) {
-        LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to match via " + member.getClass().getName() + "#matchName", thrownError);
+    while (currentTree != null) {
+      List<TagDefinition> candidates = new ArrayList<>();
+
+      for (TagDefinition member : currentTree.members) {
+        try {
+          if (member.matchName(nameLower))
+            candidates.add(member);
+        } catch (Throwable thrownError) {
+          LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to match via " + member.getClass().getName() + "#matchName", thrownError);
+        }
       }
+
+      int candidateCount = candidates.size();
+
+      if (candidateCount == 0) {
+        currentTree = currentTree.parent;
+        continue;
+      }
+
+      if (candidateCount != 1)
+        candidates.sort(Comparator.comparingInt(item -> item.tagPriority.ordinal()));
+
+      return candidates.get(0);
     }
 
-    int candidateCount = candidates.size();
-
-    if (candidateCount == 0)
-      return null;
-
-    if (candidateCount == 1)
-      return candidates.get(0);
-
-    candidates.sort(Comparator.comparingInt(item -> item.tagPriority.ordinal()));
-
-    return candidates.get(0);
+    return null;
   }
 
   protected void register(TagDefinition tag) {
@@ -76,13 +87,14 @@ public abstract class TagRegistry {
         CharTree nextTree = currentTree.charMap.get(currentChar);
 
         if (nextTree == null) {
-          nextTree = new CharTree();
+          nextTree = new CharTree(currentTree);
           currentTree.charMap.put(currentChar, nextTree);
         }
 
-        nextTree.members.add(tag);
         currentTree = nextTree;
       }
+
+      currentTree.members.add(tag);
     }
   }
 }
