@@ -238,35 +238,30 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonStringLetAttribute() {
+  public void shouldThrowOnNonStringNonMarkupLetAttribute() {
     makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE,
       "<container @let=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE,
       "<container @let-my_var=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE,
       "<container @let-my_var=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE,
       "<container @let-my_var=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
+      MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE,
       "<container @let-my_var=false>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_STRING_LET_ATTRIBUTE,
-      "<container @let-my_var={}>"
     );
   }
 

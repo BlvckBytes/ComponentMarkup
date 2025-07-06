@@ -17,6 +17,9 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeExc
 import at.blvckbytes.component_markup.expression.tokenizer.token.BooleanToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.DoubleToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.LongToken;
+import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
@@ -114,7 +117,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
 
       ExpressionNode bindingExpression = parseExpression(value, valueBeginPosition);
-      LetBinding binding = new LetBinding(bindingName, bindingExpression, lastPosition);
+      LetBinding binding = new ExpressionLetBinding(bindingExpression, bindingName, lastPosition);
 
       if (!currentLayer.addLetBinding(binding))
         throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
@@ -218,8 +221,8 @@ public class MarkupParser implements XmlEventConsumer {
     if (name.charAt(0) == '[')
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    if (name.equals("let") || name.startsWith("let-"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
+    if (name.equals("let") || (name.startsWith("let-") && name.length() == 4))
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
 
     TagAndBuffers currentLayer = tagStack.peek();
 
@@ -256,6 +259,25 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (name.equals("for-separator") && currentLayer.forIterable != null) {
       currentLayer.forSeparator = subtree;
+      return;
+    }
+
+    if (name.startsWith("let-")) {
+      assert name.length() > 4;
+
+      String bindingName = name.substring(4);
+
+      if (!isValidExpressionIdentifier(bindingName))
+        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
+
+      if (bindingName.equals(currentLayer.forIterationVariable))
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
+
+      LetBinding binding = new MarkupLetBinding(subtree, bindingName, lastPosition);
+
+      if (!currentLayer.addLetBinding(binding))
+        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
+
       return;
     }
 
@@ -559,7 +581,7 @@ public class MarkupParser implements XmlEventConsumer {
       throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name.substring(3));
 
     if (name.equals("let") || name.startsWith("let-"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_LET_ATTRIBUTE);
+      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE);
 
     TagAndBuffers currentLayer = tagStack.peek();
 

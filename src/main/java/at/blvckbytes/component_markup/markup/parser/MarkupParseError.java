@@ -24,7 +24,7 @@ public enum MarkupParseError implements ErrorMessage {
   WHEN_MATCHING_NO_CASES("Specify at least one *is case to be used with *when"),
   NON_STRING_STRUCTURAL_ATTRIBUTE("Structural attributes may only be strings, containing expressions"),
   NON_STRING_EXPRESSION_ATTRIBUTE("Attributes bound to expressions may only be strings, containing expressions"),
-  NON_STRING_LET_ATTRIBUTE("Let-bindings may only be strings, containing expressions"),
+  NON_STRING_NON_MARKUP_LET_ATTRIBUTE("Let-bindings may only be strings, containing expressions, or markup-values"),
   EXPECTED_MARKUP_ATTRIBUTE_VALUE("The attribute %s expected a markup-value: { ... }"),
   EXPECTED_EXPRESSION_ATTRIBUTE_VALUE("The attribute %s of tag %s expected a scalar-value (string, boolean or number) or a bound expression"),
   EXPECTED_SELF_CLOSING_TAG("This tag is self-closing, <%s />, and does not support a separate closing-tag"),

@@ -774,6 +774,50 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldRenderMarkupLetBindings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container",
+      "  let-spacer={ <dark_gray><st>{{' ' ** 15}} }",
+      "  let-line={ <red>Hello, world! }",
+      ">",
+      "  {{line}}<br/>",
+      "  {{spacer}}<br/>",
+      "  {{line}}<br/>",
+      "  {{spacer}}<br/>",
+      "  {{line}}"
+    );
+
+    JsonObjectBuilder spacer = new JsonObjectBuilder()
+      .string("text", "               ")
+      .string("color", "dark_gray")
+      .bool("strikethrough", true);
+
+    JsonObjectBuilder line = new JsonObjectBuilder()
+      .string("text", "Hello, world!")
+      .string("color", "red");
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(o -> line)
+            .object(o -> o.string("text", "\n"))
+            .object(o -> spacer)
+            .object(o -> o.string("text", "\n"))
+            .object(o -> line)
+            .object(o -> o.string("text", "\n"))
+            .object(o -> spacer)
+            .object(o -> o.string("text", "\n"))
+            .object(o -> line)
+        ))
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,

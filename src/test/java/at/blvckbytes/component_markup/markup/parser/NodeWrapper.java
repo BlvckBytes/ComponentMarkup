@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ public class NodeWrapper<T extends MarkupNode> {
 
   public NodeWrapper<T> let(String name, ExpressionNode expression, CursorPosition position) {
     assert node.letBindings != null;
-    node.letBindings.add(new LetBinding(name, expression, position));
+    node.letBindings.add(new ExpressionLetBinding(expression, name, position));
     return this;
   }
 

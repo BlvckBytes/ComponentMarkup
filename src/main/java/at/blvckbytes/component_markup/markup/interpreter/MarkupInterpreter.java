@@ -5,10 +5,12 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
+import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
@@ -231,7 +233,14 @@ public class MarkupInterpreter implements Interpreter {
     Map<String, Object> boundVariables = new HashMap<>();
 
     for (LetBinding letBinding : node.letBindings) {
-      Object value = ExpressionInterpreter.interpret(letBinding.expression, environment);
+      Object value;
+
+      if (letBinding instanceof ExpressionLetBinding)
+        value = ExpressionInterpreter.interpret(((ExpressionLetBinding) letBinding).expression, environment);
+      else if (letBinding instanceof MarkupLetBinding)
+        value = ((MarkupLetBinding) letBinding).markup;
+      else
+        continue;
 
       if (boundVariables.put(letBinding.name, value) != null)
         LoggerProvider.get().log(Level.WARNING, "Duplicate let-binding " + letBinding.name);
