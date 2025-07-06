@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
@@ -242,6 +243,35 @@ public class MarkupInterpreter implements Interpreter {
     return boundVariables.keySet();
   }
 
+  private void interpretObjectAsNode(
+    ExpressionDrivenNode container,
+    @Nullable Object value,
+    boolean withinCollection
+  ) {
+    if (!withinCollection && value == null)
+      return;
+
+    if (!(value instanceof MarkupNode)) {
+      _interpret(new TextNode(String.valueOf(value), container.position));
+      return;
+    }
+
+    _interpret((MarkupNode) value);
+  }
+
+  private void interpretExpressionDriven(ExpressionDrivenNode node) {
+    Object value = ExpressionInterpreter.interpret(node.expression, environment);
+
+    if (value instanceof Collection) {
+      for (Object item : (Collection<?>) value)
+        interpretObjectAsNode(node, item, true);
+
+      return;
+    }
+
+    interpretObjectAsNode(node, value, false);
+  }
+
   private void interpretForLoop(ForLoopNode node) {
     Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
@@ -330,6 +360,16 @@ public class MarkupInterpreter implements Interpreter {
         return;
 
       interpretForLoop((ForLoopNode) node);
+
+      interceptors.handleAfter(node);
+      return;
+    }
+
+    if (node instanceof ExpressionDrivenNode) {
+      if (interceptors.handleBeforeAndGetIfSkip(node))
+        return;
+
+      interpretExpressionDriven((ExpressionDrivenNode) node);
 
       interceptors.handleAfter(node);
       return;

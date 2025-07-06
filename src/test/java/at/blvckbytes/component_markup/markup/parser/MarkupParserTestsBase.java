@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
+import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
@@ -72,6 +73,10 @@ public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ContainerNode> container(CursorPosition position) {
     return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new ArrayList<>()));
+  }
+
+  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(CursorPosition position, ExpressionNode expression) {
+    return new NodeWrapper<>(new ExpressionDrivenNode(expression, position));
   }
 
   protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, CursorPosition position, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
