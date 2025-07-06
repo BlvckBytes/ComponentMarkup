@@ -11,18 +11,8 @@ import java.util.List;
 
 public class TranslateTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
-  private static final MarkupAttributeDefinition ATTR_WITH = new MarkupAttributeDefinition("with", AttributeFlag.MULTI_VALUE);
-  private static final ExpressionAttributeDefinition ATTR_FALLBACK = new ExpressionAttributeDefinition("fallback");
-
   public TranslateTag() {
-    super(
-      TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_KEY,
-      ATTR_WITH,
-      ATTR_FALLBACK
-    );
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -34,14 +24,14 @@ public class TranslateTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new TranslateNode(
-      ATTR_KEY.single(attributes),
-      ATTR_WITH.multi(attributes),
-      ATTR_FALLBACK.singleOrNull(attributes),
+      attributes.getMandatoryExpressionNode("key"),
+      attributes.getOptionalMarkupList("with"),
+      attributes.getOptionalExpressionNode("fallback"),
       position, letBindings
     );
   }

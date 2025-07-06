@@ -11,17 +11,11 @@ import java.util.List;
 
 public abstract class ClickTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
-
   private final ClickAction action;
   private final String tagName;
 
   protected ClickTag(ClickAction action, String tagName) {
-    super(
-      TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_VALUE
-    );
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
 
     this.tagName = tagName;
     this.action = action;
@@ -36,13 +30,13 @@ public abstract class ClickTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new ClickNode(
       action,
-      ATTR_VALUE.single(attributes),
+      attributes.getMandatoryExpressionNode("value"),
       position, children, letBindings
     );
   }

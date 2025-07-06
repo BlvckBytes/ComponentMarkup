@@ -27,7 +27,7 @@ public class ContainerTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {

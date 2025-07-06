@@ -11,31 +11,22 @@ import java.util.List;
 
 public class HoverEntityTag extends HoverTag {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_TYPE = new MandatoryExpressionAttributeDefinition("type");
-  private static final MandatoryExpressionAttributeDefinition ATTR_ID = new MandatoryExpressionAttributeDefinition("id");
-  private static final MarkupAttributeDefinition ATTR_NAME = new MarkupAttributeDefinition("name");
-
   public HoverEntityTag() {
-    super(
-      "hover-entity",
-      ATTR_TYPE,
-      ATTR_ID,
-      ATTR_NAME
-    );
+    super("hover-entity");
   }
 
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new EntityHoverNode(
-      ATTR_TYPE.single(attributes),
-      ATTR_ID.single(attributes),
-      ATTR_NAME.singleOrNull(attributes),
+      attributes.getMandatoryExpressionNode("type"),
+      attributes.getMandatoryExpressionNode("id"),
+      attributes.getOptionalMarkupNode("name"),
       position, children, letBindings
     );
   }

@@ -66,10 +66,6 @@ public abstract class MarkupParserTestsBase {
     return ImmediateExpression.of(value);
   }
 
-  protected static ExpressionNode imm(String value) {
-    return ImmediateExpression.of(value);
-  }
-
   protected static ExpressionNode expr(String expression) {
     return ExpressionParser.parse(expression);
   }

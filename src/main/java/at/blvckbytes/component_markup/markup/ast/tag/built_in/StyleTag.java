@@ -14,30 +14,8 @@ import java.util.List;
 
 public class StyleTag extends TagDefinition {
 
-  private static final ExpressionAttributeDefinition ATTR_OBFUSCATED = new ExpressionAttributeDefinition("obfuscated");
-  private static final ExpressionAttributeDefinition ATTR_STRIKETHROUGH = new ExpressionAttributeDefinition("strikethrough");
-  private static final ExpressionAttributeDefinition ATTR_UNDERLINED = new ExpressionAttributeDefinition("underlined");
-  private static final ExpressionAttributeDefinition ATTR_ITALIC = new ExpressionAttributeDefinition("italic");
-  private static final ExpressionAttributeDefinition ATTR_BOLD = new ExpressionAttributeDefinition("bold");
-  private static final ExpressionAttributeDefinition ATTR_FONT = new ExpressionAttributeDefinition("font");
-  private static final ExpressionAttributeDefinition ATTR_COLOR = new ExpressionAttributeDefinition("color");
-  private static final ExpressionAttributeDefinition ATTR_SHADOW = new ExpressionAttributeDefinition("shadow");
-  private static final ExpressionAttributeDefinition ATTR_SHADOW_OPACITY = new ExpressionAttributeDefinition("shadow-opacity");
-
   public StyleTag() {
-    super(
-      TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_OBFUSCATED,
-      ATTR_STRIKETHROUGH,
-      ATTR_UNDERLINED,
-      ATTR_ITALIC,
-      ATTR_BOLD,
-      ATTR_FONT,
-      ATTR_COLOR,
-      ATTR_SHADOW,
-      ATTR_SHADOW_OPACITY
-    );
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -49,7 +27,7 @@ public class StyleTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
@@ -58,31 +36,31 @@ public class StyleTag extends TagDefinition {
 
     ExpressionNode expression;
 
-    if ((expression = ATTR_OBFUSCATED.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("obfuscated")) != null)
       style.setFormat(Format.OBFUSCATED, expression);
 
-    if ((expression = ATTR_BOLD.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("bold")) != null)
       style.setFormat(Format.BOLD, expression);
 
-    if ((expression = ATTR_STRIKETHROUGH.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("strikethrough")) != null)
       style.setFormat(Format.STRIKETHROUGH, expression);
 
-    if ((expression = ATTR_UNDERLINED.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("underlined")) != null)
       style.setFormat(Format.UNDERLINED, expression);
 
-    if ((expression = ATTR_ITALIC.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("italic")) != null)
       style.setFormat(Format.ITALIC, expression);
 
-    if ((expression = ATTR_FONT.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("font")) != null)
       style.font = expression;
 
-    if ((expression = ATTR_COLOR.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("color")) != null)
       style.color = expression;
 
-    if ((expression = ATTR_SHADOW.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("shadow")) != null)
       style.shadowColor = expression;
 
-    if ((expression = ATTR_SHADOW_OPACITY.singleOrNull(attributes)) != null)
+    if ((expression = attributes.getOptionalExpressionNode("shadow-opacity")) != null)
       style.shadowColorOpacity = expression;
 
     return wrapper;

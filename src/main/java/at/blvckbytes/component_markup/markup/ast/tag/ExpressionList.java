@@ -13,25 +13,23 @@ import java.util.List;
 
 public class ExpressionList {
 
-  // TODO: Write tests for this spread-stuff which also make sure that attribute-order is guaranteed
+  public static final ExpressionList EMPTY = new ExpressionList(0);
 
   private final List<ExpressionAttribute> attributes;
-  private boolean hasSpreadAttributes;
-  private @Nullable List<ExpressionNode> values;
 
-  public ExpressionList() {
-    this.attributes = new ArrayList<>();
+  public ExpressionList(int size) {
+    this.attributes = new ArrayList<>(size);
   }
 
-  public void addAttributeValue(ExpressionAttribute attribute) {
-    hasSpreadAttributes |= attribute.isInSpreadMode;
+  public boolean isEmpty() {
+    return attributes.isEmpty();
+  }
+
+  public void add(ExpressionAttribute attribute) {
     this.attributes.add(attribute);
   }
 
   public List<ExpressionNode> get(Interpreter interpreter) {
-    if (this.values != null)
-      return this.values;
-
     List<ExpressionNode> result = new ArrayList<>(attributes.size());
 
     for (ExpressionAttribute attribute : attributes) {
@@ -54,9 +52,6 @@ public class ExpressionList {
 
       result.add(toTerminal(evaluatedValue, beginIndex));
     }
-
-    if (!hasSpreadAttributes)
-      this.values = result;
 
     return result;
   }

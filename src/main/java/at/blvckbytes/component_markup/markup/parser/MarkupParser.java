@@ -30,6 +30,7 @@ public class MarkupParser implements XmlEventConsumer {
   private final Stack<TagAndBuffers> tagStack;
 
   private CursorPosition lastPosition;
+  private @Nullable CursorPosition tagAttributeBeginPosition;
   private @Nullable MarkupParser subtreeParser;
   private MarkupNode result;
 
@@ -52,8 +53,10 @@ public class MarkupParser implements XmlEventConsumer {
 
   @Override
   public void onCursorPosition(CursorPosition position) {
-    if (subtreeParser != null)
+    if (subtreeParser != null) {
       subtreeParser.lastPosition = position;
+      return;
+    }
 
     this.lastPosition = position;
   }
@@ -142,7 +145,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (currentLayer.forIterable != null) {
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
 
         currentLayer.forReversed = expression;
         return;
@@ -150,24 +153,13 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name);
       }
     }
 
-    AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
-
-    if (attribute == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
-
-    if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
-
-    if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
-
-    currentLayer.addAttribute(new ExpressionAttribute(name, expression, isSpreadMode));
+    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, expression, isSpreadMode));
   }
 
   @Override
@@ -207,6 +199,8 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
+    this.tagAttributeBeginPosition = lastPosition;
+
     name = lower(name);
 
     if (name.charAt(0) == '*')
@@ -222,24 +216,11 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (name.equals("for-separator") && currentLayer.forIterable != null) {
       if (currentLayer.forSeparator != null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
     }
 
     else if (name.equals("for-reversed"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE, name);
-
-    else {
-      AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
-
-      if (attribute == null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
-
-      if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
-
-      if (!(attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition))
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_SCALAR_VALUE, name);
-    }
+      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, currentLayer.tagNameLower);
 
     subtreeParser = new MarkupParser(tagRegistry, lastPosition);
   }
@@ -269,7 +250,9 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    currentLayer.addAttribute(new MarkupAttribute(name, subtree));
+    assert tagAttributeBeginPosition != null;
+
+    currentLayer.attributeMap.add(new MarkupAttribute(tagAttributeBeginPosition, name, subtree));
   }
 
   @Override
@@ -287,7 +270,8 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addAttribute(new ExpressionAttribute(name, ImmediateExpression.of(true), false));
+
+    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, ImmediateExpression.of(true), false));
   }
 
   @Override
@@ -566,32 +550,21 @@ public class MarkupParser implements XmlEventConsumer {
     if (currentLayer.forIterable != null) {
       if (name.equals("for-separator")) {
         if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
+        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name);
       }
 
       if (name.equals("for-reversed")) {
         if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
 
         currentLayer.forReversed = expression;
         return;
       }
     }
 
-    AttributeDefinition attribute = currentLayer.tag.getAttribute(name);
-
-    if (attribute == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_ATTRIBUTE, currentLayer.tagNameLower, name);
-
-    if (attribute instanceof MarkupAttributeDefinition || attribute instanceof MandatoryMarkupAttributeDefinition)
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_VALUE, name);
-
-    if (!attribute.flags.contains(AttributeFlag.MULTI_VALUE) && currentLayer.hasAttribute(name))
-      throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name);
-
-    currentLayer.addAttribute(new ExpressionAttribute(name, expression, false));
+    currentLayer.attributeMap.add(new ExpressionAttribute(lastPosition, name, expression, false));
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

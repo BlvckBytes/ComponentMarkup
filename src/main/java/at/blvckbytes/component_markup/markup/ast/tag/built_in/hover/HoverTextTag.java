@@ -11,25 +11,20 @@ import java.util.List;
 
 public class HoverTextTag extends HoverTag {
 
-  private static final MandatoryMarkupAttributeDefinition ATTR_VALUE = new MandatoryMarkupAttributeDefinition("value");
-
   public HoverTextTag() {
-    super(
-      "hover-text",
-      ATTR_VALUE
-    );
+    super("hover-text");
   }
 
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new TextHoverNode(
-      ATTR_VALUE.single(attributes),
+      attributes.getMandatoryMarkupNode("value"),
       position, children, letBindings
     );
   }

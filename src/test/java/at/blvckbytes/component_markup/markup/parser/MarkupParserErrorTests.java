@@ -21,28 +21,28 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnUnknownAttribute() {
     makeErrorCase(
-      MarkupParseError.UNKNOWN_ATTRIBUTE,
-      "<hover-text @unknown=5>"
+      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
+      "<hover-text value={} @unknown=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.UNKNOWN_ATTRIBUTE,
-      "<hover-text @unknown=5.5>"
+      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
+      "<hover-text value={} @unknown=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.UNKNOWN_ATTRIBUTE,
-      "<hover-text @unknown=\"hello\">"
+      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
+      "<hover-text value={} @unknown=\"hello\">"
     );
 
     makeErrorCase(
-      MarkupParseError.UNKNOWN_ATTRIBUTE,
-      "<hover-text @unknown=true>"
+      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
+      "<hover-text value={} @unknown=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.UNKNOWN_ATTRIBUTE,
-      "<hover-text @unknown={}>"
+      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
+      "<hover-text value={} @unknown={}>"
     );
   }
 
@@ -273,27 +273,27 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnExpectedMarkupValue() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=\"hello, world\">"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=false>"
     );
   }
@@ -301,7 +301,7 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnExpectedScalarValue() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_SCALAR_VALUE,
+      MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
       "<key @key={} />"
     );
   }
@@ -333,22 +333,22 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnNonMarkupForSeparator() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @for-separator=.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @for-separator=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @for-separator=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_VALUE,
+      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @for-separator=\"hello\">"
     );
   }
@@ -356,7 +356,7 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnNonScalarForReversed() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_SCALAR_VALUE,
+      MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @for-reversed={}>"
     );
   }
@@ -410,7 +410,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt interpret=true @interpret=false>"
+      "<block-nbt coordinates=\"a\" path=\"b\" interpret=true @interpret=false>"
     );
   }
 
@@ -541,12 +541,12 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnMissingMandatoryAttributes() {
     makeErrorCase(
-      MarkupParseError.MISSING_MANDATORY_ATTRIBUTES,
+      MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
       "@<score />"
     );
 
     makeErrorCase(
-      MarkupParseError.MISSING_MANDATORY_ATTRIBUTES,
+      MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
       "@<score name=\"hello\"/>"
     );
   }
@@ -739,7 +739,7 @@ public class MarkupParserErrorTests {
 
     CursorPosition position = input.anchor(0);
 
-    Assertions.assertEquals(position.toString(), ((MarkupParseException) thrownError).position.toString());
     Assertions.assertEquals(error, ((MarkupParseException) thrownError).error);
+    Assertions.assertEquals(position.toString(), ((MarkupParseException) thrownError).position.toString());
   }
 }

@@ -11,14 +11,8 @@ import java.util.List;
 
 public class KeyTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
-
   public KeyTag() {
-    super(
-      TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_KEY
-    );
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -30,10 +24,13 @@ public class KeyTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    return new KeyNode(ATTR_KEY.single(attributes), position, letBindings);
+    return new KeyNode(
+      attributes.getMandatoryExpressionNode("key"),
+      position, letBindings
+    );
   }
 }

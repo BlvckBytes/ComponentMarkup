@@ -11,25 +11,20 @@ import java.util.List;
 
 public class HoverAchievementTag extends HoverTag {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
-
   public HoverAchievementTag() {
-    super(
-      "hover-achievement",
-      ATTR_VALUE
-    );
+    super("hover-achievement");
   }
 
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new AchievementHoverNode(
-      ATTR_VALUE.single(attributes),
+      attributes.getMandatoryExpressionNode("value"),
       position, children, letBindings
     );
   }

@@ -11,18 +11,8 @@ import java.util.List;
 
 public class ScoreTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_NAME = new MandatoryExpressionAttributeDefinition("name");
-  private static final MandatoryExpressionAttributeDefinition ATTR_OBJECTIVE = new MandatoryExpressionAttributeDefinition("objective");
-  private static final ExpressionAttributeDefinition ATTR_VALUE = new ExpressionAttributeDefinition("value");
-
   public ScoreTag() {
-    super(
-      TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_NAME,
-      ATTR_OBJECTIVE,
-      ATTR_VALUE
-    );
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -34,14 +24,14 @@ public class ScoreTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new ScoreNode(
-      ATTR_NAME.single(attributes),
-      ATTR_OBJECTIVE.single(attributes),
-      ATTR_VALUE.singleOrNull(attributes),
+      attributes.getMandatoryExpressionNode("name"),
+      attributes.getMandatoryExpressionNode("objective"),
+      attributes.getOptionalExpressionNode("value"),
       position, letBindings
     );
   }

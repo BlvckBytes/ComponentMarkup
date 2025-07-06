@@ -11,14 +11,8 @@ import java.util.List;
 
 public class InsertTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
-
   public InsertTag() {
-    super(
-      TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_VALUE
-    );
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -30,12 +24,12 @@ public class InsertTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new InsertNode(
-      ATTR_VALUE.single(attributes),
+      attributes.getMandatoryExpressionNode("value"),
       position, children, letBindings
     );
   }

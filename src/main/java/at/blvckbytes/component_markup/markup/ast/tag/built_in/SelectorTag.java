@@ -11,16 +11,8 @@ import java.util.List;
 
 public class SelectorTag extends TagDefinition {
 
-  private static final MandatoryExpressionAttributeDefinition ATTR_SELECTOR = new MandatoryExpressionAttributeDefinition("selector");
-  private static final MarkupAttributeDefinition ATTR_SEPARATOR = new MarkupAttributeDefinition("separator");
-
   public SelectorTag() {
-    super(
-      TagClosing.SELF_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_SELECTOR,
-      ATTR_SEPARATOR
-    );
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
@@ -32,13 +24,13 @@ public class SelectorTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new SelectorNode(
-      ATTR_SELECTOR.single(attributes),
-      ATTR_SEPARATOR.singleOrNull(attributes),
+      attributes.getMandatoryExpressionNode("selector"),
+      attributes.getOptionalMarkupNode("separator"),
       position, letBindings
     );
   }

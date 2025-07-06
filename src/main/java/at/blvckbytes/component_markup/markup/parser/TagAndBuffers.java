@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.util.LoggerProvider;
@@ -28,7 +27,7 @@ public class TagAndBuffers implements ParserChildItem {
   private @Nullable List<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
 
-  private @Nullable AttributeMap attributes;
+  public final InternalAttributeMap attributeMap;
 
   private @Nullable List<ParserChildItem> children;
 
@@ -55,20 +54,7 @@ public class TagAndBuffers implements ParserChildItem {
     this.tagNameLower = tagNameLower;
     this.position = position;
     this.parent = parent;
-  }
-
-  public boolean hasAttribute(String name) {
-    if (this.attributes == null)
-      return false;
-
-    return this.attributes.hasName(name);
-  }
-
-  public void addAttribute(Attribute attribute) {
-    if (this.attributes == null)
-      this.attributes = new AttributeMap();
-
-    this.attributes.add(attribute);
+    this.attributeMap = new InternalAttributeMap(tagNameLower, position);
   }
 
   public boolean hasLetBinding(String name) {
@@ -307,44 +293,24 @@ public class TagAndBuffers implements ParserChildItem {
   }
 
   private @Nullable MarkupNode createNodeOrNull(@Nullable List<MarkupNode> processedChildren) {
+    MarkupNode result;
+
     try {
-      return tag.createNode(tagNameLower, position, attributes, bindings, processedChildren);
+      result = tag.createNode(tagNameLower, position, attributeMap, bindings, processedChildren);
     } catch (Throwable thrownError) {
-      String className = tag.getClass().getName();
+      if (thrownError instanceof MarkupParseException)
+        throw thrownError;
 
-      if (thrownError instanceof AbsentMandatoryAttributeException) {
-        AttributeDefinition absentAttribute = ((AbsentMandatoryAttributeException) thrownError).attribute;
-
-        if (!tag.attributes.contains(absentAttribute)) {
-          LoggerProvider.get().log(Level.SEVERE, "Tag " + className + " (<" + tagNameLower + ">) tried to require an unregistered attribute called \"" + absentAttribute.name + "\"", thrownError);
-          return null;
-        }
-      }
-
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + className + "#createNode", thrownError);
+      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + tag.getClass() + "#createNode", thrownError);
       return null;
     }
+
+    attributeMap.validateNoUnusedAttributes();
+
+    return result;
   }
 
   public MarkupNode createNode() {
-    List<String> missingNames = null;
-
-    for (AttributeDefinition definition : tag.attributes) {
-      if (!(definition instanceof MandatoryExpressionAttributeDefinition || definition instanceof MandatoryMarkupAttributeDefinition))
-        continue;
-
-      if (attributes != null && attributes.hasName(definition.name))
-        continue;
-
-      if (missingNames == null)
-        missingNames = new ArrayList<>();
-
-      missingNames.add(definition.name);
-    }
-
-    if (missingNames != null)
-      throw new MarkupParseException(position, MarkupParseError.MISSING_MANDATORY_ATTRIBUTES, tagNameLower, String.join(", ", missingNames));
-
     MarkupNode result = createNodeOrNull(getProcessedChildren());
 
     if (result == null)

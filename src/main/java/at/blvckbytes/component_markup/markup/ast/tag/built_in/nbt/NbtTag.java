@@ -11,27 +11,16 @@ import java.util.List;
 
 public abstract class NbtTag extends TagDefinition {
 
-  protected static final MandatoryExpressionAttributeDefinition ATTR_PATH = new MandatoryExpressionAttributeDefinition("path");
-  protected static final ExpressionAttributeDefinition ATTR_INTERPRET = new ExpressionAttributeDefinition("interpret");
-  protected static final MarkupAttributeDefinition ATTR_SEPARATOR = new MarkupAttributeDefinition("separator");
-
   private final NbtSource source;
   private final String tagName;
-  private final MandatoryExpressionAttributeDefinition sourceAttribute;
+  private final String sourceAttributeName;
 
-  protected NbtTag(NbtSource source, String tagName, MandatoryExpressionAttributeDefinition sourceAttribute) {
-    super(
-      TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL,
-      ATTR_PATH,
-      ATTR_INTERPRET,
-      ATTR_SEPARATOR,
-      sourceAttribute
-    );
+  protected NbtTag(NbtSource source, String tagName, String sourceAttributeName) {
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
 
     this.source = source;
     this.tagName = tagName;
-    this.sourceAttribute = sourceAttribute;
+    this.sourceAttributeName = sourceAttributeName;
   }
 
   @Override
@@ -43,16 +32,16 @@ public abstract class NbtTag extends TagDefinition {
   public @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new NbtNode(
       source,
-      sourceAttribute.single(attributes),
-      ATTR_PATH.single(attributes),
-      ATTR_INTERPRET.singleOrNull(attributes),
-      ATTR_SEPARATOR.singleOrNull(attributes),
+      attributes.getMandatoryExpressionNode(sourceAttributeName),
+      attributes.getMandatoryExpressionNode("path"),
+      attributes.getOptionalExpressionNode("interpret"),
+      attributes.getOptionalMarkupNode("separator"),
       position, letBindings
     );
   }

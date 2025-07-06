@@ -9,34 +9,15 @@ import java.util.*;
 
 public abstract class TagDefinition {
 
-  public final Set<AttributeDefinition> attributes;
   public final TagClosing tagClosing;
   public final TagPriority tagPriority;
 
   protected TagDefinition(
     TagClosing tagClosing,
-    TagPriority tagPriority,
-    AttributeDefinition... attributes
+    TagPriority tagPriority
   ) {
-    Set<AttributeDefinition> definitions = new HashSet<>();
-
-    for (AttributeDefinition definition : attributes) {
-      if (!definitions.add(definition))
-        throw new IllegalStateException("Colliding attribute: " + definition.name);
-    }
-
-    this.attributes = Collections.unmodifiableSet(definitions);
     this.tagClosing = tagClosing;
     this.tagPriority = tagPriority;
-  }
-
-  public @Nullable AttributeDefinition getAttribute(String attributeName) {
-    for (AttributeDefinition attribute : attributes) {
-      if (attribute.name.equalsIgnoreCase(attributeName))
-        return attribute;
-    }
-
-    return null;
   }
 
   public abstract boolean matchName(String tagNameLower);
@@ -44,7 +25,7 @@ public abstract class TagDefinition {
   public abstract @NotNull MarkupNode createNode(
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
-    @Nullable AttributeMap attributes,
+    @NotNull AttributeMap attributes,
     @Nullable List<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   );
