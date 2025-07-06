@@ -21,7 +21,6 @@ public abstract class NbtTag extends TagDefinition {
 
   protected NbtTag(NbtSource source, String tagName, MandatoryExpressionAttributeDefinition sourceAttribute) {
     super(
-      new String[] { tagName },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL,
       ATTR_PATH,

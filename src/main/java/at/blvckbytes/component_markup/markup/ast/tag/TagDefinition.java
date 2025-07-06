@@ -10,12 +10,10 @@ import java.util.*;
 public abstract class TagDefinition {
 
   public final Set<AttributeDefinition> attributes;
-  public final Collection<String> staticPrefixes;
   public final TagClosing tagClosing;
   public final TagPriority tagPriority;
 
   protected TagDefinition(
-    String[] staticPrefixes,
     TagClosing tagClosing,
     TagPriority tagPriority,
     AttributeDefinition... attributes
@@ -28,7 +26,6 @@ public abstract class TagDefinition {
     }
 
     this.attributes = Collections.unmodifiableSet(definitions);
-    this.staticPrefixes = Collections.unmodifiableList(Arrays.asList(staticPrefixes));
     this.tagClosing = tagClosing;
     this.tagPriority = tagPriority;
   }

@@ -11,15 +11,13 @@ import java.util.List;
 
 public class SpaceTag extends TagDefinition {
 
-  private static final String TAG_NAME = "space";
-
   public SpaceTag() {
-    super(new String[] { TAG_NAME }, TagClosing.SELF_CLOSE, TagPriority.NORMAL);
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("space");
   }
 
   @Override

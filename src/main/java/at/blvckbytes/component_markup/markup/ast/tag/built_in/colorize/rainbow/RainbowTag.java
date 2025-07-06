@@ -13,18 +13,13 @@ import java.util.List;
 
 public class RainbowTag extends ColorizeTag {
 
-  private static final String TAG_NAME = "rainbow";
-
   public RainbowTag() {
-    super(
-      new String[] { TAG_NAME },
-      TagPriority.NORMAL
-    );
+    super(TagPriority.NORMAL);
   }
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return TAG_NAME.equals(tagNameLower);
+    return tagNameLower.equals("rainbow");
   }
 
   @Override

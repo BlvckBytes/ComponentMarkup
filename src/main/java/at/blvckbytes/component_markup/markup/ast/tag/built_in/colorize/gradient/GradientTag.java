@@ -13,15 +13,12 @@ import java.util.List;
 
 public class GradientTag extends ColorizeTag {
 
-  private static final String TAG_NAME = "gradient";
-
   private static final MandatoryExpressionAttributeDefinition ATTR_COLOR = new MandatoryExpressionAttributeDefinition("color", AttributeFlag.MULTI_VALUE);
   private static final ExpressionAttributeDefinition ATTR_OFFSET = new ExpressionAttributeDefinition("offset", AttributeFlag.MULTI_VALUE);
   private static final ExpressionAttributeDefinition ATTR_Z_INDEX = new ExpressionAttributeDefinition("z-index", AttributeFlag.MULTI_VALUE);
 
   public GradientTag() {
     super(
-      new String[] { TAG_NAME },
       TagPriority.NORMAL,
       ATTR_COLOR,
       ATTR_OFFSET,
@@ -31,7 +28,7 @@ public class GradientTag extends ColorizeTag {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return TAG_NAME.equals(tagNameLower);
+    return tagNameLower.equals("gradient");
   }
 
   @Override

@@ -10,7 +10,7 @@ public abstract class HoverTag extends TagDefinition {
   private final String tagName;
 
   protected HoverTag(String tagName, AttributeDefinition... attributes) {
-    super(new String[] { tagName }, TagClosing.OPEN_CLOSE, TagPriority.NORMAL, attributes);
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL, attributes);
 
     this.tagName = tagName;
   }

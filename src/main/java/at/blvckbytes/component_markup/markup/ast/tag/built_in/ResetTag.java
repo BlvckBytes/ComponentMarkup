@@ -12,11 +12,7 @@ import java.util.List;
 public class ResetTag extends TagDefinition {
 
   protected ResetTag() {
-    super(
-      new String[]{ "reset" },
-      TagClosing.OPEN_CLOSE,
-      TagPriority.NORMAL
-    );
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override

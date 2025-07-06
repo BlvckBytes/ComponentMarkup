@@ -10,75 +10,17 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ImmediateFormatTag extends TagDefinition {
 
-  private static final Set<String> namedFormats;
-  private static final String[] staticPrefixes;
-
-  static {
-    namedFormats = new HashSet<>();
-    namedFormats.add("b");
-    namedFormats.add("bold");
-    namedFormats.add("!b");
-    namedFormats.add("!bold");
-    namedFormats.add("i");
-    namedFormats.add("italic");
-    namedFormats.add("!i");
-    namedFormats.add("!italic");
-    namedFormats.add("u");
-    namedFormats.add("underlined");
-    namedFormats.add("!u");
-    namedFormats.add("!underlined");
-    namedFormats.add("st");
-    namedFormats.add("strikethrough");
-    namedFormats.add("!st");
-    namedFormats.add("!strikethrough");
-    namedFormats.add("obf");
-    namedFormats.add("obfuscated");
-    namedFormats.add("!obf");
-    namedFormats.add("!obfuscated");
-
-    staticPrefixes = new String[namedFormats.size() + 1];
-
-    int prefixIndex = 0;
-
-    for (String namedFormat : namedFormats)
-      staticPrefixes[prefixIndex++] = namedFormat;
-
-    staticPrefixes[prefixIndex] = "&";
-  }
-
   public ImmediateFormatTag() {
-    super(staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
-  }
-
-  private boolean isFormatChar(char c, boolean allowReset) {
-    return (
-      (c >= 'k' && c <= 'o') ||
-      (allowReset && c == 'r')
-    );
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override
   public boolean matchName(String tagNameLower) {
-    int nameLength = tagNameLower.length();
-
-    if (nameLength == 0)
-      return false;
-
-    char firstChar = tagNameLower.charAt(0);
-
-    if (nameLength == 2 && firstChar == '&')
-      return isFormatChar(tagNameLower.charAt(1), true);
-
-    if (nameLength == 3 && firstChar == '&' && tagNameLower.charAt(1) == '!')
-      return isFormatChar(tagNameLower.charAt(2), false);
-
-    return namedFormats.contains(tagNameLower);
+    return applyFormat(tagNameLower, null);
   }
 
   @Override
@@ -94,7 +36,10 @@ public class ImmediateFormatTag extends TagDefinition {
     return wrapper;
   }
 
-  private void applyFormat(String tagNameLower, NodeStyle style) {
+  private boolean applyFormat(String tagNameLower, @Nullable NodeStyle style) {
+    if (tagNameLower.isEmpty())
+      return false;
+
     char firstChar = tagNameLower.charAt(0);
 
     boolean isNegative = (
@@ -151,9 +96,12 @@ public class ImmediateFormatTag extends TagDefinition {
         break;
 
       default:
-        return;
+        return false;
     }
 
-    style.formatStates[format.ordinal()] = ImmediateExpression.of(!isNegative);
+    if (style != null)
+      style.formatStates[format.ordinal()] = ImmediateExpression.of(!isNegative);
+
+    return true;
   }
 }

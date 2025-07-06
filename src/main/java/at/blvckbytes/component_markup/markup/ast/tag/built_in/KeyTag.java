@@ -11,13 +11,10 @@ import java.util.List;
 
 public class KeyTag extends TagDefinition {
 
-  private static final String TAG_NAME = "key";
-
   private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
 
   public KeyTag() {
     super(
-      new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
       TagPriority.NORMAL,
       ATTR_KEY
@@ -26,7 +23,7 @@ public class KeyTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("key");
   }
 
   @Override

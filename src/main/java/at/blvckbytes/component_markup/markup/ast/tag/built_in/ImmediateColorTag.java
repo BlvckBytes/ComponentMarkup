@@ -13,22 +13,8 @@ import java.util.List;
 
 public class ImmediateColorTag extends TagDefinition {
 
-  private static final String[] staticPrefixes;
-
-  static {
-    staticPrefixes = new String[AnsiStyleColor.NAMES.size() + 2];
-
-    int prefixIndex = 0;
-
-    for (String namedColor : AnsiStyleColor.NAMES)
-      staticPrefixes[prefixIndex++] = namedColor;
-
-    staticPrefixes[prefixIndex++] = "&";
-    staticPrefixes[prefixIndex] = "#";
-  }
-
   public ImmediateColorTag() {
-    super(staticPrefixes, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override

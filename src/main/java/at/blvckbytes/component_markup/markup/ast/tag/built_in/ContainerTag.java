@@ -15,7 +15,7 @@ public class ContainerTag extends TagDefinition {
   public static final ContainerTag INSTANCE = new ContainerTag();
 
   private ContainerTag() {
-    super(new String[] { TAG_NAME }, TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
+    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
   }
 
   @Override

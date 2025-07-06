@@ -11,13 +11,10 @@ import java.util.List;
 
 public class InsertTag extends TagDefinition {
 
-  private static final String TAG_NAME = "insert";
-
   private static final MandatoryExpressionAttributeDefinition ATTR_VALUE = new MandatoryExpressionAttributeDefinition("value");
 
   public InsertTag() {
     super(
-      new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL,
       ATTR_VALUE
@@ -26,7 +23,7 @@ public class InsertTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("insert");
   }
 
   @Override

@@ -12,15 +12,12 @@ import java.util.List;
 
 public class TransitionTag extends ColorizeTag {
 
-  private static final String TAG_NAME = "transition";
-
   private static final MandatoryExpressionAttributeDefinition ATTR_COLOR = new MandatoryExpressionAttributeDefinition("color", AttributeFlag.MULTI_VALUE);
   private static final ExpressionAttributeDefinition ATTR_OFFSET = new ExpressionAttributeDefinition("offset", AttributeFlag.MULTI_VALUE);
   private static final ExpressionAttributeDefinition ATTR_Z_INDEX = new ExpressionAttributeDefinition("z-index", AttributeFlag.MULTI_VALUE);
 
   public TransitionTag() {
     super(
-      new String[] { TAG_NAME },
       TagPriority.NORMAL,
       ATTR_COLOR,
       ATTR_OFFSET,
@@ -30,7 +27,7 @@ public class TransitionTag extends ColorizeTag {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return TAG_NAME.equals(tagNameLower);
+    return tagNameLower.equals("transition");
   }
 
   @Override

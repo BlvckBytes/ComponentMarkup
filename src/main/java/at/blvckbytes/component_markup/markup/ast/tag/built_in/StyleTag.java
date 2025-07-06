@@ -14,8 +14,6 @@ import java.util.List;
 
 public class StyleTag extends TagDefinition {
 
-  private static final String TAG_NAME = "style";
-
   private static final ExpressionAttributeDefinition ATTR_OBFUSCATED = new ExpressionAttributeDefinition("obfuscated");
   private static final ExpressionAttributeDefinition ATTR_STRIKETHROUGH = new ExpressionAttributeDefinition("strikethrough");
   private static final ExpressionAttributeDefinition ATTR_UNDERLINED = new ExpressionAttributeDefinition("underlined");
@@ -28,7 +26,6 @@ public class StyleTag extends TagDefinition {
 
   public StyleTag() {
     super(
-      new String[] { TAG_NAME },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL,
       ATTR_OBFUSCATED,
@@ -45,7 +42,7 @@ public class StyleTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("style");
   }
 
   @Override

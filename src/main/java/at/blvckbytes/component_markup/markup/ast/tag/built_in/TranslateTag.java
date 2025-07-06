@@ -11,15 +11,12 @@ import java.util.List;
 
 public class TranslateTag extends TagDefinition {
 
-  private static final String TAG_NAME = "translate";
-
   private static final MandatoryExpressionAttributeDefinition ATTR_KEY = new MandatoryExpressionAttributeDefinition("key");
   private static final MarkupAttributeDefinition ATTR_WITH = new MarkupAttributeDefinition("with", AttributeFlag.MULTI_VALUE);
   private static final ExpressionAttributeDefinition ATTR_FALLBACK = new ExpressionAttributeDefinition("fallback");
 
   public TranslateTag() {
     super(
-      new String[] { TAG_NAME },
       TagClosing.SELF_CLOSE,
       TagPriority.NORMAL,
       ATTR_KEY,
@@ -30,7 +27,7 @@ public class TranslateTag extends TagDefinition {
 
   @Override
   public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals(TAG_NAME);
+    return tagNameLower.equals("translate");
   }
 
   @Override

@@ -12,9 +12,8 @@ public abstract class ColorizeTag extends TagDefinition {
   private static final ExpressionAttributeDefinition ATTR_SKIP_NON_TEXT = new ExpressionAttributeDefinition("skip-non-text");
   private static final ExpressionAttributeDefinition ATTR_MERGE_INNER = new ExpressionAttributeDefinition("merge-inner");
 
-  protected ColorizeTag(String[] staticPrefixes, TagPriority tagPriority, AttributeDefinition... attributes) {
+  protected ColorizeTag(TagPriority tagPriority, AttributeDefinition... attributes) {
     super(
-      staticPrefixes,
       TagClosing.OPEN_CLOSE,
       tagPriority,
       concatenate(attributes, new AttributeDefinition[] {

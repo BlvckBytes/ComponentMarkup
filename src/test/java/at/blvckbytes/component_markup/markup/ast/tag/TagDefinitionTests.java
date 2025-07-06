@@ -14,7 +14,7 @@ public class TagDefinitionTests {
   private static class MyTag extends TagDefinition {
 
     protected MyTag(AttributeDefinition... attributes) {
-      super(new String[] {}, TagClosing.OPEN_CLOSE, TagPriority.NORMAL, attributes);
+      super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL, attributes);
     }
 
     @Override

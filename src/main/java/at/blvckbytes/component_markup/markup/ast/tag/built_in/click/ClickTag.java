@@ -18,7 +18,6 @@ public abstract class ClickTag extends TagDefinition {
 
   protected ClickTag(ClickAction action, String tagName) {
     super(
-      new String[] { tagName },
       TagClosing.OPEN_CLOSE,
       TagPriority.NORMAL,
       ATTR_VALUE
