@@ -100,7 +100,7 @@ public class ComponentSequence {
       if (this.commonStyle == null)
         this.commonStyle = memberCommonStyle.copy();
       else
-        this.commonStyle.subtractUncommonProperties(memberCommonStyle);;
+        this.commonStyle.subtractUncommonProperties(memberCommonStyle);
     }
 
     this.members.add(member);

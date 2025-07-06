@@ -16,7 +16,7 @@ public enum PrefixOperator {
   REVERSE    ("~<"),
   ;
 
-  public static List<PrefixOperator> CONTAINING_TILDE = Arrays.asList(
+  public static final List<PrefixOperator> CONTAINING_TILDE = Arrays.asList(
     UPPER_CASE, LOWER_CASE, TITLE_CASE, TOGGLE_CASE, SLUGIFY, ASCIIFY, TRIM, REVERSE
   );
 
