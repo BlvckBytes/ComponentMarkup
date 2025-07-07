@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class MarkupInterpreter implements Interpreter {
@@ -281,7 +282,7 @@ public class MarkupInterpreter implements Interpreter {
     interpretObjectAsNode(node, value, false);
   }
 
-  private void interpretForLoop(ForLoopNode node) {
+  private <T> T interpretForLoop(ForLoopNode node, Supplier<T> afterEnvironmentSetup) {
     Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
@@ -290,6 +291,8 @@ public class MarkupInterpreter implements Interpreter {
 
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
+
+    T passthroughValue = afterEnvironmentSetup.get();
 
     boolean reversed;
 
@@ -327,28 +330,11 @@ public class MarkupInterpreter implements Interpreter {
       environment.popVariable(node.iterationVariable);
 
     environment.popVariable("loop");
+
+    return passthroughValue;
   }
 
   private void _interpret(MarkupNode node) {
-    Set<String> introducedBindings = introduceLetBindings(node);
-
-    // Because Java doesn't support defer...
-    __interpret(node);
-
-    if (introducedBindings != null)
-      environment.popVariables(introducedBindings);
-  }
-
-  private void __interpret(MarkupNode node) {
-    if (node.ifCondition != null) {
-      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
-
-      if (!environment.getValueInterpreter().asBoolean(result)) {
-        interceptors.handleAfter(node);
-        return;
-      }
-    }
-
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
@@ -360,65 +346,64 @@ public class MarkupInterpreter implements Interpreter {
 
     // Interceptors are what establish additional behaviour, thus do not invoke all
     // of their call-sites in this method if the current node itself is not to be used
-    if (!doNotUse && node instanceof InterpreterInterceptor)
-      interceptors.add((InterpreterInterceptor) node);
+    if (!doNotUse) {
+      if (node instanceof InterpreterInterceptor)
+        interceptors.add((InterpreterInterceptor) node);
 
-    if (node instanceof IfElseIfElseNode) {
       if (interceptors.handleBeforeAndGetIfSkip(node))
         return;
+    }
 
-      interpretIfElseIfElse((IfElseIfElseNode) node, environment);
+    Set<String> introducedBindings = __interpret(node);
 
+    if (introducedBindings != null)
+      environment.popVariables(introducedBindings);
+
+    if (!doNotUse)
       interceptors.handleAfter(node);
-      return;
+  }
+
+  private Set<String> __interpret(MarkupNode node) {
+    if (node.ifCondition != null) {
+      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
+
+      if (!environment.getValueInterpreter().asBoolean(result))
+        return null;
+    }
+
+    // The for-loop introduces temporary variables itself, so only introduce bindings after the fact
+    // such that they have immediate access to said references; it does not make sense to define a
+    // let-binding on the very same node a *for attribute is employed on *and* use said binding as
+    // the iterable; thus, bindings are granted access to loop-variables, but the iterable doesn't
+    // get access to the let-bindings of this very same node - the only logical order.
+    if (node instanceof ForLoopNode)
+      return interpretForLoop((ForLoopNode) node, () -> introduceLetBindings(node));
+
+    Set<String> introducedBindings = introduceLetBindings(node);
+
+    if (node instanceof IfElseIfElseNode) {
+      interpretIfElseIfElse((IfElseIfElseNode) node, environment);
+      return introducedBindings;
     }
 
     if (node instanceof WhenMatchingNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
       interpretWhenMatching((WhenMatchingNode) node, environment);
-
-      interceptors.handleAfter(node);
-      return;
-    }
-
-    if (node instanceof ForLoopNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
-      interpretForLoop((ForLoopNode) node);
-
-      interceptors.handleAfter(node);
-      return;
+      return introducedBindings;
     }
 
     if (node instanceof ExpressionDrivenNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
       interpretExpressionDriven((ExpressionDrivenNode) node);
-
-      interceptors.handleAfter(node);
-      return;
+      return introducedBindings;
     }
 
     OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
       builder.onBreak();
-
-      interceptors.handleAfter(node);
-      return;
+      return introducedBindings;
     }
 
     if (node instanceof InterpolationNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
       ExpressionNode contents = ((InterpolationNode) node).contents;
       Object interpolationValue = evaluateAsPlainObject(contents);
 
@@ -438,24 +423,15 @@ public class MarkupInterpreter implements Interpreter {
 
       _interpret(interpolatedNode);
 
-      interceptors.handleAfter(node);
-      return;
+      return introducedBindings;
     }
 
     // Terminal nodes always render, because since they do not bear any child-nodes,
     // the only sensible way to "toggle" them is via an if-condition
     if (node instanceof TerminalNode) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
-
       builder.onTerminal((TerminalNode) node, DelayedCreationHandler.NONE_SENTINEL);
-
-      interceptors.handleAfter(node);
-      return;
+      return introducedBindings;
     }
-
-    if (!doNotUse && interceptors.handleBeforeAndGetIfSkip(node))
-      return;
 
     if (node.children != null && !node.children.isEmpty()) {
       builder.onNonTerminalBegin(node);
@@ -466,7 +442,6 @@ public class MarkupInterpreter implements Interpreter {
       builder.onNonTerminalEnd();
     }
 
-    if (!doNotUse)
-      interceptors.handleAfter(node);
+    return introducedBindings;
   }
 }

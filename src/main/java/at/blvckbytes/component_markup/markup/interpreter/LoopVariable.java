@@ -2,16 +2,15 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 public class LoopVariable {
 
-  private final int size;
-
   public int index;
+  public final int length;
   public boolean isFirst;
   public boolean isLast;
   public boolean isEven;
   public boolean isOdd;
 
-  public LoopVariable(int size) {
-    this.size = size;
+  public LoopVariable(int length) {
+    this.length = length;
   }
 
   public void setIndex(int index) {
@@ -19,6 +18,6 @@ public class LoopVariable {
     isEven = index % 2 == 0;
     isOdd = !isEven;
     isFirst = index == 0;
-    isLast = index == size - 1;
+    isLast = index == length - 1;
   }
 }
