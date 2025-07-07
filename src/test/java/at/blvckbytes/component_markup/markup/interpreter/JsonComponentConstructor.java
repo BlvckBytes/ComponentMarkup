@@ -170,7 +170,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();
 
-    contentsObject.addProperty("id", material);
+    if (material != null)
+      contentsObject.addProperty("id", material);
 
     if (count != null)
       contentsObject.addProperty("count", count);

@@ -17,7 +17,7 @@ import java.util.function.BiConsumer;
 
 public class MarkupInterpreterTests {
 
-  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().create();
+  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
   private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
 
   @Test
@@ -927,7 +927,7 @@ public class MarkupInterpreterTests {
       return result;
     }
 
-    if (input instanceof JsonPrimitive)
+    if (input instanceof JsonPrimitive || input instanceof JsonNull)
       return input;
 
     throw new IllegalStateException("Unaccounted-for json-element: " + input.getClass());
