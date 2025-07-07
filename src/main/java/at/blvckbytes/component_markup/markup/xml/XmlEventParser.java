@@ -43,74 +43,67 @@ public class XmlEventParser {
         if (isWithinCurlyBrackets)
           break;
 
-        throw new XmlParseException(XmlParseError.UNESCAPED_CLOSING_CURLY);
+        throw new XmlParseException(XmlParseError.UNESCAPED_CURLY);
       }
 
       CursorPosition preConsumePosition = cursor.getPosition();
       int possibleNonTextBeginIndex = cursor.getNextCharIndex();
 
-      if (cursor.peekChar() == '{') {
+      if (cursor.peekChar() == '{' && priorChar != '\\') {
         cursor.nextChar();
 
         CursorPosition beginPosition = cursor.getPosition();
 
-        if (cursor.peekChar() == '{') {
-          cursor.nextChar();
+        if (substringBuilder.hasStartSet()) {
+          substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
+          consumer.onCursorPosition(textContentBeginPosition);
 
-          if (substringBuilder.hasStartSet()) {
-            substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-            consumer.onCursorPosition(textContentBeginPosition);
-
-            consumer.onText(
-              substringBuilder.build(
-                wasPriorTagOrInterpolation
-                  ? SUBSTRING_INNER_TEXT
-                  : SUBSTRING_FIRST_TEXT
-              )
-            );
-          }
-
-          substringBuilder.setStartInclusive(cursor.getNextCharIndex());
-
-          CursorPosition valueBeginPosition = null;
-
-          while (cursor.peekChar() != 0) {
-            int possiblePreTerminationIndex = cursor.getNextCharIndex();
-            char currentChar = cursor.nextChar();
-
-            if (currentChar == '\n') {
-              consumer.onCursorPosition(beginPosition);
-              throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
-            }
-
-            if (valueBeginPosition == null)
-              valueBeginPosition = cursor.getPosition();
-
-            inStringDetector.onEncounter(currentChar);
-
-            if (inStringDetector.isInString())
-              continue;
-
-            if (currentChar == '}' && cursor.peekChar() == '}') {
-              cursor.nextChar();
-              substringBuilder.setEndExclusive(possiblePreTerminationIndex);
-              break;
-            }
-          }
-
-          consumer.onCursorPosition(beginPosition);
-
-          if (!substringBuilder.hasEndSet())
-            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
-
-          inStringDetector.reset();
-
-          consumer.onInterpolation(substringBuilder.build(SUBSTRING_NOT_TEXT), valueBeginPosition);
-          wasPriorTagOrInterpolation = true;
-          continue;
+          consumer.onText(
+            substringBuilder.build(
+              wasPriorTagOrInterpolation
+                ? SUBSTRING_INNER_TEXT
+                : SUBSTRING_FIRST_TEXT
+            )
+          );
         }
 
-        cursor.restoreState(preConsumePosition);
+        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+
+        CursorPosition valueBeginPosition = null;
+
+        while (cursor.peekChar() != 0) {
+          int possiblePreTerminationIndex = cursor.getNextCharIndex();
+          char currentChar = cursor.nextChar();
+
+          if (currentChar == '\n' || currentChar == '{') {
+            consumer.onCursorPosition(beginPosition);
+            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
+          }
+
+          if (valueBeginPosition == null)
+            valueBeginPosition = cursor.getPosition();
+
+          inStringDetector.onEncounter(currentChar);
+
+          if (inStringDetector.isInString())
+            continue;
+
+          if (currentChar == '}') {
+            substringBuilder.setEndExclusive(possiblePreTerminationIndex);
+            break;
+          }
+        }
+
+        consumer.onCursorPosition(beginPosition);
+
+        if (!substringBuilder.hasEndSet())
+          throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
+
+        inStringDetector.reset();
+
+        consumer.onInterpolation(substringBuilder.build(SUBSTRING_NOT_TEXT), valueBeginPosition);
+        wasPriorTagOrInterpolation = true;
+        continue;
       }
 
       CursorPosition firstSpacePosition = null;
@@ -168,7 +161,7 @@ public class XmlEventParser {
         textContentBeginPosition = cursor.getPosition();
       }
 
-      if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}')) {
+      if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}' || cursor.peekChar() == '{')) {
         substringBuilder.addIndexToBeRemoved(nextCharIndex);
         nextChar = cursor.nextChar();
       }
@@ -255,6 +248,7 @@ public class XmlEventParser {
     consumer.onStringAttribute(attributeName, valueBeginPosition, value);
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
     if (cursor.peekChar() == 0)
       return true;

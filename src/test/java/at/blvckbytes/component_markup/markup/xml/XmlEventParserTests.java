@@ -175,7 +175,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationExpressions() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{{#user.name}}@!"
+      "@<red@>@Hello, @{#user.name}@!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -201,10 +201,10 @@ public class XmlEventParserTests {
       "         @limit=5",
       "         @separator={@<br/@>@}",
       "         @empty={@<red@>@No items found!@}",
-      "       @>@- @<yellow@>@{{# member.item }}@</gray>@<br/@>",
+      "       @>@- @<yellow@>@{# member.item }@</gray>@<br/@>",
       "       @<gray@>@Last line! :)",
       "  @}",
-      "@>@hover over @{{#\"me\"}}@! :)"
+      "@>@hover over @{#\"me\"}@! :)"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -262,7 +262,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationWithCurlyBracketsInStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{{#user.name + \"}}\" + '}}'}}@!"
+      "@<red@>@Hello, @{#user.name + \"}\" + '}'}@!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -270,7 +270,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent("red"),
       new TagOpenEndEvent("red", false),
       new TextEvent("Hello, "),
-      new InterpolationEvent("user.name + \"}}\" + '}}'", text.auxAnchor(0)),
+      new InterpolationEvent("user.name + \"}\" + '}'", text.auxAnchor(0)),
       new TextEvent("!"),
       new InputEndEvent()
     );
@@ -349,7 +349,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveSurroundingInterpolationSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello @{{#user.name}}@ world!"
+      "@<red@>@Hello @{#user.name}@ world!"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -424,7 +424,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldEscapeCharactersInText() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@escaping closing \\> opening \\<; closing \\} opening \\{@</red>"
+      "@<red@>@' escaping \" closing \\> opening \\<; closing \\} opening \\{ \" and '@</red>"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -433,12 +433,11 @@ public class XmlEventParserTests {
       new TagOpenEndEvent("red", false),
       // Within text-content, there's no need to escape quotes, as strings only occur
       // at values of attributes; also, there's no need to escape closing pointy-brackets,
-      // as the predecessor tag (if any) is already closed; also, there's no need to
-      // escape opening curly-brackets, as entering subtrees only happens for attributes.
+      // as the predecessor tag (if any) is already closed.
       // I am >not< looking for general "consistency" here, but rather want to keep it as
       // syntactically terse as possible, while maintaining readability - thus, only escape
       // what's absolutely required as to avoid ambiguity while parsing.
-      new TextEvent("escaping closing \\> opening <; closing } opening \\{"),
+      new TextEvent("' escaping \" closing \\> opening <; closing } opening { \" and '"),
       new TagCloseEvent("red"),
       new InputEndEvent()
     );
@@ -569,7 +568,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@{{user.name + \"}}\" + '}}'"
+      "@<red@>@{user.name + \"}\" + '}'"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -581,7 +580,31 @@ public class XmlEventParserTests {
     );
 
     text = new TextWithAnchors(
-      "@<red@>@{{user.name\n}}"
+      "@<red@>@{user.name\n}"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      XmlParseError.UNTERMINATED_INTERPOLATION,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      text.anchorEvent(2)
+    );
+
+    text = new TextWithAnchors(
+      "@<red@>@{user.name{"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      XmlParseError.UNTERMINATED_INTERPOLATION,
+      new TagOpenBeginEvent("red"),
+      new TagOpenEndEvent("red", false),
+      text.anchorEvent(2)
+    );
+
+    text = new TextWithAnchors(
+      "@<red@>@{{"
     );
 
     makeCaseWithInterleavedAnchors(
@@ -688,7 +711,7 @@ public class XmlEventParserTests {
   public void shouldThrowOnUnescapedCurlyBrackets() {
     makeCaseWithInterleavedAnchors(
       new TextWithAnchors("hello } world"),
-      XmlParseError.UNESCAPED_CLOSING_CURLY
+      XmlParseError.UNESCAPED_CURLY
     );
   }
 

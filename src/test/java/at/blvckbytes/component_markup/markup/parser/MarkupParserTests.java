@@ -53,7 +53,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseForLoop() {
     TextWithAnchors text = new TextWithAnchors(
       "@<container *for-member=\"members\">",
-      "  @hello, @{{member}}@!",
+      "  @hello, @{member}@!",
       "</container>"
     );
 
@@ -76,7 +76,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseForLoopWithConditional() {
     TextWithAnchors text = new TextWithAnchors(
       "@<container *for-member=\"members\" *if=\"member != null\">",
-      "  @hello, @{{member}}@!",
+      "  @hello, @{member}@!",
       "</container>"
     );
 
@@ -259,7 +259,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldUnpackButInheritAll() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red *if=\"a\" *use=\"b\" @let-c=\"d\">@{{'test'}}"
+      "<red *if=\"a\" *use=\"b\" @let-c=\"d\">@{'test'}"
     );
 
     makeCase(
@@ -340,7 +340,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldPreserveWhitespaceInBetweenTagsAndOrInterpolation() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red>@hello</red>@ @{{test}}"
+      "<red>@hello</red>@ @{test}"
     );
 
     makeCase(
@@ -359,7 +359,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     );
 
     text = new TextWithAnchors(
-      "@<gray>@\\#@{{loop.index + 1}}@ <red>@{{word}}"
+      "@<gray>@\\#@{loop.index + 1}@ <red>@{word}"
     );
 
     makeCase(
@@ -382,8 +382,8 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     );
 
     text = new TextWithAnchors(
-      "@<gray>@\\#@{{loop.index + 1}} ",
-      " <red>@{{word}}"
+      "@<gray>@\\#@{loop.index + 1} ",
+      " <red>@{word}"
     );
 
     makeCase(

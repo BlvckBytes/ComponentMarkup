@@ -468,7 +468,7 @@ public class MarkupParserErrorTests {
         "  let-a=\"b\"",
         "  [key]=\"my.expr[222 c.d.e\"",
         "  fallback={",
-        "    hello, {{user}}",
+        "    hello, {user}",
         "  }",
         "/>"
       ),
@@ -481,7 +481,7 @@ public class MarkupParserErrorTests {
         "----------------------^",
         "   Error: Expected a closing-bracket after the indexing-invocation: ]",
         "4:   fallback={",
-        "5:     hello, {{user}}",
+        "5:     hello, {user}",
         "6:   }",
         "7: />"
       )
@@ -491,13 +491,13 @@ public class MarkupParserErrorTests {
       new TextWithAnchors(
         "<red",
         "  let-a=\"b\"",
-        ">{{ user.'name' }}"
+        ">{ user.'name' }"
       ),
       new TextWithAnchors(
         "1: <red",
         "2:   let-a=\"b\"",
-        "3: >{{ user.'name' }}",
-        "------------^",
+        "3: >{ user.'name' }",
+        "-----------^",
         "   Error: The right-hand-side of a member-access operation may only be an identifier: user.<identifier>"
       )
     );
