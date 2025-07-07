@@ -99,7 +99,29 @@ public class MarkupParser implements XmlEventConsumer {
 
     TagAndBuffers currentLayer = tagStack.peek();
 
-    int nameLength = name.length();
+    int nameLength;
+    boolean isExpressionMode = false;
+    boolean isSpreadMode = false;
+
+    while ((nameLength = name.length()) > 2) {
+      boolean hasOpening = name.charAt(0) == '[';
+      boolean hasClosing = name.charAt(nameLength - 1) == ']';
+
+      if (!hasOpening && !hasClosing)
+        break;
+
+      if (!hasOpening || !hasClosing)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
+
+      if (isExpressionMode)
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
+
+      isExpressionMode = true;
+      name = name.substring(1, nameLength - 1);
+
+      if (name.equals("let") || name.startsWith("let-"))
+        throw new MarkupParseException(lastPosition, MarkupParseError.BRACKETED_LET_BINDING);
+    }
 
     if (name.equals("let"))
       throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
@@ -110,17 +132,6 @@ public class MarkupParser implements XmlEventConsumer {
 
       addExpressionLetBinding(name.substring(4), parseExpression(value, valueBeginPosition), currentLayer);
       return;
-    }
-
-    boolean isExpressionMode = false;
-    boolean isSpreadMode = false;
-
-    if (nameLength > 2 && name.charAt(0) == '[') {
-      if (name.charAt(nameLength - 1) != ']')
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
-
-      isExpressionMode = true;
-      name = name.substring(1, nameLength - 1);
     }
 
     if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {

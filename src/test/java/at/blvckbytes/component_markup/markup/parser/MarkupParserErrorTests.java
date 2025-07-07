@@ -68,6 +68,24 @@ public class MarkupParserErrorTests {
   }
 
   @Test
+  public void shouldThrowOnBracketedLetBindings() {
+    makeErrorCase(
+      MarkupParseError.BRACKETED_LET_BINDING,
+      "<container @[let-]=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.BRACKETED_LET_BINDING,
+      "<container @[let-my_var]=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.BRACKETED_LET_BINDING,
+      "<container @[let]=\"\">"
+    );
+  }
+
+  @Test
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
@@ -121,6 +139,24 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
       "<container @[hello=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
+      "<container @hello]=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
+      "<container @[[hello]=\"world\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleAttributeBrackets() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS,
+      "<container @[[hello]]=\"world\">"
     );
   }
 
