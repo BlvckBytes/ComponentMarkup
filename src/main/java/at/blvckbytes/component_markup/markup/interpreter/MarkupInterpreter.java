@@ -231,7 +231,7 @@ public class MarkupInterpreter implements Interpreter {
     if (node.letBindings == null)
       return null;
 
-    Map<String, Object> boundVariables = new HashMap<>();
+    Set<String> introducedNames = new HashSet<>();
 
     for (LetBinding letBinding : node.letBindings) {
       Object value;
@@ -243,14 +243,11 @@ public class MarkupInterpreter implements Interpreter {
       else
         continue;
 
-      if (boundVariables.put(letBinding.name, value) != null)
-        LoggerProvider.get().log(Level.WARNING, "Duplicate let-binding " + letBinding.name);
+      environment.pushVariable(letBinding.name, value);
+      introducedNames.add(letBinding.name);
     }
 
-    // Set them after evaluating all bindings, such that bindings cannot access each others
-    environment.pushVariables(boundVariables);
-
-    return boundVariables.keySet();
+    return introducedNames;
   }
 
   private void interpretObjectAsNode(

@@ -18,11 +18,6 @@ public class TemporaryMemberEnvironment implements InterpretationEnvironment {
     this.shadowingStaticVariables = new HashMap<>();
   }
 
-  public void pushVariables(Map<String, Object> variables) {
-    for (Map.Entry<String, Object> entry : variables.entrySet())
-      pushVariable(entry.getKey(), entry.getValue());
-  }
-
   public void popVariables(Set<String> names) {
     for (String name : names)
       popVariable(name);

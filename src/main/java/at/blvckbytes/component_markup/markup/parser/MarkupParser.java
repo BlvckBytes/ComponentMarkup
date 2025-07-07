@@ -108,20 +108,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (nameLength == 4)
         throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
 
-      String bindingName = name.substring(4);
-
-      if (!isValidExpressionIdentifier(bindingName))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
-
-      if (bindingName.equals(currentLayer.forIterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-
-      ExpressionNode bindingExpression = parseExpression(value, valueBeginPosition);
-      LetBinding binding = new ExpressionLetBinding(bindingExpression, bindingName, lastPosition);
-
-      if (!currentLayer.addLetBinding(binding))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-
+      addExpressionLetBinding(name.substring(4), parseExpression(value, valueBeginPosition), currentLayer);
       return;
     }
 
@@ -442,6 +429,19 @@ public class MarkupParser implements XmlEventConsumer {
   // Utilities
   // ================================================================================
 
+  private void addExpressionLetBinding(String bindingName, ExpressionNode bindingExpression, TagAndBuffers currentLayer) {
+    if (!isValidExpressionIdentifier(bindingName))
+      throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
+
+    if (bindingName.equals(currentLayer.forIterationVariable))
+      throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
+
+    LetBinding binding = new ExpressionLetBinding(bindingExpression, bindingName, lastPosition);
+
+    if (!currentLayer.addLetBinding(binding))
+      throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
+  }
+
   private void handleStructuralAttribute(String name, @Nullable String value, CursorPosition valueBeginPosition) {
     TagAndBuffers currentLayer = tagStack.peek();
 
@@ -580,10 +580,18 @@ public class MarkupParser implements XmlEventConsumer {
     if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.')
       throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name.substring(3));
 
-    if (name.equals("let") || name.startsWith("let-"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_NON_MARKUP_LET_ATTRIBUTE);
-
     TagAndBuffers currentLayer = tagStack.peek();
+
+    if (name.equals("let"))
+      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
+
+    if (name.startsWith("let-")) {
+      if (name.length() == 4)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
+
+      addExpressionLetBinding(name.substring(4), expression, currentLayer);
+      return;
+    }
 
     if (currentLayer.forIterable != null) {
       if (name.equals("for-separator")) {

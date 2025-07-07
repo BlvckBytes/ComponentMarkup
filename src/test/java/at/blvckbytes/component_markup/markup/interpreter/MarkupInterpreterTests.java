@@ -834,6 +834,27 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldAllowBackwardsAccessOnLetBindings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container",
+      "  let-a=5",
+      "  let-b=12",
+      "  let-c=\"b - a\"",
+      "  let-d=3",
+      "  let-e=\"c ^ d\"",
+      ">{e}"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "343")
+    );
+  }
+
   private void makeColorizerCase(
     TextWithAnchors input,
     String text,
