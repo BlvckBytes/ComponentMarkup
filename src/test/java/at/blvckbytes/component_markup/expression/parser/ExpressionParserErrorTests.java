@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.expression.parser;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -4,7 +4,6 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.logging.Level;
 
-public class ComputedStyle extends Jsonifiable {
+public class ComputedStyle {
 
   public long packedColor = PackedColor.NULL_SENTINEL;
   public long packedShadowColor = PackedColor.NULL_SENTINEL;

@@ -1,8 +1,6 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
-
-public abstract class Token extends Jsonifiable {
+public abstract class Token {
 
   public final int beginIndex;
   public final int endIndex;

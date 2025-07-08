@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-import at.blvckbytes.component_markup.JsonConverter;
+import at.blvckbytes.component_markup.Jsonifier;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
@@ -355,7 +355,7 @@ public class ExpressionTokenizerTests {
       if (actualTokensString.length() != 0)
         actualTokensString.append('\n');
 
-      actualTokensString.append(JsonConverter.jsonify(tokenizer.nextToken()));
+      actualTokensString.append(Jsonifier.jsonify(tokenizer.nextToken()));
     }
 
     StringBuilder expectedTokensString = new StringBuilder();
@@ -366,7 +366,7 @@ public class ExpressionTokenizerTests {
       if (expectedTokensString.length() != 0)
         expectedTokensString.append('\n');
 
-      expectedTokensString.append(JsonConverter.jsonify(makeToken(expectedValue, input.anchorIndex(valueIndex))));
+      expectedTokensString.append(Jsonifier.jsonify(makeToken(expectedValue, input.anchorIndex(valueIndex))));
     }
 
     assertEquals(expectedTokensString.toString(), actualTokensString.toString());

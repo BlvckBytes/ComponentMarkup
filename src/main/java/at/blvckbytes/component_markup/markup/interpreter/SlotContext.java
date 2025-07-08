@@ -1,11 +1,10 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
 
-public class SlotContext extends Jsonifiable {
+public class SlotContext {
 
   private static final long DEFAULT_COLOR = AnsiStyleColor.WHITE.packedColor;
   private static final long DEFAULT_SHADOW_COLOR = PackedColor.setClampedA(AnsiStyleColor.BLACK.packedColor, 64);

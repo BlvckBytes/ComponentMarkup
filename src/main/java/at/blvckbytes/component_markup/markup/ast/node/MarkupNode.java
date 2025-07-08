@@ -5,13 +5,12 @@ import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class MarkupNode extends Jsonifiable {
+public abstract class MarkupNode {
 
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;

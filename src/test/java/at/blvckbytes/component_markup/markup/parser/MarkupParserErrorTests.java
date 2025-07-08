@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.JsonConverter;
+import at.blvckbytes.component_markup.Jsonifier;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
@@ -744,6 +744,6 @@ public class MarkupParserErrorTests {
     CursorPosition position = input.anchor(0);
 
     Assertions.assertEquals(error, ((MarkupParseException) thrownError).error);
-    Assertions.assertEquals(JsonConverter.jsonify(position), JsonConverter.jsonify(((MarkupParseException) thrownError).position));
+    Assertions.assertEquals(Jsonifier.jsonify(position), Jsonifier.jsonify(((MarkupParseException) thrownError).position));
   }
 }

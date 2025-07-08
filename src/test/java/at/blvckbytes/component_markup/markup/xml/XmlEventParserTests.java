@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.JsonConverter;
+import at.blvckbytes.component_markup.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.event.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -765,11 +765,11 @@ public class XmlEventParserTests {
         if (anchorEvent == null)
           throw new IllegalStateException("Required " + (expectedEvents.length - 1) + " anchors, but only got " + input.getAnchorCount());
 
-        expectedEventsString.append(JsonConverter.jsonify(anchorEvent));
+        expectedEventsString.append(Jsonifier.jsonify(anchorEvent));
         expectedEventsString.append('\n');
       }
 
-      expectedEventsString.append(JsonConverter.jsonify(expectedEvent));
+      expectedEventsString.append(Jsonifier.jsonify(expectedEvent));
     }
 
     assertEquals(expectedEventsString.toString(), actualEventsJoiner.toString());

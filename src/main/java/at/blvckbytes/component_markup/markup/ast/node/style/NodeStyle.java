@@ -4,12 +4,11 @@ import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public class NodeStyle extends Jsonifiable {
+public class NodeStyle {
 
   private static final TerminalNode NULL_TERMINAL = new TerminalNode(new NullToken(0, "null"));
 

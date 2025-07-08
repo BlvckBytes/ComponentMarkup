@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.parser;
 
-import at.blvckbytes.component_markup.JsonConverter;
+import at.blvckbytes.component_markup.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizerTests;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
@@ -640,7 +640,7 @@ public class ExpressionParserTests {
     }
 
     Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
-    Assertions.assertEquals(JsonConverter.jsonify(expectedNode), JsonConverter.jsonify(actualNode));
+    Assertions.assertEquals(Jsonifier.jsonify(expectedNode), Jsonifier.jsonify(actualNode));
   }
 
   private void makeCasePlain(String expression) {

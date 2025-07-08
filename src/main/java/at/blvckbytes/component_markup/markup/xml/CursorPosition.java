@@ -1,8 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
-
-public class CursorPosition extends Jsonifiable {
+public class CursorPosition {
 
   public static final CursorPosition ZERO = new CursorPosition(0, 0, 0);
 
