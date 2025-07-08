@@ -1,9 +1,8 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 
-public class StringAttributeEvent extends Jsonifiable implements XmlEvent {
+public class StringAttributeEvent extends XmlEvent {
 
   public final String name;
   public final CursorPosition valueBeginPosition;

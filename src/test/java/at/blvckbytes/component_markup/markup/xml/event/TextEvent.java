@@ -1,8 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
-
-public class TextEvent extends Jsonifiable implements XmlEvent {
+public class TextEvent extends XmlEvent {
 
   public final String text;
 

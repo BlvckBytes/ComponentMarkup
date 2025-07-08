@@ -1,8 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
-
-public class TagOpenEndEvent extends Jsonifiable implements XmlEvent {
+public class TagOpenEndEvent extends XmlEvent {
 
   public final String tagName;
   public final boolean wasSelfClosing;

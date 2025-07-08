@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
+import at.blvckbytes.component_markup.JsonConverter;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -87,6 +88,6 @@ public class XmlEventJoiner implements XmlEventConsumer {
     if (eventsString.length() > 0)
       eventsString.append('\n');
 
-    eventsString.append(event);
+    eventsString.append(JsonConverter.jsonify(event));
   }
 }

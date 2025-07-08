@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
+import at.blvckbytes.component_markup.JsonConverter;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
@@ -110,6 +111,6 @@ public abstract class MarkupParserTestsBase {
 
   protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {
     MarkupNode actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
-    Assertions.assertEquals(wrappedExpectedNode.get().toString(), actualNode.toString());
+    Assertions.assertEquals(JsonConverter.jsonify(wrappedExpectedNode.get()), JsonConverter.jsonify(actualNode));
   }
 }

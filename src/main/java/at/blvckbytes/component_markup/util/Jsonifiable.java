@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.util;
 
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
-import com.google.gson.*;
+import at.blvckbytes.component_markup.util.json.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -14,18 +14,16 @@ import java.util.logging.Level;
 
 public abstract class Jsonifiable {
 
-  private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-
-  public JsonObject jsonify() {
+  public _JsonObject jsonify() {
     return jsonify(this);
   }
 
-  public static JsonObject jsonify(Object instance) {
-    JsonObject result = new JsonObject();
+  public static _JsonObject jsonify(Object instance) {
+    _JsonObject result = new _JsonObject();
 
     Class<?> currentClass = instance.getClass();
 
-    result.addProperty("className", currentClass.getName());
+    result.add("className", new _JsonString(currentClass.getName()));
 
     do {
       if (isJavaStandardClass(currentClass))
@@ -76,19 +74,19 @@ public abstract class Jsonifiable {
     return result;
   }
 
-  private static JsonElement jsonifyObject(@Nullable Class<?> type, @Nullable Object item) {
+  private static _JsonElement jsonifyObject(@Nullable Class<?> type, @Nullable Object item) {
     if (item == null) {
       if (type != null && (Collection.class.isAssignableFrom(type) || type.isArray()))
-        return new JsonArray();
+        return new _JsonArray();
 
       if (type != null && Map.class.isAssignableFrom(type))
-        return new JsonObject();
+        return new _JsonObject();
 
-      return JsonNull.INSTANCE;
+      return _JsonString.NULL;
     }
 
     if (item.getClass().isArray()) {
-      JsonArray result = new JsonArray();
+      _JsonArray result = new _JsonArray();
       int arrayLength = Array.getLength(item);
 
       for (int index = 0; index < arrayLength; ++index)
@@ -101,22 +99,22 @@ public abstract class Jsonifiable {
       return ((Jsonifiable) item).jsonify();
 
     if (item instanceof Number)
-      return new JsonPrimitive((Number) item);
+      return new _JsonNumber((Number) item);
 
     if (item instanceof String)
-      return new JsonPrimitive((String) item);
+      return new _JsonString((String) item);
 
     if (item instanceof Character)
-      return new JsonPrimitive(String.valueOf(item));
+      return new _JsonString(String.valueOf(item));
 
     if (item instanceof Boolean)
-      return new JsonPrimitive((Boolean) item);
+      return new _JsonBoolean((Boolean) item);
 
     if (item instanceof Enum<?>)
-      return new JsonPrimitive(((Enum<?>) item).name());
+      return new _JsonString(((Enum<?>) item).name());
 
     if (item instanceof Collection<?>) {
-      JsonArray result = new JsonArray();
+      _JsonArray result = new _JsonArray();
 
       for (Object listItem : ((List<?>) item))
         result.add(jsonifyObject(null, listItem));
@@ -131,26 +129,17 @@ public abstract class Jsonifiable {
       return jsonifyObject(null, ((MarkupList) item).get(null));
 
     if (item instanceof Map<?, ?>) {
-      JsonObject result = new JsonObject();
+      _JsonObject result = new _JsonObject();
 
       for (Map.Entry<?, ?> entry : ((Map<?, ?>) item).entrySet())
-        result.add(jsonifyObject(null, entry.getKey()).getAsString(), jsonifyObject(null, entry.getValue()));
+        result.add(String.valueOf(entry.getKey()), jsonifyObject(null, entry.getValue()));
 
       return result;
     }
 
     LoggerProvider.get().log(Level.WARNING, "Don't know how to stringify " + item.getClass());
 
-    return JsonNull.INSTANCE;
-  }
-
-  @Override
-  public String toString() {
-    return gsonInstance.toJson(jsonify());
-  }
-
-  public static String toString(Object item) {
-    return gsonInstance.toJson(Jsonifiable.jsonify(item));
+    return _JsonString.NULL;
   }
 
   private static boolean isJavaStandardClass(Class<?> clazz) {

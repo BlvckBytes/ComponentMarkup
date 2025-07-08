@@ -1,8 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.Jsonifiable;
-
-public class DoubleAttributeEvent extends Jsonifiable implements XmlEvent {
+public class DoubleAttributeEvent extends XmlEvent {
 
   public final String name;
   public final String raw;
