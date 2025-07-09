@@ -41,7 +41,7 @@ public class OutputBuilder {
     this.chatContext = componentConstructor.getSlotContext(SlotType.CHAT);
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle, componentConstructor));
+    this.sequencesStack.push(ComponentSequence.initial(slotContext, chatContext, componentConstructor, interpreter));
     this.result = new ArrayList<>();
   }
 
@@ -55,7 +55,7 @@ public class OutputBuilder {
 
     popAllSequencesAndAddToResult(poppedNonTerminals);
 
-    sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle, componentConstructor));
+    sequencesStack.push(ComponentSequence.initial(slotContext, chatContext, componentConstructor, interpreter));
 
     int size;
 
@@ -64,8 +64,7 @@ public class OutputBuilder {
   }
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
-    ComponentSequence parentSequence = sequencesStack.isEmpty() ? null : sequencesStack.peek();
-    sequencesStack.push(ComponentSequence.next(nonTerminal, interpreter, parentSequence, chatContext, componentConstructor));
+    sequencesStack.push(sequencesStack.peek().makeChildSequence(nonTerminal));
   }
 
   public void onNonTerminalEnd() {
@@ -248,130 +247,7 @@ public class OutputBuilder {
   }
 
   public @Nullable Object onTerminal(TerminalNode node, DelayedCreationHandler creationHandler) {
-    Object result = null;
-
-    ComponentSequence parentSequence = sequencesStack.peek();
-    ComputedStyle style = ComponentSequence.next(node, interpreter, parentSequence, chatContext, componentConstructor).styleToApply;
-
-    if (node instanceof TextNode) {
-      String text = ((TextNode) node).text;
-
-      if (creationHandler != DelayedCreationHandler.IMMEDIATE_SENTINEL) {
-        parentSequence.addBufferedText(text, style, creationHandler);
-        return null;
-      }
-
-      result = componentConstructor.createTextNode(text);
-    }
-
-    else if (node instanceof KeyNode) {
-      String key = interpreter.evaluateAsString(((KeyNode) node).key);
-      result = componentConstructor.createTextNode(key);
-    }
-
-    else if (node instanceof ScoreNode) {
-      ScoreNode scoreNode = (ScoreNode) node;
-      String name = interpreter.evaluateAsString(scoreNode.name);
-      String objective = interpreter.evaluateAsString(scoreNode.objective);
-      String value = interpreter.evaluateAsStringOrNull(scoreNode.value);
-      result = componentConstructor.createScoreNode(name, objective, value);
-    }
-
-    else if (node instanceof SelectorNode) {
-      SelectorNode selectorNode = (SelectorNode) node;
-      String selector = interpreter.evaluateAsString(selectorNode.selector);
-
-      Object separator = null;
-
-      if (selectorNode.separator != null) {
-        List<Object> components = interpreter.interpretSubtree(
-          selectorNode.separator,
-          componentConstructor.getSlotContext(SlotType.SELECTOR_SEPARATOR)
-        );
-
-        separator = components.isEmpty() ? null : components.get(0);
-      }
-
-      result = componentConstructor.createSelectorNode(selector, separator);
-    }
-
-    else if (node instanceof NbtNode) {
-      NbtNode nbtNode = (NbtNode) node;
-
-      String identifier = interpreter.evaluateAsString(nbtNode.identifier);
-      String path = interpreter.evaluateAsString(nbtNode.path);
-
-      boolean interpret = false;
-
-      if (nbtNode.interpret != null)
-        interpret = interpreter.evaluateAsBoolean(nbtNode.interpret);
-
-      Object separator = null;
-
-      if (nbtNode.separator != null) {
-        List<Object> components = interpreter.interpretSubtree(
-          nbtNode.separator,
-          componentConstructor.getSlotContext(SlotType.NBT_SEPARATOR)
-        );
-
-        separator = components.isEmpty() ? null : components.get(0);
-      }
-
-      switch (nbtNode.source) {
-        case BLOCK:
-          result = componentConstructor.createBlockNbtNode(identifier, path, interpret, separator);
-          break;
-
-        case ENTITY:
-          result = componentConstructor.createEntityNbtNode(identifier, path, interpret, separator);
-          break;
-
-        case STORAGE:
-          result = componentConstructor.createStorageNbtNode(identifier, path, interpret, separator);
-          break;
-
-        default:
-          LoggerProvider.get().log(Level.WARNING, "Encountered unknown nbt-source: " + nbtNode.source);
-      }
-    }
-
-    else if (node instanceof TranslateNode) {
-      TranslateNode translateNode = (TranslateNode) node;
-
-      String key = interpreter.evaluateAsString(translateNode.key);
-
-      List<Object> with = new ArrayList<>();
-
-      for (MarkupNode withNode : translateNode.with.get(interpreter)) {
-        List<Object> components = interpreter.interpretSubtree(
-          withNode,
-          componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)
-        );
-
-        if (!components.isEmpty())
-          with.add(components.get(0));
-      }
-
-      String fallback = null;
-
-      if (translateNode.fallback != null)
-        fallback = interpreter.evaluateAsStringOrNull(translateNode.fallback);
-
-      result = componentConstructor.createTranslateNode(key, with, fallback);
-    }
-
-    else
-      LoggerProvider.get().log(Level.WARNING, "Unknown terminal-node: " + node.getClass());
-
-    if (result == null)
-      result = componentConstructor.createTextNode("<error>");
-
-    if (style != null)
-      style.applyStyles(result, componentConstructor);
-
-    parentSequence.addMember(result, style);
-
-    return result;
+    return sequencesStack.peek().onTerminal(node, creationHandler);
   }
 
   private void popAllSequencesAndAddToResult(@Nullable List<MarkupNode> nonTerminalCollector) {

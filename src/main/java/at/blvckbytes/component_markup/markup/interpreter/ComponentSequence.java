@@ -2,14 +2,21 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public class ComponentSequence {
 
+  private final @Nullable ComponentSequence parentSequence;
+  private final SlotContext slotContext;
+  private final SlotContext resetContext;
+  private final Interpreter interpreter;
   private final ComponentConstructor componentConstructor;
   public final @Nullable MarkupNode nonTerminal;
   private @Nullable List<Object> members;
@@ -23,6 +30,132 @@ public class ComponentSequence {
   public final @Nullable ComputedStyle styleToApply;
 
   private @Nullable ComputedStyle commonStyle;
+
+  public @Nullable Object onTerminal(TerminalNode node, DelayedCreationHandler creationHandler) {
+    ComputedStyle style = makeChildSequence(node).styleToApply;
+
+    Object result = null;
+
+    if (node instanceof TextNode) {
+      String text = ((TextNode) node).text;
+
+      if (creationHandler != DelayedCreationHandler.IMMEDIATE_SENTINEL) {
+        addBufferedText(text, style, creationHandler);
+        return null;
+      }
+
+      result = componentConstructor.createTextNode(text);
+    }
+
+    else if (node instanceof KeyNode) {
+      String key = interpreter.evaluateAsString(((KeyNode) node).key);
+      result = componentConstructor.createTextNode(key);
+    }
+
+    else if (node instanceof ScoreNode) {
+      ScoreNode scoreNode = (ScoreNode) node;
+      String name = interpreter.evaluateAsString(scoreNode.name);
+      String objective = interpreter.evaluateAsString(scoreNode.objective);
+      String value = interpreter.evaluateAsStringOrNull(scoreNode.value);
+      result = componentConstructor.createScoreNode(name, objective, value);
+    }
+
+    else if (node instanceof SelectorNode) {
+      SelectorNode selectorNode = (SelectorNode) node;
+      String selector = interpreter.evaluateAsString(selectorNode.selector);
+
+      Object separator = null;
+
+      if (selectorNode.separator != null) {
+        List<Object> components = interpreter.interpretSubtree(
+          selectorNode.separator,
+          componentConstructor.getSlotContext(SlotType.SELECTOR_SEPARATOR)
+        );
+
+        separator = components.isEmpty() ? null : components.get(0);
+      }
+
+      result = componentConstructor.createSelectorNode(selector, separator);
+    }
+
+    else if (node instanceof NbtNode) {
+      NbtNode nbtNode = (NbtNode) node;
+
+      String identifier = interpreter.evaluateAsString(nbtNode.identifier);
+      String path = interpreter.evaluateAsString(nbtNode.path);
+
+      boolean interpret = false;
+
+      if (nbtNode.interpret != null)
+        interpret = interpreter.evaluateAsBoolean(nbtNode.interpret);
+
+      Object separator = null;
+
+      if (nbtNode.separator != null) {
+        List<Object> components = interpreter.interpretSubtree(
+          nbtNode.separator,
+          componentConstructor.getSlotContext(SlotType.NBT_SEPARATOR)
+        );
+
+        separator = components.isEmpty() ? null : components.get(0);
+      }
+
+      switch (nbtNode.source) {
+        case BLOCK:
+          result = componentConstructor.createBlockNbtNode(identifier, path, interpret, separator);
+          break;
+
+        case ENTITY:
+          result = componentConstructor.createEntityNbtNode(identifier, path, interpret, separator);
+          break;
+
+        case STORAGE:
+          result = componentConstructor.createStorageNbtNode(identifier, path, interpret, separator);
+          break;
+
+        default:
+          LoggerProvider.get().log(Level.WARNING, "Encountered unknown nbt-source: " + nbtNode.source);
+      }
+    }
+
+    else if (node instanceof TranslateNode) {
+      TranslateNode translateNode = (TranslateNode) node;
+
+      String key = interpreter.evaluateAsString(translateNode.key);
+
+      List<Object> with = new ArrayList<>();
+
+      for (MarkupNode withNode : translateNode.with.get(interpreter)) {
+        List<Object> components = interpreter.interpretSubtree(
+          withNode,
+          componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)
+        );
+
+        if (!components.isEmpty())
+          with.add(components.get(0));
+      }
+
+      String fallback = null;
+
+      if (translateNode.fallback != null)
+        fallback = interpreter.evaluateAsStringOrNull(translateNode.fallback);
+
+      result = componentConstructor.createTranslateNode(key, with, fallback);
+    }
+
+    else
+      LoggerProvider.get().log(Level.WARNING, "Unknown terminal-node: " + node.getClass());
+
+    if (result == null)
+      result = componentConstructor.createTextNode("<error>");
+
+    if (style != null)
+      style.applyStyles(result, componentConstructor);
+
+    addMember(result, style);
+
+    return result;
+  }
 
   public void possiblyUpdateCommonStyleToOnlyElement() {
     if (members == null || members.size() != 1)
@@ -120,25 +253,26 @@ public class ComponentSequence {
     return sequenceComponent;
   }
 
-  public static ComponentSequence initial(ComputedStyle defaultStyle, ComponentConstructor componentConstructor) {
-    return new ComponentSequence(null, null, defaultStyle, null, componentConstructor);
+  public static ComponentSequence initial(
+    SlotContext slotContext,
+    SlotContext resetContext,
+    ComponentConstructor componentConstructor, Interpreter interpreter) {
+    return new ComponentSequence(
+      null, slotContext, resetContext, null,
+      null, slotContext.defaultStyle, null,
+      componentConstructor, interpreter
+    );
   }
 
-  public static ComponentSequence next(
-    MarkupNode styleProvider,
-    Interpreter interpreter,
-    ComponentSequence parentSequence,
-    SlotContext chatContext,
-    ComponentConstructor componentConstructor
-  ) {
-    ComputedStyle computedStyle = null;
+  public ComponentSequence makeChildSequence(MarkupNode styleProvider) {
+    ComputedStyle childStyle = null;
 
     if (styleProvider instanceof StyledNode)
-      computedStyle = new ComputedStyle((StyledNode) styleProvider, interpreter);
+      childStyle = new ComputedStyle((StyledNode) styleProvider, interpreter);
 
-    ComputedStyle styleToApply = computedStyle;
-    ComputedStyle effectiveStyle = computedStyle;
-    ComputedStyle inheritedStyle = parentSequence.effectiveStyle;
+    ComputedStyle styleToApply = childStyle;
+    ComputedStyle effectiveStyle = childStyle;
+    ComputedStyle inheritedStyle = this.effectiveStyle;
 
     if (inheritedStyle != null) {
       // Do not specify styles explicitly which are already active due to inheritance
@@ -152,30 +286,38 @@ public class ComponentSequence {
       // By definition, a reset means resetting to chat-state; thus,
       // that's the context to get defaults from
       if (styleProvider != null && styleProvider.doesResetStyle) {
-        ComputedStyle mask = inheritedStyle.copy().subtractEqualStyles(computedStyle);
+        ComputedStyle mask = inheritedStyle.copy().subtractEqualStyles(childStyle);
 
         if (styleToApply == null)
           styleToApply = new ComputedStyle();
 
-        styleToApply = styleToApply.applyDefaults(mask, chatContext);
+        styleToApply = styleToApply.applyDefaults(mask, resetContext);
       }
     }
 
-    return new ComponentSequence(styleProvider, computedStyle, effectiveStyle, styleToApply, componentConstructor);
+    return new ComponentSequence(this, slotContext, resetContext, styleProvider, childStyle, effectiveStyle, styleToApply, componentConstructor, interpreter);
   }
 
   public ComponentSequence(
+    @Nullable ComponentSequence parentSequence,
+    SlotContext slotContext,
+    SlotContext resetContext,
     @Nullable MarkupNode nonTerminal,
     @Nullable ComputedStyle computedStyle,
     @Nullable ComputedStyle effectiveStyle,
     @Nullable ComputedStyle styleToApply,
-    ComponentConstructor componentConstructor
+    ComponentConstructor componentConstructor,
+    Interpreter interpreter
   ) {
+    this.parentSequence = parentSequence;
+    this.slotContext = slotContext;
+    this.resetContext = resetContext;
     this.nonTerminal = nonTerminal;
     this.members = new ArrayList<>();
     this.computedStyle = computedStyle;
     this.effectiveStyle = effectiveStyle;
     this.styleToApply = styleToApply;
     this.componentConstructor = componentConstructor;
+    this.interpreter = interpreter;
   }
 }
