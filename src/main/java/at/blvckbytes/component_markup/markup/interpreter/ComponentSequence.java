@@ -2,13 +2,22 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
+import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
+import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
+import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode;
+import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
+import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
+import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class ComponentSequence {
@@ -25,9 +34,9 @@ public class ComponentSequence {
   private @Nullable ComputedStyle bufferedTextsStyle;
   private DelayedCreationHandler creationHandler;
 
-  public final @Nullable ComputedStyle computedStyle;
-  public final @Nullable ComputedStyle effectiveStyle;
-  public final @Nullable ComputedStyle styleToApply;
+  private final @Nullable ComputedStyle computedStyle;
+  private final @Nullable ComputedStyle effectiveStyle;
+  private final @Nullable ComputedStyle styleToApply;
 
   private @Nullable ComputedStyle commonStyle;
 
@@ -239,18 +248,196 @@ public class ComponentSequence {
     this.members.add(member);
   }
 
-  public Object combine(ComponentConstructor componentConstructor) {
+  public @Nullable Object combine(ComponentConstructor componentConstructor) {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null || this.members.isEmpty())
-     return componentConstructor.createTextNode("");
+      return null;
+
+    Object result;
 
     if (members.size() == 1)
-      return members.get(0);
+      result = members.get(0);
+    else {
+      result = componentConstructor.createTextNode("");
+      componentConstructor.setChildren(result, members);
+    }
 
-    Object sequenceComponent = componentConstructor.createTextNode("");
-    componentConstructor.setChildren(sequenceComponent, members);
-    return sequenceComponent;
+    if (styleToApply != null) {
+      ComputedStyle commonStyle;
+
+      if ((commonStyle = getCommonStyle()) != null)
+        styleToApply.subtractCommonStyles(commonStyle);
+
+      styleToApply.applyStyles(result, componentConstructor);
+    }
+
+    possiblyUpdateCommonStyleToOnlyElement();
+
+    return applyNonTerminal(result);
+  }
+
+  private Object applyNonTerminal(Object result) {
+    if (nonTerminal == null || nonTerminal instanceof ContainerNode)
+      return result;
+
+    if (nonTerminal instanceof ClickNode) {
+      ClickNode clickNode = (ClickNode) nonTerminal;
+
+      switch (clickNode.action) {
+        case COPY_TO_CLIPBOARD:
+          componentConstructor.setClickCopyToClipboardAction(
+            result,
+            interpreter.evaluateAsString(clickNode.value)
+          );
+          break;
+
+        case SUGGEST_COMMAND:
+          componentConstructor.setClickSuggestCommandAction(
+            result,
+            interpreter.evaluateAsString(clickNode.value)
+          );
+          break;
+
+        case RUN_COMMAND:
+          componentConstructor.setClickRunCommandAction(
+            result,
+            interpreter.evaluateAsString(clickNode.value)
+          );
+          break;
+
+        case CHANGE_PAGE:
+          componentConstructor.setClickChangePageAction(
+            result,
+            (int) interpreter.evaluateAsLong(clickNode.value)
+          );
+          break;
+
+        case OPEN_FILE:
+          componentConstructor.setClickOpenFileAction(
+            result,
+            interpreter.evaluateAsString(clickNode.value)
+          );
+          break;
+
+        case OPEN_URL: {
+          String urlValue = interpreter.evaluateAsString(clickNode.value);
+
+          try {
+            URI uri = URI.create(urlValue);
+            componentConstructor.setClickOpenUrlAction(result, uri);
+          } catch (Throwable e) {
+            // TODO: Provide better message
+            LoggerProvider.get().log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
+          }
+
+          break;
+        }
+
+        default:
+          LoggerProvider.get().log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
+      }
+
+      return result;
+    }
+
+    if (nonTerminal instanceof InsertNode) {
+      InsertNode insertNode = (InsertNode) nonTerminal;
+      String value = interpreter.evaluateAsString(insertNode.value);
+      componentConstructor.setInsertAction(result, value);
+      return result;
+    }
+
+    if (nonTerminal instanceof AchievementHoverNode) {
+      AchievementHoverNode achievementHoverNode = (AchievementHoverNode) nonTerminal;
+      String value = interpreter.evaluateAsString(achievementHoverNode.value);
+      componentConstructor.setHoverAchievementAction(result, value);
+      return result;
+    }
+
+    if (nonTerminal instanceof EntityHoverNode) {
+      EntityHoverNode entityHoverNode = (EntityHoverNode) nonTerminal;
+      String type = interpreter.evaluateAsString(entityHoverNode.type);
+      String id = interpreter.evaluateAsString(entityHoverNode.id);
+
+      Object name = null;
+
+      if (entityHoverNode.name != null) {
+        List<Object> components = interpreter.interpretSubtree(
+          entityHoverNode.name,
+          componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
+        );
+
+        name = components.isEmpty() ? null : components.get(0);
+      }
+
+      try {
+        UUID uuid = UUID.fromString(id);
+        componentConstructor.setHoverEntityAction(result, type, uuid, name);
+      } catch (Throwable e) {
+        // TODO: Provide better message
+        LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
+      }
+      return result;
+    }
+
+    if (nonTerminal instanceof ItemHoverNode) {
+      ItemHoverNode itemHoverNode = (ItemHoverNode) nonTerminal;
+
+      String material = null;
+
+      if (itemHoverNode.material != null)
+        material = interpreter.evaluateAsStringOrNull(itemHoverNode.material);
+
+      Integer count = null;
+
+      if (itemHoverNode.amount != null)
+        count = (int) interpreter.evaluateAsLong(itemHoverNode.amount);
+
+      Object name = null;
+
+      if (itemHoverNode.name != null) {
+        List<Object> components = interpreter.interpretSubtree(
+          itemHoverNode.name,
+          componentConstructor.getSlotContext(SlotType.ITEM_NAME)
+        );
+
+        name = components.isEmpty() ? null : components.get(0);
+      }
+
+      List<Object> lore = null;
+
+      if (itemHoverNode.lore != null) {
+        lore = interpreter.interpretSubtree(
+          itemHoverNode.lore,
+          componentConstructor.getSlotContext(SlotType.ITEM_LORE)
+        );
+      }
+
+      boolean hideProperties = false;
+
+      if (itemHoverNode.hideProperties != null)
+        hideProperties = interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
+
+      componentConstructor.setHoverItemAction(result, material, count, name, lore, hideProperties);
+      return result;
+    }
+
+    if (nonTerminal instanceof TextHoverNode) {
+      TextHoverNode textHoverNode = (TextHoverNode) nonTerminal;
+
+      List<Object> components = interpreter.interpretSubtree(
+        textHoverNode.value,
+        componentConstructor.getSlotContext(SlotType.TEXT_TOOLTIP)
+      );
+
+      if (!components.isEmpty())
+        componentConstructor.setHoverTextAction(result, components.get(0));
+
+      return result;
+    }
+
+    return result;
   }
 
   public static ComponentSequence initial(
