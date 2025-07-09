@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
@@ -24,6 +25,7 @@ public class OutputBuilder {
   private final Interpreter interpreter;
   private final SlotContext slotContext;
   private final SlotContext chatContext;
+  private final @Nullable String breakString;
 
   private final List<Object> result;
   private final Stack<ComponentSequence> sequencesStack;
@@ -37,15 +39,15 @@ public class OutputBuilder {
     this.interpreter = interpreter;
     this.slotContext = slotContext;
     this.chatContext = componentConstructor.getSlotContext(SlotType.CHAT);
+    this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
     this.sequencesStack.push(ComponentSequence.initial(slotContext.defaultStyle, componentConstructor));
     this.result = new ArrayList<>();
   }
 
-  public void onBreak() {
-    if (slotContext.breakChar != 0) {
-      Object separatorNode = componentConstructor.createTextNode(String.valueOf(slotContext.breakChar));
-      sequencesStack.peek().addMember(separatorNode, null);
+  public void onBreak(BreakNode node) {
+    if (breakString != null) {
+      onTerminal(new TextNode(breakString, node.position), DelayedCreationHandler.NONE_SENTINEL);
       return;
     }
 

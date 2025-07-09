@@ -396,7 +396,7 @@ public class MarkupInterpreter implements Interpreter {
     OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
-      builder.onBreak();
+      builder.onBreak((BreakNode) node);
       return introducedBindings;
     }
 
