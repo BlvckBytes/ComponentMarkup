@@ -14,9 +14,6 @@ import java.util.logging.Level;
 public class OutputBuilder {
 
   private final ComponentConstructor componentConstructor;
-  private final Interpreter interpreter;
-  private final SlotContext slotContext;
-  private final SlotContext chatContext;
   private final @Nullable String breakString;
 
   private final List<Object> result;
@@ -25,15 +22,13 @@ public class OutputBuilder {
   public OutputBuilder(
     ComponentConstructor componentConstructor,
     Interpreter interpreter,
-    SlotContext slotContext
+    SlotContext slotContext,
+    SlotContext resetContext
   ) {
     this.componentConstructor = componentConstructor;
-    this.interpreter = interpreter;
-    this.slotContext = slotContext;
-    this.chatContext = componentConstructor.getSlotContext(SlotType.CHAT);
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(slotContext, chatContext, componentConstructor, interpreter));
+    this.sequencesStack.push(ComponentSequence.initial(slotContext, resetContext, componentConstructor, interpreter));
     this.result = new ArrayList<>();
   }
 
@@ -43,16 +38,7 @@ public class OutputBuilder {
       return;
     }
 
-    List<MarkupNode> poppedNonTerminals = new ArrayList<>();
-
-    popAllSequencesAndAddToResult(poppedNonTerminals);
-
-    sequencesStack.push(ComponentSequence.initial(slotContext, chatContext, componentConstructor, interpreter));
-
-    int size;
-
-    while ((size = poppedNonTerminals.size()) != 0)
-      onNonTerminalBegin(poppedNonTerminals.remove(size - 1));
+    combineAllSequencesAndResult();
   }
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
@@ -73,27 +59,25 @@ public class OutputBuilder {
     return sequencesStack.peek().onTerminal(node, creationHandler);
   }
 
-  private void popAllSequencesAndAddToResult(@Nullable List<MarkupNode> nonTerminalCollector) {
-    while (!sequencesStack.isEmpty()) {
-      ComponentSequence sequence = sequencesStack.pop();
+  private void combineAllSequencesAndResult() {
+    for (int index = sequencesStack.size() - 1; index >= 0; --index) {
+      ComponentSequence sequence = sequencesStack.get(index);
 
-      if (sequence.nonTerminal != null && nonTerminalCollector != null)
-        nonTerminalCollector.add(sequence.nonTerminal);
+      if (index == 0) {
+        Object combineResult = sequence.combineAndClearMembers();
 
-      if (!sequencesStack.isEmpty()) {
-        sequencesStack.peek().addSequence(sequence);
-        continue;
+        if (combineResult != null)
+          result.add(combineResult);
+
+        break;
       }
 
-      Object combineResult = sequence.combine(componentConstructor);
-
-      if (combineResult != null)
-        result.add(combineResult);
+      sequencesStack.get(index - 1).addSequence(sequence);
     }
   }
 
   public List<Object> build() {
-    popAllSequencesAndAddToResult(null);
+    combineAllSequencesAndResult();
 
     if (result.isEmpty())
       result.add(componentConstructor.createTextNode(""));

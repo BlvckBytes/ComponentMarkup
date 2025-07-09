@@ -226,10 +226,11 @@ public class ComponentSequence {
     members.add(result);
 
     bufferedTexts.clear();
+    bufferedTextsStyle = null;
   }
 
   public void addSequence(ComponentSequence sequence) {
-    Object result = sequence.combine(componentConstructor);
+    Object result = sequence.combineAndClearMembers();
 
     if (result == null)
       return;
@@ -237,7 +238,7 @@ public class ComponentSequence {
     addMember(result, sequence.commonStyle);
   }
 
-  public void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
+  private void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null)
@@ -253,7 +254,7 @@ public class ComponentSequence {
     this.members.add(member);
   }
 
-  public @Nullable Object combine(ComponentConstructor componentConstructor) {
+  public @Nullable Object combineAndClearMembers() {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null || this.members.isEmpty())
@@ -277,12 +278,16 @@ public class ComponentSequence {
 
     possiblyUpdateCommonStyleToOnlyElement();
 
-    return applyNonTerminal(result);
+    applyNonTerminal(result);
+
+    members.clear();
+
+    return result;
   }
 
-  private Object applyNonTerminal(Object result) {
+  private void applyNonTerminal(Object result) {
     if (nonTerminal == null || nonTerminal instanceof ContainerNode)
-      return result;
+      return;
 
     if (nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminal;
@@ -341,21 +346,21 @@ public class ComponentSequence {
           LoggerProvider.get().log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
-      return result;
+      return;
     }
 
     if (nonTerminal instanceof InsertNode) {
       InsertNode insertNode = (InsertNode) nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
       componentConstructor.setInsertAction(result, value);
-      return result;
+      return;
     }
 
     if (nonTerminal instanceof AchievementHoverNode) {
       AchievementHoverNode achievementHoverNode = (AchievementHoverNode) nonTerminal;
       String value = interpreter.evaluateAsString(achievementHoverNode.value);
       componentConstructor.setHoverAchievementAction(result, value);
-      return result;
+      return;
     }
 
     if (nonTerminal instanceof EntityHoverNode) {
@@ -381,7 +386,7 @@ public class ComponentSequence {
         // TODO: Provide better message
         LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
       }
-      return result;
+      return;
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
@@ -423,7 +428,7 @@ public class ComponentSequence {
         hideProperties = interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
 
       componentConstructor.setHoverItemAction(result, material, count, name, lore, hideProperties);
-      return result;
+      return;
     }
 
     if (nonTerminal instanceof TextHoverNode) {
@@ -437,10 +442,8 @@ public class ComponentSequence {
       if (!components.isEmpty())
         componentConstructor.setHoverTextAction(result, components.get(0));
 
-      return result;
+      return;
     }
-
-    return result;
   }
 
   public static ComponentSequence initial(

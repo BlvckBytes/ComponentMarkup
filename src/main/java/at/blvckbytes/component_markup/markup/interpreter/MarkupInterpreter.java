@@ -26,12 +26,14 @@ public class MarkupInterpreter implements Interpreter {
   private final TemporaryMemberEnvironment environment;
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
+  private final SlotContext resetContext;
 
   private MarkupInterpreter(ComponentConstructor componentConstructor, InterpretationEnvironment baseEnvironment) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
+    this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
   }
 
   public static List<Object> interpret(
@@ -160,7 +162,7 @@ public class MarkupInterpreter implements Interpreter {
 
   @Override
   public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder(componentConstructor, this, slotContext));
+    builderStack.push(new OutputBuilder(componentConstructor, this, slotContext, resetContext));
     _interpret(node);
     return builderStack.pop().build();
   }
