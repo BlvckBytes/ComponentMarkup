@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TranslateNode extends TerminalNode {
+public class TranslateNode extends UnitNode {
 
   public final ExpressionNode key;
   public final MarkupList with;

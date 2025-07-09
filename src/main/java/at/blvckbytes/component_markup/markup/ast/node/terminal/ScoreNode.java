@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ScoreNode extends TerminalNode {
+public class ScoreNode extends UnitNode {
 
   public final ExpressionNode name;
   public final ExpressionNode objective;

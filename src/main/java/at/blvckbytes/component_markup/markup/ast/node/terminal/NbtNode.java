@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class NbtNode extends TerminalNode {
+public class NbtNode extends UnitNode {
 
   public final NbtSource source;
   public final ExpressionNode identifier;

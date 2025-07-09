@@ -3,16 +3,16 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 public abstract class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
 
@@ -49,7 +49,9 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     return state;
   }
 
-  protected abstract boolean handleTerminalAndGetIfDoProcess(TerminalNode node, ColorizeNodeState state, Interpreter interpreter);
+  protected abstract boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter interpreter);
+
+  protected abstract boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter);
 
   @Override
   public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
@@ -75,10 +77,15 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
           return InterceptionResult.DO_PROCESS;
       }
 
-      if (handleTerminalAndGetIfDoProcess(terminalNode, state, interpreter))
-        return InterceptionResult.DO_PROCESS;
+      if (node instanceof TextNode)
+        return handleTextAndGetIfDoProcess((TextNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
 
-      return InterceptionResult.DO_NOT_PROCESS;
+      if (node instanceof UnitNode) {
+        if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
+          return InterceptionResult.DO_PROCESS;
+
+        return handleUnitAndGetIfDoProcess((UnitNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+      }
     }
 
     return InterceptionResult.DO_PROCESS;
@@ -109,16 +116,5 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
 //      return;
 //
 //    state.discard();
-  }
-
-  protected void addInjected(ColorizeNodeState state, OutputBuilder builder, TerminalNode terminal) {
-    Object created = builder.onTerminal(terminal, DelayedCreationHandler.IMMEDIATE_SENTINEL);
-
-    if (created == null) {
-      LoggerProvider.get().log(Level.WARNING, "Received null-result from " + builder.getClass().getSimpleName() + "#onTerminal despite signalling immediate");
-      return;
-    }
-
-    state.addInjected(created);
   }
 }

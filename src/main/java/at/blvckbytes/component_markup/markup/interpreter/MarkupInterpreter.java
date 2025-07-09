@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
@@ -428,7 +429,12 @@ public class MarkupInterpreter implements Interpreter {
     // Terminal nodes always render, because since they do not bear any child-nodes,
     // the only sensible way to "toggle" them is via an if-condition
     if (node instanceof TerminalNode) {
-      builder.onTerminal((TerminalNode) node, DelayedCreationHandler.NONE_SENTINEL);
+      if (node instanceof UnitNode)
+        builder.onUnit((UnitNode) node);
+
+      else if (node instanceof TextNode)
+        builder.onText((TextNode) node, null, false);
+
       return introducedBindings;
     }
 

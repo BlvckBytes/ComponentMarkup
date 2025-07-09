@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class ComponentSequence {
@@ -32,7 +33,7 @@ public class ComponentSequence {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
-  private DelayedCreationHandler creationHandler;
+  private Consumer<Object> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
   private final @Nullable ComputedStyle effectiveStyle;
@@ -40,23 +41,12 @@ public class ComponentSequence {
 
   private @Nullable ComputedStyle commonStyle;
 
-  public @Nullable Object onTerminal(TerminalNode node, DelayedCreationHandler creationHandler) {
+  public Object onUnit(UnitNode node) {
     ComputedStyle style = makeChildSequence(node).styleToApply;
 
     Object result = null;
 
-    if (node instanceof TextNode) {
-      String text = ((TextNode) node).text;
-
-      if (creationHandler != DelayedCreationHandler.IMMEDIATE_SENTINEL) {
-        addBufferedText(text, style, creationHandler);
-        return null;
-      }
-
-      result = componentConstructor.createTextNode(text);
-    }
-
-    else if (node instanceof KeyNode) {
+    if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
       result = componentConstructor.createTextNode(key);
     }
@@ -153,7 +143,7 @@ public class ComponentSequence {
     }
 
     else
-      LoggerProvider.get().log(Level.WARNING, "Unknown terminal-node: " + node.getClass());
+      LoggerProvider.get().log(Level.WARNING, "Unknown unit-node: " + node.getClass());
 
     if (result == null)
       result = componentConstructor.createTextNode("<error>");
@@ -164,6 +154,27 @@ public class ComponentSequence {
     addMember(result, style);
 
     return result;
+  }
+
+  public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {
+    ComputedStyle style = makeChildSequence(node).styleToApply;
+
+    if (doNotBuffer) {
+      Object result = componentConstructor.createTextNode(node.text);
+
+      if (style != null)
+        style.applyStyles(result, componentConstructor);
+
+
+      addMember(result, style);
+
+      if (creationHandler != null)
+        creationHandler.accept(result);
+
+      return;
+    }
+
+    addBufferedText(node.text, style, creationHandler);
   }
 
   public void possiblyUpdateCommonStyleToOnlyElement() {
@@ -178,8 +189,8 @@ public class ComponentSequence {
     this.commonStyle.addMissing(this.styleToApply);
   }
 
-  public void addBufferedText(String text, @Nullable ComputedStyle style, DelayedCreationHandler creationHandler) {
-    this.creationHandler = creationHandler;
+  public void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
+    this.textCreationHandler = creationHandler;
 
     if (this.bufferedTexts == null)
       this.bufferedTexts = new ArrayList<>();
@@ -220,10 +231,10 @@ public class ComponentSequence {
     if (bufferedTextsStyle != null)
       bufferedTextsStyle.applyStyles(result, componentConstructor);
 
-    if (creationHandler != DelayedCreationHandler.NONE_SENTINEL)
-      creationHandler.handle(result);
-
     members.add(result);
+
+    if (textCreationHandler != null)
+      textCreationHandler.accept(result);
 
     bufferedTexts.clear();
     bufferedTextsStyle = null;
@@ -278,14 +289,14 @@ public class ComponentSequence {
 
     possiblyUpdateCommonStyleToOnlyElement();
 
-    applyNonTerminal(result);
+    applyKnownNonTerminal(result);
 
     members.clear();
 
     return result;
   }
 
-  private void applyNonTerminal(Object result) {
+  private void applyKnownNonTerminal(Object result) {
     if (nonTerminal == null || nonTerminal instanceof ContainerNode)
       return;
 
@@ -441,8 +452,6 @@ public class ComponentSequence {
 
       if (!components.isEmpty())
         componentConstructor.setHoverTextAction(result, components.get(0));
-
-      return;
     }
   }
 

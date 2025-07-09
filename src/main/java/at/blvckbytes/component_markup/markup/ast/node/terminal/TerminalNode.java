@@ -10,10 +10,7 @@ import java.util.List;
 
 public abstract class TerminalNode extends StyledNode implements ParserChildItem {
 
-  public TerminalNode(
-    CursorPosition position,
-    @Nullable List<LetBinding> letBindings
-  ) {
+  public TerminalNode(CursorPosition position, @Nullable List<LetBinding> letBindings) {
     super(position, null, letBindings);
   }
 }
