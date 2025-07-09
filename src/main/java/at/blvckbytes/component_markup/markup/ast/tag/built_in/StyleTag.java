@@ -63,6 +63,9 @@ public class StyleTag extends TagDefinition {
     if ((expression = attributes.getOptionalExpressionNode("shadow-opacity")) != null)
       style.shadowColorOpacity = expression;
 
+    if ((expression = attributes.getOptionalExpressionNode("reset")) != null)
+      style.reset = expression;
+
     return wrapper;
   }
 }

@@ -14,7 +14,6 @@ public abstract class MarkupNode {
 
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;
-  public boolean doesResetStyle;
 
   public final CursorPosition position;
 
@@ -36,15 +35,13 @@ public abstract class MarkupNode {
     if (other instanceof StyledNode) {
       NodeStyle otherStyle = ((StyledNode) other).getStyle();
 
-      if (otherStyle != null && otherStyle.hasEffect()) {
+      if (otherStyle != null && otherStyle.hasNonNullProperties()) {
         if (!(this instanceof StyledNode))
           return false;
 
         ((StyledNode) this).getOrInstantiateStyle().inheritFrom(otherStyle, other.useCondition);
       }
     }
-
-    this.doesResetStyle |= other.doesResetStyle;
 
     if (other.ifCondition != null) {
       if (this.ifCondition == null)

@@ -2,26 +2,22 @@ package at.blvckbytes.component_markup.markup.ast.node.style;
 
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
 
 public class NodeStyle {
 
   private static final TerminalNode NULL_TERMINAL = new TerminalNode(new NullToken(0, "null"));
 
-  public final @Nullable ExpressionNode[] formatStates;
+  private @Nullable ExpressionNode @Nullable [] formatStates;
   public @Nullable ExpressionNode color;
   public @Nullable ExpressionNode shadowColor;
   public @Nullable ExpressionNode shadowColorOpacity;
   public @Nullable ExpressionNode font;
-
-  public NodeStyle() {
-    this.formatStates = new ExpressionNode[Format.VALUES.size()];
-    this.reset();
-  }
+  public @Nullable ExpressionNode reset;
 
   public void inheritFrom(NodeStyle other, @Nullable ExpressionNode condition) {
     ExpressionNode otherValue;
@@ -54,45 +50,58 @@ public class NodeStyle {
       this.font = otherValue;
     }
 
-    for (Format format : Format.VALUES) {
-      ExpressionNode thisFormatState = this.formatStates[format.ordinal()];
+    if (other.reset != null)
+      this.reset = inheritFlagWithCondition(this.reset, other.reset, condition);
 
-      if (thisFormatState != null)
-        continue;
+    if (other.formatStates != null) {
+      for (Format format : Format.VALUES) {
+        otherValue = other.getFormat(format);
 
-      otherValue = other.formatStates[format.ordinal()];
+        ExpressionNode thisFormatState = getFormat(format);
 
-      if (otherValue == null)
-        continue;
-
-      if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, null);
-
-      this.formatStates[format.ordinal()] = otherValue;
+        setFormat(format, inheritFlagWithCondition(thisFormatState, otherValue, condition));
+      }
     }
   }
 
-  public boolean hasEffect() {
-    if (this.font != null || this.color != null || this.shadowColor != null || this.shadowColorOpacity != null)
+  private static @Nullable ExpressionNode inheritFlagWithCondition(@Nullable ExpressionNode thisValue, @Nullable ExpressionNode otherValue, @Nullable ExpressionNode otherCondition) {
+    if (otherValue == null)
+      return thisValue;
+
+    if (otherCondition != null)
+      otherValue = new BranchingNode(otherCondition, otherValue, NULL_TERMINAL);
+
+    if (thisValue == null)
+      return otherValue;
+
+    return new InfixOperationNode(thisValue, InfixOperator.DISJUNCTION, otherValue, null);
+  }
+
+  public boolean hasNonNullProperties() {
+    if (this.font != null || this.color != null || this.shadowColor != null || this.shadowColorOpacity != null || this.reset != null)
       return true;
 
-    for (ExpressionNode formatState : formatStates) {
-      if (formatState != null)
-        return true;
+    if (this.formatStates != null) {
+      for (ExpressionNode formatState : formatStates) {
+        if (formatState != null)
+          return true;
+      }
     }
 
     return false;
   }
 
-  public void setFormat(Format formatting, ExpressionNode value) {
-    formatStates[formatting.ordinal()] = value;
+  public void setFormat(Format format, ExpressionNode value) {
+    if (this.formatStates == null)
+      this.formatStates = new ExpressionNode[Format.COUNT];
+
+    this.formatStates[format.ordinal()] = value;
   }
 
-  public void reset() {
-    Arrays.fill(formatStates, null);
-    this.color = null;
-    this.shadowColor = null;
-    this.shadowColorOpacity = null;
-    this.font = null;
+  public @Nullable ExpressionNode getFormat(Format format) {
+    if (this.formatStates == null)
+      return null;
+
+    return this.formatStates[format.ordinal()];
   }
 }

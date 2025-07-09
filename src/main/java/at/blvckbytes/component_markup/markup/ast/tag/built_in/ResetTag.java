@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -29,7 +30,7 @@ public class ResetTag extends TagDefinition {
     @Nullable List<MarkupNode> children
   ) {
     ContainerNode result = new ContainerNode(position, children, letBindings);
-    result.doesResetStyle = true;
+    result.getOrInstantiateStyle().reset = ImmediateExpression.of(true);
     return result;
   }
 }

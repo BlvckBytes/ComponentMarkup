@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
@@ -65,26 +66,27 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
       return InterceptionResult.DO_PROCESS_AND_CALL_AFTER;
     }
 
-    if (node.doesResetStyle)
-      return InterceptionResult.DO_PROCESS;
+    if (node instanceof StyledNode) {
+      NodeStyle nodeStyle = ((StyledNode) node).getStyle();
 
-    if (node instanceof TerminalNode) {
-      TerminalNode terminalNode = (TerminalNode) node;
-      NodeStyle nodeStyle = terminalNode.getStyle();
+      if (nodeStyle != null && nodeStyle.reset != null && interpreter.evaluateAsBoolean(nodeStyle.reset))
+        return InterceptionResult.DO_PROCESS;
 
-      if (nodeStyle != null) {
-        if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsPlainObject(nodeStyle.color) != null)
-          return InterceptionResult.DO_PROCESS;
-      }
+      if (node instanceof TerminalNode) {
+        if (nodeStyle != null) {
+          if (!state.flags.contains(ColorizeFlag.OVERRIDE_COLORS) && nodeStyle.color != null && interpreter.evaluateAsPlainObject(nodeStyle.color) != null)
+            return InterceptionResult.DO_PROCESS;
+        }
 
-      if (node instanceof TextNode)
-        return handleTextAndGetIfDoProcess((TextNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+        if (node instanceof TextNode)
+          return handleTextAndGetIfDoProcess((TextNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
 
-      if (node instanceof UnitNode) {
-        if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
-          return InterceptionResult.DO_PROCESS;
+        if (node instanceof UnitNode) {
+          if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
+            return InterceptionResult.DO_PROCESS;
 
-        return handleUnitAndGetIfDoProcess((UnitNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+          return handleUnitAndGetIfDoProcess((UnitNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+        }
       }
     }
 

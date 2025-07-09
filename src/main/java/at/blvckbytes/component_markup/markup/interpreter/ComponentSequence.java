@@ -487,7 +487,7 @@ public class ComponentSequence {
       // Add explicit properties to invert unwanted inherited style
       // By definition, a reset means resetting to chat-state; thus,
       // that's the context to get defaults from
-      if (styleProvider != null && styleProvider.doesResetStyle) {
+      if (childStyle != null && childStyle.reset) {
         ComputedStyle mask = inheritedStyle.copy().subtractEqualStyles(childStyle);
 
         if (styleToApply == null)

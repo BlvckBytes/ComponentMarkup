@@ -18,6 +18,7 @@ public class ComputedStyle {
   public long packedShadowColor = PackedColor.NULL_SENTINEL;
   public @Nullable String font;
   public int formats;
+  public boolean reset;
 
   public ComputedStyle() {}
 
@@ -25,12 +26,12 @@ public class ComputedStyle {
   public boolean equals(Object o) {
     if (!(o instanceof ComputedStyle)) return false;
     ComputedStyle that = (ComputedStyle) o;
-    return packedColor == that.packedColor && packedShadowColor == that.packedShadowColor && formats == that.formats && Objects.equals(font, that.font);
+    return packedColor == that.packedColor && packedShadowColor == that.packedShadowColor && formats == that.formats && reset == that.reset && Objects.equals(font, that.font);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(packedColor, packedShadowColor, font, formats);
+    return Objects.hash(packedColor, packedShadowColor, font, reset, formats);
   }
 
   public ComputedStyle setFormat(Format format, TriState value) {
@@ -227,6 +228,7 @@ public class ComputedStyle {
     result.packedShadowColor = this.packedShadowColor;
     result.font = this.font;
     result.formats = this.formats;
+    result.reset = this.reset;
     return result;
   }
 
@@ -276,8 +278,11 @@ public class ComputedStyle {
     if (style.font != null)
       this.font = interpreter.evaluateAsStringOrNull(style.font);
 
-    for (int index = 0; index < Format.COUNT; ++index) {
-      ExpressionNode formatExpression = style.formatStates[index];
+    if (style.reset != null)
+      this.reset = interpreter.evaluateAsBoolean(style.reset);
+
+    for (Format format : Format.VALUES) {
+      ExpressionNode formatExpression = style.getFormat(format);
 
       if (formatExpression == null)
         continue;
@@ -287,7 +292,7 @@ public class ComputedStyle {
       if (value == TriState.NULL)
         continue;
 
-      this.formats = TriStateBitFlags.write(this.formats, index, value);
+      this.formats = TriStateBitFlags.write(this.formats, format.ordinal(), value);
     }
   }
 
