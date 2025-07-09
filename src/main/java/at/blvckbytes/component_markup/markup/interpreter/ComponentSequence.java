@@ -48,7 +48,7 @@ public class ComponentSequence {
 
     if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
-      result = componentConstructor.createTextNode(key);
+      result = componentConstructor.createKeyNode(key);
     }
 
     else if (node instanceof ScoreNode) {

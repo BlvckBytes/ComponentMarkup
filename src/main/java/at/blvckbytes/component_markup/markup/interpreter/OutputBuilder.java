@@ -87,6 +87,8 @@ public class OutputBuilder {
     if (result.isEmpty())
       result.add(componentConstructor.createTextNode(""));
 
+    sequencesStack.clear();
+
     return result;
   }
 }
