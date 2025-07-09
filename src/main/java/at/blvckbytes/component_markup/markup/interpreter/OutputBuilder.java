@@ -140,6 +140,7 @@ public class OutputBuilder {
             URI uri = URI.create(urlValue);
             componentConstructor.setClickOpenUrlAction(sequenceComponent, uri);
           } catch (Throwable e) {
+            // TODO: Provide better message
             LoggerProvider.get().log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
           }
 
@@ -183,6 +184,7 @@ public class OutputBuilder {
         UUID uuid = UUID.fromString(id);
         componentConstructor.setHoverEntityAction(sequenceComponent, type, uuid, name);
       } catch (Throwable e) {
+        // TODO: Provide better message
         LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
       }
     }
@@ -220,7 +222,12 @@ public class OutputBuilder {
         );
       }
 
-      componentConstructor.setHoverItemAction(sequenceComponent, material, count, name, lore);
+      boolean hideProperties = false;
+
+      if (itemHoverNode.hideProperties != null)
+        hideProperties = interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
+
+      componentConstructor.setHoverItemAction(sequenceComponent, material, count, name, lore, hideProperties);
     }
 
     else if (sequence.nonTerminal instanceof TextHoverNode) {

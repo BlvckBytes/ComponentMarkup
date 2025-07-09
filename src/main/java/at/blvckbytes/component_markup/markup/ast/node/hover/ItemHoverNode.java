@@ -14,12 +14,14 @@ public class ItemHoverNode extends HoverNode {
   public final @Nullable ExpressionNode amount;
   public final @Nullable MarkupNode name;
   public final @Nullable MarkupNode lore;
+  public final @Nullable ExpressionNode hideProperties;
 
   public ItemHoverNode(
     @Nullable ExpressionNode material,
     @Nullable ExpressionNode amount,
     @Nullable MarkupNode name,
     @Nullable MarkupNode lore,
+    @Nullable ExpressionNode hideProperties,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable List<LetBinding> letBindings
@@ -30,5 +32,6 @@ public class ItemHoverNode extends HoverNode {
     this.amount = amount;
     this.name = name;
     this.lore = lore;
+    this.hideProperties = hideProperties;
   }
 }

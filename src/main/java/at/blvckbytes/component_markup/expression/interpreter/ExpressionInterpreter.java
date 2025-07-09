@@ -299,6 +299,7 @@ public class ExpressionInterpreter {
     Field field = publicFieldsByClass.computeIfAbsent(source.getClass(), PublicFieldMap::new).locateField(stringKey);
 
     if (field == null) {
+      // TODO: Provide better message
       LoggerProvider.get().log(Level.WARNING, "Could not locate field " + stringKey);
       return null;
     }

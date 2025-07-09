@@ -21,7 +21,8 @@ public class TerminalNode extends ExpressionNode {
       String variableName = (String) token.getPlainValue();
 
       if (!environment.doesVariableExist(variableName)) {
-        LoggerProvider.get().log(Level.WARNING, "Could not access variable " + variableName);
+        // TODO: Provide better message
+        LoggerProvider.get().log(Level.WARNING, "Could not locate variable " + variableName);
         return null;
       }
 

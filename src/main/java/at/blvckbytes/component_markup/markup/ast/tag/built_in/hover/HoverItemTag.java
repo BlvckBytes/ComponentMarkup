@@ -28,6 +28,7 @@ public class HoverItemTag extends HoverTag {
       attributes.getOptionalExpressionNode("amount"),
       attributes.getOptionalMarkupNode("name"),
       attributes.getOptionalMarkupNode("lore"),
+      attributes.getOptionalExpressionNode("hide-properties"),
       position, children, letBindings
     );
   }

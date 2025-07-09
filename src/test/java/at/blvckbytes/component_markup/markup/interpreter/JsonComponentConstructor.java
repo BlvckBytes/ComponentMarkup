@@ -166,7 +166,14 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setHoverItemAction(Object component, @Nullable String material, @Nullable Integer count, @Nullable Object name, @Nullable List<Object> lore) {
+  public void setHoverItemAction(
+    Object component,
+    @Nullable String material,
+    @Nullable Integer count,
+    @Nullable Object name,
+    @Nullable List<Object> lore,
+    boolean hideFlags
+  ) {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();
 
@@ -175,6 +182,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
 
     if (count != null)
       contentsObject.addProperty("count", count);
+
+    contentsObject.addProperty("hideFlags", hideFlags);
 
     if (name != null || lore != null) {
       JsonObject tagObject = new JsonObject();
