@@ -178,10 +178,6 @@ public class ComponentSequence {
     this.commonStyle.addMissing(this.styleToApply);
   }
 
-  public @Nullable ComputedStyle getCommonStyle() {
-    return commonStyle;
-  }
-
   public void addBufferedText(String text, @Nullable ComputedStyle style, DelayedCreationHandler creationHandler) {
     this.creationHandler = creationHandler;
 
@@ -232,6 +228,15 @@ public class ComponentSequence {
     bufferedTexts.clear();
   }
 
+  public void addSequence(ComponentSequence sequence) {
+    Object result = sequence.combine(componentConstructor);
+
+    if (result == null)
+      return;
+
+    addMember(result, sequence.commonStyle);
+  }
+
   public void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
     concatAndInstantiateBufferedTexts();
 
@@ -264,9 +269,7 @@ public class ComponentSequence {
     }
 
     if (styleToApply != null) {
-      ComputedStyle commonStyle;
-
-      if ((commonStyle = getCommonStyle()) != null)
+      if (commonStyle != null)
         styleToApply.subtractCommonStyles(commonStyle);
 
       styleToApply.applyStyles(result, componentConstructor);

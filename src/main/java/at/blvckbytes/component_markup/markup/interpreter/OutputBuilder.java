@@ -66,17 +66,7 @@ public class OutputBuilder {
     }
 
     ComponentSequence sequence = sequencesStack.pop();
-    Object item = combineSequence(sequence);
-    sequencesStack.peek().addMember(item, sequence.getCommonStyle());
-  }
-
-  private Object combineSequence(ComponentSequence sequence) {
-    Object sequenceComponent = sequence.combine(componentConstructor);
-
-    if (sequenceComponent == null)
-      sequenceComponent = componentConstructor.createTextNode("");
-
-    return sequenceComponent;
+    sequencesStack.peek().addSequence(sequence);
   }
 
   public @Nullable Object onTerminal(TerminalNode node, DelayedCreationHandler creationHandler) {
@@ -90,14 +80,15 @@ public class OutputBuilder {
       if (sequence.nonTerminal != null && nonTerminalCollector != null)
         nonTerminalCollector.add(sequence.nonTerminal);
 
-      Object sequenceComponent = combineSequence(sequence);
-
       if (!sequencesStack.isEmpty()) {
-        sequencesStack.peek().addMember(sequenceComponent, sequence.getCommonStyle());
+        sequencesStack.peek().addSequence(sequence);
         continue;
       }
 
-      result.add(sequenceComponent);
+      Object combineResult = sequence.combine(componentConstructor);
+
+      if (combineResult != null)
+        result.add(combineResult);
     }
   }
 
