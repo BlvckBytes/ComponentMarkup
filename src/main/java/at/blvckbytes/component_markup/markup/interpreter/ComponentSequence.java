@@ -167,7 +167,6 @@ public class ComponentSequence {
       if (style != null)
         style.applyStyles(result, componentConstructor);
 
-
       addMember(result, style);
 
       if (creationHandler != null)
@@ -211,14 +210,11 @@ public class ComponentSequence {
     if (bufferedTexts == null || bufferedTexts.isEmpty())
       return;
 
-    int unstyledCount = bufferedTexts.size();
-
-    if (this.members == null)
-      this.members = new ArrayList<>();
+    int bufferSize = bufferedTexts.size();
 
     Object result;
 
-    if (unstyledCount == 1)
+    if (bufferSize == 1)
       result = componentConstructor.createTextNode(bufferedTexts.get(0));
 
     else {
@@ -233,13 +229,14 @@ public class ComponentSequence {
     if (bufferedTextsStyle != null)
       bufferedTextsStyle.applyStyles(result, componentConstructor);
 
-    members.add(result);
+    bufferedTexts.clear();
+
+    addMember(result, bufferedTextsStyle);
+
+    bufferedTextsStyle = null;
 
     if (textCreationHandler != null)
       textCreationHandler.accept(result);
-
-    bufferedTexts.clear();
-    bufferedTextsStyle = null;
   }
 
   public void addSequence(ComponentSequence sequence) {
