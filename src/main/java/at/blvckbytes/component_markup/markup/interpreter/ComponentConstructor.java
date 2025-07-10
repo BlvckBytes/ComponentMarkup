@@ -39,7 +39,7 @@ public interface ComponentConstructor {
   // Click-Action
   // ================================================================================
 
-  void setClickChangePageAction(Object component, int value);
+  void setClickChangePageAction(Object component, String value);
 
   void setClickCopyToClipboardAction(Object component, String value);
 

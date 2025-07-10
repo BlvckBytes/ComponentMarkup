@@ -28,7 +28,9 @@ public class ComponentSequence {
   private final SlotContext resetContext;
   private final Interpreter interpreter;
   private final ComponentConstructor componentConstructor;
-  public final @Nullable MarkupNode nonTerminal;
+
+  private final @Nullable Consumer<Object> applyKnownNonTerminal;
+
   private @Nullable List<Object> members;
 
   private @Nullable List<String> bufferedTexts;
@@ -289,89 +291,70 @@ public class ComponentSequence {
 
     possiblyUpdateCommonStyleToOnlyElement();
 
-    applyKnownNonTerminal(result);
+    if (applyKnownNonTerminal != null)
+      applyKnownNonTerminal.accept(result);
 
     members.clear();
 
     return result;
   }
 
-  private void applyKnownNonTerminal(Object result) {
+  private @Nullable Consumer<Object> makeKnownNonTerminalClosure(MarkupNode nonTerminal) {
     if (nonTerminal == null || nonTerminal instanceof ContainerNode)
-      return;
+      return null;
 
     if (nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminal;
 
+      String value = interpreter.evaluateAsString(clickNode.value);
+
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
-          componentConstructor.setClickCopyToClipboardAction(
-            result,
-            interpreter.evaluateAsString(clickNode.value)
-          );
-          break;
+          return result -> componentConstructor.setClickCopyToClipboardAction(result, value);
 
         case SUGGEST_COMMAND:
-          componentConstructor.setClickSuggestCommandAction(
-            result,
-            interpreter.evaluateAsString(clickNode.value)
-          );
-          break;
+          return result -> componentConstructor.setClickSuggestCommandAction(result, value);
 
         case RUN_COMMAND:
-          componentConstructor.setClickRunCommandAction(
-            result,
-            interpreter.evaluateAsString(clickNode.value)
-          );
-          break;
+          return result -> componentConstructor.setClickRunCommandAction(result, value);
 
         case CHANGE_PAGE:
-          componentConstructor.setClickChangePageAction(
-            result,
-            (int) interpreter.evaluateAsLong(clickNode.value)
-          );
-          break;
+          return result -> componentConstructor.setClickChangePageAction(result, value);
 
         case OPEN_FILE:
-          componentConstructor.setClickOpenFileAction(
-            result,
-            interpreter.evaluateAsString(clickNode.value)
-          );
-          break;
+          return result -> componentConstructor.setClickOpenFileAction(result, value);
 
         case OPEN_URL: {
           String urlValue = interpreter.evaluateAsString(clickNode.value);
 
           try {
             URI uri = URI.create(urlValue);
-            componentConstructor.setClickOpenUrlAction(result, uri);
+            return result -> componentConstructor.setClickOpenUrlAction(result, uri);
           } catch (Throwable e) {
             // TODO: Provide better message
             LoggerProvider.get().log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
           }
 
-          break;
+          return null;
         }
 
         default:
           LoggerProvider.get().log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
-      return;
+      return null;
     }
 
     if (nonTerminal instanceof InsertNode) {
       InsertNode insertNode = (InsertNode) nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
-      componentConstructor.setInsertAction(result, value);
-      return;
+      return result -> componentConstructor.setInsertAction(result, value);
     }
 
     if (nonTerminal instanceof AchievementHoverNode) {
       AchievementHoverNode achievementHoverNode = (AchievementHoverNode) nonTerminal;
       String value = interpreter.evaluateAsString(achievementHoverNode.value);
-      componentConstructor.setHoverAchievementAction(result, value);
-      return;
+      return result -> componentConstructor.setHoverAchievementAction(result, value);
     }
 
     if (nonTerminal instanceof EntityHoverNode) {
@@ -379,7 +362,7 @@ public class ComponentSequence {
       String type = interpreter.evaluateAsString(entityHoverNode.type);
       String id = interpreter.evaluateAsString(entityHoverNode.id);
 
-      Object name = null;
+      Object name;
 
       if (entityHoverNode.name != null) {
         List<Object> components = interpreter.interpretSubtree(
@@ -389,31 +372,38 @@ public class ComponentSequence {
 
         name = components.isEmpty() ? null : components.get(0);
       }
+      else
+        name = null;
 
       try {
         UUID uuid = UUID.fromString(id);
-        componentConstructor.setHoverEntityAction(result, type, uuid, name);
+        return result -> componentConstructor.setHoverEntityAction(result, type, uuid, name);
       } catch (Throwable e) {
         // TODO: Provide better message
         LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
       }
-      return;
+
+      return null;
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
       ItemHoverNode itemHoverNode = (ItemHoverNode) nonTerminal;
 
-      String material = null;
+      String material;
 
       if (itemHoverNode.material != null)
         material = interpreter.evaluateAsStringOrNull(itemHoverNode.material);
+      else
+        material = null;
 
-      Integer count = null;
+      Integer count;
 
       if (itemHoverNode.amount != null)
         count = (int) interpreter.evaluateAsLong(itemHoverNode.amount);
+      else
+        count = null;
 
-      Object name = null;
+      Object name;
 
       if (itemHoverNode.name != null) {
         List<Object> components = interpreter.interpretSubtree(
@@ -422,24 +412,27 @@ public class ComponentSequence {
         );
 
         name = components.isEmpty() ? null : components.get(0);
-      }
+      } else
+        name = null;
 
-      List<Object> lore = null;
+      List<Object> lore;
 
       if (itemHoverNode.lore != null) {
         lore = interpreter.interpretSubtree(
           itemHoverNode.lore,
           componentConstructor.getSlotContext(SlotType.ITEM_LORE)
         );
-      }
+      } else
+        lore = null;
 
-      boolean hideProperties = false;
+      boolean hideProperties;
 
       if (itemHoverNode.hideProperties != null)
         hideProperties = interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
+      else
+        hideProperties = false;
 
-      componentConstructor.setHoverItemAction(result, material, count, name, lore, hideProperties);
-      return;
+      return result -> componentConstructor.setHoverItemAction(result, material, count, name, lore, hideProperties);
     }
 
     if (nonTerminal instanceof TextHoverNode) {
@@ -451,8 +444,10 @@ public class ComponentSequence {
       );
 
       if (!components.isEmpty())
-        componentConstructor.setHoverTextAction(result, components.get(0));
+        return result -> componentConstructor.setHoverTextAction(result, components.get(0));
     }
+
+    return null;
   }
 
   public static ComponentSequence initial(
@@ -514,12 +509,15 @@ public class ComponentSequence {
     this.parentSequence = parentSequence;
     this.slotContext = slotContext;
     this.resetContext = resetContext;
-    this.nonTerminal = nonTerminal;
     this.members = new ArrayList<>();
     this.computedStyle = computedStyle;
     this.effectiveStyle = effectiveStyle;
     this.styleToApply = styleToApply;
     this.componentConstructor = componentConstructor;
     this.interpreter = interpreter;
+
+    // Captures the required environment-variable values at the time of entering this tag
+    // and also makes applying this exact same non-terminal again reusable.
+    this.applyKnownNonTerminal = makeKnownNonTerminalClosure(nonTerminal);
   }
 }

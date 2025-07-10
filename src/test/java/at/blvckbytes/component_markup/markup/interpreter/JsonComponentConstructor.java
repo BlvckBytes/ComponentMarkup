@@ -123,8 +123,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setClickChangePageAction(Object component, int value) {
-    setClickAction(component, "change_page", String.valueOf(value));
+  public void setClickChangePageAction(Object component, String value) {
+    setClickAction(component, "change_page", value);
   }
 
   @Override
