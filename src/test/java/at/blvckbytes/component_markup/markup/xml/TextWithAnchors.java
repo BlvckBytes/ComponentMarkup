@@ -18,6 +18,9 @@ public class TextWithAnchors {
     this.anchors = new ArrayList<>();
     this.auxAnchors = new ArrayList<>();
 
+    List<CursorPosition> anchorPositions = new ArrayList<>();
+    List<CursorPosition> auxAnchorPositions = new ArrayList<>();
+
     StringBuilder result = new StringBuilder();
     int lineNumber = 1, columnNumber = 1, charIndex = 0;
 
@@ -28,7 +31,7 @@ public class TextWithAnchors {
         char currentChar = line.charAt(lineCharIndex);
         boolean isEscaped = lineCharIndex != 0 && line.charAt(lineCharIndex - 1) == '\\';
 
-        CursorPositionEvent event = new CursorPositionEvent(new CursorPosition(charIndex + 1, lineNumber, columnNumber));
+        CursorPosition position = new CursorPosition(charIndex + 1, lineNumber, columnNumber, null);
 
         if (currentChar == '@') {
           if (isEscaped) {
@@ -38,7 +41,7 @@ public class TextWithAnchors {
           }
 
           else {
-            this.anchors.add(event);
+            anchorPositions.add(position);
             continue;
           }
         }
@@ -51,7 +54,7 @@ public class TextWithAnchors {
           }
 
           else {
-            this.auxAnchors.add(event);
+            auxAnchorPositions.add(position);
             continue;
           }
         }
@@ -79,6 +82,28 @@ public class TextWithAnchors {
     }
 
     this.text = result.toString();
+
+    for (CursorPosition anchorPosition : anchorPositions) {
+      this.anchors.add(new CursorPositionEvent(
+        new CursorPosition(
+          anchorPosition.nextCharIndex,
+          anchorPosition.lineNumber,
+          anchorPosition.columnNumber,
+          this.text
+        )
+      ));
+    }
+
+    for (CursorPosition auxAnchorPosition : auxAnchorPositions) {
+      this.auxAnchors.add(new CursorPositionEvent(
+        new CursorPosition(
+          auxAnchorPosition.nextCharIndex,
+          auxAnchorPosition.lineNumber,
+          auxAnchorPosition.columnNumber,
+          this.text
+        )
+      ));
+    }
   }
 
   public int getAnchorCount() {

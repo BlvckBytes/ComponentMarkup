@@ -48,7 +48,7 @@ public class InputCursor {
   }
 
   public CursorPosition getPosition() {
-    return new CursorPosition(nextCharIndex, lineNumber, columnNumber);
+    return new CursorPosition(nextCharIndex, lineNumber, columnNumber, input);
   }
 
   public void restoreState(CursorPosition position) {

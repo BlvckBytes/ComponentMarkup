@@ -945,7 +945,7 @@ public class MarkupInterpreterTests {
     try {
       actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
     } catch (MarkupParseException e) {
-      System.out.println(String.join("\n", e.makeErrorScreen(input.text)));
+      System.out.println(String.join("\n", e.makeErrorScreen()));
       Assertions.fail("Threw an error:", e);
       return;
     }

@@ -25,6 +25,10 @@ import java.util.*;
 
 public abstract class MarkupParserTestsBase {
 
+  protected static CursorPosition zeroCursor(TextWithAnchors input) {
+    return new CursorPosition(0, 0, 0, input.text);
+  }
+
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
     return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
   }

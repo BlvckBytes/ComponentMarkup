@@ -38,10 +38,6 @@ public class MarkupParser implements XmlEventConsumer {
   private @Nullable MarkupParser subtreeParser;
   private MarkupNode result;
 
-  private MarkupParser(TagRegistry tagRegistry) {
-    this(tagRegistry, CursorPosition.ZERO);
-  }
-
   private MarkupParser(TagRegistry tagRegistry, CursorPosition initialPosition) {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
@@ -425,7 +421,9 @@ public class MarkupParser implements XmlEventConsumer {
   // ================================================================================
 
   public static MarkupNode parse(String input, TagRegistry tagRegistry) {
-    MarkupParser parser = new MarkupParser(tagRegistry);
+    // The initial position, which will also be applied to the outermost implicit
+    // container, is the zero-sentinel (unreachable by user-input)
+    MarkupParser parser = new MarkupParser(tagRegistry, new CursorPosition(0, 0, 0, input));
 
     try {
       XmlEventParser.parse(input, parser);

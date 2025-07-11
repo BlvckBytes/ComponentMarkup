@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(text("before", text.anchor(0)))
         .child(
           text("if contents", text.anchor(1))
@@ -133,7 +132,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(text("before", text.anchor(0)))
         .child(
           ifElseIfElse(
@@ -168,7 +167,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(text("before", text.anchor(0)))
         .child(
           ifElseIfElse(
@@ -209,7 +208,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(text("before", text.anchor(0)))
         .child(
           when(
@@ -306,7 +305,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(
           text("hello", text.anchor(0))
             .color("aqua")
@@ -345,7 +344,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(CursorPosition.ZERO)
+      container(zeroCursor(text))
         .child(
           text("hello", text.anchor(0))
             .color("red")

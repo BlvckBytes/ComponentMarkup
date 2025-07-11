@@ -78,16 +78,16 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     return charIndex;
   }
 
-  public List<String> makeErrorScreen(String input) {
+  public List<String> makeErrorScreen() {
     List<String> result = new ArrayList<>();
 
-    int inputLength = input.length();
+    int inputLength = position.input.length();
     int targetCharIndex = getCharIndex();
 
     int lineCounter = 1;
 
     for (int index = 0; index < inputLength; ++index) {
-      if (input.charAt(index) == '\n')
+      if (position.input.charAt(index) == '\n')
         ++lineCounter;
     }
 
@@ -97,7 +97,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
-      char currentChar = input.charAt(index);
+      char currentChar = position.input.charAt(index);
 
       if (currentChar == '\r')
         continue;
@@ -109,7 +109,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
           ++index;
 
         String lineNumber = String.format("%0" + maxLineNumberDigits + "d", nextLineNumber++) + ": ";
-        String lineContents = input.substring(lineBegin, index);
+        String lineContents = position.input.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
 

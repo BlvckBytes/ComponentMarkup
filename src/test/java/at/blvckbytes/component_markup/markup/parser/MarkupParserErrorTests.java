@@ -720,7 +720,7 @@ public class MarkupParserErrorTests {
       () -> MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE)
     );
 
-    List<String> screenLines = exception.makeErrorScreen(input.text);
+    List<String> screenLines = exception.makeErrorScreen();
     Assertions.assertEquals(screen.text, String.join("\n", screenLines));
   }
 

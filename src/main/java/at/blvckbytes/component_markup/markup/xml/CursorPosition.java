@@ -2,17 +2,13 @@ package at.blvckbytes.component_markup.markup.xml;
 
 public class CursorPosition {
 
-  public static final CursorPosition ZERO = new CursorPosition(0, 0, 0);
-
   public final int nextCharIndex, lineNumber, columnNumber;
+  public final String input;
 
-  public CursorPosition(
-    int nextCharIndex,
-    int lineNumber,
-    int columnNumber
-  ) {
+  public CursorPosition(int nextCharIndex, int lineNumber, int columnNumber, String input) {
     this.nextCharIndex = nextCharIndex;
     this.lineNumber = lineNumber;
     this.columnNumber = columnNumber;
+    this.input = input;
   }
 }
