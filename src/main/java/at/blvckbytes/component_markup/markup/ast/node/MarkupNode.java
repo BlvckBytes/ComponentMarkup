@@ -15,7 +15,7 @@ public abstract class MarkupNode {
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;
 
-  public final CursorPosition position;
+  public CursorPosition position;
 
   public @Nullable List<MarkupNode> children;
   public @Nullable List<LetBinding> letBindings;

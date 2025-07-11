@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.util.TriState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -97,9 +98,11 @@ public interface ComponentConstructor {
   void setItalicFormat(Object component, TriState value);
 
   // ================================================================================
-  // Miscellaneous
+  // Children
   // ================================================================================
 
   void setChildren(Object component, List<Object> children);
+
+  @NotNull List<Object> getChildren(Object component);
 
 }

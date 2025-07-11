@@ -178,6 +178,10 @@ public class ComponentSequence {
     addBufferedText(node.text, style, creationHandler);
   }
 
+  public void emitComponent(Object component) {
+    addMember(component, null);
+  }
+
   public void possiblyUpdateCommonStyleToOnlyElement() {
     if (members == null || members.size() != 1)
       return;
@@ -239,13 +243,14 @@ public class ComponentSequence {
       textCreationHandler.accept(result);
   }
 
-  public void addSequence(ComponentSequence sequence) {
+  public Object addSequence(ComponentSequence sequence) {
     Object result = sequence.combineAndClearMembers();
 
     if (result == null)
-      return;
+      return null;
 
     addMember(result, sequence.commonStyle);
+    return result;
   }
 
   private void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {

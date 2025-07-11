@@ -322,8 +322,10 @@ public class MarkupInterpreter implements Interpreter {
 
       _interpret(node.body);
 
-      if (introducedNames != null)
-        environment.popVariables(introducedNames);
+      if (introducedNames != null) {
+        for (String introducedName : introducedNames)
+          environment.popVariable(introducedName);
+      }
     }
 
     if (node.iterationVariable != null)
@@ -347,17 +349,16 @@ public class MarkupInterpreter implements Interpreter {
     // Interceptors are what establish additional behaviour, thus do not invoke all
     // of their call-sites in this method if the current node itself is not to be used
     if (!doNotUse) {
-      if (node instanceof InterpreterInterceptor)
-        interceptors.add((InterpreterInterceptor) node);
-
       if (interceptors.handleBeforeAndGetIfSkip(node))
         return;
     }
 
     Set<String> introducedBindings = __interpret(node);
 
-    if (introducedBindings != null)
-      environment.popVariables(introducedBindings);
+    if (introducedBindings != null) {
+      for (String introducedBinding : introducedBindings)
+        environment.popVariable(introducedBinding);
+    }
 
     if (!doNotUse)
       interceptors.handleAfter(node);

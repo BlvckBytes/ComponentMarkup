@@ -46,14 +46,15 @@ public class OutputBuilder {
     sequencesStack.push(sequencesStack.peek().makeChildSequence(nonTerminal));
   }
 
-  public void onNonTerminalEnd() {
+  @SuppressWarnings("UnusedReturnValue")
+  public @Nullable Object onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
       LoggerProvider.get().log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
-      return;
+      return null;
     }
 
     ComponentSequence sequence = sequencesStack.pop();
-    sequencesStack.peek().addSequence(sequence);
+    return sequencesStack.peek().addSequence(sequence);
   }
 
   public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {
@@ -62,6 +63,10 @@ public class OutputBuilder {
 
   public Object onUnit(UnitNode node) {
     return sequencesStack.peek().onUnit(node);
+  }
+
+  public void emitComponent(Object component) {
+    sequencesStack.peek().emitComponent(component);
   }
 
   private void combineAllSequencesAndResult() {

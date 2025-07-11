@@ -18,11 +18,6 @@ public class TemporaryMemberEnvironment implements InterpretationEnvironment {
     this.shadowingStaticVariables = new HashMap<>();
   }
 
-  public void popVariables(Set<String> names) {
-    for (String name : names)
-      popVariable(name);
-  }
-
   public void pushVariable(String name, Object value) {
     shadowingStaticVariables.computeIfAbsent(name, k -> new Stack<>()).push(value);
   }

@@ -4,9 +4,11 @@ import at.blvckbytes.component_markup.util.TriState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -349,5 +351,18 @@ public class JsonComponentConstructor implements ComponentConstructor {
       extra.add((JsonObject) child);
 
     ((JsonObject) component).add("extra", extra);
+  }
+
+  @Override
+  public @NotNull List<Object> getChildren(Object component) {
+    JsonElement extra = ((JsonObject) component).get("extra");
+    List<Object> result = new ArrayList<>();
+
+    if (extra instanceof JsonArray) {
+      for (Object child : (JsonArray) extra)
+        result.add(child);
+    }
+
+    return result;
   }
 }

@@ -105,18 +105,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   }
 
   @Override
-  public void onSkippedByParent(MarkupNode node, Interpreter interpreter) {
-    // TODO: Do I need to discard state of a >parent< has skipped? Then, intercept
-    //       has never been called, and thus state never began. Leaving the code here as
-    //       a mental note, as I haven't experimented with this exact situation yet.
-//    ColorizeNodeState state = getState(interpreter);
-//
-//    if (!(node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)))
-//      return;
-//
-//    if (!state.flags.contains(ColorizeFlag.DEEP) && interpreter.isInSubtree())
-//      return;
-//
-//    state.discard();
+  public void onSkippedByChild(MarkupNode node, Interpreter interpreter, InterceptionResult priorResult) {
+    // TODO: Implement, now that this method has changed fundamentally
   }
 }
