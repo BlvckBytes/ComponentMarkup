@@ -106,6 +106,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
 
   @Override
   public void onSkippedByChild(MarkupNode node, Interpreter interpreter, InterceptionResult priorResult) {
-    // TODO: Implement, now that this method has changed fundamentally
+    if (priorResult == InterceptionResult.DO_PROCESS_AND_CALL_AFTER)
+      getState(interpreter).discard();
   }
 }
