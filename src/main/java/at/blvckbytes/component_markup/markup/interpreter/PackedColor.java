@@ -117,18 +117,18 @@ public class PackedColor {
   }
 
   private static int fromHexOrMinusOne(String input, int offset) {
-    int result;
+    int result = 0;
     int charValue;
 
     if ((charValue = hexCharToIntOrMinusOne(input.charAt(offset))) < 0)
       return -1;
 
-    result = charValue;
+    result += charValue << 4;
 
     if ((charValue = hexCharToIntOrMinusOne(input.charAt(offset + 1))) < 0)
       return -1;
 
-    result += charValue << 4;
+    result += charValue;
 
     return result;
   }
