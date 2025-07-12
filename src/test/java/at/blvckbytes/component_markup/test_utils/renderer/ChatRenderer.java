@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.interpreter.*;
+import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import com.google.gson.JsonArray;
@@ -27,23 +28,43 @@ public class ChatRenderer {
   private static final float FONT_SIZE = 40;
   private static final int LINE_SPACING = 5;
   private static final int OUTER_PADDING = 20;
+  private static final int UNDERLINE_MARGIN = 5;
+  private static final int STRIKETHROUGH_MARGIN = -11;
+  private static final int LINE_THICKNESS = 4;
 
   private static @Nullable Font FONT_REGULAR, FONT_BOLD, FONT_ITALIC, FONT_BOLD_ITALIC;
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
-    MarkupNode ast = MarkupParser.parse(
-      new TextWithAnchors(
+    MarkupNode ast;
+
+    try {
+      TextWithAnchors input = new TextWithAnchors(
         "<rainbow>All of the fancy rainbow colors!</>",
         "<br/>",
         "<red><b>Hello, </b>world! :)</>",
         "<br/>",
         "<aqua>One last <i>line</i>.</>",
         "<br/>",
-        "<gold *for=\"1..5\" for-separator={<br/>}>just kidding!"
-      ).text,
-      BuiltInTagRegistry.INSTANCE
-    );
+        "<gold *for=\"1..5\" for-separator={<br/>}>",
+        "  <style",
+        "    [underlined]=\"loop.index == 1\"",
+        "    [strikethrough]=\"loop.index == 3\"",
+        "  >just kidding!</>",
+        "</>"
+      );
+
+      System.out.println("About to parse the following input:");
+      System.out.println(input.text);
+
+      ast = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
+    } catch (MarkupParseException exception) {
+      System.out.println("An error occurred while trying to parse the input:");
+      for (String line : exception.makeErrorScreen())
+        System.out.println(line);
+
+      return;
+    }
 
     List<Object> components = MarkupInterpreter.interpret(
       new JsonComponentConstructor() {
@@ -229,20 +250,25 @@ public class ChatRenderer {
 
     graphics.drawString(component.text, offset.width, offset.height);
 
+    Stroke stroke = graphics.getStroke();
+    graphics.setStroke(new BasicStroke(LINE_THICKNESS));
+
     assert component.selfDimension != null;
 
     if (component.hasFormat(Format.UNDERLINED)) {
-      int underlineY = offset.height + 1;
+      int underlineY = offset.height + UNDERLINE_MARGIN;
       graphics.drawLine(offset.width, underlineY, offset.width + component.selfDimension.width, underlineY);
     }
 
     if (component.hasFormat(Format.STRIKETHROUGH)) {
-      int strikethroughY = offset.height - component.selfDimension.height / 2;
+      int strikethroughY = offset.height + STRIKETHROUGH_MARGIN;
       graphics.drawLine(offset.width, strikethroughY, offset.width + component.selfDimension.width, strikethroughY);
     }
 
     if (component.hasFormat(Format.OBFUSCATED))
       throw new IllegalStateException("Obfuscation cannot be (or is not yet) an implemented format");
+
+    graphics.setStroke(stroke);
 
     Dimension childOffset = new Dimension(offset.width + component.selfDimension.width, offset.height);
 
