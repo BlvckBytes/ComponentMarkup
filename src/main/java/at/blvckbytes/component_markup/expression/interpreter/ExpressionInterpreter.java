@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 public class ExpressionInterpreter {
 
+  private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
+
   private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]");
   private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
   private static final Pattern NON_WORDS = Pattern.compile("[^\\p{IsAlphabetic}\\d]+");
@@ -154,7 +156,7 @@ public class ExpressionInterpreter {
 
         case GREATER_THAN_OR_EQUAL:
         case LESS_THAN_OR_EQUAL:
-          if (checkEquality(lhsValue, rhsValue))
+          if (checkEquality(lhsValue, rhsValue, valueInterpreter))
             return true;
 
         case GREATER_THAN:
@@ -164,7 +166,7 @@ public class ExpressionInterpreter {
 
           int comparisonResult;
 
-          if ((lhs instanceof Double || lhs instanceof Float) || (rhs instanceof Double || rhs instanceof Float))
+          if (lhs instanceof Double || rhs instanceof Double)
             comparisonResult = Double.compare(lhs.doubleValue(), rhs.doubleValue());
           else
             comparisonResult = Long.compare(lhs.longValue(), rhs.longValue());
@@ -177,10 +179,10 @@ public class ExpressionInterpreter {
         }
 
         case EQUAL_TO:
-          return checkEquality(lhsValue, rhsValue);
+          return checkEquality(lhsValue, rhsValue, valueInterpreter);
 
         case NOT_EQUAL_TO:
-          return !checkEquality(lhsValue, rhsValue);
+          return !checkEquality(lhsValue, rhsValue, valueInterpreter);
 
         case RANGE: {
           long lowerBound = valueInterpreter.asLong(lhsValue);
@@ -383,12 +385,22 @@ public class ExpressionInterpreter {
     return Math.max(0, Math.min(max, value));
   }
 
-  private static boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue) {
+  private static boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue, ValueInterpreter valueInterpreter) {
     if (lhsValue == null && rhsValue == null)
       return true;
 
     if (lhsValue == null || rhsValue == null)
       return false;
+
+    if (lhsValue instanceof Number || rhsValue instanceof Number) {
+      Number lhsNumber = valueInterpreter.asLongOrDouble(lhsValue);
+      Number rhsNumber = valueInterpreter.asLongOrDouble(rhsValue);
+
+      if (lhsNumber instanceof Double || rhsNumber instanceof Double)
+        return Math.abs(lhsNumber.doubleValue() - rhsNumber.doubleValue()) < DOUBLE_EQUALITY_THRESHOLD;
+
+      return lhsNumber.longValue() == rhsNumber.longValue();
+    }
 
     return lhsValue.equals(rhsValue);
   }

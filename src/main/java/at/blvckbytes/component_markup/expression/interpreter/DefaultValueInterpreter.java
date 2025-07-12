@@ -23,8 +23,12 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     if (value == null)
       return 0L;
 
-    if (value instanceof Number)
-      return (Number) value;
+    if (value instanceof Number) {
+      if (value instanceof Double || value instanceof Float)
+        return ((Number) value).doubleValue();
+
+      return ((Number) value).longValue();
+    }
 
     String stringValue = asString(value);
 
