@@ -7,7 +7,8 @@ import at.blvckbytes.component_markup.util.TriStateBitFlags;
 public class SlotContext {
 
   private static final long DEFAULT_COLOR = AnsiStyleColor.WHITE.packedColor;
-  private static final long DEFAULT_SHADOW_COLOR = PackedColor.setClampedA(AnsiStyleColor.BLACK.packedColor, 64);
+  private static final int DEFAULT_SHADOW_COLOR_OPACITY = 63;
+  private static final long DEFAULT_SHADOW_COLOR = PackedColor.setClampedA(AnsiStyleColor.BLACK.packedColor, DEFAULT_SHADOW_COLOR_OPACITY);
   private static final String DEFAULT_FONT = "minecraft:default";
 
   private static final SlotContext SLOT_CHAT = new SlotContext(
@@ -68,8 +69,10 @@ public class SlotContext {
     if (input.packedColor == PackedColor.NULL_SENTINEL)
       input.packedColor = DEFAULT_COLOR;
 
-    if (input.packedShadowColor == PackedColor.NULL_SENTINEL)
+    if (input.packedShadowColor == PackedColor.NULL_SENTINEL) {
       input.packedShadowColor = DEFAULT_SHADOW_COLOR;
+      input.packedShadowColorOpacity = DEFAULT_SHADOW_COLOR_OPACITY;
+    }
 
     if (input.font == null)
       input.font = DEFAULT_FONT;

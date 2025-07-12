@@ -16,6 +16,7 @@ public class ComputedStyle {
 
   public long packedColor = PackedColor.NULL_SENTINEL;
   public long packedShadowColor = PackedColor.NULL_SENTINEL;
+  public int packedShadowColorOpacity;
   public @Nullable String font;
   public int formats;
   public boolean reset;
@@ -250,9 +251,9 @@ public class ComputedStyle {
     }
 
     if (style.shadowColor != null || style.shadowColorOpacity != null) {
-      // Default Minecraft shadow-behaviour: color=#000000 opacity=25%
-      long packedColor = AnsiStyleColor.BLACK.packedColor;
-      int opacity = 64;
+      // Default Minecraft shadow-behaviour: color=(foreground || #000000) opacity=25%
+      long packedColor = this.packedColor == PackedColor.NULL_SENTINEL ? AnsiStyleColor.BLACK.packedColor : this.packedColor;
+      int opacity = 63;
 
       if (style.shadowColor != null) {
         String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
@@ -273,6 +274,7 @@ public class ComputedStyle {
       }
 
       this.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
+      this.packedShadowColorOpacity = opacity;
     }
 
     if (style.font != null)
