@@ -874,7 +874,7 @@ public class MarkupInterpreterTests {
       throw new IllegalStateException("Could not determine a name for this test-case");
 
     if (nameSuffix != null)
-      testCaseName += nameSuffix;
+      testCaseName += "_" + nameSuffix;
 
     File resourcesFolder = Paths.get("src", "test", "resources").toFile();
     File caseFolder = new File(resourcesFolder, Paths.get("interpreter", testCaseName).toString());
