@@ -45,7 +45,7 @@ public class ChatRenderer {
         "<br/>",
         "<red><b>Hello, </b>world! :)</>",
         "<br/>",
-        "<aqua>One last <i>line</i>.</>",
+        "<style shadow=\"red\"><aqua>One last <i>line</i>.</></>",
         "<br/>",
         "<gold *for=\"1..5\" for-separator={<br/>}>",
         "  <style",
@@ -273,10 +273,19 @@ public class ChatRenderer {
 
     graphics.setFont(font);
 
+    Color color = component.getColor();
+
     Color shadowColor = component.getShadowColor();
 
-    if (shadowColor == null)
-      shadowColor = colorFromPacked(context.defaultStyle.packedShadowColor);
+    if (shadowColor == null) {
+      if (color != null)
+        shadowColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), context.defaultStyle.packedShadowColorOpacity);
+      else
+        shadowColor = colorFromPacked(context.defaultStyle.packedShadowColor);
+    }
+
+    if (color == null)
+      color = colorFromPacked(context.defaultStyle.packedColor);
 
     graphics.setColor(shadowColor);
     graphics.drawString(component.text, offset.width + SHADOW_DELTA_X, offset.height + SHADOW_DELTA_Y);
@@ -317,11 +326,6 @@ public class ChatRenderer {
     }
 
     graphics.setStroke(oldStroke);
-
-    Color color = component.getColor();
-
-    if (color == null)
-      color = colorFromPacked(context.defaultStyle.packedColor);
 
     graphics.setColor(color);
     graphics.drawString(component.text, offset.width, offset.height);

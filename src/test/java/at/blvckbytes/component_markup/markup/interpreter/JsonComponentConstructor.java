@@ -292,7 +292,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
       return;
     }
 
-    ((JsonObject) component).addProperty("shadow_color", PackedColor.asNonAlphaHex(packedColor));
+    ((JsonObject) component).addProperty("shadow_color", PackedColor.asAlphaHex(packedColor));
   }
 
   @Override
