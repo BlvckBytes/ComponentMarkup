@@ -15,17 +15,24 @@ public class ChatComponent {
 
   private final EnumSet<Format> formats;
   private final @Nullable Color color;
+  private final @Nullable Color shadowColor;
   private final @Nullable ChatComponent parent;
 
   public @Nullable Dimension totalDimension;
   public @Nullable Dimension selfDimension;
 
-  public ChatComponent(String text, @Nullable Color color, @Nullable ChatComponent parent) {
+  public ChatComponent(
+    String text,
+    @Nullable Color color,
+    @Nullable Color shadowColor,
+    @Nullable ChatComponent parent
+  ) {
     this.text = text;
     this.extra = new ArrayList<>();
 
     this.formats = EnumSet.noneOf(Format.class);
     this.color = color;
+    this.shadowColor = shadowColor;
     this.parent = parent;
   }
 
@@ -49,6 +56,16 @@ public class ChatComponent {
 
     if (this.parent != null)
       return this.parent.getColor();
+
+    return null;
+  }
+
+  public @Nullable Color getShadowColor() {
+    if (this.shadowColor != null)
+      return this.shadowColor;
+
+    if (this.parent != null)
+      return this.parent.getShadowColor();
 
     return null;
   }

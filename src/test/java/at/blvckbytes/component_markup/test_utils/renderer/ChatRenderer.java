@@ -31,10 +31,11 @@ public class ChatRenderer {
   private static final int UNDERLINE_MARGIN = 5;
   private static final int STRIKETHROUGH_MARGIN = -11;
   private static final int LINE_THICKNESS = 4;
+  private static final int SHADOW_DELTA_X = 5;
+  private static final int SHADOW_DELTA_Y = 5;
 
   private static @Nullable Font FONT_REGULAR, FONT_BOLD, FONT_ITALIC, FONT_BOLD_ITALIC;
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     MarkupNode ast;
 
@@ -48,8 +49,10 @@ public class ChatRenderer {
         "<br/>",
         "<gold *for=\"1..5\" for-separator={<br/>}>",
         "  <style",
-        "    [underlined]=\"loop.index == 1\"",
-        "    [strikethrough]=\"loop.index == 3\"",
+        "    [italic]=\"loop.index == 0 || loop.index == 4\"",
+        "    [underlined]=\"loop.index == 1 || loop.index == 4\"",
+        "    [strikethrough]=\"loop.index == 2 || loop.index == 4\"",
+        "    [bold]=\"loop.index == 3 || loop.index == 4\"",
         "  >just kidding!</>",
         "</>"
       );
@@ -66,32 +69,35 @@ public class ChatRenderer {
       return;
     }
 
+    ComponentConstructor componentConstructor = new JsonComponentConstructor() {
+      @Override
+      public SlotContext getSlotContext(SlotType slot) {
+        SlotContext superResult = super.getSlotContext(slot);
+
+        if (slot == SlotType.CHAT)
+          return new SlotContext((char) 0, superResult.defaultStyle);
+
+        return superResult;
+      }
+    };
+
     List<Object> components = MarkupInterpreter.interpret(
-      new JsonComponentConstructor() {
-        @Override
-        public SlotContext getSlotContext(SlotType slot) {
-          SlotContext superResult = super.getSlotContext(slot);
-
-          if (slot == SlotType.CHAT)
-            return new SlotContext((char) 0, superResult.defaultStyle);
-
-          return superResult;
-        }
-      },
+      componentConstructor,
       InterpretationEnvironment.EMPTY_ENVIRONMENT,
       SlotType.CHAT,
       ast
     );
 
-    BufferedImage image = render((List<JsonObject>) (List<?>) components);
+    BufferedImage image = render(components, componentConstructor.getSlotContext(SlotType.CHAT));
     ImageIO.write(image, "png", new java.io.File("chat_output.png"));
   }
 
-  public static BufferedImage render(List<JsonObject> components) throws Exception {
-    return render(translateJsonComponents(components));
+  @SuppressWarnings("unchecked")
+  public static BufferedImage render(List<?> components, SlotContext context) throws Exception {
+    return render(translateJsonComponents((List<JsonObject>) components), context);
   }
 
-  private static BufferedImage render(ChatComponent[] components) throws Exception {
+  private static BufferedImage render(ChatComponent[] components, SlotContext context) throws Exception {
     int requiredWidth = 0;
     int requiredHeight = 0;
 
@@ -130,7 +136,7 @@ public class ChatRenderer {
 
       offset.height += component.totalDimension.height;
 
-      renderComponent(graphics, offset, component);
+      renderComponent(graphics, offset, component, context);
     }
 
     graphics.dispose();
@@ -179,12 +185,27 @@ public class ChatRenderer {
       long packedColor = PackedColor.tryParse(colorElement.getAsString());
 
       if (packedColor == PackedColor.NULL_SENTINEL)
-        throw new IllegalStateException("Encountered unparsable color on: " + component);
+        throw new IllegalStateException("Encountered unparsable \"color\" on: " + component);
 
-      color = new Color((int) packedColor);
+      color = colorFromPacked(packedColor);
     }
 
-    ChatComponent result = new ChatComponent(textElement.getAsString(), color, parent);
+    JsonElement shadowColorElement = component.get("shadow_color");
+    Color shadowColor = null;
+
+    if (shadowColorElement != null) {
+      if (!(shadowColorElement instanceof JsonPrimitive))
+        throw new IllegalStateException("Expected \"shadow_color\" to be a string on: " + component);
+
+      long packedColor = PackedColor.tryParse(shadowColorElement.getAsString());
+
+      if (packedColor == PackedColor.NULL_SENTINEL)
+        throw new IllegalStateException("Encountered unparsable \"shadow_color\" on: " + component);
+
+      shadowColor = colorFromPacked(packedColor);
+    }
+
+    ChatComponent result = new ChatComponent(textElement.getAsString(), color, shadowColor, parent);
 
     for (Format format : Format.VALUES) {
       String formatName = format.name().toLowerCase();
@@ -238,42 +259,94 @@ public class ChatRenderer {
     return width;
   }
 
-  private static void renderComponent(Graphics2D graphics, Dimension offset, ChatComponent component) throws Exception {
+  private static Color colorFromPacked(long packedColor) {
+    return new Color(
+      (int) PackedColor.getR(packedColor),
+      (int) PackedColor.getG(packedColor),
+      (int) PackedColor.getB(packedColor),
+      (int) PackedColor.getA(packedColor)
+    );
+  }
+
+  private static void renderComponent(Graphics2D graphics, Dimension offset, ChatComponent component, SlotContext context) throws Exception {
     Font font = selectFontVariant(component.hasFormat(Format.BOLD), component.hasFormat(Format.ITALIC));
 
     graphics.setFont(font);
 
-    Color color;
+    Color shadowColor = component.getShadowColor();
 
-    if ((color = component.getColor()) != null)
-      graphics.setColor(color);
+    if (shadowColor == null)
+      shadowColor = colorFromPacked(context.defaultStyle.packedShadowColor);
 
-    graphics.drawString(component.text, offset.width, offset.height);
+    graphics.setColor(shadowColor);
+    graphics.drawString(component.text, offset.width + SHADOW_DELTA_X, offset.height + SHADOW_DELTA_Y);
 
-    Stroke stroke = graphics.getStroke();
-    graphics.setStroke(new BasicStroke(LINE_THICKNESS));
+    int underlineX = offset.width;
+    int underlineY = offset.height + UNDERLINE_MARGIN;
+
+    int strikethroughX = offset.width;
+    int strikethroughY = offset.height + STRIKETHROUGH_MARGIN;
+
+    Stroke oldStroke = graphics.getStroke();
+    Stroke newStroke = new BasicStroke(LINE_THICKNESS);
+
+    graphics.setStroke(newStroke);
 
     assert component.selfDimension != null;
 
     if (component.hasFormat(Format.UNDERLINED)) {
-      int underlineY = offset.height + UNDERLINE_MARGIN;
-      graphics.drawLine(offset.width, underlineY, offset.width + component.selfDimension.width, underlineY);
+      underlineX += SHADOW_DELTA_X;
+      underlineY += SHADOW_DELTA_Y;
+
+      graphics.setColor(shadowColor);
+      graphics.drawLine(underlineX, underlineY, underlineX + component.selfDimension.width, underlineY);
+
+      underlineX -= SHADOW_DELTA_X;
+      underlineY -= SHADOW_DELTA_Y;
     }
 
     if (component.hasFormat(Format.STRIKETHROUGH)) {
-      int strikethroughY = offset.height + STRIKETHROUGH_MARGIN;
-      graphics.drawLine(offset.width, strikethroughY, offset.width + component.selfDimension.width, strikethroughY);
+      strikethroughX += SHADOW_DELTA_X;
+      strikethroughY += SHADOW_DELTA_Y;
+
+      graphics.setColor(shadowColor);
+      graphics.drawLine(strikethroughX, strikethroughY, strikethroughX + component.selfDimension.width, strikethroughY);
+
+      strikethroughX -= SHADOW_DELTA_X;
+      strikethroughY -= SHADOW_DELTA_Y;
+    }
+
+    graphics.setStroke(oldStroke);
+
+    Color color = component.getColor();
+
+    if (color == null)
+      color = colorFromPacked(context.defaultStyle.packedColor);
+
+    graphics.setColor(color);
+    graphics.drawString(component.text, offset.width, offset.height);
+
+    graphics.setStroke(newStroke);
+
+    if (component.hasFormat(Format.UNDERLINED)) {
+      graphics.setColor(color);
+      graphics.drawLine(underlineX, underlineY, underlineX + component.selfDimension.width, underlineY);
+    }
+
+    if (component.hasFormat(Format.STRIKETHROUGH)) {
+      graphics.setColor(color);
+      graphics.drawLine(strikethroughX, strikethroughY, strikethroughX + component.selfDimension.width, strikethroughY);
     }
 
     if (component.hasFormat(Format.OBFUSCATED))
       throw new IllegalStateException("Obfuscation cannot be (or is not yet) an implemented format");
 
-    graphics.setStroke(stroke);
+    graphics.setStroke(oldStroke);
 
     Dimension childOffset = new Dimension(offset.width + component.selfDimension.width, offset.height);
 
     for (ChatComponent child : component.extra) {
-      renderComponent(graphics, childOffset, child);
+      renderComponent(graphics, childOffset, child, context);
       assert child.totalDimension != null;
       childOffset.width += child.totalDimension.width;
     }
