@@ -1,20 +1,13 @@
 package at.blvckbytes.component_markup.test_utils.renderer;
 
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.interpreter.*;
-import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
-import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.Nullable;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
@@ -35,62 +28,6 @@ public class ChatRenderer {
   private static final int SHADOW_DELTA_Y = 5;
 
   private static @Nullable Font FONT_REGULAR, FONT_BOLD, FONT_ITALIC, FONT_BOLD_ITALIC;
-
-  public static void main(String[] args) throws Exception {
-    MarkupNode ast;
-
-    try {
-      TextWithAnchors input = new TextWithAnchors(
-        "<rainbow>All of the fancy rainbow colors!</>",
-        "<br/>",
-        "<red><b>Hello, </b>world! :)</>",
-        "<br/>",
-        "<style shadow=\"red\"><aqua>One last <i>line</i>.</></>",
-        "<br/>",
-        "<gold *for=\"1..5\" for-separator={<br/>}>",
-        "  <style",
-        "    [italic]=\"loop.index == 0 || loop.index == 4\"",
-        "    [underlined]=\"loop.index == 1 || loop.index == 4\"",
-        "    [strikethrough]=\"loop.index == 2 || loop.index == 4\"",
-        "    [bold]=\"loop.index == 3 || loop.index == 4\"",
-        "  >just kidding!</>",
-        "</>"
-      );
-
-      System.out.println("About to parse the following input:");
-      System.out.println(input.text);
-
-      ast = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
-    } catch (MarkupParseException exception) {
-      System.out.println("An error occurred while trying to parse the input:");
-      for (String line : exception.makeErrorScreen())
-        System.out.println(line);
-
-      return;
-    }
-
-    ComponentConstructor componentConstructor = new JsonComponentConstructor() {
-      @Override
-      public SlotContext getSlotContext(SlotType slot) {
-        SlotContext superResult = super.getSlotContext(slot);
-
-        if (slot == SlotType.CHAT)
-          return new SlotContext((char) 0, superResult.defaultStyle);
-
-        return superResult;
-      }
-    };
-
-    List<Object> components = MarkupInterpreter.interpret(
-      componentConstructor,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
-      SlotType.CHAT,
-      ast
-    );
-
-    BufferedImage image = render(components, componentConstructor.getSlotContext(SlotType.CHAT));
-    ImageIO.write(image, "png", new java.io.File("chat_output.png"));
-  }
 
   @SuppressWarnings("unchecked")
   public static BufferedImage render(List<?> components, SlotContext context) throws Exception {

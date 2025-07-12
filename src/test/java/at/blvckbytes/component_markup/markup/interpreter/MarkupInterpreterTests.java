@@ -7,14 +7,27 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import com.google.gson.*;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 
 public class MarkupInterpreterTests {
 
@@ -303,50 +316,12 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldGenerateARainbow() {
-    TextWithAnchors text = new TextWithAnchors(
-      "<rainbow>I am the <b>coolest rainbow</b> on earth"
-    );
-
-    makeColorizerCase(
-      text,
-      "I am the coolest rainbow on earth",
-      (index, letter) -> {
-        if (index >= 9 && index <= 23)
-          letter.bool("bold", true);
-      },
-      "#FF0000",
-      null,
-      "#FF3900",
-      "#FF7100",
-      null,
-      "#FFAA00",
-      "#FFE300",
-      "#E3FF00",
-      null,
-      "#AAFF00",
-      "#71FF00",
-      "#39FF00",
-      "#00FF00",
-      "#00FF39",
-      "#00FF71",
-      "#00FFAA",
-      null,
-      "#00FFE3",
-      "#00E3FF",
-      "#00AAFF",
-      "#0071FF",
-      "#0039FF",
-      "#0000FF",
-      "#3900FF",
-      null,
-      "#7100FF",
-      "#AA00FF",
-      null,
-      "#E300FF",
-      "#FF00E3",
-      "#FF00AA",
-      "#FF0071",
-      "#FF0039"
+    makeRecordedCase(
+      new TextWithAnchors(
+        "<rainbow>I am the <b>coolest rainbow</b> on earth"
+      ),
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.CHAT
     );
   }
 
@@ -356,60 +331,63 @@ public class MarkupInterpreterTests {
       "<red *if=\"a\" *use=\"b\">Hello, world!"
     );
 
-    makeCase(
+    makeRecordedCase(
       text,
       new EnvironmentBuilder()
         .withStatic("a", true)
         .withStatic("b", true),
       SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "Hello, world!")
-        .string("color", "red")
+      "TrueTrue"
     );
 
-    makeCase(
+    makeRecordedCase(
       text,
       new EnvironmentBuilder()
         .withStatic("a", true)
         .withStatic("b", false),
       SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "Hello, world!")
+      "TrueFalse"
     );
 
-    makeCase(
+    makeRecordedCase(
       text,
       new EnvironmentBuilder()
         .withStatic("a", false)
         .withStatic("b", true),
       SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "")
+      "FalseTrue"
     );
 
-    makeCase(
+    makeRecordedCase(
       text,
       new EnvironmentBuilder()
         .withStatic("a", false)
         .withStatic("b", false),
       SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "")
+      "FalseFalse"
     );
   }
 
   @Test
   public void shouldSkipRainbowsOnUseIsFalse() {
     TextWithAnchors text = new TextWithAnchors(
-      "<rainbow *use=\"false\">Hello, world!"
+      "<rainbow *use=\"a\">Hello, world!"
     );
 
-    makeCase(
+    makeRecordedCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new EnvironmentBuilder()
+        .withStatic("a", true),
       SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "Hello, world!")
+      "True"
+    );
+
+    makeRecordedCase(
+      text,
+      new EnvironmentBuilder()
+        .withStatic("a", false),
+      SlotType.CHAT,
+      "False"
     );
   }
 
@@ -854,6 +832,126 @@ public class MarkupInterpreterTests {
       new JsonObjectBuilder()
         .string("text", "343")
     );
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void makeRecordedCase(
+    TextWithAnchors input,
+    InterpretationEnvironment environment,
+    SlotType slot
+  ) {
+    makeRecordedCase(input, environment, slot, null);
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void makeRecordedCase(
+    TextWithAnchors input,
+    InterpretationEnvironment environment,
+    SlotType slot,
+    @Nullable String nameSuffix
+  ) {
+    StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+
+    String testCaseName = null;
+
+    for (StackTraceElement stackTraceElement : stacktrace) {
+      String methodName = stackTraceElement.getMethodName();
+      try {
+        Method method = getClass().getDeclaredMethod(methodName);
+
+        if (!method.isAnnotationPresent(Test.class))
+          continue;
+
+        testCaseName = methodName;
+        break;
+      } catch (NoSuchMethodException ignored) {
+      } catch (Exception e) {
+        LoggerProvider.get().log(Level.SEVERE, "Could not access method", e);
+      }
+    }
+
+    if (testCaseName == null)
+      throw new IllegalStateException("Could not determine a name for this test-case");
+
+    if (nameSuffix != null)
+      testCaseName += nameSuffix;
+
+    File resourcesFolder = Paths.get("src", "test", "resources").toFile();
+    File caseFolder = new File(resourcesFolder, Paths.get("interpreter", testCaseName).toString());
+
+    if (!caseFolder.exists()) {
+      if (!caseFolder.mkdirs())
+        throw new IllegalStateException("Could not create folders for " + caseFolder);
+    }
+
+    File componentsFile = new File(caseFolder, "components.json");
+
+    MarkupNode actualNode;
+
+    try {
+      actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
+    } catch (MarkupParseException e) {
+      System.out.println(String.join("\n", e.makeErrorScreen()));
+      Assertions.fail("Threw an error:", e);
+      return;
+    }
+
+    List<Object> components = MarkupInterpreter.interpret(
+      componentConstructor,
+      environment,
+      slot, actualNode
+    );
+
+    JsonArray actualArray = new JsonArray();
+
+    for (Object component : components)
+      actualArray.add((JsonElement) component);
+
+    String actualJson = gsonInstance.toJson(actualArray);
+
+    if (componentsFile.exists()) {
+      LoggerProvider.get().log(Level.INFO, "Found data for case " + testCaseName);
+
+      String expectedJson;
+
+      try (
+        FileReader fileReader = new FileReader(componentsFile);
+        BufferedReader bufferedReader = new BufferedReader(fileReader)
+      ) {
+        StringJoiner result = new StringJoiner("\n");
+
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null)
+          result.add(line);
+
+        expectedJson = result.toString();
+      } catch (Exception e) {
+        Assertions.fail("Could not read stored components:", e);
+        return;
+      }
+
+      Assertions.assertEquals(expectedJson, actualJson);
+      return;
+    }
+
+    LoggerProvider.get().log(Level.INFO, "Writing initial data for case " + testCaseName);
+
+    try (
+      FileWriter writer = new FileWriter(componentsFile)
+    ) {
+      writer.write(actualJson);
+    } catch (Exception e) {
+      Assertions.fail("Could not write components:", e);
+    }
+
+    try {
+      File renderFile = new File(caseFolder, "render.png");
+      BufferedImage image = ChatRenderer.render(components, componentConstructor.getSlotContext(slot));
+      ImageIO.write(image, "png", renderFile);
+    } catch (Exception e) {
+      Assertions.fail("Could not render/write image:", e);
+    }
   }
 
   private void makeColorizerCase(
