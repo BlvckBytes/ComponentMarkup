@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.expression.parser;
 
-import at.blvckbytes.component_markup.Jsonifier;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizerTests;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;

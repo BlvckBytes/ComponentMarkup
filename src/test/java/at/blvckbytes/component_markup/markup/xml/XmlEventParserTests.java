@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.Jsonifier;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.event.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

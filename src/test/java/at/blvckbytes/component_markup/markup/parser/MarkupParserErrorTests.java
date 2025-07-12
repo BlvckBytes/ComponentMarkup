@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.Jsonifier;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
