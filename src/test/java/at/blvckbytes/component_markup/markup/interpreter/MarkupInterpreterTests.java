@@ -834,6 +834,90 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldResetInMultiComponentScenario() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<reset>",
+      "  <gray>",
+      "    <translate key=\"a\"/> A<br/>",
+      "    <translate key=\"b\"/> B<br/>",
+      "    <translate key=\"c\"/> C",
+      "  </gray>",
+      "  <br/>",
+      "  <translate key=\"d\"/> D<br/>",
+      "  <red><translate key=\"e\"/> E",
+      "</reset>",
+      "<br/>",
+      "last line"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(line -> (
+          line
+            .string("text", "")
+            .string("color", "gray")
+            .bool("italic", false)
+            .array("extra", extra -> (
+              extra
+                .object(item -> item.string("translate", "a"))
+                .object(item -> item.string("text", " A"))
+            ))
+        ))
+        .object(line -> (
+          line
+            .string("text", "")
+            .string("color", "gray")
+            .bool("italic", false)
+            .array("extra", extra -> (
+              extra
+                .object(item -> item.string("translate", "b"))
+                .object(item -> item.string("text", " B"))
+            ))
+        ))
+        .object(line -> (
+          line
+            .string("text", "")
+            .string("color", "gray")
+            .bool("italic", false)
+            .array("extra", extra -> (
+              extra
+                .object(item -> item.string("translate", "c"))
+                .object(item -> item.string("text", " C"))
+            ))
+        ))
+        .object(line -> (
+          line
+            .string("text", "")
+            .string("color", "white")
+            .bool("italic", false)
+            .array("extra", extra -> (
+              extra
+                .object(item -> item.string("translate", "d"))
+                .object(item -> item.string("text", " D"))
+            ))
+        ))
+        .object(line -> (
+          line
+            .string("text", "")
+            .string("color", "red")
+            .bool("italic", false)
+            .array("extra", extra -> (
+              extra
+                .object(item -> item.string("translate", "e"))
+                .object(item -> item.string("text", " E"))
+            ))
+        ))
+        .object(line -> (
+          line
+            .string("text", "last line")
+        ))
+    );
+  }
+
   @SuppressWarnings("SameParameterValue")
   private void makeRecordedCase(
     TextWithAnchors input,
