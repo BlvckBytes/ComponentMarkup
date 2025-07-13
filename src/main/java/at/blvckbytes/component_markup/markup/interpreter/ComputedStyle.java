@@ -1,15 +1,18 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.util.JsonifyGetter;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.logging.Level;
 
 public class ComputedStyle {
@@ -21,18 +24,36 @@ public class ComputedStyle {
   public int formats;
   public boolean reset;
 
-  public ComputedStyle() {}
+  public boolean doStylesEqual(@Nullable ComputedStyle other) {
+    if (other == null)
+      return !hasEffect();
 
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof ComputedStyle)) return false;
-    ComputedStyle that = (ComputedStyle) o;
-    return packedColor == that.packedColor && packedShadowColor == that.packedShadowColor && formats == that.formats && reset == that.reset && Objects.equals(font, that.font);
+    if (packedColor != other.packedColor)
+      return false;
+
+    if (packedShadowColor != other.packedShadowColor)
+      return false;
+
+    if (formats != other.formats)
+      return false;
+
+    return Objects.equals(font, other.font);
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(packedColor, packedShadowColor, font, reset, formats);
+  public boolean hasEffect() {
+    if (this.packedColor != PackedColor.NULL_SENTINEL)
+      return true;
+
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL)
+      return true;
+
+    if (this.font != null)
+      return true;
+
+    if (!TriStateBitFlags.isAllNulls(formats))
+      return true;
+
+    return this.reset;
   }
 
   public ComputedStyle setFormat(Format format, TriState value) {
@@ -86,6 +107,35 @@ public class ComputedStyle {
     }
 
     return this;
+  }
+
+  public void subtractStylesOnEquality(@Nullable ComputedStyle other, boolean equal) {
+    if (other == null)
+      return;
+
+    if (this.font != null && (this.font.equals(other.font) ^ (!equal)))
+      this.font = null;
+
+    if (this.packedColor != PackedColor.NULL_SENTINEL && ((this.packedColor == other.packedColor) ^ (!equal)))
+      this.packedColor = PackedColor.NULL_SENTINEL;
+
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && ((this.packedShadowColor == other.packedShadowColor) ^ (!equal)))
+      this.packedShadowColor = PackedColor.NULL_SENTINEL;
+
+    if (TriStateBitFlags.isAllNulls(this.formats))
+      return;
+
+    for (int index = 0; index < Format.COUNT; ++index) {
+      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
+
+      if (thisFormat == TriState.NULL)
+        continue;
+
+      TriState otherFormat = TriStateBitFlags.read(other.formats, index);
+
+      if ((thisFormat == otherFormat) ^ (!equal))
+        this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
+    }
   }
 
   public void subtractUncommonProperties(@Nullable ComputedStyle other) {
@@ -145,9 +195,9 @@ public class ComputedStyle {
     }
   }
 
-  public ComputedStyle subtractEqualStyles(@Nullable ComputedStyle other) {
+  public void subtractEqualStyles(@Nullable ComputedStyle other) {
     if (other == null)
-      return this;
+      return;
 
     if (this.font != null && this.font.equals(other.font))
       this.font = null;
@@ -159,7 +209,7 @@ public class ComputedStyle {
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
 
     if (TriStateBitFlags.isAllNulls(this.formats) || TriStateBitFlags.isAllNulls(other.formats))
-      return this;
+      return;
 
     for (int index = 0; index < Format.COUNT; ++index) {
       TriState thisFormat = TriStateBitFlags.read(this.formats, index);
@@ -171,13 +221,11 @@ public class ComputedStyle {
           this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
       }
     }
-
-    return this;
   }
 
-  public ComputedStyle applyDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
+  public void applyDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
     if (mask == null)
-      return this;
+      return;
 
     ComputedStyle defaultStyle = slotContext.defaultStyle;
 
@@ -199,7 +247,7 @@ public class ComputedStyle {
 
     // Nothing to set to default or no default value provided
     if (TriStateBitFlags.isAllNulls(mask.formats) || TriStateBitFlags.isAllNulls(defaultStyle.formats))
-      return this;
+      return;
 
     for (int index = 0; index < Format.COUNT; ++index) {
       TriState thisFormat = TriStateBitFlags.read(this.formats, index);
@@ -219,8 +267,6 @@ public class ComputedStyle {
 
       this.formats = TriStateBitFlags.write(this.formats, index, defaultFormat);
     }
-
-    return this;
   }
 
   public ComputedStyle copy() {
@@ -233,11 +279,16 @@ public class ComputedStyle {
     return result;
   }
 
-  public ComputedStyle(StyledNode styleHolder, Interpreter interpreter) {
-    NodeStyle style = styleHolder.getStyle();
+  public static @Nullable ComputedStyle computeFor(MarkupNode node, Interpreter interpreter) {
+    if (!(node instanceof StyledNode))
+      return null;
+
+    NodeStyle style = ((StyledNode) node).getStyle();
 
     if (style == null)
-      return;
+      return null;
+
+    ComputedStyle result = null;
 
     if (style.color != null) {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
@@ -245,14 +296,21 @@ public class ComputedStyle {
       if (colorString != null) {
         long packedColor = PackedColor.tryParse(colorString);
 
-        if (packedColor != PackedColor.NULL_SENTINEL)
-          this.packedColor = packedColor;
+        if (packedColor != PackedColor.NULL_SENTINEL) {
+          result = new ComputedStyle();
+          result.packedColor = packedColor;
+        }
       }
     }
 
     if (style.shadowColor != null || style.shadowColorOpacity != null) {
       // Default Minecraft shadow-behaviour: color=(foreground || #000000) opacity=25%
-      long packedColor = this.packedColor == PackedColor.NULL_SENTINEL ? AnsiStyleColor.BLACK.packedColor : this.packedColor;
+      long packedColor = AnsiStyleColor.BLACK.packedColor;
+
+      //noinspection ConstantValue
+      if (result != null && result.packedColor != PackedColor.NULL_SENTINEL)
+        packedColor = result.packedColor;
+
       int opacity = 63;
 
       if (style.shadowColor != null) {
@@ -273,15 +331,26 @@ public class ComputedStyle {
           opacity = (int) Math.round((opacityValue / 100.0) * 255);
       }
 
-      this.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
-      this.packedShadowColorOpacity = opacity;
+      if (result == null)
+        result = new ComputedStyle();
+
+      result.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
+      result.packedShadowColorOpacity = opacity;
     }
 
-    if (style.font != null)
-      this.font = interpreter.evaluateAsStringOrNull(style.font);
+    if (style.font != null) {
+      if (result == null)
+        result = new ComputedStyle();
 
-    if (style.reset != null)
-      this.reset = interpreter.evaluateAsBoolean(style.reset);
+      result.font = interpreter.evaluateAsStringOrNull(style.font);
+    }
+
+    if (style.reset != null) {
+      if (result == null)
+        result = new ComputedStyle();
+
+      result.reset = interpreter.evaluateAsBoolean(style.reset);
+    }
 
     for (Format format : Format.VALUES) {
       ExpressionNode formatExpression = style.getFormat(format);
@@ -294,8 +363,13 @@ public class ComputedStyle {
       if (value == TriState.NULL)
         continue;
 
-      this.formats = TriStateBitFlags.write(this.formats, format.ordinal(), value);
+      if (result == null)
+        result = new ComputedStyle();
+
+      result.formats = TriStateBitFlags.write(result.formats, format.ordinal(), value);
     }
+
+    return result;
   }
 
   public void applyStyles(Object component, ComponentConstructor componentConstructor) {
@@ -343,5 +417,39 @@ public class ComputedStyle {
           LoggerProvider.get().log(Level.WARNING, "Encountered unknown format: " + format.name());
       }
     }
+  }
+
+  @JsonifyGetter
+  public String readableFormats() {
+    StringJoiner result = new StringJoiner(", ");
+
+    for (Format format : Format.VALUES) {
+      TriState value = TriStateBitFlags.read(this.formats, format.ordinal());
+      result.add(format.name() + ": " + value.name());
+    }
+
+    return result.toString();
+  }
+
+  @JsonifyGetter
+  public String readableColor() {
+    return readablePackedColor(this.packedColor);
+  }
+
+  @JsonifyGetter
+  public String readableShadowColor() {
+    return readablePackedColor(this.packedShadowColor);
+  }
+
+  private String readablePackedColor(long packedColor) {
+    if (packedColor == PackedColor.NULL_SENTINEL)
+      return "null";
+
+    AnsiStyleColor ansiColor = AnsiStyleColor.fromColor(packedColor);
+
+    if (ansiColor != null)
+      return ansiColor.name;
+
+    return PackedColor.asAlphaHex(packedColor);
   }
 }

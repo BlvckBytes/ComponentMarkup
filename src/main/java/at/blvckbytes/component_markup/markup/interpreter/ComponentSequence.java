@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
@@ -16,14 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class ComponentSequence {
 
-  private final @Nullable ComponentSequence parentSequence;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
   private final Interpreter interpreter;
@@ -31,20 +28,26 @@ public class ComponentSequence {
 
   private final @Nullable Consumer<Object> applyKnownNonTerminal;
 
-  private @Nullable List<Object> members;
+  private @Nullable List<MemberAndStyle> memberEntries;
+
+  // Style-properties which are equal amongst all members
+  // E.g.: if all members are bold, that style may be hoisted up
+  private @Nullable ComputedStyle membersEqualStyle;
+
+  // Style-properties which are common amongst all members
+  // E.g.: if all members specify a color, the parent-color becomes obsolete
+  private @Nullable ComputedStyle membersCommonStyle;
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
   private Consumer<Object> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
-  private final @Nullable ComputedStyle effectiveStyle;
-  private final @Nullable ComputedStyle styleToApply;
-
-  private @Nullable ComputedStyle commonStyle;
+  private final ComputedStyle parentStyle;
+  private final ComputedStyle selfAndParentStyle;
 
   public Object onUnit(UnitNode node) {
-    ComputedStyle style = makeChildSequence(node).styleToApply;
+    ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     Object result = null;
 
@@ -150,24 +153,18 @@ public class ComponentSequence {
     if (result == null)
       result = componentConstructor.createTextNode("<error>");
 
-    if (style != null)
-      style.applyStyles(result, componentConstructor);
-
-    addMember(result, style);
+    addMember(result, nodeStyle);
 
     return result;
   }
 
   public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {
-    ComputedStyle style = makeChildSequence(node).styleToApply;
+    ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
       Object result = componentConstructor.createTextNode(node.text);
 
-      if (style != null)
-        style.applyStyles(result, componentConstructor);
-
-      addMember(result, style);
+      addMember(result, nodeStyle);
 
       if (creationHandler != null)
         creationHandler.accept(result);
@@ -175,39 +172,45 @@ public class ComponentSequence {
       return;
     }
 
-    addBufferedText(node.text, style, creationHandler);
+    addBufferedText(node.text, nodeStyle, creationHandler);
   }
 
   public void emitComponent(Object component) {
     addMember(component, null);
   }
 
-  public void possiblyUpdateCommonStyleToOnlyElement() {
-    if (members == null || members.size() != 1)
-      return;
-
-    if (this.commonStyle == null) {
-      this.commonStyle = this.styleToApply;
-      return;
-    }
-
-    this.commonStyle.addMissing(this.styleToApply);
-  }
-
-  public void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
+  private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
     this.textCreationHandler = creationHandler;
+
+    handleResetAndSubtractUnnecessaryStyles(style);
+
+    if (!areStylesEffectivelyEqual(style, bufferedTextsStyle))
+      concatAndInstantiateBufferedTexts();
 
     if (this.bufferedTexts == null)
       this.bufferedTexts = new ArrayList<>();
 
-    if (!Objects.equals(style, bufferedTextsStyle))
-      concatAndInstantiateBufferedTexts();
-
     this.bufferedTexts.add(text);
     bufferedTextsStyle = style;
+  }
 
-    if (commonStyle == null)
-      commonStyle = style == null ? new ComputedStyle() : style;
+  private boolean areStylesEffectivelyEqual(@Nullable ComputedStyle a, @Nullable ComputedStyle b) {
+    if (a == null && b == null)
+      return true;
+
+    ComputedStyle nonNull, other;
+
+    if (a != null) {
+      nonNull = a;
+      other = b;
+    }
+
+    else {
+      nonNull = b;
+      other = a;
+    }
+
+    return nonNull.doStylesEqual(other);
   }
 
   private void concatAndInstantiateBufferedTexts() {
@@ -230,9 +233,6 @@ public class ComponentSequence {
       result = componentConstructor.createTextNode(accumulator.toString());
     }
 
-    if (bufferedTextsStyle != null)
-      bufferedTextsStyle.applyStyles(result, componentConstructor);
-
     bufferedTexts.clear();
 
     addMember(result, bufferedTextsStyle);
@@ -244,61 +244,115 @@ public class ComponentSequence {
   }
 
   public Object addSequence(ComponentSequence sequence) {
-    Object result = sequence.combineAndClearMembers();
+    CombinationResult result = sequence.combineAndClearMembers();
 
     if (result == null)
       return null;
 
-    addMember(result, sequence.commonStyle);
+    addMember(result.component, result.styleToApply);
+
     return result;
   }
 
-  private void addMember(Object member, @Nullable ComputedStyle memberCommonStyle) {
+  private void addMember(Object member, @Nullable ComputedStyle memberStyle) {
     concatAndInstantiateBufferedTexts();
 
-    if (this.members == null)
-      this.members = new ArrayList<>();
+    if (this.memberEntries == null)
+      this.memberEntries = new ArrayList<>();
 
-    if (memberCommonStyle != null) {
-      if (this.commonStyle == null)
-        this.commonStyle = memberCommonStyle.copy();
-      else
-        this.commonStyle.subtractUncommonProperties(memberCommonStyle);
-    }
+    handleResetAndSubtractUnnecessaryStyles(memberStyle);
 
-    this.members.add(member);
+    if (this.membersEqualStyle == null) {
+      this.membersEqualStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
+    } else
+      this.membersEqualStyle.subtractStylesOnEquality(memberStyle, false);
+
+    if (this.membersCommonStyle == null) {
+      this.membersCommonStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
+    } else
+      this.membersCommonStyle.subtractUncommonProperties(memberStyle);
+
+    this.memberEntries.add(new MemberAndStyle(member, memberStyle));
   }
 
-  public @Nullable Object combineAndClearMembers() {
+  public @Nullable CombinationResult combineAndClearMembers() {
     concatAndInstantiateBufferedTexts();
 
-    if (this.members == null || this.members.isEmpty())
+    if (this.memberEntries == null || this.memberEntries.isEmpty())
       return null;
 
     Object result;
 
-    if (members.size() == 1)
-      result = members.get(0);
+    // Apply no styles, as they're all kept in the common-style
+    if (memberEntries.size() == 1) {
+      MemberAndStyle onlyMember = memberEntries.get(0);
+
+      if (onlyMember.style != null) {
+        onlyMember.style.subtractEqualStyles(membersEqualStyle);
+        onlyMember.style.applyStyles(onlyMember.member, componentConstructor);
+      }
+
+      result = onlyMember.member;
+    }
+
     else {
       result = componentConstructor.createTextNode("");
+
+      List<Object> members = new ArrayList<>();
+
+      for (MemberAndStyle memberEntry : memberEntries) {
+
+        if (memberEntry.style != null) {
+          memberEntry.style.subtractEqualStyles(membersEqualStyle);
+          memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
+        }
+
+        members.add(memberEntry.member);
+      }
+
       componentConstructor.setChildren(result, members);
     }
-
-    if (styleToApply != null) {
-      if (commonStyle != null)
-        styleToApply.subtractCommonStyles(commonStyle);
-
-      styleToApply.applyStyles(result, componentConstructor);
-    }
-
-    possiblyUpdateCommonStyleToOnlyElement();
 
     if (applyKnownNonTerminal != null)
       applyKnownNonTerminal.accept(result);
 
-    members.clear();
+    ComputedStyle styleToApply;
 
-    return result;
+    // If there's a common style on all elements, its properties prevail over the container's
+    if (this.membersEqualStyle != null)
+      styleToApply = this.membersEqualStyle.addMissing(this.computedStyle);
+    else
+      styleToApply = this.computedStyle;
+
+    if (styleToApply != null) {
+      if (membersCommonStyle != null) {
+        membersCommonStyle.subtractStylesOnEquality(membersEqualStyle, true);
+        styleToApply.subtractCommonStyles(membersCommonStyle);
+      }
+
+//      appendResetPropertiesIfApplicable(styleToApply, selfAndParentStyle);
+      styleToApply.subtractEqualStyles(this.parentStyle);
+    }
+
+    if (this.memberEntries != null)
+      memberEntries.clear();
+
+    this.membersEqualStyle = null;
+    this.membersCommonStyle = null;
+
+    return new CombinationResult(result, styleToApply);
+  }
+
+  // TODO: Inline
+  private void handleResetAndSubtractUnnecessaryStyles(@Nullable ComputedStyle style) {
+    if (style == null)
+      return;
+
+    // If the member resets, append all necessary properties to go back to the resetContext
+    appendResetPropertiesIfApplicable(style, selfAndParentStyle);
+
+    // Don't apply styles which are already effective in this component
+    style.subtractEqualStyles(selfAndParentStyle);
   }
 
   private @Nullable Consumer<Object> makeKnownNonTerminalClosure(MarkupNode nonTerminal) {
@@ -452,74 +506,68 @@ public class ComponentSequence {
     return null;
   }
 
+  public ComponentSequence makeChildSequence(MarkupNode childNode) {
+    ComputedStyle childParentStyle = this.computedStyle;
+
+    if (childParentStyle != null)
+      childParentStyle.addMissing(this.parentStyle);
+    else
+      childParentStyle = this.parentStyle;
+
+    return new ComponentSequence(childParentStyle, childNode, slotContext, resetContext, componentConstructor, interpreter);
+  }
+
   public static ComponentSequence initial(
     SlotContext slotContext,
     SlotContext resetContext,
-    ComponentConstructor componentConstructor, Interpreter interpreter) {
-    return new ComponentSequence(
-      null, slotContext, resetContext, null,
-      null, slotContext.defaultStyle, null,
-      componentConstructor, interpreter
-    );
-  }
-
-  public ComponentSequence makeChildSequence(MarkupNode styleProvider) {
-    ComputedStyle childStyle = null;
-
-    if (styleProvider instanceof StyledNode)
-      childStyle = new ComputedStyle((StyledNode) styleProvider, interpreter);
-
-    ComputedStyle styleToApply = childStyle;
-    ComputedStyle effectiveStyle = childStyle;
-    ComputedStyle inheritedStyle = this.effectiveStyle;
-
-    if (inheritedStyle != null) {
-      // Do not specify styles explicitly which are already active due to inheritance
-      if (styleToApply != null)
-        styleToApply = styleToApply.copy().subtractEqualStyles(inheritedStyle);
-
-      // Add the inherited style to what's currently effective
-      effectiveStyle = effectiveStyle == null ? inheritedStyle : effectiveStyle.copy().addMissing(inheritedStyle);
-
-      // Add explicit properties to invert unwanted inherited style
-      // By definition, a reset means resetting to chat-state; thus,
-      // that's the context to get defaults from
-      if (childStyle != null && childStyle.reset) {
-        ComputedStyle mask = inheritedStyle.copy().subtractEqualStyles(childStyle);
-
-        if (styleToApply == null)
-          styleToApply = new ComputedStyle();
-
-        styleToApply = styleToApply.applyDefaults(mask, resetContext);
-      }
-    }
-
-    return new ComponentSequence(this, slotContext, resetContext, styleProvider, childStyle, effectiveStyle, styleToApply, componentConstructor, interpreter);
-  }
-
-  public ComponentSequence(
-    @Nullable ComponentSequence parentSequence,
-    SlotContext slotContext,
-    SlotContext resetContext,
-    @Nullable MarkupNode nonTerminal,
-    @Nullable ComputedStyle computedStyle,
-    @Nullable ComputedStyle effectiveStyle,
-    @Nullable ComputedStyle styleToApply,
     ComponentConstructor componentConstructor,
     Interpreter interpreter
   ) {
-    this.parentSequence = parentSequence;
+    return new ComponentSequence(slotContext.defaultStyle, null, slotContext, resetContext, componentConstructor, interpreter);
+  }
+
+  private ComponentSequence(
+    ComputedStyle parentStyle,
+    @Nullable MarkupNode nonTerminal,
+    SlotContext slotContext,
+    SlotContext resetContext,
+    ComponentConstructor componentConstructor,
+    Interpreter interpreter
+  ) {
+    this.parentStyle = parentStyle;
     this.slotContext = slotContext;
     this.resetContext = resetContext;
-    this.members = new ArrayList<>();
-    this.computedStyle = computedStyle;
-    this.effectiveStyle = effectiveStyle;
-    this.styleToApply = styleToApply;
+    this.memberEntries = new ArrayList<>();
     this.componentConstructor = componentConstructor;
     this.interpreter = interpreter;
 
     // Captures the required environment-variable values at the time of entering this tag
     // and also makes applying this exact same non-terminal again reusable.
     this.applyKnownNonTerminal = makeKnownNonTerminalClosure(nonTerminal);
+
+    // The style is also captured at this very moment
+    this.computedStyle = ComputedStyle.computeFor(nonTerminal, interpreter);
+
+    appendResetPropertiesIfApplicable(this.computedStyle, parentStyle);
+
+    ComputedStyle selfAndParentStyle = this.computedStyle;
+
+    if (selfAndParentStyle != null)
+      selfAndParentStyle.addMissing(parentStyle);
+    else
+      selfAndParentStyle = parentStyle;
+
+    this.selfAndParentStyle = selfAndParentStyle;
+  }
+
+  private void appendResetPropertiesIfApplicable(@Nullable ComputedStyle style, @Nullable ComputedStyle parentStyle) {
+    // Add explicit properties to invert unwanted inherited style
+    if (parentStyle != null && style != null && style.reset) {
+      ComputedStyle mask = parentStyle.copy();
+      mask.subtractEqualStyles(style);
+
+      style.applyDefaults(mask, resetContext);
+      style.reset = false;
+    }
   }
 }

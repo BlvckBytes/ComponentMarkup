@@ -74,10 +74,16 @@ public class OutputBuilder {
       ComponentSequence sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        Object combineResult = sequence.combineAndClearMembers();
+        CombinationResult combinationResult = sequence.combineAndClearMembers();
 
-        if (combineResult != null)
-          result.add(combineResult);
+        if (combinationResult != null) {
+
+          // Apply the highest-up style manually now, without any further simplifying calculations
+          if (combinationResult.styleToApply != null)
+            combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor);
+
+          result.add(combinationResult.component);
+        }
 
         break;
       }
