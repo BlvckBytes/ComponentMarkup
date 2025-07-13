@@ -918,6 +918,36 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldEmitEmptyComponentsOnBackToBackBreaks() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<red>First line</>",
+      "<br/>",
+      "<br/>",
+      "<aqua>Last line</>"
+    );
+
+    makeCase(
+      text,
+      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(line -> (
+          line
+            .string("text", "First line")
+            .string("color", "red")
+        ))
+        .object(line -> (
+          line.string("text", "")
+        ))
+        .object(line -> (
+          line
+            .string("text", "Last line")
+            .string("color", "aqua")
+        ))
+    );
+  }
+
   @SuppressWarnings("SameParameterValue")
   private void makeRecordedCase(
     TextWithAnchors input,

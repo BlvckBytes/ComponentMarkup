@@ -252,12 +252,15 @@ public class ComponentSequence {
   public Object addSequence(ComponentSequence sequence) {
     CombinationResult result = sequence.combineAndClearMembers();
 
-    if (result == null)
-      return null;
+    if (result == null) {
+      Object emptyComponent = componentConstructor.createTextNode("");
+      addMember(emptyComponent, null);
+      return emptyComponent;
+    }
 
     addMember(result.component, result.styleToApply);
 
-    return result;
+    return result.component;
   }
 
   private void addMember(Object member, @Nullable ComputedStyle memberStyle) {
