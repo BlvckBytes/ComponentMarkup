@@ -331,9 +331,10 @@ public class ComponentSequence {
     ComputedStyle styleToApply;
 
     // If there's an equal style on all elements, its properties prevail over the container's
-    if (this.membersEqualStyle != null)
-      styleToApply = this.membersEqualStyle.addMissing(this.computedStyle);
-    else
+    if (this.membersEqualStyle != null) {
+      styleToApply = this.membersEqualStyle;
+      styleToApply.addMissing(this.computedStyle);
+    } else
       styleToApply = this.computedStyle;
 
     if (styleToApply != null) {
@@ -562,10 +563,7 @@ public class ComponentSequence {
   private void appendResetPropertiesIfApplicable(@Nullable ComputedStyle style, @Nullable ComputedStyle parentStyle) {
     // Add explicit properties to invert unwanted inherited style
     if (parentStyle != null && style != null && style.reset) {
-      ComputedStyle mask = parentStyle.copy();
-      mask.subtractStylesOnEquality(style, true);
-
-      style.applyDefaults(mask, resetContext);
+      style.addMissingDefaults(parentStyle, resetContext);
       style.reset = false;
     }
   }

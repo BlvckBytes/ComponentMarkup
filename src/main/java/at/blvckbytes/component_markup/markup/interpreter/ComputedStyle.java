@@ -76,9 +76,9 @@ public class ComputedStyle {
     return this;
   }
 
-  public ComputedStyle addMissing(@Nullable ComputedStyle other) {
+  public void addMissing(@Nullable ComputedStyle other) {
     if (other == null)
-      return this;
+      return;
 
     if (this.packedColor == PackedColor.NULL_SENTINEL)
       this.packedColor = other.packedColor;
@@ -91,11 +91,11 @@ public class ComputedStyle {
 
     if (TriStateBitFlags.isAllNulls(this.formats)) {
       this.formats = other.formats;
-      return this;
+      return;
     }
 
     if (TriStateBitFlags.isAllNulls(other.formats))
-      return this;
+      return;
 
     for (int index = 0; index < Format.COUNT; ++index) {
       if (TriStateBitFlags.read(this.formats, index) != TriState.NULL)
@@ -105,8 +105,6 @@ public class ComputedStyle {
 
       this.formats = TriStateBitFlags.write(this.formats, index, otherState);
     }
-
-    return this;
   }
 
   public void subtractStylesOnEquality(@Nullable ComputedStyle other, boolean equal) {
@@ -170,7 +168,7 @@ public class ComputedStyle {
     }
   }
 
-  public void applyDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
+  public void addMissingDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
     if (mask == null)
       return;
 
