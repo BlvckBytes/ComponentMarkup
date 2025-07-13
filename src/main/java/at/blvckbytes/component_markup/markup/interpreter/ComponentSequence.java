@@ -187,7 +187,7 @@ public class ComponentSequence {
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
 
       // Don't apply styles which are already effective in this component
-      style.subtractEqualStyles(selfAndParentStyle);
+      style.subtractStylesOnEquality(selfAndParentStyle, true);
     }
 
     if (!areStylesEffectivelyEqual(style, bufferedTextsStyle))
@@ -271,7 +271,7 @@ public class ComponentSequence {
       appendResetPropertiesIfApplicable(memberStyle, selfAndParentStyle);
 
       // Don't apply styles which are already effective in this component
-      memberStyle.subtractEqualStyles(selfAndParentStyle);
+      memberStyle.subtractStylesOnEquality(selfAndParentStyle, true);
     }
 
     if (this.membersEqualStyle == null) {
@@ -300,7 +300,7 @@ public class ComponentSequence {
       MemberAndStyle onlyMember = memberEntries.get(0);
 
       if (onlyMember.style != null) {
-        onlyMember.style.subtractEqualStyles(membersEqualStyle);
+        onlyMember.style.subtractStylesOnEquality(membersEqualStyle, true);
         onlyMember.style.applyStyles(onlyMember.member, componentConstructor);
       }
 
@@ -315,7 +315,7 @@ public class ComponentSequence {
       for (MemberAndStyle memberEntry : memberEntries) {
 
         if (memberEntry.style != null) {
-          memberEntry.style.subtractEqualStyles(membersEqualStyle);
+          memberEntry.style.subtractStylesOnEquality(membersEqualStyle, true);
           memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
         }
 
@@ -342,7 +342,7 @@ public class ComponentSequence {
         styleToApply.subtractCommonStyles(membersCommonStyle);
       }
 
-      styleToApply.subtractEqualStyles(this.parentStyle);
+      styleToApply.subtractStylesOnEquality(this.parentStyle, true);
     }
 
     if (this.memberEntries != null)
@@ -563,7 +563,7 @@ public class ComponentSequence {
     // Add explicit properties to invert unwanted inherited style
     if (parentStyle != null && style != null && style.reset) {
       ComputedStyle mask = parentStyle.copy();
-      mask.subtractEqualStyles(style);
+      mask.subtractStylesOnEquality(style, true);
 
       style.applyDefaults(mask, resetContext);
       style.reset = false;

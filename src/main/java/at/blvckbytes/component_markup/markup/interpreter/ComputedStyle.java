@@ -195,34 +195,6 @@ public class ComputedStyle {
     }
   }
 
-  public void subtractEqualStyles(@Nullable ComputedStyle other) {
-    if (other == null)
-      return;
-
-    if (this.font != null && this.font.equals(other.font))
-      this.font = null;
-
-    if (this.packedColor != PackedColor.NULL_SENTINEL && this.packedColor == other.packedColor)
-      this.packedColor = PackedColor.NULL_SENTINEL;
-
-    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && this.packedShadowColor == other.packedShadowColor)
-      this.packedShadowColor = PackedColor.NULL_SENTINEL;
-
-    if (TriStateBitFlags.isAllNulls(this.formats) || TriStateBitFlags.isAllNulls(other.formats))
-      return;
-
-    for (int index = 0; index < Format.COUNT; ++index) {
-      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
-
-      if (thisFormat != TriState.NULL) {
-        TriState otherFormat = TriStateBitFlags.read(other.formats, index);
-
-        if (thisFormat == otherFormat)
-          this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
-      }
-    }
-  }
-
   public void applyDefaults(@Nullable ComputedStyle mask, SlotContext slotContext) {
     if (mask == null)
       return;
