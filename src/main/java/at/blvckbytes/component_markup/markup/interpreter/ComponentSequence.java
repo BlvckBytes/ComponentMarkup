@@ -282,7 +282,7 @@ public class ComponentSequence {
     if (this.membersCommonStyle == null) {
       this.membersCommonStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
     } else
-      this.membersCommonStyle.subtractUncommonProperties(memberStyle);
+      this.membersCommonStyle.subtractStylesOnCommonality(memberStyle, false);
 
     this.memberEntries.add(new MemberAndStyle(member, memberStyle));
   }
@@ -339,7 +339,7 @@ public class ComponentSequence {
     if (styleToApply != null) {
       if (membersCommonStyle != null) {
         membersCommonStyle.subtractStylesOnEquality(membersEqualStyle, true);
-        styleToApply.subtractCommonStyles(membersCommonStyle);
+        styleToApply.subtractStylesOnCommonality(membersCommonStyle, true);
       }
 
       styleToApply.subtractStylesOnEquality(this.parentStyle, true);

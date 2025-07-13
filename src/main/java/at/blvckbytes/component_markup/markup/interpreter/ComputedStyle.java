@@ -138,20 +138,23 @@ public class ComputedStyle {
     }
   }
 
-  public void subtractUncommonProperties(@Nullable ComputedStyle other) {
+  public void subtractStylesOnCommonality(@Nullable ComputedStyle other, boolean common) {
     if (other == null)
       return;
 
-    if (this.font != null && other.font == null)
+    if (this.font != null && ((other.font == null) ^ common))
       this.font = null;
 
-    if (this.packedColor != PackedColor.NULL_SENTINEL && other.packedColor == PackedColor.NULL_SENTINEL)
+    if (this.packedColor != PackedColor.NULL_SENTINEL && ((other.packedColor == PackedColor.NULL_SENTINEL) ^ common))
       this.packedColor = PackedColor.NULL_SENTINEL;
 
-    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && other.packedShadowColor == PackedColor.NULL_SENTINEL)
+    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && ((other.packedShadowColor == PackedColor.NULL_SENTINEL) ^ common))
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
 
     if (TriStateBitFlags.isAllNulls(this.formats))
+      return;
+
+    if (common && TriStateBitFlags.isAllNulls(other.formats))
       return;
 
     for (int index = 0; index < Format.COUNT; ++index) {
@@ -162,36 +165,8 @@ public class ComputedStyle {
 
       TriState otherFormat = TriStateBitFlags.read(other.formats, index);
 
-      if (otherFormat == TriState.NULL)
+      if ((otherFormat == TriState.NULL) ^ common)
         this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
-    }
-  }
-
-  public void subtractCommonStyles(@Nullable ComputedStyle other) {
-    if (other == null)
-      return;
-
-    if (this.font != null && other.font != null)
-      this.font = null;
-
-    if (this.packedColor != PackedColor.NULL_SENTINEL && other.packedColor != PackedColor.NULL_SENTINEL)
-      this.packedColor = PackedColor.NULL_SENTINEL;
-
-    if (this.packedShadowColor != PackedColor.NULL_SENTINEL && other.packedShadowColor != PackedColor.NULL_SENTINEL)
-      this.packedShadowColor = PackedColor.NULL_SENTINEL;
-
-    if (TriStateBitFlags.isAllNulls(this.formats) || TriStateBitFlags.isAllNulls(other.formats))
-      return;
-
-    for (int index = 0; index < Format.COUNT; ++index) {
-      TriState thisFormat = TriStateBitFlags.read(this.formats, index);
-
-      if (thisFormat != TriState.NULL) {
-        TriState otherFormat = TriStateBitFlags.read(other.formats, index);
-
-        if (otherFormat != TriState.NULL)
-          this.formats = TriStateBitFlags.write(this.formats, index, TriState.NULL);
-      }
     }
   }
 
