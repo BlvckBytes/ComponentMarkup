@@ -182,7 +182,13 @@ public class ComponentSequence {
   private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
     this.textCreationHandler = creationHandler;
 
-    handleResetAndSubtractUnnecessaryStyles(style);
+    if (style != null) {
+      // If the member resets, append all necessary properties to go back to the resetContext
+      appendResetPropertiesIfApplicable(style, selfAndParentStyle);
+
+      // Don't apply styles which are already effective in this component
+      style.subtractEqualStyles(selfAndParentStyle);
+    }
 
     if (!areStylesEffectivelyEqual(style, bufferedTextsStyle))
       concatAndInstantiateBufferedTexts();
@@ -260,7 +266,13 @@ public class ComponentSequence {
     if (this.memberEntries == null)
       this.memberEntries = new ArrayList<>();
 
-    handleResetAndSubtractUnnecessaryStyles(memberStyle);
+    if (memberStyle != null) {
+      // If the member resets, append all necessary properties to go back to the resetContext
+      appendResetPropertiesIfApplicable(memberStyle, selfAndParentStyle);
+
+      // Don't apply styles which are already effective in this component
+      memberStyle.subtractEqualStyles(selfAndParentStyle);
+    }
 
     if (this.membersEqualStyle == null) {
       this.membersEqualStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
@@ -318,7 +330,7 @@ public class ComponentSequence {
 
     ComputedStyle styleToApply;
 
-    // If there's a common style on all elements, its properties prevail over the container's
+    // If there's an equal style on all elements, its properties prevail over the container's
     if (this.membersEqualStyle != null)
       styleToApply = this.membersEqualStyle.addMissing(this.computedStyle);
     else
@@ -330,7 +342,6 @@ public class ComponentSequence {
         styleToApply.subtractCommonStyles(membersCommonStyle);
       }
 
-//      appendResetPropertiesIfApplicable(styleToApply, selfAndParentStyle);
       styleToApply.subtractEqualStyles(this.parentStyle);
     }
 
@@ -341,18 +352,6 @@ public class ComponentSequence {
     this.membersCommonStyle = null;
 
     return new CombinationResult(result, styleToApply);
-  }
-
-  // TODO: Inline
-  private void handleResetAndSubtractUnnecessaryStyles(@Nullable ComputedStyle style) {
-    if (style == null)
-      return;
-
-    // If the member resets, append all necessary properties to go back to the resetContext
-    appendResetPropertiesIfApplicable(style, selfAndParentStyle);
-
-    // Don't apply styles which are already effective in this component
-    style.subtractEqualStyles(selfAndParentStyle);
   }
 
   private @Nullable Consumer<Object> makeKnownNonTerminalClosure(MarkupNode nonTerminal) {
