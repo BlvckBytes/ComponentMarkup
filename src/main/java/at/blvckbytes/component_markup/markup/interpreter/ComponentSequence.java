@@ -286,7 +286,8 @@ public class ComponentSequence {
         members.add(memberEntry.member);
       }
 
-      componentConstructor.setChildren(result, members);
+      if (!componentConstructor.setMembers(result, members, MembersSlot.CHILDREN))
+        LoggerProvider.get().log(Level.WARNING, "Could not set the members of a component");
     }
 
     if (applyKnownNonTerminal != null)

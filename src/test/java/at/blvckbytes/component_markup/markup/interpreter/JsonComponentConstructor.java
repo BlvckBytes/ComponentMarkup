@@ -3,17 +3,18 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 
 public class JsonComponentConstructor implements ComponentConstructor {
 
@@ -293,37 +294,194 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // Miscellaneous
   // ================================================================================
 
-  @Override
-  public void setChildren(Object component, List<Object> children) {
-    JsonArray extra = new JsonArray();
+  private JsonArray toJsonArray(@Nullable List<Object> children) {
+    JsonArray result = new JsonArray();
 
-    for (Object child : children)
-      extra.add((JsonObject) child);
-
-    ((JsonObject) component).add("extra", extra);
-  }
-
-  @Override
-  public @NotNull List<Object> getChildren(Object component) {
-    JsonElement extra = ((JsonObject) component).get("extra");
-    List<Object> result = new ArrayList<>();
-
-    if (extra instanceof JsonArray) {
-      for (Object child : (JsonArray) extra)
-        result.add(child);
+    if (children != null) {
+      for (Object child : children)
+        result.add((JsonElement) child);
     }
 
     return result;
   }
 
   @Override
-  public Object shallowCopy(Object component) {
+  public boolean setMembers(Object component, @Nullable List<Object> children, MembersSlot slot) {
+    JsonPropertyRW propertyRW = accessProperty((JsonObject) component, slot);
+
+    if (propertyRW == null)
+      return false;
+
+    switch (slot) {
+      case HOVER_ITEM_NAME:
+      case HOVER_ENTITY_NAME:
+      case HOVER_TEXT_VALUE: {
+        if (children == null)
+          return propertyRW.write(null);
+
+        if (children.size() > 1)
+          LoggerProvider.get().log(Level.WARNING, "Expected children for slot " + slot + " to be a singleton-list");
+
+        return propertyRW.write((JsonElement) children.get(0));
+      }
+
+      default:
+        return propertyRW.write(toJsonArray(children));
+    }
+  }
+
+  @Override
+  public @Nullable List<Object> getMembers(Object component, MembersSlot slot) {
+    JsonPropertyRW propertyRW = accessProperty((JsonObject) component, slot);
+
+    if (propertyRW == null)
+      return null;
+
+    JsonElement value = propertyRW.read();
+
+    if (value == null)
+      return null;
+
+    List<Object> result = new ArrayList<>();
+
+    if (value instanceof JsonArray) {
+      for (JsonElement item : (JsonArray) value)
+        result.add(item);
+
+      return result;
+    }
+
+    result.add(value);
+
+    return result;
+  }
+
+  private static class JsonPropertyRW {
+
+    final Supplier<JsonElement> _read;
+    final Consumer<JsonElement> _write;
+
+    JsonPropertyRW(Supplier<JsonElement> read, Consumer<JsonElement> write) {
+      _read = read;
+      _write = write;
+    }
+
+    boolean write(JsonElement element) {
+      try {
+        this._write.accept(element);
+        return true;
+      } catch (ClassCastException | NullPointerException ignored) {
+        return false;
+      }
+    }
+
+    @Nullable JsonElement read() {
+      try {
+        return this._read.get();
+      } catch (ClassCastException | NullPointerException ignored) {
+        return null;
+      }
+    }
+  }
+
+  private JsonPropertyRW accessProperty(JsonObject component, MembersSlot slot) {
+    switch (slot) {
+      case CHILDREN: {
+        return new JsonPropertyRW(
+          () -> component.getAsJsonArray("extra"),
+          value -> component.add("extra", value)
+        );
+      }
+
+      case TRANSLATE_WITH: {
+        if (!component.has("translate"))
+          return null;
+
+        return new JsonPropertyRW(
+          () -> component.getAsJsonArray("with"),
+          value -> component.add("with", value)
+        );
+      }
+
+      case HOVER_ENTITY_NAME:
+      case HOVER_ITEM_LORE:
+      case HOVER_ITEM_NAME:
+      case HOVER_TEXT_VALUE: {
+        JsonObject eventObject = component.getAsJsonObject("hoverEvent");
+        String action = eventObject.get("action").getAsString();
+
+        switch (slot) {
+          case HOVER_ENTITY_NAME: {
+            if (!action.equals("show_entity"))
+              return null;
+
+            return new JsonPropertyRW(
+              () -> eventObject.get("name"),
+              value -> eventObject.add("name", value)
+            );
+          }
+
+          case HOVER_ITEM_LORE:
+          case HOVER_ITEM_NAME: {
+            if (!action.equals("show_item"))
+              return null;
+
+            JsonObject tag = eventObject.getAsJsonObject("contents").getAsJsonObject("tag");
+
+            if (slot == MembersSlot.HOVER_ITEM_NAME) {
+              JsonElement nameElement = tag.get("name");
+
+              return new JsonPropertyRW(
+                () -> tag.get("name"),
+                value -> tag.add("name", value)
+              );
+            }
+
+            return new JsonPropertyRW(
+              () -> tag.get("lore"),
+              value -> tag.add("lore", value)
+            );
+          }
+
+          case HOVER_TEXT_VALUE: {
+            if (!action.equals("show_text"))
+              return null;
+
+            return new JsonPropertyRW(
+              () -> component.get("contents"),
+              value -> component.add("contents", value)
+            );
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public Object shallowCopyIncludingMemberLists(Object component) {
     JsonObject copy = new JsonObject();
     JsonObject source = (JsonObject) component;
 
-    for (String key : source.keySet())
-      copy.add(key, source.get(key));
+    for (String key : source.keySet()) {
+      JsonElement sourceValue = source.get(key);
+
+      if (sourceValue instanceof JsonArray)
+        sourceValue = copyArray((JsonArray) sourceValue);
+
+      copy.add(key, sourceValue);
+    }
 
     return copy;
+  }
+
+  private JsonArray copyArray(JsonArray input) {
+    JsonArray result = new JsonArray();
+
+    for (JsonElement item : input)
+      result.add(item);
+
+    return result;
   }
 }

@@ -98,13 +98,24 @@ public interface ComponentConstructor {
   void setItalicFormat(Object component, TriState value);
 
   // ================================================================================
-  // Miscellaneous
+  // Members
   // ================================================================================
 
-  void setChildren(Object component, List<Object> children);
+  /**
+   * @return True iif the slot was valid on this component
+   */
+  boolean setMembers(Object component, @Nullable List<Object> children, MembersSlot slot);
 
-  @NotNull List<Object> getChildren(Object component);
+  /**
+   * @return Non-null value iif the slot was valid on this component
+   */
+  @Nullable List<Object> getMembers(Object component, MembersSlot slot);
 
-  Object shallowCopy(Object component);
+  /**
+   * Creates a shallow copy of the given component which also copies all member-lists such
+   * that they can be safely manipulated; members which are handled as singleton-lists and are
+   * thereby references of their own do not need to be copied.
+   */
+  Object shallowCopyIncludingMemberLists(Object component);
 
 }

@@ -1,0 +1,10 @@
+package at.blvckbytes.component_markup.markup.interpreter;
+
+public enum MembersSlot {
+  CHILDREN,
+  TRANSLATE_WITH,
+  HOVER_ENTITY_NAME,
+  HOVER_TEXT_VALUE,
+  HOVER_ITEM_NAME,
+  HOVER_ITEM_LORE
+}
