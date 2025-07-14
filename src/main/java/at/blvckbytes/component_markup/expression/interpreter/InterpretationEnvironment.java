@@ -2,30 +2,53 @@ package at.blvckbytes.component_markup.expression.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
-public interface InterpretationEnvironment {
+import java.util.HashMap;
+import java.util.Map;
 
-  InterpretationEnvironment EMPTY_ENVIRONMENT = new InterpretationEnvironment() {
+public class InterpretationEnvironment {
 
-    @Override
-    public @Nullable Object getVariableValue(String name) {
-      return null;
-    }
+  private static final DefaultValueInterpreter DEFAULT_INTERPRETER = new DefaultValueInterpreter();
 
-    @Override
-    public boolean doesVariableExist(String name) {
-      return false;
-    }
+  protected final Map<String, Object> variables;
+  protected ValueInterpreter valueInterpreter;
 
-    @Override
-    public ValueInterpreter getValueInterpreter() {
-      return new DefaultValueInterpreter();
-    }
-  };
+  public InterpretationEnvironment() {
+    this(new HashMap<>(), DEFAULT_INTERPRETER);
+  }
 
-  @Nullable Object getVariableValue(String name);
+  private InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter) {
+    this.variables = variables;
+    this.valueInterpreter = valueInterpreter;
+  }
 
-  boolean doesVariableExist(String name);
+  public @Nullable Object getVariableValue(String name) {
+    return variables.get(name);
+  }
 
-  ValueInterpreter getValueInterpreter();
+  public boolean doesVariableExist(String name) {
+    return variables.containsKey(name);
+  }
 
+  public ValueInterpreter getValueInterpreter() {
+    return valueInterpreter;
+  }
+
+  public InterpretationEnvironment withVariable(String name, Object value) {
+    this.variables.put(name, value);
+    return this;
+  }
+
+  public InterpretationEnvironment removeVariable(String name) {
+    this.variables.remove(name);
+    return this;
+  }
+
+  public InterpretationEnvironment withValueInterpreter(ValueInterpreter valueInterpreter) {
+    this.valueInterpreter = valueInterpreter;
+    return this;
+  }
+
+  public InterpretationEnvironment copy() {
+    return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter);
+  }
 }

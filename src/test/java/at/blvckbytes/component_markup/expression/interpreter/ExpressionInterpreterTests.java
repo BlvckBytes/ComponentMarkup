@@ -15,8 +15,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformUpperCase() {
     makeCase(
       "'before ' & ~^my_string & ' after'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "helLo, woRld"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "helLo, woRld"),
       "before HELLO, WORLD after"
     );
   }
@@ -25,8 +25,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformLowerCase() {
     makeCase(
       "'before ' & ~_my_string & ' after'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "helLo, woRld"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "helLo, woRld"),
       "before hello, world after"
     );
   }
@@ -35,8 +35,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformTitleCase() {
     makeCase(
       "'before ' & ~#my_string & ' test'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "helLo, woRld"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "helLo, woRld"),
       "before Hello, World test"
     );
   }
@@ -45,8 +45,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformSlugify() {
     makeCase(
       "'before ' & ~-my_string & ' test'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "helLö, @wöRld"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "helLö, @wöRld"),
       "before hellö-wörld test"
     );
   }
@@ -55,8 +55,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformAsciify() {
     makeCase(
       "'before ' & ~?my_string & ' test'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "helLö, wèRld"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "helLö, wèRld"),
       "before helLo, weRld test"
     );
   }
@@ -65,8 +65,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformTrim() {
     makeCase(
       "'before ' & ~|my_string & ' test'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "  Hello, World  "),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "  Hello, World  "),
       "before Hello, World test"
     );
   }
@@ -75,8 +75,8 @@ public class ExpressionInterpreterTests {
   public void shouldTransformReverse() {
     makeCase(
       "'before ' & ~<my_string & ' test'",
-      new EnvironmentBuilder()
-        .withStatic("my_string", "Hello, World"),
+      new InterpretationEnvironment()
+        .withVariable("my_string", "Hello, World"),
       "before dlroW ,olleH test"
     );
   }
@@ -87,13 +87,13 @@ public class ExpressionInterpreterTests {
 
     makeCase(
       "'hello' @ null",
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       result
     );
 
     makeCase(
       "'hello' @ ''",
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       result
     );
   }
@@ -102,15 +102,15 @@ public class ExpressionInterpreterTests {
   public void shouldExplodeStringWithDelimiter() {
     makeCase(
       "'first second third' @ ' '",
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       Arrays.asList("first", "second", "third")
     );
   }
 
   @Test
   public void shouldExplodeStringWithRegex() {
-    InterpretationEnvironment environment = new EnvironmentBuilder()
-      .withStatic("input", "first0second1third2fourth");
+    InterpretationEnvironment environment = new InterpretationEnvironment()
+      .withVariable("input", "first0second1third2fourth");
 
     makeCase(
       "input @ '[0-9]'",
@@ -127,8 +127,8 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldSubstringInAllPermutations() {
-    InterpretationEnvironment environment = new EnvironmentBuilder()
-      .withStatic("input", "ABCDEFGHIJ");
+    InterpretationEnvironment environment = new InterpretationEnvironment()
+      .withVariable("input", "ABCDEFGHIJ");
 
     // Full string
     makeCase("input[:]", environment, "ABCDEFGHIJ");
@@ -204,7 +204,7 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldRepeatAString() {
-    makeCase("'hello' ** 5", InterpretationEnvironment.EMPTY_ENVIRONMENT, "hellohellohellohellohello");
+    makeCase("'hello' ** 5", new InterpretationEnvironment(), "hellohellohellohellohello");
   }
 
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {

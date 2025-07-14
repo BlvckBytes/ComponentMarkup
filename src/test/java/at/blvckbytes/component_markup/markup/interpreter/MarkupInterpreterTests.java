@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.expression.interpreter.EnvironmentBuilder;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
@@ -42,7 +41,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world! :)")
@@ -61,8 +60,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("my_flag", true),
+      new InterpretationEnvironment()
+        .withVariable("my_flag", true),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "My flag is true!")
@@ -72,8 +71,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("my_flag", false),
+      new InterpretationEnvironment()
+        .withVariable("my_flag", false),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "My flag is false!")
@@ -98,8 +97,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "a"),
+      new InterpretationEnvironment()
+        .withVariable("input", "a"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Case A")
@@ -108,8 +107,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "b"),
+      new InterpretationEnvironment()
+        .withVariable("input", "b"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Case B")
@@ -118,9 +117,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "null")
-        .withStatic("other_input", "C"),
+      new InterpretationEnvironment()
+        .withVariable("input", "null")
+        .withVariable("other_input", "C"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Nested case C")
@@ -129,9 +128,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "null")
-        .withStatic("other_input", "D"),
+      new InterpretationEnvironment()
+        .withVariable("input", "null")
+        .withVariable("other_input", "D"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Nested case D")
@@ -140,9 +139,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "null")
-        .withStatic("other_input", "E"),
+      new InterpretationEnvironment()
+        .withVariable("input", "null")
+        .withVariable("other_input", "E"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -150,8 +149,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", "asd"),
+      new InterpretationEnvironment()
+        .withVariable("input", "asd"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Fallback Case")
@@ -160,8 +159,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("input", null),
+      new InterpretationEnvironment()
+        .withVariable("input", null),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Fallback Case")
@@ -177,10 +176,10 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("my_prefix", "prefix ")
-        .withStatic("my_name", "Steve")
-        .withStatic("my_suffix", " suffix"),
+      new InterpretationEnvironment()
+        .withVariable("my_prefix", "prefix ")
+        .withVariable("my_name", "Steve")
+        .withVariable("my_suffix", " suffix"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, prefix Steve suffix")
@@ -207,8 +206,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("my_chars", Arrays.asList("A", "S", "T")),
+      new InterpretationEnvironment()
+        .withVariable("my_chars", Arrays.asList("A", "S", "T")),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -252,7 +251,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hover over me!")
@@ -278,7 +277,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "1 2 3")
@@ -320,7 +319,7 @@ public class MarkupInterpreterTests {
       new TextWithAnchors(
         "<rainbow>I am the <b>coolest rainbow</b> on earth"
       ),
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT
     );
   }
@@ -333,36 +332,36 @@ public class MarkupInterpreterTests {
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", true)
-        .withStatic("b", true),
+      new InterpretationEnvironment()
+        .withVariable("a", true)
+        .withVariable("b", true),
       SlotType.CHAT,
       "TrueTrue"
     );
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", true)
-        .withStatic("b", false),
+      new InterpretationEnvironment()
+        .withVariable("a", true)
+        .withVariable("b", false),
       SlotType.CHAT,
       "TrueFalse"
     );
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", false)
-        .withStatic("b", true),
+      new InterpretationEnvironment()
+        .withVariable("a", false)
+        .withVariable("b", true),
       SlotType.CHAT,
       "FalseTrue"
     );
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", false)
-        .withStatic("b", false),
+      new InterpretationEnvironment()
+        .withVariable("a", false)
+        .withVariable("b", false),
       SlotType.CHAT,
       "FalseFalse"
     );
@@ -376,16 +375,16 @@ public class MarkupInterpreterTests {
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", true),
+      new InterpretationEnvironment()
+        .withVariable("a", true),
       SlotType.CHAT,
       "True"
     );
 
     makeRecordedCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", false),
+      new InterpretationEnvironment()
+        .withVariable("a", false),
       SlotType.CHAT,
       "False"
     );
@@ -399,8 +398,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", true),
+      new InterpretationEnvironment()
+        .withVariable("a", true),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
@@ -413,8 +412,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", false),
+      new InterpretationEnvironment()
+        .withVariable("a", false),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
@@ -429,7 +428,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -462,7 +461,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -491,7 +490,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.ITEM_LORE,
       new JsonObjectBuilder()
         .string("text", "Hello, world!")
@@ -511,7 +510,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.ITEM_LORE,
       new JsonArrayBuilder()
         .object(line -> (
@@ -541,7 +540,7 @@ public class MarkupInterpreterTests {
       new TextWithAnchors(
         "<red><italic><green><italic>hello, world</green><blue><italic>test me out</blue>"
       ),
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -570,7 +569,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "AAAAA")
@@ -587,9 +586,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", "first")
-        .withStatic("b", "second"),
+      new InterpretationEnvironment()
+        .withVariable("a", "first")
+        .withVariable("b", "second"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello, first and second!")
@@ -605,9 +604,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("a", "first")
-        .withStatic("b", "second"),
+      new InterpretationEnvironment()
+        .withVariable("a", "first")
+        .withVariable("b", "second"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "Hello first world second!")
@@ -625,9 +624,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("markup_value", node)
-        .withStatic("scalar_value", "Hello, world!"),
+      new InterpretationEnvironment()
+        .withVariable("markup_value", node)
+        .withVariable("scalar_value", "Hello, world!"),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -671,8 +670,8 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("first_node", firstNode),
+      new InterpretationEnvironment()
+        .withVariable("first_node", firstNode),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("translate", "my.key")
@@ -694,9 +693,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("first_node", firstNode)
-        .withStatic("second_node", secondNode),
+      new InterpretationEnvironment()
+        .withVariable("first_node", firstNode)
+        .withVariable("second_node", secondNode),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("translate", "my.key")
@@ -713,9 +712,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("first_node", firstNode)
-        .withStatic("second_node", secondNode),
+      new InterpretationEnvironment()
+        .withVariable("first_node", firstNode)
+        .withVariable("second_node", secondNode),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("translate", "my.key")
@@ -732,9 +731,9 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      new EnvironmentBuilder()
-        .withStatic("first_node", firstNode)
-        .withStatic("second_node", secondNode),
+      new InterpretationEnvironment()
+        .withVariable("first_node", firstNode)
+        .withVariable("second_node", secondNode),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("translate", "my.key")
@@ -778,7 +777,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
@@ -805,7 +804,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "aaaaaaaaaa")
@@ -827,7 +826,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "343")
@@ -853,7 +852,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.ITEM_LORE,
       new JsonArrayBuilder()
         .object(line -> (
@@ -929,7 +928,7 @@ public class MarkupInterpreterTests {
 
     makeCase(
       text,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.ITEM_LORE,
       new JsonArrayBuilder()
         .object(line -> (
@@ -1076,7 +1075,7 @@ public class MarkupInterpreterTests {
   ) {
     makeCase(
       input,
-      InterpretationEnvironment.EMPTY_ENVIRONMENT,
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "")
