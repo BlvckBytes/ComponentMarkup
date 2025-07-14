@@ -33,7 +33,7 @@ public class SlotContext {
     )
   );
 
-  private static final SlotContext SLOT_NBT_SEPARATOR = new SlotContext(
+  private static final SlotContext SLOT_SINGLE_LINE_CHAT = new SlotContext(
     ' ',
     applyCommonDefaults(new ComputedStyle())
   );
@@ -50,16 +50,13 @@ public class SlotContext {
     switch (slot) {
       case ENTITY_NAME:
       case ITEM_NAME:
-      case TEXT_TOOLTIP:
         return SLOT_ENTITY_NAME;
 
       case ITEM_LORE:
         return SLOT_ITEM_LORE;
 
-      case NBT_SEPARATOR:
-      case SELECTOR_SEPARATOR:
-      case TRANSLATE_WITH:
-        return SLOT_NBT_SEPARATOR;
+      case SINGLE_LINE_CHAT:
+        return SLOT_SINGLE_LINE_CHAT;
     }
 
     return SLOT_CHAT;

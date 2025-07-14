@@ -1,0 +1,63 @@
+package at.blvckbytes.component_markup.markup.ast.tag.built_in.selector;
+
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredNode;
+import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
+import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
+import at.blvckbytes.component_markup.markup.interpreter.SlotType;
+import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+
+public class SelectorNode extends DeferredNode<SelectorParameter> {
+
+  public final ExpressionNode selector;
+  public final @Nullable MarkupNode separator;
+
+  public SelectorNode(
+    ExpressionNode selector,
+    @Nullable MarkupNode separator,
+    CursorPosition position,
+    @Nullable List<LetBinding> letBindings
+  ) {
+    super(position, letBindings);
+
+    this.selector = selector;
+    this.separator = separator;
+  }
+
+  @Override
+  public @Nullable Object renderComponent(
+    SelectorParameter selectorParameter,
+    ComponentConstructor componentConstructor,
+    InterpretationEnvironment environment,
+    SlotContext slotContext,
+    @Nullable Object recipient
+  ) {
+    // TODO: Implement
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public SelectorParameter createParameter(Interpreter interpreter) {
+    String selector = interpreter.evaluateAsString(this.selector);
+
+    Object separator = null;
+
+    if (this.separator != null) {
+      List<Object> components = interpreter.interpretSubtree(
+        this.separator,
+        interpreter.getComponentConstructor().getSlotContext(SlotType.SINGLE_LINE_CHAT)
+      );
+
+      separator = components.isEmpty() ? null : components.get(0);
+    }
+
+    return new SelectorParameter(selector, separator);
+  }
+}

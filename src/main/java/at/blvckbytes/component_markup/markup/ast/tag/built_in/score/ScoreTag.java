@@ -1,7 +1,6 @@
-package at.blvckbytes.component_markup.markup.ast.tag.built_in;
+package at.blvckbytes.component_markup.markup.ast.tag.built_in.score;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.terminal.ScoreNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;

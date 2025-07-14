@@ -12,8 +12,8 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverTextTag
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.BlockNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.EntityNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.StorageNbtTag;
-
-import java.util.logging.Logger;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.score.ScoreTag;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.selector.SelectorTag;
 
 public class BuiltInTagRegistry extends TagRegistry {
 

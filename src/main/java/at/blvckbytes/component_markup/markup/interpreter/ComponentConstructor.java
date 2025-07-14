@@ -1,5 +1,8 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,21 +23,18 @@ public interface ComponentConstructor {
   // TerminalNode
   // ================================================================================
 
-  Object createTextNode(String text);
+  Object createTextComponent(String text);
 
-  Object createKeyNode(String key);
+  Object createKeyComponent(String key);
 
-  Object createTranslateNode(String key, List<Object> with, @Nullable String fallback);
+  Object createTranslateComponent(String key, List<Object> with, @Nullable String fallback);
 
-  Object createScoreNode(String name, String objective, @Nullable String value);
-
-  Object createSelectorNode(String selector, @Nullable Object separator);
-
-  Object createBlockNbtNode(String coordinates, String path, boolean interpret, @Nullable Object separator);
-
-  Object createEntityNbtNode(String selector, String path, boolean interpret, @Nullable Object separator);
-
-  Object createStorageNbtNode(String resource, String path, boolean interpret, @Nullable Object separator);
+  DeferredComponent createDeferredComponent(
+    DeferredRenderer<?> renderer,
+    RendererParameter parameter,
+    InterpretationEnvironment environmentSnapshot,
+    SlotContext slotContext
+  );
 
   // ================================================================================
   // Click-Action
@@ -98,11 +98,13 @@ public interface ComponentConstructor {
   void setItalicFormat(Object component, TriState value);
 
   // ================================================================================
-  // Children
+  // Miscellaneous
   // ================================================================================
 
   void setChildren(Object component, List<Object> children);
 
   @NotNull List<Object> getChildren(Object component);
+
+  Object shallowCopy(Object component);
 
 }

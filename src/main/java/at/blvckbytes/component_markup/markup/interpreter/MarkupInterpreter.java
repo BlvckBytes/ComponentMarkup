@@ -25,25 +25,36 @@ public class MarkupInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final TemporaryMemberEnvironment environment;
+  private final @Nullable Object recipient;
+
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
   private final SlotContext resetContext;
 
-  private MarkupInterpreter(ComponentConstructor componentConstructor, InterpretationEnvironment baseEnvironment) {
+  private MarkupInterpreter(
+    ComponentConstructor componentConstructor,
+    InterpretationEnvironment baseEnvironment,
+    @Nullable Object recipient
+  ) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
+    this.recipient = recipient;
+
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
     this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
   }
 
-  public static List<Object> interpret(
+  public static InterpretationResult interpret(
     ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
+    @Nullable Object recipient,
     SlotType slot, MarkupNode node
   ) {
-    return new MarkupInterpreter(componentConstructor, baseEnvironment)
-      .interpretSubtree(node, componentConstructor.getSlotContext(slot));
+    return new InterpretationResult(
+      new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
+        .interpretSubtree(node, componentConstructor.getSlotContext(slot))
+    );
   }
 
   @Override
@@ -163,7 +174,7 @@ public class MarkupInterpreter implements Interpreter {
 
   @Override
   public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder(componentConstructor, this, slotContext, resetContext));
+    builderStack.push(new OutputBuilder(recipient, componentConstructor, this, slotContext, resetContext));
     _interpret(node);
     return builderStack.pop().build();
   }

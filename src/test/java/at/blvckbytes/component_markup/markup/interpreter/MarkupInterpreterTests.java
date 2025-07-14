@@ -1012,8 +1012,10 @@ public class MarkupInterpreterTests {
     List<Object> components = MarkupInterpreter.interpret(
       componentConstructor,
       environment,
-      slot, actualNode
-    );
+      null,
+      slot,
+      actualNode
+    ).resolveDeferred(null);
 
     JsonArray actualArray = new JsonArray();
 
@@ -1176,8 +1178,10 @@ public class MarkupInterpreterTests {
     List<Object> resultItems = MarkupInterpreter.interpret(
       componentConstructor,
       baseEnvironment,
-      slot, actualNode
-    );
+      null,
+      slot,
+      actualNode
+    ).resolveDeferred(null);
 
     JsonArray actualJson = new JsonArray();
 

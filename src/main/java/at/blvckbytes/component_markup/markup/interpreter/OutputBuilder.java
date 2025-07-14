@@ -21,6 +21,7 @@ public class OutputBuilder {
   private final Stack<ComponentSequence> sequencesStack;
 
   public OutputBuilder(
+    @Nullable Object recipient,
     ComponentConstructor componentConstructor,
     Interpreter interpreter,
     SlotContext slotContext,
@@ -29,7 +30,7 @@ public class OutputBuilder {
     this.componentConstructor = componentConstructor;
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(slotContext, resetContext, componentConstructor, interpreter));
+    this.sequencesStack.push(ComponentSequence.initial(recipient, slotContext, resetContext, componentConstructor, interpreter));
     this.result = new ArrayList<>();
   }
 
@@ -96,7 +97,7 @@ public class OutputBuilder {
     combineAllSequencesAndResult();
 
     if (result.isEmpty())
-      result.add(componentConstructor.createTextNode(""));
+      result.add(componentConstructor.createTextComponent(""));
 
     sequencesStack.clear();
 

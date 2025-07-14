@@ -13,8 +13,6 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   private final InterpretationEnvironment baseEnvironment;
   private final Map<String, Stack<Object>> shadowingVariables;
 
-  private @Nullable InterpretationEnvironment cachedSnapshot;
-
   public TemporaryMemberEnvironment(InterpretationEnvironment baseEnvironment) {
     this.baseEnvironment = baseEnvironment;
     this.shadowingVariables = new HashMap<>();
@@ -22,7 +20,6 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
 
   public void pushVariable(String name, Object value) {
     shadowingVariables.computeIfAbsent(name, k -> new Stack<>()).push(value);
-    this.cachedSnapshot = null;
   }
 
   public void updateVariable(String name, Object value) {
@@ -34,7 +31,6 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
     }
 
     valueStack.set(valueStack.size() - 1, value);
-    this.cachedSnapshot = null;
   }
 
   public void popVariable(String name) {
@@ -46,7 +42,6 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
     }
 
     valueStack.pop();
-    this.cachedSnapshot = null;
   }
 
   @Override
@@ -75,17 +70,12 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   }
 
   public InterpretationEnvironment snapshot() {
-    if (this.cachedSnapshot != null)
-      return this.cachedSnapshot;
-
     InterpretationEnvironment snapshot = this.baseEnvironment.copy();
 
     for (String shadowingVariableName : shadowingVariables.keySet()) {
       Object currentShadowingValue = shadowingVariables.get(shadowingVariableName).peek();
       snapshot.withVariable(shadowingVariableName, currentShadowingValue);
     }
-
-    this.cachedSnapshot = snapshot;
 
     return snapshot;
   }

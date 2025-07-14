@@ -1,5 +1,8 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
 import at.blvckbytes.component_markup.util.TriState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,21 +31,21 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public Object createTextNode(String text) {
+  public Object createTextComponent(String text) {
     JsonObject component = new JsonObject();
     component.addProperty("text", text);
     return component;
   }
 
   @Override
-  public Object createKeyNode(String key) {
+  public Object createKeyComponent(String key) {
     JsonObject component = new JsonObject();
     component.addProperty("keybind", key);
     return component;
   }
 
   @Override
-  public Object createTranslateNode(String key, List<Object> with, @Nullable String fallback) {
+  public Object createTranslateComponent(String key, List<Object> with, @Nullable String fallback) {
     JsonObject component = new JsonObject();
     component.addProperty("translate", key);
 
@@ -62,62 +65,9 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public Object createScoreNode(String name, String objective, @Nullable String value) {
-    JsonObject component = new JsonObject();
-    JsonObject scoreObject = new JsonObject();
-
-    scoreObject.addProperty("name", name);
-    scoreObject.addProperty("objective", objective);
-
-    if (value != null)
-      scoreObject.addProperty("value", value);
-
-    component.add("score", scoreObject);
-
-    return component;
-  }
-
-  @Override
-  public Object createSelectorNode(String selector, @Nullable Object separator) {
-    JsonObject component = new JsonObject();
-
-    component.addProperty("selector", selector);
-
-    if (separator != null)
-      component.add("separator", (JsonObject) separator);
-
-    return component;
-  }
-
-  @Override
-  public Object createBlockNbtNode(String coordinates, String path, boolean interpret, @Nullable Object separator) {
-    return createNbtNode("storage", coordinates, path, interpret, separator);
-  }
-
-  @Override
-  public Object createEntityNbtNode(String selector, String path, boolean interpret, @Nullable Object separator) {
-    return createNbtNode("entity", selector, path, interpret, separator);
-  }
-
-  @Override
-  public Object createStorageNbtNode(String resource, String path, boolean interpret, @Nullable Object separator) {
-    return createNbtNode("storage", resource, path, interpret, separator);
-  }
-
-  private Object createNbtNode(String sourceKey, String identifier, String path, boolean interpret, @Nullable Object separator) {
-    JsonObject component = new JsonObject();
-
-    component.addProperty("nbt", path);
-
-    if (interpret)
-      component.addProperty("interpret", true);
-
-    if (separator != null)
-      component.add("separator", (JsonObject) separator);
-
-    component.addProperty(sourceKey, identifier);
-
-    return component;
+  public DeferredComponent createDeferredComponent(DeferredRenderer<?> renderer, RendererParameter parameter, InterpretationEnvironment environmentSnapshot, SlotContext slotContext) {
+    // TODO: Implement
+    throw new UnsupportedOperationException();
   }
 
   // ================================================================================
@@ -364,5 +314,16 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     return result;
+  }
+
+  @Override
+  public Object shallowCopy(Object component) {
+    JsonObject copy = new JsonObject();
+    JsonObject source = (JsonObject) component;
+
+    for (String key : source.keySet())
+      copy.add(key, source.get(key));
+
+    return copy;
   }
 }

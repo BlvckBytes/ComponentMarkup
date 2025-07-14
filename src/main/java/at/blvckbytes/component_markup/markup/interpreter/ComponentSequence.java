@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 public class ComponentSequence {
 
+  private final @Nullable Object recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
   private final Interpreter interpreter;
@@ -46,6 +47,29 @@ public class ComponentSequence {
   private final ComputedStyle parentStyle;
   private final ComputedStyle selfAndParentStyle;
 
+  @SuppressWarnings("unchecked")
+  private Object onDeferredNode(DeferredNode<?> deferredNode) {
+    RendererParameter parameter = deferredNode.createParameter(interpreter);
+
+    if (this.recipient != null) {
+      return ((DeferredNode<RendererParameter>) deferredNode).renderComponent(
+        parameter,
+        componentConstructor,
+        interpreter.getEnvironment(),
+        slotContext,
+        this.recipient
+      );
+    }
+
+    // TODO: Store paths to deferred components
+    return componentConstructor.createDeferredComponent(
+      deferredNode,
+      parameter,
+      interpreter.getEnvironment().snapshot(),
+      slotContext
+    );
+  }
+
   public Object onUnit(UnitNode node) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
@@ -53,74 +77,11 @@ public class ComponentSequence {
 
     if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
-      result = componentConstructor.createKeyNode(key);
+      result = componentConstructor.createKeyComponent(key);
     }
 
-    else if (node instanceof ScoreNode) {
-      ScoreNode scoreNode = (ScoreNode) node;
-      String name = interpreter.evaluateAsString(scoreNode.name);
-      String objective = interpreter.evaluateAsString(scoreNode.objective);
-      String value = interpreter.evaluateAsStringOrNull(scoreNode.value);
-      result = componentConstructor.createScoreNode(name, objective, value);
-    }
-
-    else if (node instanceof SelectorNode) {
-      SelectorNode selectorNode = (SelectorNode) node;
-      String selector = interpreter.evaluateAsString(selectorNode.selector);
-
-      Object separator = null;
-
-      if (selectorNode.separator != null) {
-        List<Object> components = interpreter.interpretSubtree(
-          selectorNode.separator,
-          componentConstructor.getSlotContext(SlotType.SELECTOR_SEPARATOR)
-        );
-
-        separator = components.isEmpty() ? null : components.get(0);
-      }
-
-      result = componentConstructor.createSelectorNode(selector, separator);
-    }
-
-    else if (node instanceof NbtNode) {
-      NbtNode nbtNode = (NbtNode) node;
-
-      String identifier = interpreter.evaluateAsString(nbtNode.identifier);
-      String path = interpreter.evaluateAsString(nbtNode.path);
-
-      boolean interpret = false;
-
-      if (nbtNode.interpret != null)
-        interpret = interpreter.evaluateAsBoolean(nbtNode.interpret);
-
-      Object separator = null;
-
-      if (nbtNode.separator != null) {
-        List<Object> components = interpreter.interpretSubtree(
-          nbtNode.separator,
-          componentConstructor.getSlotContext(SlotType.NBT_SEPARATOR)
-        );
-
-        separator = components.isEmpty() ? null : components.get(0);
-      }
-
-      switch (nbtNode.source) {
-        case BLOCK:
-          result = componentConstructor.createBlockNbtNode(identifier, path, interpret, separator);
-          break;
-
-        case ENTITY:
-          result = componentConstructor.createEntityNbtNode(identifier, path, interpret, separator);
-          break;
-
-        case STORAGE:
-          result = componentConstructor.createStorageNbtNode(identifier, path, interpret, separator);
-          break;
-
-        default:
-          LoggerProvider.get().log(Level.WARNING, "Encountered unknown nbt-source: " + nbtNode.source);
-      }
-    }
+    else if (node instanceof DeferredNode)
+      result = onDeferredNode((DeferredNode<?>) node);
 
     else if (node instanceof TranslateNode) {
       TranslateNode translateNode = (TranslateNode) node;
@@ -132,7 +93,7 @@ public class ComponentSequence {
       for (MarkupNode withNode : translateNode.with.get(interpreter)) {
         List<Object> components = interpreter.interpretSubtree(
           withNode,
-          componentConstructor.getSlotContext(SlotType.TRANSLATE_WITH)
+          componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
         );
 
         if (!components.isEmpty())
@@ -144,14 +105,14 @@ public class ComponentSequence {
       if (translateNode.fallback != null)
         fallback = interpreter.evaluateAsStringOrNull(translateNode.fallback);
 
-      result = componentConstructor.createTranslateNode(key, with, fallback);
+      result = componentConstructor.createTranslateComponent(key, with, fallback);
     }
 
     else
       LoggerProvider.get().log(Level.WARNING, "Unknown unit-node: " + node.getClass());
 
     if (result == null)
-      result = componentConstructor.createTextNode("<error>");
+      result = componentConstructor.createTextComponent("<error>");
 
     addMember(result, nodeStyle);
 
@@ -162,7 +123,7 @@ public class ComponentSequence {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
-      Object result = componentConstructor.createTextNode(node.text);
+      Object result = componentConstructor.createTextComponent(node.text);
 
       addMember(result, nodeStyle);
 
@@ -228,7 +189,7 @@ public class ComponentSequence {
     Object result;
 
     if (bufferSize == 1)
-      result = componentConstructor.createTextNode(bufferedTexts.get(0));
+      result = componentConstructor.createTextComponent(bufferedTexts.get(0));
 
     else {
       StringBuilder accumulator = new StringBuilder();
@@ -236,7 +197,7 @@ public class ComponentSequence {
       for (String unstyledText : bufferedTexts)
         accumulator.append(unstyledText);
 
-      result = componentConstructor.createTextNode(accumulator.toString());
+      result = componentConstructor.createTextComponent(accumulator.toString());
     }
 
     bufferedTexts.clear();
@@ -253,7 +214,7 @@ public class ComponentSequence {
     CombinationResult result = sequence.combineAndClearMembers();
 
     if (result == null) {
-      Object emptyComponent = componentConstructor.createTextNode("");
+      Object emptyComponent = componentConstructor.createTextComponent("");
       addMember(emptyComponent, null);
       return emptyComponent;
     }
@@ -311,7 +272,7 @@ public class ComponentSequence {
     }
 
     else {
-      result = componentConstructor.createTextNode("");
+      result = componentConstructor.createTextComponent("");
 
       List<Object> members = new ArrayList<>();
 
@@ -499,7 +460,7 @@ public class ComponentSequence {
 
       List<Object> components = interpreter.interpretSubtree(
         textHoverNode.value,
-        componentConstructor.getSlotContext(SlotType.TEXT_TOOLTIP)
+        componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
       );
 
       if (!components.isEmpty())
@@ -517,19 +478,21 @@ public class ComponentSequence {
     else
       childParentStyle = this.parentStyle;
 
-    return new ComponentSequence(childParentStyle, childNode, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, childParentStyle, childNode, slotContext, resetContext, componentConstructor, interpreter);
   }
 
   public static ComponentSequence initial(
+    @Nullable Object recipient,
     SlotContext slotContext,
     SlotContext resetContext,
     ComponentConstructor componentConstructor,
     Interpreter interpreter
   ) {
-    return new ComponentSequence(slotContext.defaultStyle, null, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, slotContext.defaultStyle, null, slotContext, resetContext, componentConstructor, interpreter);
   }
 
   private ComponentSequence(
+    @Nullable Object recipient,
     ComputedStyle parentStyle,
     @Nullable MarkupNode nonTerminal,
     SlotContext slotContext,
@@ -537,6 +500,7 @@ public class ComponentSequence {
     ComponentConstructor componentConstructor,
     Interpreter interpreter
   ) {
+    this.recipient = recipient;
     this.parentStyle = parentStyle;
     this.slotContext = slotContext;
     this.resetContext = resetContext;
