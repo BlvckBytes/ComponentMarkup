@@ -45,16 +45,14 @@ public class MarkupInterpreter implements Interpreter {
     this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
   }
 
-  public static InterpretationResult interpret(
+  public static ComponentOutput interpret(
     ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
     @Nullable Object recipient,
     SlotType slot, MarkupNode node
   ) {
-    return new InterpretationResult(
-      new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
-        .interpretSubtree(node, componentConstructor.getSlotContext(slot))
-    );
+    return new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
+      .interpretSubtree(node, componentConstructor.getSlotContext(slot));
   }
 
   @Override
@@ -173,7 +171,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
+  public ComponentOutput interpretSubtree(MarkupNode node, SlotContext slotContext) {
     builderStack.push(new OutputBuilder(recipient, componentConstructor, this, slotContext, resetContext));
     _interpret(node);
     return builderStack.pop().build();

@@ -1015,7 +1015,7 @@ public class MarkupInterpreterTests {
       null,
       slot,
       actualNode
-    ).resolveDeferred(null);
+    ).components;
 
     JsonArray actualArray = new JsonArray();
 
@@ -1181,7 +1181,7 @@ public class MarkupInterpreterTests {
       null,
       slot,
       actualNode
-    ).resolveDeferred(null);
+    ).components;
 
     JsonArray actualJson = new JsonArray();
 

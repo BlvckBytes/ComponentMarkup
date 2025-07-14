@@ -93,7 +93,7 @@ public class OutputBuilder {
     }
   }
 
-  public List<Object> build() {
+  public ComponentOutput build() {
     combineAllSequencesAndResult();
 
     if (result.isEmpty())
@@ -101,6 +101,6 @@ public class OutputBuilder {
 
     sequencesStack.clear();
 
-    return result;
+    return new ComponentOutput(result);
   }
 }

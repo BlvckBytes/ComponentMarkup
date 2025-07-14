@@ -94,7 +94,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           withNode,
           componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-        );
+        ).components;
 
         if (!components.isEmpty())
           with.add(components.get(0));
@@ -388,7 +388,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           entityHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
-        );
+        ).components;
 
         name = components.isEmpty() ? null : components.get(0);
       }
@@ -429,7 +429,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           itemHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ITEM_NAME)
-        );
+        ).components;
 
         name = components.isEmpty() ? null : components.get(0);
       } else
@@ -441,7 +441,7 @@ public class ComponentSequence {
         lore = interpreter.interpretSubtree(
           itemHoverNode.lore,
           componentConstructor.getSlotContext(SlotType.ITEM_LORE)
-        );
+        ).components;
       } else
         lore = null;
 
@@ -461,7 +461,7 @@ public class ComponentSequence {
       List<Object> components = interpreter.interpretSubtree(
         textHoverNode.value,
         componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-      );
+      ).components;
 
       if (!components.isEmpty())
         return result -> componentConstructor.setHoverTextAction(result, components.get(0));
