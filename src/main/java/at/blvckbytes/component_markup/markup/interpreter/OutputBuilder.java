@@ -101,6 +101,6 @@ public class OutputBuilder {
 
     sequencesStack.clear();
 
-    return new ComponentOutput(result);
+    return new ComponentOutput(result, componentConstructor);
   }
 }

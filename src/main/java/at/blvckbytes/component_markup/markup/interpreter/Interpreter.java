@@ -12,6 +12,8 @@ public interface Interpreter {
 
   TemporaryMemberEnvironment getEnvironment();
 
+  // TODO: These arguments for evaluation should all be @Nullable (for convenience)
+
   @NotNull String evaluateAsString(ExpressionNode expression);
 
   @Nullable String evaluateAsStringOrNull(ExpressionNode expression);

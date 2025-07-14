@@ -12,6 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverTextTag
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.BlockNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.EntityNbtTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.StorageNbtTag;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.player_name.PlayerNameTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.score.ScoreTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.selector.SelectorTag;
 
@@ -50,5 +51,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new TransitionTag());
     register(new ResetTag());
     register(new SpaceTag());
+    register(new PlayerNameTag());
   }
 }

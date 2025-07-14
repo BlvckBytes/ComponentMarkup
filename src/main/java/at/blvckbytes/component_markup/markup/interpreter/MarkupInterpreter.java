@@ -49,10 +49,10 @@ public class MarkupInterpreter implements Interpreter {
     ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
     @Nullable Object recipient,
-    SlotType slot, MarkupNode node
+    SlotContext slotContext, MarkupNode node
   ) {
     return new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
-      .interpretSubtree(node, componentConstructor.getSlotContext(slot));
+      .interpretSubtree(node, slotContext);
   }
 
   @Override

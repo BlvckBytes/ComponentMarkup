@@ -94,7 +94,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           withNode,
           componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-        ).components;
+        ).unprocessedComponents;
 
         if (!components.isEmpty())
           with.add(components.get(0));
@@ -286,8 +286,12 @@ public class ComponentSequence {
         members.add(memberEntry.member);
       }
 
-      if (!componentConstructor.setMembers(result, members, MembersSlot.CHILDREN))
+      Object setMembersResult = componentConstructor.setMembers(result, MembersSlot.CHILDREN, members);
+
+      if (setMembersResult == null)
         LoggerProvider.get().log(Level.WARNING, "Could not set the members of a component");
+      else
+        result = setMembersResult;
     }
 
     if (applyKnownNonTerminal != null)
@@ -389,7 +393,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           entityHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
-        ).components;
+        ).unprocessedComponents;
 
         name = components.isEmpty() ? null : components.get(0);
       }
@@ -430,7 +434,7 @@ public class ComponentSequence {
         List<Object> components = interpreter.interpretSubtree(
           itemHoverNode.name,
           componentConstructor.getSlotContext(SlotType.ITEM_NAME)
-        ).components;
+        ).unprocessedComponents;
 
         name = components.isEmpty() ? null : components.get(0);
       } else
@@ -442,7 +446,7 @@ public class ComponentSequence {
         lore = interpreter.interpretSubtree(
           itemHoverNode.lore,
           componentConstructor.getSlotContext(SlotType.ITEM_LORE)
-        ).components;
+        ).unprocessedComponents;
       } else
         lore = null;
 
@@ -462,7 +466,7 @@ public class ComponentSequence {
       List<Object> components = interpreter.interpretSubtree(
         textHoverNode.value,
         componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-      ).components;
+      ).unprocessedComponents;
 
       if (!components.isEmpty())
         return result -> componentConstructor.setHoverTextAction(result, components.get(0));

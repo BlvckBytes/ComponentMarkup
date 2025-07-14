@@ -1013,9 +1013,9 @@ public class MarkupInterpreterTests {
       componentConstructor,
       environment,
       null,
-      slot,
+      componentConstructor.getSlotContext(slot),
       actualNode
-    ).components;
+    ).unprocessedComponents;
 
     JsonArray actualArray = new JsonArray();
 
@@ -1179,9 +1179,9 @@ public class MarkupInterpreterTests {
       componentConstructor,
       baseEnvironment,
       null,
-      slot,
+      componentConstructor.getSlotContext(slot),
       actualNode
-    ).components;
+    ).unprocessedComponents;
 
     JsonArray actualJson = new JsonArray();
 

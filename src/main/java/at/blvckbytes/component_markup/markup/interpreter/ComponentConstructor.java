@@ -4,7 +4,6 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
 import at.blvckbytes.component_markup.util.TriState;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -102,9 +101,11 @@ public interface ComponentConstructor {
   // ================================================================================
 
   /**
-   * @return True iif the slot was valid on this component
+   * @return Non-null value (component; either equal to input or clone if that was more efficient
+   * to swap out the members via) iif the slot was valid on this component
    */
-  boolean setMembers(Object component, @Nullable List<Object> children, MembersSlot slot);
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  @Nullable Object setMembers(Object component, MembersSlot slot, @Nullable List<Object> children);
 
   /**
    * @return Non-null value iif the slot was valid on this component
@@ -118,4 +119,11 @@ public interface ComponentConstructor {
    */
   Object shallowCopyIncludingMemberLists(Object component);
 
+  // ================================================================================
+  // Miscellaneous
+  // ================================================================================
+
+  DeferredDataProvider getDataProvider();
+
+  String stripToPlainText(Object component);
 }

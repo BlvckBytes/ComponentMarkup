@@ -306,27 +306,37 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public boolean setMembers(Object component, @Nullable List<Object> children, MembersSlot slot) {
+  public @Nullable Object setMembers(Object component, MembersSlot slot, @Nullable List<Object> children) {
     JsonPropertyRW propertyRW = accessProperty((JsonObject) component, slot);
 
     if (propertyRW == null)
-      return false;
+      return null;
 
     switch (slot) {
       case HOVER_ITEM_NAME:
       case HOVER_ENTITY_NAME:
       case HOVER_TEXT_VALUE: {
-        if (children == null)
-          return propertyRW.write(null);
+        if (children == null) {
+          if (!propertyRW.write(null))
+            return null;
+
+          return component;
+        }
 
         if (children.size() > 1)
           LoggerProvider.get().log(Level.WARNING, "Expected children for slot " + slot + " to be a singleton-list");
 
-        return propertyRW.write((JsonElement) children.get(0));
+        if (!propertyRW.write((JsonElement) children.get(0)))
+          return null;
+
+        return component;
       }
 
       default:
-        return propertyRW.write(toJsonArray(children));
+        if (!propertyRW.write(toJsonArray(children)))
+          return null;
+
+        return component;
     }
   }
 
@@ -474,6 +484,16 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     return copy;
+  }
+
+  @Override
+  public DeferredDataProvider getDataProvider() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String stripToPlainText(Object component) {
+    throw new UnsupportedOperationException();
   }
 
   private JsonArray copyArray(JsonArray input) {
