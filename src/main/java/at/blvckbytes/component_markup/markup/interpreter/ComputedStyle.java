@@ -359,7 +359,7 @@ public class ComputedStyle {
           break;
 
         default:
-          LoggerProvider.get().log(Level.WARNING, "Encountered unknown format: " + format.name());
+          LoggerProvider.log(Level.WARNING, "Encountered unknown format: " + format.name());
       }
     }
   }

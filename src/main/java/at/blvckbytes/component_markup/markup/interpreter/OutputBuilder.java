@@ -50,7 +50,7 @@ public class OutputBuilder {
   @SuppressWarnings("UnusedReturnValue")
   public @Nullable Object onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
-      LoggerProvider.get().log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
+      LoggerProvider.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
       return null;
     }
 

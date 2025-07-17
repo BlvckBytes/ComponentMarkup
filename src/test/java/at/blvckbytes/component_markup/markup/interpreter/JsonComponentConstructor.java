@@ -324,7 +324,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
         }
 
         if (children.size() > 1)
-          LoggerProvider.get().log(Level.WARNING, "Expected children for slot " + slot + " to be a singleton-list");
+          LoggerProvider.log(Level.WARNING, "Expected children for slot " + slot + " to be a singleton-list");
 
         if (!propertyRW.write((JsonElement) children.get(0)))
           return null;

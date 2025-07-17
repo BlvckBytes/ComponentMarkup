@@ -109,7 +109,7 @@ public class ComponentSequence {
     }
 
     else
-      LoggerProvider.get().log(Level.WARNING, "Unknown unit-node: " + node.getClass());
+      LoggerProvider.log(Level.WARNING, "Unknown unit-node: " + node.getClass());
 
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
@@ -134,6 +134,17 @@ public class ComponentSequence {
     }
 
     addBufferedText(node.text, nodeStyle, creationHandler);
+  }
+
+  private Object setChildren(Object component, List<Object> children) {
+    Object setMembersResult = componentConstructor.setMembers(component, MembersSlot.CHILDREN, children);
+
+    if (setMembersResult == null) {
+      LoggerProvider.log(Level.WARNING, "Could not set the children of a component");
+      return component;
+    }
+
+    return setMembersResult;
   }
 
   public void emitComponent(Object component) {
@@ -286,12 +297,7 @@ public class ComponentSequence {
         members.add(memberEntry.member);
       }
 
-      Object setMembersResult = componentConstructor.setMembers(result, MembersSlot.CHILDREN, members);
-
-      if (setMembersResult == null)
-        LoggerProvider.get().log(Level.WARNING, "Could not set the members of a component");
-      else
-        result = setMembersResult;
+      result = setChildren(result, members);
     }
 
     if (applyKnownNonTerminal != null)
@@ -357,14 +363,14 @@ public class ComponentSequence {
             return result -> componentConstructor.setClickOpenUrlAction(result, uri);
           } catch (Throwable e) {
             // TODO: Provide better message
-            LoggerProvider.get().log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
+            LoggerProvider.log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
           }
 
           return null;
         }
 
         default:
-          LoggerProvider.get().log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
+          LoggerProvider.log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
       return null;
@@ -405,7 +411,7 @@ public class ComponentSequence {
         return result -> componentConstructor.setHoverEntityAction(result, type, uuid, name);
       } catch (Throwable e) {
         // TODO: Provide better message
-        LoggerProvider.get().log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
+        LoggerProvider.log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
       }
 
       return null;

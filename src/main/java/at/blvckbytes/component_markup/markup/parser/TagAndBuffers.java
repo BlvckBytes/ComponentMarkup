@@ -294,7 +294,7 @@ public class TagAndBuffers implements ParserChildItem {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;
 
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + tag.getClass() + "#createNode", thrownError);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + tag.getClass() + "#createNode", thrownError);
       return null;
     }
 

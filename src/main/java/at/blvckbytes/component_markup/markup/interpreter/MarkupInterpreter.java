@@ -80,7 +80,7 @@ public class MarkupInterpreter implements Interpreter {
 
       return environment.getValueInterpreter().asString(result);
     } catch (Throwable e) {
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a string", e);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a string", e);
       return null;
     }
   }
@@ -105,7 +105,7 @@ public class MarkupInterpreter implements Interpreter {
 
       return environment.getValueInterpreter().asLong(result);
     } catch (Throwable e) {
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long", e);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long", e);
       return null;
     }
   }
@@ -130,7 +130,7 @@ public class MarkupInterpreter implements Interpreter {
 
       return environment.getValueInterpreter().asDouble(result);
     } catch (Throwable e) {
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a double", e);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a double", e);
       return null;
     }
   }
@@ -155,7 +155,7 @@ public class MarkupInterpreter implements Interpreter {
 
       return environment.getValueInterpreter().asBoolean(result) ? TriState.TRUE : TriState.FALSE;
     } catch (Throwable e) {
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a boolean", e);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a boolean", e);
       return null;
     }
   }
@@ -165,7 +165,7 @@ public class MarkupInterpreter implements Interpreter {
     try {
       return ExpressionInterpreter.interpret(expression, environment);
     } catch (Throwable e) {
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to interpret an expression as a plain object", e);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a plain object", e);
       return null;
     }
   }
@@ -194,7 +194,7 @@ public class MarkupInterpreter implements Interpreter {
 
   private void interpretWhenMatching(WhenMatchingNode node, TemporaryMemberEnvironment environment) {
     if (node.casesLower.isEmpty())
-      LoggerProvider.get().log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
+      LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     Object result = ExpressionInterpreter.interpret(node.input, environment);
 
@@ -216,7 +216,7 @@ public class MarkupInterpreter implements Interpreter {
 
   private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
     if (node.conditions.isEmpty())
-      LoggerProvider.get().log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
+      LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     for (MarkupNode conditional : node.conditions) {
       if (conditional.ifCondition == null) {
@@ -428,7 +428,7 @@ public class MarkupInterpreter implements Interpreter {
         interpolatedNode = new ContainerNode(interpolatedNode.position, Collections.singletonList(interpolatedNode), null);
 
         if (!interpolatedNode.canBeUnpackedFromAndIfSoInherit(node))
-          LoggerProvider.get().log(Level.WARNING, "Could not inherit from InterpolationNode despite containerizing");
+          LoggerProvider.log(Level.WARNING, "Could not inherit from InterpolationNode despite containerizing");
       }
 
       _interpret(interpolatedNode);

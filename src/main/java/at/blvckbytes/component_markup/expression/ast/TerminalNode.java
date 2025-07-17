@@ -22,7 +22,7 @@ public class TerminalNode extends ExpressionNode {
 
       if (!environment.doesVariableExist(variableName)) {
         // TODO: Provide better message
-        LoggerProvider.get().log(Level.WARNING, "Could not locate variable " + variableName);
+        LoggerProvider.log(Level.WARNING, "Could not locate variable " + variableName);
         return null;
       }
 

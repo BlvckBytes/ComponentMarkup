@@ -979,7 +979,7 @@ public class MarkupInterpreterTests {
         break;
       } catch (NoSuchMethodException ignored) {
       } catch (Exception e) {
-        LoggerProvider.get().log(Level.SEVERE, "Could not access method", e);
+        LoggerProvider.log(Level.SEVERE, "Could not access method", e);
       }
     }
 
@@ -1025,7 +1025,7 @@ public class MarkupInterpreterTests {
     String actualJson = gsonInstance.toJson(actualArray);
 
     if (componentsFile.exists()) {
-      LoggerProvider.get().log(Level.INFO, "Found data for case " + testCaseName);
+      LoggerProvider.log(Level.INFO, "Found data for case " + testCaseName);
 
       String expectedJson;
 
@@ -1050,7 +1050,7 @@ public class MarkupInterpreterTests {
       return;
     }
 
-    LoggerProvider.get().log(Level.INFO, "Writing initial data for case " + testCaseName);
+    LoggerProvider.log(Level.INFO, "Writing initial data for case " + testCaseName);
 
     try (
       FileWriter writer = new FileWriter(componentsFile)

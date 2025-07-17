@@ -24,7 +24,7 @@ public abstract class TagRegistry {
         if (definition.matchName(nameLower))
           candidates.add(definition);
       } catch (Throwable thrownError) {
-        LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to match via " + definition.getClass() + "#matchName", thrownError);
+        LoggerProvider.log(Level.SEVERE, "An error occurred while trying to match via " + definition.getClass() + "#matchName", thrownError);
       }
     }
 

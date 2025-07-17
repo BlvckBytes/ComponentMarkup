@@ -37,7 +37,7 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
     Stack<Object> valueStack = shadowingVariables.computeIfAbsent(name, k -> new Stack<>());
 
     if (valueStack.isEmpty()) {
-      LoggerProvider.get().log(Level.WARNING, "The temporary variable-stack for variable " + name + " was unbalanced");
+      LoggerProvider.log(Level.WARNING, "The temporary variable-stack for variable " + name + " was unbalanced");
       return;
     }
 

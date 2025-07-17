@@ -31,7 +31,7 @@ public class InterceptorStack {
       return interceptor.interceptInterpretation(node, interpreter);
     } catch (Throwable thrownError) {
       String className = interceptor.getClass().getName();
-      LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
       return InterceptionResult.DO_PROCESS;
     }
   }
@@ -87,7 +87,7 @@ public class InterceptorStack {
           entry.interceptor.afterInterpretation(node, interpreter);
         } catch (Throwable thrownError) {
           String className = entry.interceptor.getClass().getName();
-          LoggerProvider.get().log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
+          LoggerProvider.log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
         }
       }
 

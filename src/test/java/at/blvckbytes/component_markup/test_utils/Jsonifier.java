@@ -50,7 +50,7 @@ public abstract class Jsonifier {
           field.setAccessible(true);
           result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
-          LoggerProvider.get().log(Level.WARNING, "Could not access field " + fieldName + " of " + currentClass, e);
+          LoggerProvider.log(Level.WARNING, "Could not access field " + fieldName + " of " + currentClass, e);
         }
       }
 
@@ -64,7 +64,7 @@ public abstract class Jsonifier {
           continue;
 
         if (method.getParameterCount() > 0)
-          LoggerProvider.get().log(Level.WARNING, "Method " + method + " requires parameters and thus isn't a valid " + annotationClass);
+          LoggerProvider.log(Level.WARNING, "Method " + method + " requires parameters and thus isn't a valid " + annotationClass);
 
         String methodName = method.getName();
 
@@ -72,7 +72,7 @@ public abstract class Jsonifier {
           method.setAccessible(true);
           result.add(methodName, jsonifyObject(method.getReturnType(), method.invoke(instance)));
         } catch (Exception e) {
-          LoggerProvider.get().log(Level.WARNING, "Could not access method " + methodName + " of " + currentClass, e);
+          LoggerProvider.log(Level.WARNING, "Could not access method " + methodName + " of " + currentClass, e);
         }
       }
 

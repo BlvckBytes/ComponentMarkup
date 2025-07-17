@@ -85,7 +85,7 @@ public class ExpressionInterpreter {
           return new StringBuilder(valueInterpreter.asString(operandValue)).reverse().toString();
 
         default:
-          LoggerProvider.get().log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
+          LoggerProvider.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;
       }
     }
@@ -210,7 +210,7 @@ public class ExpressionInterpreter {
           return performSubscripting(lhsValue, rhsValue, environment);
 
         default:
-          LoggerProvider.get().log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
+          LoggerProvider.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
           return null;
       }
     }
@@ -244,7 +244,7 @@ public class ExpressionInterpreter {
       return result;
     }
 
-    LoggerProvider.get().log(Level.WARNING, "Unimplemented node: " + expression.getClass());
+    LoggerProvider.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
   }
 
@@ -302,14 +302,14 @@ public class ExpressionInterpreter {
 
     if (field == null) {
       // TODO: Provide better message
-      LoggerProvider.get().log(Level.WARNING, "Could not locate field " + stringKey);
+      LoggerProvider.log(Level.WARNING, "Could not locate field " + stringKey);
       return null;
     }
 
     try {
       return field.get(source);
     } catch (Exception e) {
-      LoggerProvider.get().log(Level.WARNING, "Could not access field " + field, e);
+      LoggerProvider.log(Level.WARNING, "Could not access field " + field, e);
       return null;
     }
   }
