@@ -41,7 +41,7 @@ public class NbtNode extends DeferredNode<NbtParameter> {
   }
 
   @Override
-  public @Nullable Object renderComponent(
+  public @Nullable List<Object> renderComponent(
     NbtParameter nbtParameter,
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,

@@ -32,7 +32,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
   }
 
   @Override
-  public @Nullable Object renderComponent(
+  public @Nullable List<Object> renderComponent(
     SelectorParameter selectorParameter,
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,

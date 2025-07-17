@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -47,30 +48,7 @@ public class ComponentSequence {
   private final ComputedStyle parentStyle;
   private final ComputedStyle selfAndParentStyle;
 
-  @SuppressWarnings("unchecked")
-  private Object onDeferredNode(DeferredNode<?> deferredNode) {
-    RendererParameter parameter = deferredNode.createParameter(interpreter);
-
-    if (this.recipient != null) {
-      return ((DeferredNode<RendererParameter>) deferredNode).renderComponent(
-        parameter,
-        componentConstructor,
-        interpreter.getEnvironment(),
-        slotContext,
-        this.recipient
-      );
-    }
-
-    // TODO: Store paths to deferred components
-    return componentConstructor.createDeferredComponent(
-      deferredNode,
-      parameter,
-      interpreter.getEnvironment().snapshot(),
-      slotContext
-    );
-  }
-
-  public Object onUnit(UnitNode node) {
+  public void onUnit(UnitNode node, @Nullable Consumer<Object> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     Object result = null;
@@ -80,8 +58,45 @@ public class ComponentSequence {
       result = componentConstructor.createKeyComponent(key);
     }
 
-    else if (node instanceof DeferredNode)
-      result = onDeferredNode((DeferredNode<?>) node);
+    // TODO: Store paths to deferred components
+    else if (node instanceof DeferredNode) {
+      DeferredNode<?> deferredNode = (DeferredNode<?>) node;
+      RendererParameter parameter = deferredNode.createParameter(interpreter);
+
+      if (this.recipient != null) {
+        //noinspection unchecked
+        List<Object> renderedComponents = ((DeferredNode<RendererParameter>) deferredNode).renderComponent(
+          parameter,
+          componentConstructor,
+          interpreter.getEnvironment(),
+          slotContext,
+          this.recipient
+        );
+
+        if (renderedComponents == null)
+          return;
+
+        for (Object renderedComponent : renderedComponents) {
+          addMember(renderedComponent, nodeStyle);
+
+          if (creationHandler != null)
+            creationHandler.accept(renderedComponent);
+        }
+
+        return;
+      }
+
+      DeferredComponent deferredComponent = componentConstructor.createDeferredComponent(
+        deferredNode,
+        parameter,
+        interpreter.getEnvironment().snapshot(),
+        slotContext
+      );
+
+      // Deferred components cannot hold any properties like style because they're immutable
+      // Thus, warp in a truly native component, which will be discarded when splicing in the result later
+      result = setChildren(componentConstructor.createTextComponent(""), Collections.singletonList(deferredComponent));
+    }
 
     else if (node instanceof TranslateNode) {
       TranslateNode translateNode = (TranslateNode) node;
@@ -116,7 +131,8 @@ public class ComponentSequence {
 
     addMember(result, nodeStyle);
 
-    return result;
+    if (creationHandler != null)
+      creationHandler.accept(result);
   }
 
   public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {

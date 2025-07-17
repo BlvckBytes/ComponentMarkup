@@ -440,7 +440,7 @@ public class MarkupInterpreter implements Interpreter {
     // the only sensible way to "toggle" them is via an if-condition
     if (node instanceof TerminalNode) {
       if (node instanceof UnitNode)
-        builder.onUnit((UnitNode) node);
+        builder.onUnit((UnitNode) node, null);
 
       else if (node instanceof TextNode)
         builder.onText((TextNode) node, null, false);

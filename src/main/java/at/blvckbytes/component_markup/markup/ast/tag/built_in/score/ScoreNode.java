@@ -33,7 +33,7 @@ public class ScoreNode extends DeferredNode<ScoreParameter> {
   }
 
   @Override
-  public @Nullable Object renderComponent(
+  public @Nullable List<Object> renderComponent(
     ScoreParameter scoreParameter,
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,

@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 
 public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
@@ -29,7 +30,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
   }
 
   @Override
-  public @Nullable Object renderComponent(
+  public @Nullable List<Object> renderComponent(
     PlayerNameParameter parameter,
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,
@@ -43,19 +44,13 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
     String name = parameter.displayName ? provider.getDisplayName(recipient) : provider.getName(recipient);
 
     if (representation == null)
-      return componentConstructor.createTextComponent(name);
+      return Collections.singletonList(componentConstructor.createTextComponent(name));
 
     environment = environment.copy().withVariable("player_name", name);
 
-    List<Object> components = MarkupInterpreter.interpret(
+    return MarkupInterpreter.interpret(
       componentConstructor, environment, recipient, slotContext, representation
     ).unprocessedComponents;
-
-    if (components.isEmpty())
-      return null;
-
-    // TODO: What if the context supports component[] for multiline text? Should we support that?
-    return components.get(0);
   }
 
   @Override

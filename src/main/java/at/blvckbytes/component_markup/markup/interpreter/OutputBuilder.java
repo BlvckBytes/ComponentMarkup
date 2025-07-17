@@ -62,8 +62,8 @@ public class OutputBuilder {
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
   }
 
-  public Object onUnit(UnitNode node) {
-    return sequencesStack.peek().onUnit(node);
+  public void onUnit(UnitNode node, @Nullable Consumer<Object> creationHandler) {
+    sequencesStack.peek().onUnit(node, creationHandler);
   }
 
   public void emitComponent(Object component) {

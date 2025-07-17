@@ -64,7 +64,7 @@ public class ColorizeCharsNode extends ColorizeNode {
 
   @Override
   protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter) {
-    state.addInjected(interpreter.getCurrentBuilder().onUnit(node));
+    interpreter.getCurrentBuilder().onUnit(node, state::addInjected);
     return false;
   }
 
