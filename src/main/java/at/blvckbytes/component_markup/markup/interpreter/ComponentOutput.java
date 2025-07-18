@@ -10,10 +10,16 @@ import java.util.logging.Level;
 public class ComponentOutput {
 
   public final List<Object> unprocessedComponents;
+  public final @Nullable AddressTree deferredAddresses;
   private final ComponentConstructor componentConstructor;
 
-  public ComponentOutput(List<Object> unprocessedComponents, ComponentConstructor componentConstructor) {
+  public ComponentOutput(
+    List<Object> unprocessedComponents,
+    @Nullable AddressTree deferredAddresses,
+    ComponentConstructor componentConstructor
+  ) {
     this.unprocessedComponents = unprocessedComponents;
+    this.deferredAddresses = deferredAddresses;
     this.componentConstructor = componentConstructor;
   }
 
