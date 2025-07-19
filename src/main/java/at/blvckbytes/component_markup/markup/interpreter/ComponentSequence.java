@@ -91,18 +91,12 @@ public class ComponentSequence {
         return;
       }
 
-      DeferredComponent deferredComponent = componentConstructor.createDeferredComponent(
+      result = componentConstructor.createDeferredComponent(
         deferredNode,
         parameter,
         interpreter.getEnvironment().snapshot(),
         slotContext
       );
-
-      addDeferredIndex();
-
-      // Deferred components cannot hold any properties like style because they're immutable
-      // Thus, warp in a truly native component, which will be discarded when splicing in the result later
-      result = setChildren(componentConstructor.createTextComponent(""), Collections.singletonList(deferredComponent));
     }
 
     else if (node instanceof TranslateNode) {
@@ -186,9 +180,6 @@ public class ComponentSequence {
   }
 
   public void emitComponent(Object component) {
-    if (component instanceof DeferredComponent)
-      addDeferredIndex();
-
     addMember(component, null);
   }
 
@@ -276,13 +267,13 @@ public class ComponentSequence {
       return emptyComponent;
     }
 
-    if (sequence.deferredAddresses != null) {
+    if (result.deferredAddresses != null) {
       if (deferredAddresses == null)
         deferredAddresses = AddressTree.emptyValue();
 
       int deferredIndex = memberEntries == null ? 0 : memberEntries.size();
 
-      AddressTree.put(deferredAddresses, MembersSlot.CHILDREN, deferredIndex, sequence.deferredAddresses);
+      AddressTree.put(deferredAddresses, MembersSlot.CHILDREN, deferredIndex, result.deferredAddresses);
     }
 
     addMember(result.component, result.styleToApply);
@@ -313,6 +304,15 @@ public class ComponentSequence {
       this.membersCommonStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
     } else
       this.membersCommonStyle.subtractStylesOnCommonality(memberStyle, false);
+
+    if (member instanceof DeferredComponent) {
+      int deferredIndex = memberEntries.size();
+
+      if (deferredAddresses == null)
+        deferredAddresses = AddressTree.emptyValue();
+
+      AddressTree.put(deferredAddresses, MembersSlot.CHILDREN, deferredIndex, null);
+    }
 
     this.memberEntries.add(new MemberAndStyle(member, memberStyle));
   }
@@ -660,14 +660,5 @@ public class ComponentSequence {
       style.addMissingDefaults(parentStyle, resetContext);
       style.reset = false;
     }
-  }
-
-  private void addDeferredIndex() {
-    int deferredIndex = memberEntries == null ? 0 : memberEntries.size();
-
-    if (deferredAddresses == null)
-      deferredAddresses = AddressTree.emptyValue();
-
-    AddressTree.put(deferredAddresses, MembersSlot.CHILDREN, deferredIndex, null);
   }
 }

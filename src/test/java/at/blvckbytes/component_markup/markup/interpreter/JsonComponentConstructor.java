@@ -18,6 +18,19 @@ import java.util.logging.Level;
 
 public class JsonComponentConstructor implements ComponentConstructor {
 
+  private static class DeferredElement extends JsonElement implements DeferredComponent {
+
+    @Override
+    public JsonElement deepCopy() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable List<Object> renderDeferredComponent(@Nullable Object recipient) {
+      throw new UnsupportedOperationException();
+    }
+  }
+
   // ================================================================================
   // SlotContext
   // ================================================================================
@@ -66,9 +79,14 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public DeferredComponent createDeferredComponent(DeferredRenderer<?> renderer, RendererParameter parameter, InterpretationEnvironment environmentSnapshot, SlotContext slotContext) {
+  public DeferredComponent createDeferredComponent(
+    DeferredRenderer<?> renderer,
+    RendererParameter parameter,
+    InterpretationEnvironment environmentSnapshot,
+    SlotContext slotContext
+  ) {
     // TODO: Implement
-    throw new UnsupportedOperationException();
+    return new DeferredElement();
   }
 
   // ================================================================================

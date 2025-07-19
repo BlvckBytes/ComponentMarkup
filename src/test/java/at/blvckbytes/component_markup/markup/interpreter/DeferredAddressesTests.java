@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 public class DeferredAddressesTests {
 
-  // TODO: Write proper test-cases
+  // TODO: Add more complex cases
 
   private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
   private static final SlotContext chatContextNewLine = componentConstructor.getSlotContext(SlotType.CHAT);
@@ -24,21 +24,52 @@ public class DeferredAddressesTests {
       new TextWithAnchors(
         "<red>",
         "  Hello, world! :)",
-        "  <bold>test!"
+        "  <bold>test!</>",
+        "  <br/>",
+        "  <italic>test2"
       ),
-      chatContextNewLine,
       null
     );
   }
 
-  private void makeCase(TextWithAnchors input, SlotContext slotContext, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
+  @Test
+  public void shouldGenerateTreeForRatherSimpleCase() {
+    makeCase(
+      new TextWithAnchors(
+        "outer 0",
+        "<br/>",
+        "outer 1",
+        "<br/>",
+        "outer 2",
+        "<player-name/>",
+        "<player-name/>",
+        "last text"
+      ),
+      new AddressTreeBuilder()
+        .put(2, slotMap -> (
+          slotMap
+            .slot(MembersSlot.CHILDREN, addressTree -> (
+              addressTree.put(0, _slotMap -> (
+                _slotMap
+                  .slot(MembersSlot.CHILDREN, _addressTree -> (
+                    _addressTree
+                      .terminal(1)
+                      .terminal(2)
+                  ))
+              ))
+            ))
+        ))
+    );
+  }
+
+  private void makeCase(TextWithAnchors input, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
     MarkupNode ast = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
 
     ComponentOutput output = MarkupInterpreter.interpret(
       componentConstructor,
       new InterpretationEnvironment(),
       null,
-      slotContext,
+      chatContextNewComponent,
       ast
     );
 
@@ -47,6 +78,6 @@ public class DeferredAddressesTests {
       return;
     }
 
-    Assertions.assertEquals(Jsonifier.jsonify(expectedDeferredAddresses.build()), Jsonifier.jsonify(output.deferredAddresses));
+    Assertions.assertEquals(Jsonifier.jsonify(expectedDeferredAddresses.result), Jsonifier.jsonify(output.deferredAddresses));
   }
 }
