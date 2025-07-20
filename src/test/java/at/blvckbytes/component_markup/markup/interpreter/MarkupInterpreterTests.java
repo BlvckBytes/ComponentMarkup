@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import com.google.gson.*;
@@ -978,6 +979,30 @@ public class MarkupInterpreterTests {
                 .string("text", " :)")
             ))
         ))
+    );
+  }
+
+  @Test
+  public void shouldCaptureVariablesOnLetBinding() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container",
+      "  +let-a=\"first\"",
+      ">",
+      "  <container",
+      "    *let-(my_template)={ {a} and {b} }",
+      "  >",
+      "    <container",
+      "      +let-a=\"override first\"",
+      "      +let-b=\"second\"",
+      "    >{my_template}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "first and second")
     );
   }
 

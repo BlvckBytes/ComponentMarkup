@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class TemporaryMemberEnvironment extends InterpretationEnvironment {
@@ -42,6 +43,20 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
     }
 
     valueStack.pop();
+  }
+
+  public void forEachKnownName(Consumer<String> handler) {
+    Set<String> shadowingNames = shadowingVariables.keySet();
+
+    for (String baseName : baseEnvironment.getNames()) {
+      if (shadowingNames.contains(baseName))
+        continue;
+
+      handler.accept(baseName);
+    }
+
+    for (String shadowingName : shadowingNames)
+      handler.accept(shadowingName);
   }
 
   @Override

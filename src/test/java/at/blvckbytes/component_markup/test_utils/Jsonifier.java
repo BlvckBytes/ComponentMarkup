@@ -131,7 +131,7 @@ public abstract class Jsonifier {
     if (item instanceof Collection<?>) {
       JsonArray result = new JsonArray();
 
-      for (Object listItem : ((List<?>) item))
+      for (Object listItem : ((Collection<?>) item))
         result.add(jsonifyObject(null, listItem));
 
       return result;

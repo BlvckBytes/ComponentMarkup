@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
+import at.blvckbytes.component_markup.markup.ast.tag.CaptureLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
@@ -239,6 +240,16 @@ public class MarkupInterpreter implements Interpreter {
     _interpret(node.fallback);
   }
 
+  private MarkupNode createVariableCapture(MarkupNode node, LetBinding binding) {
+    Set<LetBinding> newBindings = node.letBindings == null ? new HashSet<>() : new HashSet<>(node.letBindings);
+
+    environment.forEachKnownName(name -> {
+      newBindings.add(new CaptureLetBinding(environment.getVariableValue(name), name, binding));
+    });
+
+    return new MarkupNode(node.position, Collections.singletonList(node), newBindings) {};
+  }
+
   private @Nullable Set<String> introduceLetBindings(MarkupNode node) {
     if (node.letBindings == null)
       return null;
@@ -250,10 +261,16 @@ public class MarkupInterpreter implements Interpreter {
 
       if (letBinding instanceof ExpressionLetBinding)
         value = ExpressionInterpreter.interpret(((ExpressionLetBinding) letBinding).expression, environment);
-      else if (letBinding instanceof MarkupLetBinding)
-        value = ((MarkupLetBinding) letBinding).markup;
-      else
+      else if (letBinding instanceof MarkupLetBinding) {
+        MarkupLetBinding markupBinding = (MarkupLetBinding) letBinding;
+        value = markupBinding.capture ? createVariableCapture(markupBinding.markup, letBinding) : markupBinding.markup;
+      }
+      else if (letBinding instanceof CaptureLetBinding)
+        value = ((CaptureLetBinding) letBinding).value;
+      else {
+        LoggerProvider.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
         continue;
+      }
 
       environment.pushVariable(letBinding.name, value);
       introducedNames.add(letBinding.name);

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class InterpretationEnvironment {
 
@@ -19,6 +20,10 @@ public class InterpretationEnvironment {
   private InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter) {
     this.variables = variables;
     this.valueInterpreter = valueInterpreter;
+  }
+
+  public Set<String> getNames() {
+    return variables.keySet();
   }
 
   public @Nullable Object getVariableValue(String name) {

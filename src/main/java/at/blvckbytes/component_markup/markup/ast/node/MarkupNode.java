@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +34,14 @@ public abstract class MarkupNode {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean canBeUnpackedFromAndIfSoInherit(MarkupNode other) {
+    // Do not add additional bindings (which would not be included) to a capture
+    if (other.letBindings != null) {
+      for (LetBinding letBinding : other.letBindings) {
+        if (letBinding instanceof MarkupLetBinding && ((MarkupLetBinding) letBinding).capture)
+          return false;
+      }
+    }
+
     if (other instanceof StyledNode) {
       NodeStyle otherStyle = ((StyledNode) other).getStyle();
 
