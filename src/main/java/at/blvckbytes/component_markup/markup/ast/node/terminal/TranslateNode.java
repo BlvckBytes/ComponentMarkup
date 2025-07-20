@@ -6,8 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class TranslateNode extends UnitNode {
 
@@ -20,7 +19,7 @@ public class TranslateNode extends UnitNode {
     MarkupList with,
     @Nullable ExpressionNode fallback,
     CursorPosition position,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

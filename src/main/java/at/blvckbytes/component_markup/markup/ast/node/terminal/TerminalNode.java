@@ -6,12 +6,11 @@ import at.blvckbytes.component_markup.markup.parser.ParserChildItem;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public abstract class TerminalNode extends StyledNode implements ParserChildItem {
 
-  public TerminalNode(CursorPosition position, @Nullable Set<LetBinding> letBindings) {
+  public TerminalNode(CursorPosition position, @Nullable LinkedHashSet<LetBinding> letBindings) {
     super(position, null, letBindings);
   }
 }

@@ -4,13 +4,14 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public abstract class MarkupNode {
 
@@ -20,12 +21,12 @@ public abstract class MarkupNode {
   public CursorPosition position;
 
   public @Nullable List<MarkupNode> children;
-  public @Nullable Set<LetBinding> letBindings;
+  public @Nullable LinkedHashSet<LetBinding> letBindings;
 
   public MarkupNode(
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     this.position = position;
     this.children = children;
@@ -38,6 +39,9 @@ public abstract class MarkupNode {
     if (other.letBindings != null) {
       for (LetBinding letBinding : other.letBindings) {
         if (letBinding instanceof MarkupLetBinding && ((MarkupLetBinding) letBinding).capture)
+          return false;
+
+        if (letBinding instanceof ExpressionLetBinding && ((ExpressionLetBinding) letBinding).capture)
           return false;
       }
     }
@@ -63,8 +67,10 @@ public abstract class MarkupNode {
     if (other.letBindings != null && !other.letBindings.isEmpty()) {
       if (this.letBindings == null)
         this.letBindings = other.letBindings;
-      else
-        this.letBindings.addAll(other.letBindings);
+      else {
+        for (LetBinding otherBinding : other.letBindings.reversed())
+          this.letBindings.addFirst(otherBinding);
+      }
     }
 
     return true;

@@ -5,8 +5,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class KeyNode extends UnitNode {
 
@@ -15,7 +14,7 @@ public class KeyNode extends UnitNode {
   public KeyNode(
     ExpressionNode key,
     CursorPosition position,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

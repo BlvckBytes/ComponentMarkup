@@ -7,8 +7,8 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class KeyTag extends TagDefinition {
 
@@ -26,7 +26,7 @@ public class KeyTag extends TagDefinition {
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
     @NotNull AttributeMap attributes,
-    @Nullable Set<LetBinding> letBindings,
+    @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new KeyNode(

@@ -15,7 +15,7 @@ public enum MarkupParseError implements ErrorMessage {
   AUXILIARY_FOR_INTRINSIC_ATTRIBUTE("The intrinsic attribute %s may only be used after a *for loop"),
   BINDING_IN_USE("The name %s is already used in another binding"),
   EMPTY_BINDING("Let-bindings always require a value to be bound"),
-  NON_MARKUP_CAPTURE("The let-binding %s is capturing and can thus only be assigned with a markup-value: { ... }"),
+  NON_MARKUP_OR_EXPRESSION_CAPTURE("The let-binding %s is capturing and can thus only be assigned with a markup-value { ... } or an expression"),
   EMPTY_ATTRIBUTE_NAME("This attribute-name does not contain anything but operators"),
   MALFORMED_ATTRIBUTE_NAME("The attribute-name %s is malformed: cannot start with digits or hyphens, may only contain a-z, 0-9 and hyphens"),
   MALFORMED_IDENTIFIER("The variable-name %s is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),

@@ -10,8 +10,8 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class StyleTag extends TagDefinition {
 
@@ -29,7 +29,7 @@ public class StyleTag extends TagDefinition {
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
     @NotNull AttributeMap attributes,
-    @Nullable Set<LetBinding> letBindings,
+    @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);

@@ -236,19 +236,24 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonMarkupCaptureLetBinding() {
+  public void shouldThrowOnNonMarkupOrExpressionCaptureLetBinding() {
     makeErrorCase(
-      MarkupParseError.NON_MARKUP_CAPTURE,
-      "<container @*let-(my_var)=\"hello\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_MARKUP_CAPTURE,
+      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
       "<container @*let-(my_var)=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_MARKUP_CAPTURE,
+      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
+      "<container @*let-(my_var)=false>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
+      "<container @*let-(my_var)=-24>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
       "<container @*let-(my_var)=-.24>"
     );
   }

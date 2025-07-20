@@ -6,8 +6,8 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public abstract class StyledNode extends MarkupNode {
 
@@ -16,7 +16,7 @@ public abstract class StyledNode extends MarkupNode {
   public StyledNode(
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
   }

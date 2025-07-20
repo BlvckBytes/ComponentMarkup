@@ -241,7 +241,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private MarkupNode createVariableCapture(MarkupNode node, LetBinding binding) {
-    Set<LetBinding> newBindings = node.letBindings == null ? new HashSet<>() : new HashSet<>(node.letBindings);
+    LinkedHashSet<LetBinding> newBindings = node.letBindings == null ? new LinkedHashSet<>() : new LinkedHashSet<>(node.letBindings);
 
     environment.forEachKnownName(name -> {
       newBindings.add(new CaptureLetBinding(environment.getVariableValue(name), name, binding));

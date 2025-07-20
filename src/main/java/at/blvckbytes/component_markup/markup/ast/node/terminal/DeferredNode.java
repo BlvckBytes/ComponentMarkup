@@ -5,12 +5,11 @@ import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public abstract class DeferredNode<Parameter extends RendererParameter> extends UnitNode implements DeferredRenderer<Parameter> {
 
-  public DeferredNode(CursorPosition position, @Nullable Set<LetBinding> letBindings) {
+  public DeferredNode(CursorPosition position, @Nullable LinkedHashSet<LetBinding> letBindings) {
     super(position, letBindings);
   }
 

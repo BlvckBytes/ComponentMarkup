@@ -26,7 +26,7 @@ public abstract class TagDefinition {
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
     @NotNull AttributeMap attributes,
-    @Nullable Set<LetBinding> letBindings,
+    @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   );
 }

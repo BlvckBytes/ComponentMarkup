@@ -12,8 +12,8 @@ import at.blvckbytes.component_markup.markup.interpreter.SlotType;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class NbtNode extends DeferredNode<NbtParameter> {
 
@@ -30,7 +30,7 @@ public class NbtNode extends DeferredNode<NbtParameter> {
     @Nullable ExpressionNode interpret,
     @Nullable MarkupNode separator,
     CursorPosition position,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

@@ -5,8 +5,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class ForLoopNode extends MarkupNode {
 
@@ -24,7 +23,7 @@ public class ForLoopNode extends MarkupNode {
     @Nullable MarkupNode separator,
     @Nullable MarkupNode empty,
     @Nullable ExpressionNode reversed,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
 

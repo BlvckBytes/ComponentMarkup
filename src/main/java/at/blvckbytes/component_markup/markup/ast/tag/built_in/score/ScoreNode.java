@@ -10,8 +10,8 @@ import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ScoreNode extends DeferredNode<ScoreParameter> {
 
@@ -24,7 +24,7 @@ public class ScoreNode extends DeferredNode<ScoreParameter> {
     ExpressionNode objective,
     @Nullable ExpressionNode value,
     CursorPosition position,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

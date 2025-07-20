@@ -10,8 +10,8 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
 
@@ -22,7 +22,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
     @Nullable ExpressionNode displayName,
     @Nullable MarkupNode representation,
     CursorPosition position,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

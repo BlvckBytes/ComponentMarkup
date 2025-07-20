@@ -12,8 +12,8 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
 public abstract class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
@@ -31,7 +31,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     Function<Interpreter, ColorizeNodeState> stateCreator,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable Set<LetBinding> letBindings
+    @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

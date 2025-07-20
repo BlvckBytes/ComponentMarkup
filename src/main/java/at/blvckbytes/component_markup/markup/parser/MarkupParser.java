@@ -591,11 +591,11 @@ public class MarkupParser implements XmlEventConsumer {
       if (value instanceof MarkupNode)
         binding = new MarkupLetBinding((MarkupNode) value, bindingName, isCaptureMode, attributePosition);
       else {
-        if (isCaptureMode)
-          throw new MarkupParseException(attributePosition, MarkupParseError.NON_MARKUP_CAPTURE, bindingName);
+        if (isCaptureMode && immediateValue != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE, bindingName);
 
         if (value instanceof ExpressionNode)
-          binding = new ExpressionLetBinding((ExpressionNode) value, bindingName, attributePosition);
+          binding = new ExpressionLetBinding((ExpressionNode) value, isCaptureMode, bindingName, attributePosition);
         else
           throw new MarkupParseException(attributePosition, MarkupParseError.EMPTY_BINDING, bindingName);
       }
