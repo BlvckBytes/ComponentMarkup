@@ -756,6 +756,35 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnLiteralIntrinsicMarkupAttributes() {
+    makeErrorCase(
+      MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE,
+      "<red *for=\"1..5\" @+for-separator={ test }>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnEmptyLetBindings() {
+    makeErrorCase(
+      MarkupParseError.EMPTY_BINDING,
+      "<red @*let-my_var>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnForAuxiliaryAttributesWithoutPriorLoop() {
+    makeErrorCase(
+      MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE,
+      "<red @*for-separator={ test }>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE,
+      "<red @*for-reversed>"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

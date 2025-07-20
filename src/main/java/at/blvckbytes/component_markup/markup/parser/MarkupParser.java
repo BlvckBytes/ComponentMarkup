@@ -35,7 +35,7 @@ public class MarkupParser implements XmlEventConsumer {
   private final Stack<TagAndBuffers> tagStack;
 
   private CursorPosition lastPosition;
-  private @Nullable CursorPosition tagAttributeBeginPosition;
+  private final CursorPosition initialPosition;
   private @Nullable MarkupParser subtreeParser;
   private MarkupNode result;
 
@@ -43,6 +43,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.lastPosition = initialPosition;
+    this.initialPosition = initialPosition;
     this.result = new TextNode("", lastPosition);
 
     this.tagStack.push(new TagAndBuffers(ContainerTag.INSTANCE, ContainerTag.TAG_NAME, lastPosition, null));
@@ -99,7 +100,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, value, valueBeginPosition);
+    handleUserAttribute(name, value, lastPosition, valueBeginPosition);
   }
 
   @Override
@@ -123,7 +124,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, immediateExpression, null);
+    handleUserAttribute(name, immediateExpression, lastPosition, null);
   }
 
   @Override
@@ -147,7 +148,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, immediateExpression, null);
+    handleUserAttribute(name, immediateExpression, lastPosition, null);
   }
 
   @Override
@@ -171,7 +172,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, immediateExpression, null);
+    handleUserAttribute(name, immediateExpression, lastPosition, null);
   }
 
   @Override
@@ -180,13 +181,6 @@ public class MarkupParser implements XmlEventConsumer {
       subtreeParser.onTagAttributeBegin(name);
       return;
     }
-
-    this.tagAttributeBeginPosition = lastPosition;
-
-    name = lower(name);
-
-    if (name.charAt(0) == '[')
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
     subtreeParser = new MarkupParser(tagRegistry, lastPosition);
   }
@@ -208,9 +202,8 @@ public class MarkupParser implements XmlEventConsumer {
     name = lower(name);
 
     MarkupNode subtree = subtreeParser.result;
+    CursorPosition tagAttributeBeginPosition = subtreeParser.initialPosition;
     subtreeParser = null;
-
-    assert tagAttributeBeginPosition != null;
 
     if (name.charAt(0) == '*') {
       handleIntrinsicAttribute(name, tagAttributeBeginPosition, subtree, null);
@@ -218,9 +211,9 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (name.charAt(0) == '+')
-      throw new IllegalStateException("Markup-values on plain intrinsic attributes make no sense");
+      throw new MarkupParseException(tagAttributeBeginPosition, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
 
-    handleUserAttribute(name, subtree, null);
+    handleUserAttribute(name, subtree, tagAttributeBeginPosition, null);
   }
 
   @Override
@@ -242,7 +235,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, ImmediateExpression.of(true), null);
+    handleUserAttribute(name, ImmediateExpression.of(true), lastPosition, null);
   }
 
   @Override
@@ -486,11 +479,16 @@ public class MarkupParser implements XmlEventConsumer {
       }
 
       case "for-reversed":
-        if (!(value instanceof ExpressionNode))
-          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
+        if (!(value instanceof ExpressionNode)) {
+          if (value != null)
+            throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
+
+          // Let's allow a flag-style declaration, for convenience
+          value = ImmediateExpression.of(true);
+        }
 
         if (currentLayer.forIterable == null)
-          throw new IllegalStateException("The *for-reversed attribute may only be used in combination with for-loops");
+          throw new MarkupParseException(attributePosition, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.forReversed != null)
           throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, fullName, currentLayer.tagNameLower);
@@ -503,7 +501,7 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, fullName);
 
         if (currentLayer.forIterable == null)
-          throw new IllegalStateException("The *for-reversed attribute may only be used in combination with for-loops");
+          throw new MarkupParseException(attributePosition, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.forSeparator != null)
           throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, fullName, currentLayer.tagNameLower);
@@ -562,7 +560,7 @@ public class MarkupParser implements XmlEventConsumer {
       else if (value instanceof MarkupNode)
         binding = new MarkupLetBinding((MarkupNode) value, bindingName, attributePosition);
       else
-        throw new IllegalStateException("Either supply an expression or a markup-value on let- bindings");
+        throw new MarkupParseException(attributePosition, MarkupParseError.EMPTY_BINDING, bindingName);
 
       if (!currentLayer.addLetBinding(binding))
         throw new MarkupParseException(attributePosition, MarkupParseError.BINDING_IN_USE, bindingName);
@@ -573,7 +571,7 @@ public class MarkupParser implements XmlEventConsumer {
     throw new MarkupParseException(attributePosition, MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE, fullName);
   }
 
-  private void handleUserAttribute(String name, @NotNull Object value, @Nullable CursorPosition valueBeginPosition) {
+  private void handleUserAttribute(String name, @NotNull Object value, CursorPosition attributeBeginPosition, @Nullable CursorPosition valueBeginPosition) {
     int nameLength;
     boolean isExpressionMode = false;
 
@@ -609,11 +607,6 @@ public class MarkupParser implements XmlEventConsumer {
 
     TagAndBuffers currentLayer = tagStack.peek();
 
-    if (value instanceof MarkupNode) {
-      currentLayer.attributeMap.add(new MarkupAttribute(tagAttributeBeginPosition, name, (MarkupNode) value));
-      return;
-    }
-
     ExpressionNode expression;
 
     if (isExpressionMode) {
@@ -621,6 +614,11 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
       expression = parseExpression((String) value, valueBeginPosition);
+    }
+
+    else if (value instanceof MarkupNode) {
+      currentLayer.attributeMap.add(new MarkupAttribute(attributeBeginPosition, name, (MarkupNode) value));
+      return;
     }
 
     else {
