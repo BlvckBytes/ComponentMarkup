@@ -947,6 +947,36 @@ public class MarkupInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldNotHoistUpColorIfNotAllTextsAreColored() {
+    // There was a bug where it would hoist up "gray" to the root
+    // component, because it thought all text-members were gray.
+
+    TextWithAnchors text = new TextWithAnchors(
+      "<gray>Hello, world!</> :)"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "Hello, world!")
+                .string("color", "gray")
+            ))
+            .object(item -> (
+              item
+                .string("text", " :)")
+            ))
+        ))
+    );
+  }
+
   @SuppressWarnings("SameParameterValue")
   private void makeRecordedCase(
     TextWithAnchors input,

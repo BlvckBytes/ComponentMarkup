@@ -108,8 +108,12 @@ public class ComputedStyle {
   }
 
   public void subtractStylesOnEquality(@Nullable ComputedStyle other, boolean equal) {
-    if (other == null)
+    if (other == null) {
+      if (!equal)
+        clearStylesButReset();
+
       return;
+    }
 
     if (this.font != null && (this.font.equals(other.font) ^ (!equal)))
       this.font = null;
@@ -137,8 +141,12 @@ public class ComputedStyle {
   }
 
   public void subtractStylesOnCommonality(@Nullable ComputedStyle other, boolean common) {
-    if (other == null)
+    if (other == null) {
+      if (!common)
+        clearStylesButReset();
+
       return;
+    }
 
     if (this.font != null && ((other.font == null) ^ common))
       this.font = null;
@@ -396,5 +404,13 @@ public class ComputedStyle {
       return ansiColor.name;
 
     return PackedColor.asAlphaHex(packedColor);
+  }
+
+  private void clearStylesButReset() {
+    this.packedColor = PackedColor.NULL_SENTINEL;
+    this.packedShadowColor = PackedColor.NULL_SENTINEL;
+    this.packedShadowColorOpacity = 0;
+    this.font = null;
+    this.formats = 0;
   }
 }
