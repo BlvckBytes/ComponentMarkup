@@ -185,6 +185,11 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnbalancedAttributeBrackets() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
+      "<container @[=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
       "<container @[hello=\"world\">"
     );
 
@@ -196,6 +201,55 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
       "<container @[[hello]=\"world\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnbalancedCaptureParentheses() {
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
+      "<container @*let-(my_var={}>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
+      "<container @*let-my_var)={}>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
+      "<container @*let-((my_var)={}>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
+      "<container @*let-(my_var))={}>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleCaptureParentheses() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES,
+      "<container @*let-((hello))={}>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnNonMarkupCaptureLetBinding() {
+    makeErrorCase(
+      MarkupParseError.NON_MARKUP_CAPTURE,
+      "<container @*let-(my_var)=\"hello\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.NON_MARKUP_CAPTURE,
+      "<container @*let-(my_var)=true>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.NON_MARKUP_CAPTURE,
+      "<container @*let-(my_var)=-.24>"
     );
   }
 

@@ -556,6 +556,26 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (name.startsWith("let-")) {
       String bindingName = name.substring(4);
+      boolean isCaptureMode = false;
+
+      int nameLength;
+
+      while ((nameLength = bindingName.length()) > 0) {
+        boolean hasOpening = bindingName.charAt(0) == '(';
+        boolean hasClosing = nameLength != 1 && bindingName.charAt(nameLength - 1) == ')';
+
+        if (!hasOpening && !hasClosing)
+          break;
+
+        if (!hasOpening || !hasClosing)
+          throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES);
+
+        if (isCaptureMode)
+          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES);
+
+        isCaptureMode = true;
+        bindingName = bindingName.substring(1, nameLength - 1);
+      }
 
       if (isInvalidIdentifier(bindingName, true))
         throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
@@ -568,12 +588,17 @@ public class MarkupParser implements XmlEventConsumer {
 
       LetBinding binding;
 
-      if (value instanceof ExpressionNode)
-        binding = new ExpressionLetBinding((ExpressionNode) value, bindingName, attributePosition);
-      else if (value instanceof MarkupNode)
-        binding = new MarkupLetBinding((MarkupNode) value, bindingName, attributePosition);
-      else
-        throw new MarkupParseException(attributePosition, MarkupParseError.EMPTY_BINDING, bindingName);
+      if (value instanceof MarkupNode)
+        binding = new MarkupLetBinding((MarkupNode) value, bindingName, isCaptureMode, attributePosition);
+      else {
+        if (isCaptureMode)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_MARKUP_CAPTURE, bindingName);
+
+        if (value instanceof ExpressionNode)
+          binding = new ExpressionLetBinding((ExpressionNode) value, bindingName, attributePosition);
+        else
+          throw new MarkupParseException(attributePosition, MarkupParseError.EMPTY_BINDING, bindingName);
+      }
 
       if (!currentLayer.addLetBinding(binding))
         throw new MarkupParseException(attributePosition, MarkupParseError.BINDING_IN_USE, bindingName);
@@ -588,9 +613,9 @@ public class MarkupParser implements XmlEventConsumer {
     int nameLength;
     boolean isExpressionMode = false;
 
-    while ((nameLength = name.length()) >= 2) {
+    while ((nameLength = name.length()) > 0) {
       boolean hasOpening = name.charAt(0) == '[';
-      boolean hasClosing = name.charAt(nameLength - 1) == ']';
+      boolean hasClosing = nameLength != 1 && name.charAt(nameLength - 1) == ']';
 
       if (!hasOpening && !hasClosing)
         break;
@@ -603,7 +628,9 @@ public class MarkupParser implements XmlEventConsumer {
 
       isExpressionMode = true;
       name = name.substring(1, nameLength - 1);
+    }
 
+    if (isExpressionMode) {
       if (!name.isEmpty() && (name.charAt(0) == '*' || name.charAt(0) == '+'))
         throw new MarkupParseException(lastPosition, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
     }
