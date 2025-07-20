@@ -139,6 +139,11 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
+      "<container @*let-_a-b=\"one\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @*let-0abc=\"one\">"
     );
 
@@ -150,6 +155,29 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
       "<container @*for-0abc=\"one\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedAttributeName() {
+    makeErrorCase(
+      MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
+      "<container @a_b=\"one\">"
+    );
+    makeErrorCase(
+      MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
+      "<container @_a_b=\"one\">"
+    );
+
+    // This will be caught by the xml-parser first; still - for completeness
+    makeErrorCase(
+      MarkupParseError.XML_PARSE_ERROR,
+      "<container @0abc=\"one\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
+      "<container @[0abc]=\"one\">"
     );
   }
 
@@ -176,6 +204,45 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS,
       "<container @[[hello]]=\"world\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnEmptyAttributeNames() {
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container @[]=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container @[...]=\"world\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleAttributeSpreads() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS,
+      "<container @[......hello]=\"world\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedSpreadOperators() {
+    makeErrorCase(
+      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
+      "<container @[.hello]=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
+      "<container @[..hello]=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
+      "<container @[.....hello]=\"world\">"
     );
   }
 

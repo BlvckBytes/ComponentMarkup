@@ -539,7 +539,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (name.length() > 4) {
         iterationVariable = name.substring(4);
 
-        if (!isValidExpressionIdentifier(iterationVariable))
+        if (isInvalidIdentifier(iterationVariable, true))
           throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable);
       }
 
@@ -557,7 +557,7 @@ public class MarkupParser implements XmlEventConsumer {
     if (name.startsWith("let-")) {
       String bindingName = name.substring(4);
 
-      if (!isValidExpressionIdentifier(bindingName))
+      if (isInvalidIdentifier(bindingName, true))
         throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
 
       if (bindingName.equals(currentLayer.forIterationVariable))
@@ -588,7 +588,7 @@ public class MarkupParser implements XmlEventConsumer {
     int nameLength;
     boolean isExpressionMode = false;
 
-    while ((nameLength = name.length()) > 2) {
+    while ((nameLength = name.length()) >= 2) {
       boolean hasOpening = name.charAt(0) == '[';
       boolean hasClosing = name.charAt(nameLength - 1) == ']';
 
@@ -604,19 +604,31 @@ public class MarkupParser implements XmlEventConsumer {
       isExpressionMode = true;
       name = name.substring(1, nameLength - 1);
 
-      if (name.charAt(0) == '*' || name.charAt(0) == '+')
+      if (!name.isEmpty() && (name.charAt(0) == '*' || name.charAt(0) == '+'))
         throw new MarkupParseException(lastPosition, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
     }
 
     boolean isSpreadMode = false;
 
-    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
+    while (!name.isEmpty() && name.charAt(0) == '.') {
+      if (!(name.charAt(1) == '.' && name.charAt(2) == '.'))
+        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_SPREAD_OPERATOR);
+
+      if (isSpreadMode)
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS);
+
       name = name.substring(3);
       isSpreadMode = true;
 
       if (!isExpressionMode)
         throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name);
     }
+
+    if (name.isEmpty())
+      throw new MarkupParseException(lastPosition, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+
+    if (isInvalidIdentifier(name, false))
+      throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, name);
 
     TagAndBuffers currentLayer = tagStack.peek();
 
@@ -652,28 +664,29 @@ public class MarkupParser implements XmlEventConsumer {
     currentLayer.attributeMap.add(attribute);
   }
 
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean isValidExpressionIdentifier(String identifier) {
+  private boolean isInvalidIdentifier(String identifier, boolean expression) {
     int length = identifier.length();
 
     if (length == 0)
-      return false;
+      return true;
+
+    char separator = expression ? '_' : '-';
 
     for (int charIndex = 0; charIndex < length; ++charIndex) {
       char currentChar = identifier.charAt(charIndex);
 
       if (charIndex != 0) {
-        if (currentChar == '_' || (currentChar >= '0' && currentChar <= '9'))
+        if (currentChar == separator || (currentChar >= '0' && currentChar <= '9'))
           continue;
       }
 
       if (currentChar >= 'a' && currentChar <= 'z')
         continue;
 
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   private String lower(String input) {
