@@ -246,7 +246,12 @@ public class MarkupInterpreter implements Interpreter {
     LinkedHashSet<LetBinding> capturedBindings = new LinkedHashSet<>();
 
     environment.forEachKnownName(name -> {
-      capturedBindings.add(new CaptureLetBinding(environment.getVariableValue(name), name, binding));
+      Object variableValue = environment.getVariableValue(name);
+
+      if (variableValue instanceof InternalCopyable)
+        variableValue = ((InternalCopyable) variableValue).copy();
+
+      capturedBindings.add(new CaptureLetBinding(variableValue, name, binding));
     });
 
     return new CaptureNode(node, capturedBindings);

@@ -89,6 +89,10 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
 
     for (String shadowingVariableName : shadowingVariables.keySet()) {
       Object currentShadowingValue = shadowingVariables.get(shadowingVariableName).peek();
+
+      if (currentShadowingValue instanceof InternalCopyable)
+        currentShadowingValue = ((InternalCopyable) currentShadowingValue).copy();
+
       snapshot.withVariable(shadowingVariableName, currentShadowingValue);
     }
 

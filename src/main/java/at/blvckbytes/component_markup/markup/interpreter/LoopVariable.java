@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
-public class LoopVariable {
+public class LoopVariable implements InternalCopyable {
 
   public int index;
   public final int length;
@@ -19,5 +19,16 @@ public class LoopVariable {
     isOdd = !isEven;
     isFirst = index == 0;
     isLast = index == length - 1;
+  }
+
+  @Override
+  public Object copy() {
+    LoopVariable copy = new LoopVariable(length);
+    copy.index = index;
+    copy.isFirst = isFirst;
+    copy.isLast = isLast;
+    copy.isEven = isEven;
+    copy.isOdd = isOdd;
+    return copy;
   }
 }
