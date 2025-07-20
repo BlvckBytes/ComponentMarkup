@@ -68,8 +68,11 @@ public abstract class MarkupNode {
       if (this.letBindings == null)
         this.letBindings = other.letBindings;
       else {
-        for (LetBinding otherBinding : other.letBindings.reversed())
-          this.letBindings.addFirst(otherBinding);
+        // Sadly, Java 8 does not support reverse iteration
+        LinkedHashSet<LetBinding> totalBindings = new LinkedHashSet<>();
+        totalBindings.addAll(other.letBindings);
+        totalBindings.addAll(this.letBindings);
+        this.letBindings = totalBindings;
       }
     }
 
