@@ -56,9 +56,9 @@ public class XmlEventParser {
 
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-          consumer.onCursorPosition(textContentBeginPosition);
 
-          consumer.onText(
+          emitText(
+            textContentBeginPosition,
             substringBuilder.build(
               wasPriorTagOrInterpolation
                 ? SUBSTRING_INNER_TEXT
@@ -118,9 +118,9 @@ public class XmlEventParser {
       if (cursor.peekChar() == '<') {
         if (substringBuilder.hasStartSet()) {
           substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-          consumer.onCursorPosition(textContentBeginPosition);
 
-          consumer.onText(
+          emitText(
+            textContentBeginPosition,
             substringBuilder.build(
               wasPriorTagOrInterpolation
                 ? SUBSTRING_INNER_TEXT
@@ -133,8 +133,7 @@ public class XmlEventParser {
           substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
           substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-          consumer.onCursorPosition(firstSpacePosition);
-          consumer.onText(substringBuilder.build(SUBSTRING_NOT_TEXT));
+          emitText(firstSpacePosition, substringBuilder.build(SUBSTRING_NOT_TEXT));
         }
 
         parseOpeningOrClosingTag();
@@ -173,9 +172,9 @@ public class XmlEventParser {
 
     if (substringBuilder.hasStartSet()) {
       substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-      consumer.onCursorPosition(textContentBeginPosition);
 
-      consumer.onText(
+      emitText(
+        textContentBeginPosition,
         substringBuilder.build(
           wasPriorTagOrInterpolation
             ? SUBSTRING_LAST_TEXT
@@ -186,6 +185,14 @@ public class XmlEventParser {
 
     if (!isWithinCurlyBrackets)
       consumer.onInputEnd();
+  }
+
+  private void emitText(CursorPosition position, String text) {
+    if (text.isEmpty())
+      return;
+
+    consumer.onCursorPosition(position);
+    consumer.onText(text);
   }
 
   private @Nullable String tryParseIdentifier(boolean emitState) {

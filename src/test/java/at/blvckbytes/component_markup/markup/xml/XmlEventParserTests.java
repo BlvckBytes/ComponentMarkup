@@ -510,6 +510,25 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldNotEmitEmptyStrings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "@<container @*let-test={ @{#a}@ and @{#b} @}@>"
+    );
+
+    makeCaseWithInterleavedAnchors(
+      text,
+      new TagOpenBeginEvent("container"),
+      new TagAttributeBeginEvent("*let-test"),
+      new InterpolationEvent("a", text.auxAnchor(0)),
+      new TextEvent(" and "),
+      new InterpolationEvent("b", text.auxAnchor(1)),
+      new TagAttributeEndEvent("*let-test"),
+      new TagOpenEndEvent("container", false),
+      new InputEndEvent()
+    );
+  }
+
   // ================================================================================
   // Exception tests
   // ================================================================================
