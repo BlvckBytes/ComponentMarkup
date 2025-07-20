@@ -48,9 +48,9 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnUnknownStructuralAttribute() {
+  public void shouldThrowOnUnknownIntrinsicAttribute() {
     makeErrorCase(
-      MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE,
       "<container @*unknown>"
     );
   }
@@ -59,30 +59,40 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnnamedLetBinding() {
     makeErrorCase(
       MarkupParseError.UNNAMED_LET_BINDING,
-      "<container @let-=\"\">"
+      "<container @*let-=\"a\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNNAMED_LET_BINDING,
-      "<container @let=\"\">"
+      "<container @*let=\"b\">"
     );
   }
 
   @Test
-  public void shouldThrowOnBracketedLetBindings() {
+  public void shouldThrowOnBracketedIntrinsicAttributes() {
     makeErrorCase(
-      MarkupParseError.BRACKETED_LET_BINDING,
-      "<container @[let-]=\"\">"
+      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
+      "<container @[*if]=\"\">"
     );
 
     makeErrorCase(
-      MarkupParseError.BRACKETED_LET_BINDING,
-      "<container @[let-my_var]=\"\">"
+      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
+      "<container @[+is]=\"\">"
     );
 
     makeErrorCase(
-      MarkupParseError.BRACKETED_LET_BINDING,
-      "<container @[let]=\"\">"
+      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
+      "<container @[*let-]=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
+      "<container @[*let-my_var]=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
+      "<container @[*let]=\"\">"
     );
   }
 
@@ -90,6 +100,14 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
+      "<container @*for-=\"abc\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnEmptyExpressions() {
+    makeErrorCase(
+      MarkupParseError.EMPTY_EXPRESSION,
       "<container @*for-=\"\">"
     );
   }
@@ -98,17 +116,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnBindingInUse() {
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container let-a=\"one\" @let-a=\"two\">"
+      "<container *let-a=\"one\" @*let-a=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *for-a=\"one\" @let-a=\"two\">"
+      "<container *for-a=\"one\" @*let-a=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container let-a=\"one\" @*for-a=\"two\">"
+      "<container *let-a=\"one\" @*for-a=\"two\">"
     );
   }
 
@@ -116,12 +134,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMalformedIdentifier() {
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @let-a-b=\"one\">"
+      "<container @*let-a-b=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @let-0abc=\"one\">"
+      "<container @*let-0abc=\"one\">"
     );
 
     makeErrorCase(
@@ -208,40 +226,43 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonStringStructuralAttribute() {
-    makeNonStringStructuralAttributeCase("if");
-    makeNonStringStructuralAttributeCase("else-if");
-    makeNonStringStructuralAttributeCase("for-member");
+  public void shouldThrowOnSomeNonStringIntrinsicAttributes() {
+    makeNonStringIntrinsicAttributeCase("if");
+    makeNonStringIntrinsicAttributeCase("else-if");
+    makeNonStringIntrinsicAttributeCase("for-member");
+    makeNonStringIntrinsicAttributeCase("use");
+    makeNonStringIntrinsicAttributeCase("when");
+    makeNonStringIntrinsicAttributeCase("for-test");
   }
 
-  private void makeNonStringStructuralAttributeCase(String attribute) {
+  private void makeNonStringIntrinsicAttributeCase(String attribute) {
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "=true>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "=false>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "={}>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + ">"
     );
   }
@@ -303,7 +324,7 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnExpectedScalarValue() {
+  public void shouldThrowOnExpectedExpressionValue() {
     makeErrorCase(
       MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
       "<key @key={} />"
@@ -327,10 +348,20 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnExpectedStructuralAttributeFlag() {
+  public void shouldThrowOnExpectedIntrinsicAttributeFlag() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG,
-      "<red @*else=\"\">"
+      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
+      "<red @*else=\"a\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
+      "<red @*else=true>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
+      "<red @*else=-2.3>"
     );
   }
 
@@ -338,30 +369,30 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMarkupForSeparator() {
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @for-separator=.5>"
+      "<red *for-member=\"members\" @*for-separator=.5>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @for-separator=5>"
+      "<red *for-member=\"members\" @*for-separator=5>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @for-separator=true>"
+      "<red *for-member=\"members\" @*for-separator=true>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @for-separator=\"hello\">"
+      "<red *for-member=\"members\" @*for-separator=\"hello\">"
     );
   }
 
   @Test
-  public void shouldThrowOnNonScalarForReversed() {
+  public void shouldThrowOnNonExpressionForReversed() {
     makeErrorCase(
-      MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @for-reversed={}>"
+      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
+      "<red *for-member=\"members\" @*for-reversed={}>"
     );
   }
 
@@ -369,27 +400,27 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleNonMultiAttributes() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" for-separator={} @for-separator={}>"
+      "<red *for-member=\"members\" *for-separator={} @*for-separator={}>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" for-reversed=true @for-reversed=false>"
+      "<red *for-member=\"members\" *for-reversed=true @*for-reversed=false>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" for-reversed=.5 @for-reversed=.2>"
+      "<red *for-member=\"members\" *for-reversed=.5 @*for-reversed=.2>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" for-reversed=5 @for-reversed=2>"
+      "<red *for-member=\"members\" *for-reversed=5 @*for-reversed=2>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" for-reversed=\"hello\" @for-reversed=\"hello\">"
+      "<red *for-member=\"members\" *for-reversed=\"hello\" @*for-reversed=\"hello\">"
     );
 
     makeErrorCase(
@@ -582,7 +613,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnIsCaseOutsideOfWhenParent() {
     makeErrorCase(
       MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT,
-      "<red @*is=\"A\">Hello, world!"
+      "<red @+is=\"A\">Hello, world!"
     );
   }
 
@@ -595,23 +626,26 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonStringWhenAttributes() {
+  public void shouldThrowOnWrongValuedWhenAttributes() {
     String[] values = { "=true", "=false", "=5", "=5.5", "" };
 
     for (String value : values) {
-      makeErrorCase(
-        MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
-        "<red @*is" + value + ">"
-      );
+      // is-labels support literals, for convenience
+      if (value.isEmpty()) {
+        makeErrorCase(
+          MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE,
+          "<red @+is" + value + ">"
+        );
+      }
 
       makeErrorCase(
-        MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+        MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
         "<red @*when" + value + ">"
       );
 
       if (!value.isEmpty()) {
         makeErrorCase(
-          MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE,
+          MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
           "<red @*other" + value + ">"
         );
       }
@@ -655,8 +689,8 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE,
       "<container *when=\"my.expr\">",
-      "  <red *is=\"ABC\">Case 1</>",
-      "  @<green *is=\"abc\">Case 2</>"
+      "  <red +is=\"ABC\">Case 1</>",
+      "  @<green +is=\"abc\">Case 2</>"
     );
   }
 
@@ -665,19 +699,19 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red *is=\"ABC\" @*is=\"D\">Case"
+      "  <red +is=\"ABC\" @+is=\"D\">Case"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red *is=\"ABC\" @*other>Case"
+      "  <red +is=\"ABC\" @*other>Case"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red *other @*is=\"ABC\">Case"
+      "  <red *other @+is=\"ABC\">Case"
     );
 
     makeErrorCase(
@@ -704,13 +738,21 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  <red *is=\"A\" @*if=\"b\">Static content"
+      "  <red +is=\"A\" @*if=\"b\">Static content"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  <red *is=\"A\" @*else-if=\"b\">Static content"
+      "  <red +is=\"A\" @*else-if=\"b\">Static content"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnNonMultiAttributeWithSpreadOperator() {
+    makeErrorCase(
+      MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE,
+      "<key @[...key]=\"['first', 'second']\"/>"
     );
   }
 

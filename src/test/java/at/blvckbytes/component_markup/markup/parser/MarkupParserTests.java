@@ -11,7 +11,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseSimpleCase() {
     TextWithAnchors text = new TextWithAnchors(
       "@<translate",
-      "  @let-a=\"b\"",
+      "  @*let-a=\"b\"",
       "  [key]=\"my.expr\"",
       "  @[fallback]=\"'hello, ' & user\"",
       "/>"
@@ -100,8 +100,8 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     TextWithAnchors text = new TextWithAnchors(
       "<red",
       "  *for-member=\"members\"",
-      "  for-separator={ <aqua>@separator }",
-      "  for-reversed=true",
+      "  *for-separator={ <aqua>@separator }",
+      "  *for-reversed=true",
       ">@Hello, world"
     );
 
@@ -195,11 +195,11 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     TextWithAnchors text = new TextWithAnchors(
       "@before",
       "@<container *when=\"my.expression\">",
-      "  <red *is=\"A\">@Case A</>",
-      "  <green *is=\"B\">@Case B</>",
-      "  @<blue *is=\"C\" *when=\"another.expression\">",
-      "    <gold *is=\"D\">@Case D</>",
-      "    <yellow *is=\"E\">@Case E</>",
+      "  <red +is=\"A\">@Case A</>",
+      "  <green +is=\"B\">@Case B</>",
+      "  @<blue +is=\"C\" *when=\"another.expression\">",
+      "    <gold +is=\"D\">@Case D</>",
+      "    <yellow +is=\"E\">@Case E</>",
       "  </>",
       "  <gray *other>@Fallback Case</>",
       "</>",
@@ -258,7 +258,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldUnpackButInheritAll() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red *if=\"a\" *use=\"b\" @let-c=\"d\">@{'test'}"
+      "<red *if=\"a\" *use=\"b\" @*let-c=\"d\">@{'test'}"
     );
 
     makeCase(

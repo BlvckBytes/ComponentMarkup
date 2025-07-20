@@ -84,11 +84,11 @@ public class MarkupInterpreterTests {
   public void shouldRenderWhenMatching() {
     TextWithAnchors text = new TextWithAnchors(
       "<container *when=\"input\">",
-      "  <red *is=\"A\">Case A</>",
-      "  <green *is=\"B\">Case B</>",
-      "  <container *is=\"null\" *when=\"other_input\">",
-      "    <gold *is=\"C\">Nested case C</>",
-      "    <yellow *is=\"D\">Nested case D</>",
+      "  <red +is=\"A\">Case A</>",
+      "  <green +is=\"B\">Case B</>",
+      "  <container +is=\"null\" *when=\"other_input\">",
+      "    <gold +is=\"C\">Nested case C</>",
+      "    <yellow +is=\"D\">Nested case D</>",
       "  </>",
       "  <gray *other>Fallback Case</>",
       "</>"
@@ -170,7 +170,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldRenderInterpolationWithBinding() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red let-my_var=\"my_prefix & my_name & my_suffix\">Hello, {my_var}"
+      "<red *let-my_var=\"my_prefix & my_name & my_suffix\">Hello, {my_var}"
     );
 
     makeCase(
@@ -196,9 +196,9 @@ public class MarkupInterpreterTests {
     TextWithAnchors text = new TextWithAnchors(
       "<red",
       "  *for-char=\"my_chars\"",
-      "  for-separator={ <aqua>separator }",
-      "  for-reversed=" + reversed,
-      "  let-index=\"loop.index\"",
+      "  *for-separator={ <aqua>separator }",
+      "  *for-reversed=" + reversed,
+      "  *let-index=\"loop.index\"",
       ">",
       "  {char} at index {index}"
     );
@@ -271,7 +271,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldUpdateLetBindingOnLoopNode() {
     TextWithAnchors text = new TextWithAnchors(
-      "<container *for=\"1..3\" for-separator={<space/>} let-number=\"loop.index + 1\">{number}"
+      "<container *for=\"1..3\" *for-separator={<space/>} *let-number=\"loop.index + 1\">{number}"
     );
 
     makeCase(
@@ -739,8 +739,8 @@ public class MarkupInterpreterTests {
   public void shouldRenderMarkupLetBindings() {
     TextWithAnchors text = new TextWithAnchors(
       "<container",
-      "  let-spacer={ <dark_gray><st>{' ' ** 15} }",
-      "  let-line={ <red>Hello, world! }",
+      "  *let-spacer={ <dark_gray><st>{' ' ** 15} }",
+      "  *let-line={ <red>Hello, world! }",
       ">",
       "  {line}<br/>",
       "  {spacer}<br/>",
@@ -782,7 +782,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldAllowToUseLetBindingsOnUnpackedNode() {
     TextWithAnchors text = new TextWithAnchors(
-      "<red let-a=\"'a'\">{a ** 10}"
+      "<red *let-a=\"'a'\">{a ** 10}"
     );
 
     makeCase(
@@ -796,14 +796,35 @@ public class MarkupInterpreterTests {
   }
 
   @Test
+  public void shouldAllowLiteralLetBindings() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container",
+      "  +let-a=5",
+      "  +let-b=true",
+      "  +let-c=false",
+      "  +let-d=\"hello\"",
+      "  +let-e=-.23",
+      ">{a} {b} {c} {d} {e}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "5 true false hello -.23")
+    );
+  }
+
+  @Test
   public void shouldAllowBackwardsAccessOnLetBindings() {
     TextWithAnchors text = new TextWithAnchors(
       "<container",
-      "  let-a=5",
-      "  let-b=12",
-      "  let-c=\"b - a\"",
-      "  let-d=3",
-      "  let-e=\"c ^ d\"",
+      "  *let-a=5",
+      "  *let-b=12",
+      "  *let-c=\"b - a\"",
+      "  *let-d=3",
+      "  *let-e=\"c ^ d\"",
       ">{e}"
     );
 

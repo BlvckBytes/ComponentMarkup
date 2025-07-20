@@ -24,6 +24,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
@@ -88,84 +89,17 @@ public class MarkupParser implements XmlEventConsumer {
 
     name = lower(name);
 
+    if (name.charAt(0) == '+') {
+      handleIntrinsicAttribute(name, lastPosition, value, null);
+      return;
+    }
+
     if (name.charAt(0) == '*') {
-      handleStructuralAttribute(name, value, valueBeginPosition);
+      handleIntrinsicAttribute(name, lastPosition, parseExpression(value, valueBeginPosition), null);
       return;
     }
 
-    TagAndBuffers currentLayer = tagStack.peek();
-
-    int nameLength;
-    boolean isExpressionMode = false;
-    boolean isSpreadMode = false;
-
-    while ((nameLength = name.length()) > 2) {
-      boolean hasOpening = name.charAt(0) == '[';
-      boolean hasClosing = name.charAt(nameLength - 1) == ']';
-
-      if (!hasOpening && !hasClosing)
-        break;
-
-      if (!hasOpening || !hasClosing)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
-
-      if (isExpressionMode)
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
-
-      isExpressionMode = true;
-      name = name.substring(1, nameLength - 1);
-
-      if (name.equals("let") || name.startsWith("let-"))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BRACKETED_LET_BINDING);
-    }
-
-    if (name.equals("let"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
-
-    if (name.startsWith("let-")) {
-      if (nameLength == 4)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
-
-      addExpressionLetBinding(name.substring(4), parseExpression(value, valueBeginPosition), currentLayer);
-      return;
-    }
-
-    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
-      name = name.substring(3);
-      isSpreadMode = true;
-
-      if (!isExpressionMode)
-        throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name);
-    }
-
-    ExpressionNode expression = isExpressionMode ? parseExpression(value, valueBeginPosition) : ImmediateExpression.of(value);
-
-    if (currentLayer.forIterable != null) {
-      if (name.equals("for-reversed")) {
-        if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
-
-        currentLayer.forReversed = expression;
-        return;
-      }
-
-      if (name.equals("for-separator")) {
-        if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
-
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name);
-      }
-    }
-
-    ExpressionAttribute attribute = new ExpressionAttribute(lastPosition, name, expression);
-
-    if (!isExpressionMode)
-      attribute.flags.add(ExpressionFlag.IMMEDIATE_VALUE);
-
-    if (isSpreadMode)
-      attribute.flags.add(ExpressionFlag.SPREAD_MODE);
-
-    currentLayer.attributeMap.add(attribute);
+    handleUserAttribute(name, value, valueBeginPosition);
   }
 
   @Override
@@ -175,7 +109,21 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleScalarNonStringAttribute(name, new TerminalNode(new LongToken(0, raw, value)));
+    name = lower(name);
+
+    if (name.charAt(0) == '+') {
+      handleIntrinsicAttribute(name, lastPosition, raw, null);
+      return;
+    }
+
+    ExpressionNode immediateExpression = new TerminalNode(new LongToken(0, raw, value));
+
+    if (name.charAt(0) == '*') {
+      handleIntrinsicAttribute(name, lastPosition, immediateExpression, value);
+      return;
+    }
+
+    handleUserAttribute(name, immediateExpression, null);
   }
 
   @Override
@@ -185,7 +133,21 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleScalarNonStringAttribute(name, new TerminalNode(new DoubleToken(0, raw, value)));
+    name = lower(name);
+
+    if (name.charAt(0) == '+') {
+      handleIntrinsicAttribute(name, lastPosition, raw, value);
+      return;
+    }
+
+    ExpressionNode immediateExpression = new TerminalNode(new DoubleToken(0, raw, value));
+
+    if (name.charAt(0) == '*') {
+      handleIntrinsicAttribute(name, lastPosition, immediateExpression, value);
+      return;
+    }
+
+    handleUserAttribute(name, immediateExpression, null);
   }
 
   @Override
@@ -195,7 +157,21 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleScalarNonStringAttribute(name, new TerminalNode(new BooleanToken(0, raw, value)));
+    name = lower(name);
+
+    if (name.charAt(0) == '+') {
+      handleIntrinsicAttribute(name, lastPosition, raw, value);
+      return;
+    }
+
+    ExpressionNode immediateExpression = new TerminalNode(new BooleanToken(0, raw, value));
+
+    if (name.charAt(0) == '*') {
+      handleIntrinsicAttribute(name, lastPosition, immediateExpression, value);
+      return;
+    }
+
+    handleUserAttribute(name, immediateExpression, null);
   }
 
   @Override
@@ -209,24 +185,8 @@ public class MarkupParser implements XmlEventConsumer {
 
     name = lower(name);
 
-    if (name.charAt(0) == '*')
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
-
     if (name.charAt(0) == '[')
       throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
-
-    if (name.equals("let") || (name.startsWith("let-") && name.length() == 4))
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
-
-    TagAndBuffers currentLayer = tagStack.peek();
-
-    if (name.equals("for-separator") && currentLayer.forIterable != null) {
-      if (currentLayer.forSeparator != null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
-    }
-
-    else if (name.equals("for-reversed"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, currentLayer.tagNameLower);
 
     subtreeParser = new MarkupParser(tagRegistry, lastPosition);
   }
@@ -247,37 +207,20 @@ public class MarkupParser implements XmlEventConsumer {
 
     name = lower(name);
 
-    TagAndBuffers currentLayer = tagStack.peek();
     MarkupNode subtree = subtreeParser.result;
     subtreeParser = null;
 
-    if (name.equals("for-separator") && currentLayer.forIterable != null) {
-      currentLayer.forSeparator = subtree;
-      return;
-    }
-
-    if (name.startsWith("let-")) {
-      assert name.length() > 4;
-
-      String bindingName = name.substring(4);
-
-      if (!isValidExpressionIdentifier(bindingName))
-        throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
-
-      if (bindingName.equals(currentLayer.forIterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-
-      LetBinding binding = new MarkupLetBinding(subtree, bindingName, lastPosition);
-
-      if (!currentLayer.addLetBinding(binding))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-
-      return;
-    }
-
     assert tagAttributeBeginPosition != null;
 
-    currentLayer.attributeMap.add(new MarkupAttribute(tagAttributeBeginPosition, name, subtree));
+    if (name.charAt(0) == '*') {
+      handleIntrinsicAttribute(name, tagAttributeBeginPosition, subtree, null);
+      return;
+    }
+
+    if (name.charAt(0) == '+')
+      throw new IllegalStateException("Markup-values on plain intrinsic attributes make no sense");
+
+    handleUserAttribute(name, subtree, null);
   }
 
   @Override
@@ -290,20 +233,16 @@ public class MarkupParser implements XmlEventConsumer {
     name = lower(name);
 
     if (name.charAt(0) == '*') {
-      handleStructuralAttribute(name, null, null);
+      handleIntrinsicAttribute(name, lastPosition, null, null);
       return;
     }
 
-    TagAndBuffers currentLayer = tagStack.peek();
+    if (name.charAt(0) == '+') {
+      handleIntrinsicAttribute(name, lastPosition, null, null);
+      return;
+    }
 
-    currentLayer.attributeMap.add(
-      new ExpressionAttribute(
-        lastPosition,
-        name,
-        ImmediateExpression.of(true),
-        ExpressionFlag.IMMEDIATE_VALUE
-      )
-    );
+    handleUserAttribute(name, ImmediateExpression.of(true), null);
   }
 
   @Override
@@ -438,195 +377,268 @@ public class MarkupParser implements XmlEventConsumer {
   // Utilities
   // ================================================================================
 
-  private void addExpressionLetBinding(String bindingName, ExpressionNode bindingExpression, TagAndBuffers currentLayer) {
-    if (!isValidExpressionIdentifier(bindingName))
-      throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
-
-    if (bindingName.equals(currentLayer.forIterationVariable))
-      throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-
-    LetBinding binding = new ExpressionLetBinding(bindingExpression, bindingName, lastPosition);
-
-    if (!currentLayer.addLetBinding(binding))
-      throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, bindingName);
-  }
-
-  private void handleStructuralAttribute(String name, @Nullable String value, CursorPosition valueBeginPosition) {
+  /**
+   * @param value null => flag; String => literal (+); MarkupNode | ExpressionNode => evaluated (*)
+   */
+  private void handleIntrinsicAttribute(String name, CursorPosition attributePosition, @Nullable Object value, @Nullable Object immediateValue) {
     TagAndBuffers currentLayer = tagStack.peek();
 
-    switch (name) {
-      case "*if": {
-        if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+    // The prefix is already known as by the value's type
+    String fullName = name;
+    name = name.substring(1);
 
-        if (value == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+    switch (name) {
+      case "if": {
+        if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+
+        if (!(value instanceof ExpressionNode) || immediateValue != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
-        currentLayer.ifCondition = parseExpression(value, valueBeginPosition);
+        currentLayer.ifCondition = (ExpressionNode) value;
         currentLayer.ifConditionType = ConditionType.IF;
         return;
       }
 
-      case "*else-if": {
+      case "else-if": {
         if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+          throw new MarkupParseException(attributePosition, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
-        if (value == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+        if (!(value instanceof ExpressionNode) || immediateValue != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
-        currentLayer.ifCondition = parseExpression(value, valueBeginPosition);
+        currentLayer.ifCondition = (ExpressionNode) value;
         currentLayer.ifConditionType = ConditionType.ELSE_IF;
         return;
       }
 
-      case "*use": {
-        if (value == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+      case "use": {
+        if (!(value instanceof ExpressionNode) || immediateValue != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.useCondition != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_USE_CONDITIONS);
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_USE_CONDITIONS);
 
-        currentLayer.useCondition = parseExpression(value, valueBeginPosition);
+        currentLayer.useCondition = (ExpressionNode) value;
         return;
       }
 
-      case "*other": {
+      case "other": {
         if (value != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
+          throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name);
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT);
+          throw new MarkupParseException(attributePosition, MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT);
 
         if (currentLayer.isWhenOther || currentLayer.whenIsValue != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+          throw new MarkupParseException(attributePosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
 
         currentLayer.isWhenOther = true;
         return;
       }
 
-      case "*else": {
+      case "else": {
         if (value != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_STRUCTURAL_ATTRIBUTE_FLAG, name);
+          throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name);
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
         currentLayer.ifConditionType = ConditionType.ELSE;
         return;
       }
 
-      case "*when": {
-        if (value == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+      case "when": {
+        if (!(value instanceof ExpressionNode) || immediateValue != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.whenInput != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT);
+          throw new MarkupParseException(attributePosition, MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT);
 
-        currentLayer.whenInput = parseExpression(value, valueBeginPosition);
+        currentLayer.whenInput = (ExpressionNode) value;
         return;
       }
 
-      case "*is": {
-        if (value == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
+      case "is": {
+        String isValue;
+
+        if (value instanceof String)
+          isValue = (String) value;
+        else if (immediateValue != null)
+          isValue = String.valueOf(immediateValue);
+        else
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE, fullName);
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT);
+          throw new MarkupParseException(attributePosition, MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT);
 
         if (currentLayer.whenIsValue != null || currentLayer.isWhenOther)
-          throw new MarkupParseException(lastPosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+          throw new MarkupParseException(attributePosition, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
 
-        currentLayer.whenIsValue = value;
+        currentLayer.whenIsValue = isValue;
         return;
       }
+
+      case "for-reversed":
+        if (!(value instanceof ExpressionNode))
+          throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
+
+        if (currentLayer.forIterable == null)
+          throw new IllegalStateException("The *for-reversed attribute may only be used in combination with for-loops");
+
+        if (currentLayer.forReversed != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, fullName, currentLayer.tagNameLower);
+
+        currentLayer.forReversed = (ExpressionNode) value;
+        return;
+
+      case "for-separator":
+        if (!(value instanceof MarkupNode))
+          throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, fullName);
+
+        if (currentLayer.forIterable == null)
+          throw new IllegalStateException("The *for-reversed attribute may only be used in combination with for-loops");
+
+        if (currentLayer.forSeparator != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, fullName, currentLayer.tagNameLower);
+
+        currentLayer.forSeparator = (MarkupNode) value;
+        return;
+
+      case "for-":
+        throw new MarkupParseException(attributePosition, MarkupParseError.UNNAMED_FOR_LOOP);
+
+      case "let":
+      case "let-":
+        throw new MarkupParseException(attributePosition, MarkupParseError.UNNAMED_LET_BINDING);
     }
 
-    if (name.equals("*for") || name.startsWith("*for-")) {
+    if (name.equals("for") || name.startsWith("for-")) {
+      if (!(value instanceof ExpressionNode) || immediateValue != null)
+        throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
+
       String iterationVariable = null;
 
-      if (name.length() == 5)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_FOR_LOOP);
-
-      if (name.length() > 5) {
-        iterationVariable = name.substring(5);
+      if (name.length() > 4) {
+        iterationVariable = name.substring(4);
 
         if (!isValidExpressionIdentifier(iterationVariable))
-          throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable);
+          throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable);
       }
 
-      if (value == null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
-
       if (currentLayer.forIterable != null)
-        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_LOOPS);
+        throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_LOOPS);
 
       if (currentLayer.hasLetBinding(iterationVariable))
-        throw new MarkupParseException(lastPosition, MarkupParseError.BINDING_IN_USE, iterationVariable);
+        throw new MarkupParseException(attributePosition, MarkupParseError.BINDING_IN_USE, iterationVariable);
 
-      currentLayer.forIterable = parseExpression(value, valueBeginPosition);
+      currentLayer.forIterable = (ExpressionNode) value;
       currentLayer.forIterationVariable = iterationVariable;
       return;
     }
 
-    throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_STRUCTURAL_ATTRIBUTE, name);
-  }
-
-  private void handleScalarNonStringAttribute(String name, ExpressionNode expression) {
-    name = lower(name);
-
-    if (name.charAt(0) == '*')
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_STRUCTURAL_ATTRIBUTE);
-
-    if (name.charAt(0) == '[')
-      throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
-
-    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.')
-      throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name.substring(3));
-
-    TagAndBuffers currentLayer = tagStack.peek();
-
-    if (name.equals("let"))
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
-
     if (name.startsWith("let-")) {
-      if (name.length() == 4)
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNNAMED_LET_BINDING);
+      String bindingName = name.substring(4);
 
-      addExpressionLetBinding(name.substring(4), expression, currentLayer);
+      if (!isValidExpressionIdentifier(bindingName))
+        throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, bindingName);
+
+      if (bindingName.equals(currentLayer.forIterationVariable))
+        throw new MarkupParseException(attributePosition, MarkupParseError.BINDING_IN_USE, bindingName);
+
+      if (value instanceof String)
+        value = ImmediateExpression.of((String) value);
+
+      LetBinding binding;
+
+      if (value instanceof ExpressionNode)
+        binding = new ExpressionLetBinding((ExpressionNode) value, bindingName, attributePosition);
+      else if (value instanceof MarkupNode)
+        binding = new MarkupLetBinding((MarkupNode) value, bindingName, attributePosition);
+      else
+        throw new IllegalStateException("Either supply an expression or a markup-value on let- bindings");
+
+      if (!currentLayer.addLetBinding(binding))
+        throw new MarkupParseException(attributePosition, MarkupParseError.BINDING_IN_USE, bindingName);
+
       return;
     }
 
-    if (currentLayer.forIterable != null) {
-      if (name.equals("for-separator")) {
-        if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
+    throw new MarkupParseException(attributePosition, MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE, fullName);
+  }
 
-        throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name);
-      }
+  private void handleUserAttribute(String name, @NotNull Object value, @Nullable CursorPosition valueBeginPosition) {
+    int nameLength;
+    boolean isExpressionMode = false;
 
-      if (name.equals("for-reversed")) {
-        if (currentLayer.forReversed != null)
-          throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, currentLayer.tagNameLower);
+    while ((nameLength = name.length()) > 2) {
+      boolean hasOpening = name.charAt(0) == '[';
+      boolean hasClosing = name.charAt(nameLength - 1) == ']';
 
-        currentLayer.forReversed = expression;
-        return;
-      }
+      if (!hasOpening && !hasClosing)
+        break;
+
+      if (!hasOpening || !hasClosing)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
+
+      if (isExpressionMode)
+        throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
+
+      isExpressionMode = true;
+      name = name.substring(1, nameLength - 1);
+
+      if (name.charAt(0) == '*' || name.charAt(0) == '+')
+        throw new MarkupParseException(lastPosition, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
     }
 
-    currentLayer.attributeMap.add(
-      new ExpressionAttribute(
-        lastPosition,
-        name,
-        expression,
-        ExpressionFlag.IMMEDIATE_VALUE
-      )
-    );
+    boolean isSpreadMode = false;
+
+    if (name.length() > 3 && name.charAt(0) == '.' && name.charAt(1) == '.' && name.charAt(2) == '.') {
+      name = name.substring(3);
+      isSpreadMode = true;
+
+      if (!isExpressionMode)
+        throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name);
+    }
+
+    TagAndBuffers currentLayer = tagStack.peek();
+
+    if (value instanceof MarkupNode) {
+      currentLayer.attributeMap.add(new MarkupAttribute(tagAttributeBeginPosition, name, (MarkupNode) value));
+      return;
+    }
+
+    ExpressionNode expression;
+
+    if (isExpressionMode) {
+      if (!(value instanceof String))
+        throw new MarkupParseException(lastPosition, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+
+      expression = parseExpression((String) value, valueBeginPosition);
+    }
+
+    else {
+      if (value instanceof ExpressionNode)
+        expression = (ExpressionNode) value;
+      else
+        expression = ImmediateExpression.of(String.valueOf(value));
+    }
+
+    ExpressionAttribute attribute = new ExpressionAttribute(lastPosition, name, expression);
+
+    if (!isExpressionMode)
+      attribute.flags.add(ExpressionFlag.IMMEDIATE_VALUE);
+
+    if (isSpreadMode)
+      attribute.flags.add(ExpressionFlag.SPREAD_MODE);
+
+    currentLayer.attributeMap.add(attribute);
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -682,7 +694,12 @@ public class MarkupParser implements XmlEventConsumer {
 
   private ExpressionNode parseExpression(String input, CursorPosition valueBeginPosition) {
     try {
-      return ExpressionParser.parse(input);
+      ExpressionNode expression = ExpressionParser.parse(input);
+
+      if (expression == null)
+        throw new MarkupParseException(lastPosition, MarkupParseError.EMPTY_EXPRESSION);
+
+      return expression;
     } catch (ExpressionTokenizeException expressionTokenizeException) {
       throw new MarkupParseException(valueBeginPosition, expressionTokenizeException);
     } catch (ExpressionParseException expressionParseException) {
