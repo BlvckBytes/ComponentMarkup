@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.player_name;
 
 import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
-import org.jetbrains.annotations.Nullable;
 
 public class PlayerNameParameter implements RendererParameter {
 
@@ -18,8 +17,6 @@ public class PlayerNameParameter implements RendererParameter {
 
   @Override
   public String toString() {
-    return "PlayerNameParameter{" +
-      "displayName=" + displayName +
-      '}';
+    return "PlayerNameParameter{displayName=" + displayName + "}";
   }
 }

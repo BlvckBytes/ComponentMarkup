@@ -101,8 +101,8 @@ public interface ComponentConstructor {
   // ================================================================================
 
   /**
-   * @return Non-null value (component; either equal to input or clone if that was more efficient
-   * to swap out the members via) iif the slot was valid on this component
+   * @return Non-null value (component; either equal to input or clone if that was necessary
+   * or more efficient to swap out the members via) iif the slot was valid on this component
    */
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   @Nullable Object setMembers(Object component, MembersSlot slot, @Nullable List<Object> children);
@@ -113,9 +113,8 @@ public interface ComponentConstructor {
   @Nullable List<Object> getMembers(Object component, MembersSlot slot);
 
   /**
-   * Creates a shallow copy of the given component which also copies all member-lists such
-   * that they can be safely manipulated; members which are handled as singleton-lists and are
-   * thereby references of their own do not need to be copied.
+   * Creates a shallow copy of the given component which also copies all member-lists
+   * such that they can be safely manipulated.
    */
   Object shallowCopyIncludingMemberLists(Object component);
 

@@ -12,25 +12,23 @@ public interface Interpreter {
 
   TemporaryMemberEnvironment getEnvironment();
 
-  // TODO: These arguments for evaluation should all be @Nullable (for convenience)
+  @NotNull String evaluateAsString(@Nullable ExpressionNode expression);
 
-  @NotNull String evaluateAsString(ExpressionNode expression);
+  @Nullable String evaluateAsStringOrNull(@Nullable ExpressionNode expression);
 
-  @Nullable String evaluateAsStringOrNull(ExpressionNode expression);
+  long evaluateAsLong(@Nullable ExpressionNode expression);
 
-  long evaluateAsLong(ExpressionNode expression);
+  @Nullable Long evaluateAsLongOrNull(@Nullable ExpressionNode expression);
 
-  @Nullable Long evaluateAsLongOrNull(ExpressionNode expression);
+  double evaluateAsDouble(@Nullable ExpressionNode expression);
 
-  double evaluateAsDouble(ExpressionNode expression);
+  @Nullable Double evaluateAsDoubleOrNull(@Nullable ExpressionNode expression);
 
-  @Nullable Double evaluateAsDoubleOrNull(ExpressionNode expression);
+  boolean evaluateAsBoolean(@Nullable ExpressionNode expression);
 
-  boolean evaluateAsBoolean(ExpressionNode expression);
+  TriState evaluateAsTriState(@Nullable ExpressionNode expression);
 
-  TriState evaluateAsTriState(ExpressionNode expression);
-
-  @Nullable Object evaluateAsPlainObject(ExpressionNode expression);
+  @Nullable Object evaluateAsPlainObject(@Nullable ExpressionNode expression);
 
   ComponentOutput interpretSubtree(MarkupNode node, SlotContext slotContext);
 

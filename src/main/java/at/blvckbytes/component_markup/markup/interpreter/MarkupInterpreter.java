@@ -61,7 +61,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public @NotNull String evaluateAsString(ExpressionNode expression) {
+  public @NotNull String evaluateAsString(@Nullable ExpressionNode expression) {
     String value = evaluateAsStringOrNull(expression);
 
     if (value == null)
@@ -71,7 +71,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable String evaluateAsStringOrNull(ExpressionNode expression) {
+  public @Nullable String evaluateAsStringOrNull(@Nullable ExpressionNode expression) {
     try {
       Object result = ExpressionInterpreter.interpret(expression, environment);
 
@@ -86,7 +86,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public long evaluateAsLong(ExpressionNode expression) {
+  public long evaluateAsLong(@Nullable ExpressionNode expression) {
     Long value = evaluateAsLongOrNull(expression);
 
     if (value == null)
@@ -96,7 +96,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Long evaluateAsLongOrNull(ExpressionNode expression) {
+  public @Nullable Long evaluateAsLongOrNull(@Nullable ExpressionNode expression) {
     try {
       Object result = ExpressionInterpreter.interpret(expression, environment);
 
@@ -111,7 +111,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public double evaluateAsDouble(ExpressionNode expression) {
+  public double evaluateAsDouble(@Nullable ExpressionNode expression) {
     Double value = evaluateAsDoubleOrNull(expression);
 
     if (value == null)
@@ -121,7 +121,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Double evaluateAsDoubleOrNull(ExpressionNode expression) {
+  public @Nullable Double evaluateAsDoubleOrNull(@Nullable ExpressionNode expression) {
     try {
       Object result = ExpressionInterpreter.interpret(expression, environment);
 
@@ -136,7 +136,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public boolean evaluateAsBoolean(ExpressionNode expression) {
+  public boolean evaluateAsBoolean(@Nullable ExpressionNode expression) {
     TriState value = evaluateAsTriState(expression);
 
     if (value == TriState.NULL)
@@ -146,7 +146,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public TriState evaluateAsTriState(ExpressionNode expression) {
+  public TriState evaluateAsTriState(@Nullable ExpressionNode expression) {
     try {
       Object result = ExpressionInterpreter.interpret(expression, environment);
 
@@ -161,7 +161,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public @Nullable Object evaluateAsPlainObject(ExpressionNode expression) {
+  public @Nullable Object evaluateAsPlainObject(@Nullable ExpressionNode expression) {
     try {
       return ExpressionInterpreter.interpret(expression, environment);
     } catch (Throwable e) {
