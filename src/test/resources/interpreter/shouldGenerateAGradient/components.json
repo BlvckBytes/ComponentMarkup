@@ -1,0 +1,63 @@
+[
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "H",
+        "color": "red"
+      },
+      {
+        "text": "e",
+        "color": "#F05563"
+      },
+      {
+        "text": "l",
+        "color": "#E25571"
+      },
+      {
+        "text": "l",
+        "color": "#D4557F"
+      },
+      {
+        "text": "o",
+        "color": "#C6558D"
+      },
+      {
+        "text": ",",
+        "color": "#B8559B"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "w",
+        "bold": true,
+        "color": "#AA55AA"
+      },
+      {
+        "text": "o",
+        "bold": true,
+        "color": "#9B55B8"
+      },
+      {
+        "text": "r",
+        "bold": true,
+        "color": "#8D55C6"
+      },
+      {
+        "text": "l",
+        "bold": true,
+        "color": "#7F55D4"
+      },
+      {
+        "text": "d",
+        "bold": true,
+        "color": "#7155E2"
+      },
+      {
+        "text": "!",
+        "color": "#6355F0"
+      }
+    ]
+  }
+]

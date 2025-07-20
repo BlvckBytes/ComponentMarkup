@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
-import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class MarkupInterpreterTests {
@@ -290,26 +289,10 @@ public class MarkupInterpreterTests {
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
     );
 
-    makeColorizerCase(
+    makeRecordedCase(
       text,
-      "Hello, world!",
-      (index, letter) -> {
-        if (index >= 7 && index <= 11)
-          letter.bool("bold", true);
-      },
-      "#FF5555",
-      "#F05563",
-      "#E25571",
-      "#D4557F",
-      "#C6558D",
-      "#B8559B",
-      null,
-      "#AA55AA",
-      "#9B55B8",
-      "#8D55C6",
-      "#7F55D4",
-      "#7155E2",
-      "#6355F0"
+      new InterpretationEnvironment(),
+      SlotType.CHAT
     );
   }
 
@@ -1097,44 +1080,6 @@ public class MarkupInterpreterTests {
     } catch (Exception e) {
       Assertions.fail("Could not render/write image:", e);
     }
-  }
-
-  private void makeColorizerCase(
-    TextWithAnchors input,
-    String text,
-    BiConsumer<Integer, JsonObjectBuilder> letterAndIndexConsumer,
-    String... colors
-  ) {
-    makeCase(
-      input,
-      new InterpretationEnvironment(),
-      SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "")
-        .array("extra", extra -> {
-          char[] chars = text.toCharArray();
-
-          for (int index = 0; index < chars.length; ++index) {
-            int charIndex = index;
-            char currentChar = chars[index];
-            String currentColor = index < colors.length ? colors[index] : "<undefined>";
-
-            extra.object(letter -> {
-              letter.string("text", String.valueOf(currentChar));
-
-              if (currentColor != null)
-                letter.string("color", currentColor);
-
-              if (letterAndIndexConsumer != null)
-                letterAndIndexConsumer.accept(charIndex, letter);
-
-              return letter;
-            });
-          }
-
-          return extra;
-        })
-    );
   }
 
   private JsonElement sortKeysRecursively(JsonElement input) {
