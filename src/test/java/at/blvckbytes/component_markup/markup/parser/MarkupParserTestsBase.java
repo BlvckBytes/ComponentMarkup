@@ -29,8 +29,8 @@ public abstract class MarkupParserTestsBase {
     return new CursorPosition(0, 0, 0, input.text);
   }
 
-  protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed) {
-    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), reversed, new ArrayList<>()));
+  protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed, @Nullable NodeWrapper<?> wrappedEmpty) {
+    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), wrappedEmpty == null ? null : wrappedEmpty.get(), reversed, new ArrayList<>()));
   }
 
   protected static Map<String, NodeWrapper<? extends MarkupNode>> whenMap(Object... items) {

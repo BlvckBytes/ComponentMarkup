@@ -496,6 +496,19 @@ public class MarkupParser implements XmlEventConsumer {
         currentLayer.forReversed = (ExpressionNode) value;
         return;
 
+      case "for-empty":
+        if (!(value instanceof MarkupNode))
+          throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, fullName);
+
+        if (currentLayer.forIterable == null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, fullName);
+
+        if (currentLayer.forEmpty != null)
+          throw new MarkupParseException(attributePosition, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, fullName, currentLayer.tagNameLower);
+
+        currentLayer.forEmpty = (MarkupNode) value;
+        return;
+
       case "for-separator":
         if (!(value instanceof MarkupNode))
           throw new MarkupParseException(attributePosition, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, fullName);

@@ -66,6 +66,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .child(interpolation("member", text.anchor(2)))
           .child(text("!", text.anchor(3))),
         null,
+        null,
         null
       )
     );
@@ -90,18 +91,20 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .child(text("!", text.anchor(3)))
           .ifCondition(expr("member != null")),
         null,
+        null,
         null
       )
     );
   }
 
   @Test
-  public void shouldParseForLoopWithSeparatorAndReversed() {
+  public void shouldParseForLoopWithSeparatorAndReversedAndEmpty() {
     TextWithAnchors text = new TextWithAnchors(
       "<red",
       "  *for-member=\"members\"",
       "  *for-separator={ <aqua>@separator }",
       "  *for-reversed=true",
+      "  *for-empty={<red>@No entries!}",
       ">@Hello, world"
     );
 
@@ -110,11 +113,13 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       forLoop(
         expr("members"),
         "member",
-        text("Hello, world", text.anchor(1))
+        text("Hello, world", text.anchor(2))
           .color("red"),
         text("separator", text.anchor(0))
           .color("aqua"),
-        imm(true)
+        imm(true),
+        text("No entries!", text.anchor(1))
+          .color("red")
       )
     );
   }
@@ -289,6 +294,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         null,
         text("Hello, world!", text.anchor(0))
           .color("red"),
+        null,
         null,
         null
       )

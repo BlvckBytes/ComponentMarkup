@@ -35,6 +35,7 @@ public class TagAndBuffers implements ParserChildItem {
 
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
+  public @Nullable MarkupNode forEmpty;
   public @Nullable ExpressionNode forReversed;
   public @Nullable String forIterationVariable;
 
@@ -120,6 +121,7 @@ public class TagAndBuffers implements ParserChildItem {
             childTag.forIterationVariable,
             currentNode,
             childTag.forSeparator,
+            childTag.forEmpty,
             childTag.forReversed,
             childTag.bindings
           );

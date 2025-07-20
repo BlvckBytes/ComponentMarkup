@@ -13,6 +13,7 @@ public class ForLoopNode extends MarkupNode {
   public final @Nullable String iterationVariable;
   public final MarkupNode body;
   public final @Nullable MarkupNode separator;
+  public final @Nullable MarkupNode empty;
   public final @Nullable ExpressionNode reversed;
 
   public ForLoopNode(
@@ -20,6 +21,7 @@ public class ForLoopNode extends MarkupNode {
     @Nullable String iterationVariable,
     MarkupNode body,
     @Nullable MarkupNode separator,
+    @Nullable MarkupNode empty,
     @Nullable ExpressionNode reversed,
     @Nullable List<LetBinding> letBindings
   ) {
@@ -29,6 +31,7 @@ public class ForLoopNode extends MarkupNode {
     this.iterationVariable = iterationVariable;
     this.body = body;
     this.separator = separator;
+    this.empty = empty;
     this.reversed = reversed;
   }
 }

@@ -295,13 +295,30 @@ public class MarkupInterpreter implements Interpreter {
     Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
+    T passthroughValue = afterEnvironmentSetup.get();
+
+    int size = items.size();
+
+    if (size == 0) {
+      if (node.empty != null) {
+        Set<String> introducedNames = introduceLetBindings(node);
+
+        _interpret(node.empty);
+
+        if (introducedNames != null) {
+          for (String introducedName : introducedNames)
+            environment.popVariable(introducedName);
+        }
+      }
+
+      return passthroughValue;
+    }
+
     if (node.iterationVariable != null)
       environment.pushVariable(node.iterationVariable, null);
 
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
-
-    T passthroughValue = afterEnvironmentSetup.get();
 
     boolean reversed;
 
@@ -311,8 +328,6 @@ public class MarkupInterpreter implements Interpreter {
       Object reversedValue = ExpressionInterpreter.interpret(node.reversed, environment);
       reversed = environment.getValueInterpreter().asBoolean(reversedValue);
     }
-
-    int size = items.size();
 
     for (int index = (reversed ? size - 1 : 0); (reversed ? index >= 0 : index < size); index += (reversed ? -1 : 1)) {
       Object item = items.get(index);
