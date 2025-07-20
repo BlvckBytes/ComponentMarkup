@@ -2,7 +2,9 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
+import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
@@ -241,13 +243,13 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private MarkupNode createVariableCapture(MarkupNode node, LetBinding binding) {
-    LinkedHashSet<LetBinding> newBindings = node.letBindings == null ? new LinkedHashSet<>() : new LinkedHashSet<>(node.letBindings);
+    LinkedHashSet<LetBinding> capturedBindings = new LinkedHashSet<>();
 
     environment.forEachKnownName(name -> {
-      newBindings.add(new CaptureLetBinding(environment.getVariableValue(name), name, binding));
+      capturedBindings.add(new CaptureLetBinding(environment.getVariableValue(name), name, binding));
     });
 
-    return new MarkupNode(node.position, Collections.singletonList(node), newBindings) {};
+    return new CaptureNode(node, capturedBindings);
   }
 
   private @Nullable Set<String> introduceLetBindings(MarkupNode node) {
@@ -259,11 +261,23 @@ public class MarkupInterpreter implements Interpreter {
     for (LetBinding letBinding : node.letBindings) {
       Object value;
 
-      if (letBinding instanceof ExpressionLetBinding)
+      if (letBinding instanceof ExpressionLetBinding) {
+        ExpressionLetBinding expressionBinding = (ExpressionLetBinding) letBinding;
         value = ExpressionInterpreter.interpret(((ExpressionLetBinding) letBinding).expression, environment);
+
+        if (expressionBinding.capture) {
+          if (!(value instanceof MarkupNode))
+            value = new TextNode(String.valueOf(value), letBinding.position);
+
+          value = createVariableCapture((MarkupNode) value, letBinding);
+        }
+      }
       else if (letBinding instanceof MarkupLetBinding) {
         MarkupLetBinding markupBinding = (MarkupLetBinding) letBinding;
-        value = markupBinding.capture ? createVariableCapture(markupBinding.markup, letBinding) : markupBinding.markup;
+        value = markupBinding.markup;
+
+        if (markupBinding.capture)
+          value = createVariableCapture((MarkupNode) value, letBinding);
       }
       else if (letBinding instanceof CaptureLetBinding)
         value = ((CaptureLetBinding) letBinding).value;
@@ -456,11 +470,13 @@ public class MarkupInterpreter implements Interpreter {
       else
         interpolatedNode = new TextNode(environment.getValueInterpreter().asString(interpolationValue), node.position);
 
-      if (!interpolatedNode.canBeUnpackedFromAndIfSoInherit(node)) {
-        interpolatedNode = new ContainerNode(interpolatedNode.position, Collections.singletonList(interpolatedNode), null);
+      NodeStyle nodeStyle = ((InterpolationNode) node).getStyle();
 
-        if (!interpolatedNode.canBeUnpackedFromAndIfSoInherit(node))
-          LoggerProvider.log(Level.WARNING, "Could not inherit from InterpolationNode despite containerizing");
+      if (nodeStyle != null) {
+        if (!(interpolatedNode instanceof StyledNode))
+          interpolatedNode = new ContainerNode(interpolatedNode.position, Collections.singletonList(interpolatedNode), null);
+
+        ((StyledNode) interpolatedNode).getOrInstantiateStyle().inheritFrom(nodeStyle, node.useCondition);
       }
 
       _interpret(interpolatedNode);

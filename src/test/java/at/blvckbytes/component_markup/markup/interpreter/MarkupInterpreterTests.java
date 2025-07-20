@@ -6,7 +6,6 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import com.google.gson.*;
@@ -983,7 +982,7 @@ public class MarkupInterpreterTests {
   }
 
   @Test
-  public void shouldCaptureVariablesOnLetBinding() {
+  public void shouldCaptureVariablesOnDirectMarkupLetBinding() {
     TextWithAnchors text = new TextWithAnchors(
       "<container",
       "  +let-a=\"first\"",
@@ -992,7 +991,7 @@ public class MarkupInterpreterTests {
       "    *let-(my_template)={ {a} and {b} }",
       "  >",
       "    <container",
-      "      +let-a=\"override first\"",
+      "      +let-a=\"third\"",
       "      +let-b=\"second\"",
       "    >{my_template}"
     );
@@ -1003,6 +1002,47 @@ public class MarkupInterpreterTests {
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "first and second")
+    );
+  }
+
+  @Test
+  public void shouldCaptureVariablesOnIndirectMarkupLetBinding() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<container",
+      "  +let-a=\"first\"",
+      ">",
+      "  <container",
+      "    *let-my_template={ {a} and {b} }",
+      "  >",
+      "    <container",
+      "      *let-(my_captured_template)=\"my_template\"",
+      "    >",
+      "      <container",
+      "        +let-a=\"third\"",
+      "        +let-b=\"second\"",
+      "      >{my_template} | {my_captured_template}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      // TODO: It would be really nice if these could be combined using the buffered-text
+      //       mechanic just as well, because these containers have no style and no non-terminal effect
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item.string("text", "third and second")
+            ))
+            .object(item -> (
+              item.string("text", " | ")
+            ))
+            .object(item -> (
+              item.string("text", "first and second")
+            ))
+        ))
     );
   }
 
