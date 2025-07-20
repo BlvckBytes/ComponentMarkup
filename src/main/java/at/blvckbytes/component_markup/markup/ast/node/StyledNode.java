@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class StyledNode extends MarkupNode {
 
@@ -15,7 +16,7 @@ public abstract class StyledNode extends MarkupNode {
   public StyledNode(
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
   }

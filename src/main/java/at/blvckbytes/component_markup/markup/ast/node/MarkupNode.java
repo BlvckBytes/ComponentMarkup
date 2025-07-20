@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class MarkupNode {
 
@@ -18,12 +19,12 @@ public abstract class MarkupNode {
   public CursorPosition position;
 
   public @Nullable List<MarkupNode> children;
-  public @Nullable List<LetBinding> letBindings;
+  public @Nullable Set<LetBinding> letBindings;
 
   public MarkupNode(
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     this.position = position;
     this.children = children;

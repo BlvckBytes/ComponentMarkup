@@ -22,7 +22,7 @@ public class TagAndBuffers implements ParserChildItem {
   public final CursorPosition position;
   public final @Nullable TagAndBuffers parent;
 
-  private @Nullable List<LetBinding> bindings;
+  private @Nullable Set<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
 
   public final InternalAttributeMap attributeMap;
@@ -66,7 +66,7 @@ public class TagAndBuffers implements ParserChildItem {
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean addLetBinding(LetBinding letBinding) {
     if (this.bindings == null) {
-      this.bindings = new ArrayList<>();
+      this.bindings = new HashSet<>();
       this.bindings.add(letBinding);
       this.bindingNames = new HashSet<>();
       this.bindingNames.add(letBinding.name);

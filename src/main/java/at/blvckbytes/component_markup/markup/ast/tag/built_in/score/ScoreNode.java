@@ -11,6 +11,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class ScoreNode extends DeferredNode<ScoreParameter> {
 
@@ -23,7 +24,7 @@ public class ScoreNode extends DeferredNode<ScoreParameter> {
     ExpressionNode objective,
     @Nullable ExpressionNode value,
     CursorPosition position,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

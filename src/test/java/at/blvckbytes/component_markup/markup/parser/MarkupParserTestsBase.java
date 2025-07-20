@@ -30,7 +30,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<ForLoopNode> forLoop(ExpressionNode iterable, @Nullable String iterationVariable, NodeWrapper<?> wrappedBody, @Nullable NodeWrapper<?> wrappedSeparator, @Nullable ExpressionNode reversed, @Nullable NodeWrapper<?> wrappedEmpty) {
-    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), wrappedEmpty == null ? null : wrappedEmpty.get(), reversed, new ArrayList<>()));
+    return new NodeWrapper<>(new ForLoopNode(iterable, iterationVariable, wrappedBody.get(), wrappedSeparator == null ? null : wrappedSeparator.get(), wrappedEmpty == null ? null : wrappedEmpty.get(), reversed, new HashSet<>()));
   }
 
   protected static Map<String, NodeWrapper<? extends MarkupNode>> whenMap(Object... items) {
@@ -80,7 +80,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<ContainerNode> container(CursorPosition position) {
-    return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new ArrayList<>()));
+    return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new HashSet<>()));
   }
 
   protected static NodeWrapper<ExpressionDrivenNode> exprDriven(CursorPosition position, ExpressionNode expression) {
@@ -93,7 +93,7 @@ public abstract class MarkupParserTestsBase {
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
 
-    return new NodeWrapper<>(new TranslateNode(key, toMarkupList(withs), fallback, position, new ArrayList<>()));
+    return new NodeWrapper<>(new TranslateNode(key, toMarkupList(withs), fallback, position, new HashSet<>()));
   }
 
   private static MarkupList toMarkupList(List<MarkupNode> markupNodes) {

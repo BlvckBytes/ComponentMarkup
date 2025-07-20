@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class GradientTag extends ColorizeTag {
 
@@ -27,7 +28,7 @@ public class GradientTag extends ColorizeTag {
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
     @NotNull AttributeMap attributes,
-    @Nullable List<LetBinding> letBindings,
+    @Nullable Set<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     ExpressionList colors = attributes.getMandatoryExpressionList("color");

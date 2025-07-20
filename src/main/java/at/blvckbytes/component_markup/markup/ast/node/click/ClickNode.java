@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class ClickNode extends MarkupNode {
 
@@ -19,7 +20,7 @@ public class ClickNode extends MarkupNode {
     ExpressionNode value,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

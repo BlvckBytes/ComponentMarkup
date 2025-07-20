@@ -13,6 +13,7 @@ import at.blvckbytes.component_markup.util.JsonifyIgnore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class ColorizeNode extends MarkupNode implements InterpreterInterceptor {
@@ -30,7 +31,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     Function<Interpreter, ColorizeNodeState> stateCreator,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 

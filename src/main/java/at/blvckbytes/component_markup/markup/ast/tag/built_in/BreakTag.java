@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class BreakTag extends TagDefinition {
 
@@ -25,7 +26,7 @@ public class BreakTag extends TagDefinition {
     @NotNull String tagNameLower,
     @NotNull CursorPosition position,
     @NotNull AttributeMap attributes,
-    @Nullable List<LetBinding> letBindings,
+    @Nullable Set<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new BreakNode(position);

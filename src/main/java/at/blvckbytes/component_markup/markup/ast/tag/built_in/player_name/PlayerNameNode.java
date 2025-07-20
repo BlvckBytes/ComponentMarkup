@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
 
@@ -21,7 +22,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
     @Nullable ExpressionNode displayName,
     @Nullable MarkupNode representation,
     CursorPosition position,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

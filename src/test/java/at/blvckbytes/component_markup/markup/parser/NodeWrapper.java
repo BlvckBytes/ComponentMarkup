@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class NodeWrapper<T extends MarkupNode> {
 
@@ -29,7 +30,7 @@ public class NodeWrapper<T extends MarkupNode> {
 
   public NodeWrapper<T> let(String name, ExpressionNode expression, CursorPosition position) {
     if(node.letBindings == null)
-      node.letBindings = new ArrayList<>();
+      node.letBindings = new HashSet<>();
 
     node.letBindings.add(new ExpressionLetBinding(expression, name, position));
     return this;

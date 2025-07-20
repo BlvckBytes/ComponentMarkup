@@ -13,6 +13,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class SelectorNode extends DeferredNode<SelectorParameter> {
 
@@ -23,7 +24,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
     ExpressionNode selector,
     @Nullable MarkupNode separator,
     CursorPosition position,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

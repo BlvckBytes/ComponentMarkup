@@ -11,6 +11,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public class ColorizeMonochromeNode extends ColorizeNode {
@@ -20,7 +21,7 @@ public class ColorizeMonochromeNode extends ColorizeNode {
     Function<Interpreter, ColorizeNodeState> stateCreator,
     CursorPosition position,
     @Nullable List<MarkupNode> children,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(tagNameLower, stateCreator, position, children, letBindings);
   }

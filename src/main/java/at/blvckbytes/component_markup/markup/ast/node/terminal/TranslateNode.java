@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class TranslateNode extends UnitNode {
 
@@ -19,7 +20,7 @@ public class TranslateNode extends UnitNode {
     MarkupList with,
     @Nullable ExpressionNode fallback,
     CursorPosition position,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(position, letBindings);
 

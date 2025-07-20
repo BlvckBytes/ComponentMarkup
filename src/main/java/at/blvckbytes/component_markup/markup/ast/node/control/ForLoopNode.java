@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class ForLoopNode extends MarkupNode {
 
@@ -23,7 +24,7 @@ public class ForLoopNode extends MarkupNode {
     @Nullable MarkupNode separator,
     @Nullable MarkupNode empty,
     @Nullable ExpressionNode reversed,
-    @Nullable List<LetBinding> letBindings
+    @Nullable Set<LetBinding> letBindings
   ) {
     super(body.position, null, letBindings);
 
