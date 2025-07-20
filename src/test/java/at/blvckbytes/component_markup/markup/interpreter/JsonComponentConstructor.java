@@ -191,16 +191,6 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setHoverAchievementAction(Object component, String value) {
-    JsonObject eventObject = new JsonObject();
-
-    eventObject.addProperty("action", "show_achievement");
-    eventObject.addProperty("contents", value);
-
-    ((JsonObject) component).add("hoverEvent", eventObject);
-  }
-
-  @Override
   public void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name) {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();

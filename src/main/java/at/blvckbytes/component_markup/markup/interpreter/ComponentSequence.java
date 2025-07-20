@@ -4,7 +4,6 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
-import at.blvckbytes.component_markup.markup.ast.node.hover.AchievementHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
@@ -450,12 +449,6 @@ public class ComponentSequence {
       InsertNode insertNode = (InsertNode) nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
       return (result, addressTree) -> componentConstructor.setInsertAction(result, value);
-    }
-
-    if (nonTerminal instanceof AchievementHoverNode) {
-      AchievementHoverNode achievementHoverNode = (AchievementHoverNode) nonTerminal;
-      String value = interpreter.evaluateAsString(achievementHoverNode.value);
-      return (result, addressTree) -> componentConstructor.setHoverAchievementAction(result, value);
     }
 
     if (nonTerminal instanceof EntityHoverNode) {

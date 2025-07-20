@@ -66,8 +66,6 @@ public interface ComponentConstructor {
 
   void setHoverTextAction(Object component, Object text);
 
-  void setHoverAchievementAction(Object component, String value);
-
   void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name);
 
   // ================================================================================
