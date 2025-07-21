@@ -40,6 +40,10 @@ public class ComputedStyle {
     return Objects.equals(font, other.font);
   }
 
+  public static boolean hasEffect(@Nullable ComputedStyle style) {
+    return style != null && style.hasEffect();
+  }
+
   public boolean hasEffect() {
     if (this.packedColor != PackedColor.NULL_SENTINEL)
       return true;

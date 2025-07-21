@@ -6,6 +6,8 @@ import java.util.EnumMap;
 
 public class CombinationResult {
 
+  public static final CombinationResult NO_OP_SENTINEL = new CombinationResult(null, null, null);
+
   public final Object component;
   public final @Nullable ComputedStyle styleToApply;
   public final @Nullable EnumMap<MembersSlot, AddressTree> deferredAddresses;
@@ -18,5 +20,9 @@ public class CombinationResult {
     this.component = component;
     this.styleToApply = styleToApply;
     this.deferredAddresses = deferredAddresses;
+  }
+
+  public static CombinationResult empty(ComponentConstructor componentConstructor) {
+    return new CombinationResult(componentConstructor.createTextComponent(""), null, null);
   }
 }

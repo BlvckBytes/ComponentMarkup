@@ -49,14 +49,9 @@ public class DeferredAddressesTests {
         .put(2, slotMap -> (
           slotMap
             .slot(MembersSlot.CHILDREN, addressTree -> (
-              addressTree.put(0, _slotMap -> (
-                _slotMap
-                  .slot(MembersSlot.CHILDREN, _addressTree -> (
-                    _addressTree
-                      .terminal(1)
-                      .terminal(2)
-                  ))
-              ))
+              addressTree
+                .terminal(1)
+                .terminal(2)
             ))
         ))
     );

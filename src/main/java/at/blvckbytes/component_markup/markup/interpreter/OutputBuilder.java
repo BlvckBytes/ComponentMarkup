@@ -79,7 +79,7 @@ public class OutputBuilder {
       if (index == 0) {
         CombinationResult combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
-        if (combinationResult != null) {
+        if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
 
           // Apply the highest-up style manually now, without any further simplifying calculations
           if (combinationResult.styleToApply != null)

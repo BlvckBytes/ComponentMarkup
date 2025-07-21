@@ -1027,22 +1027,8 @@ public class MarkupInterpreterTests {
       text,
       new InterpretationEnvironment(),
       SlotType.CHAT,
-      // TODO: It would be really nice if these could be combined using the buffered-text
-      //       mechanic just as well, because these containers have no style and no non-terminal effect
       new JsonObjectBuilder()
-        .string("text", "")
-        .array("extra", extra -> (
-          extra
-            .object(item -> (
-              item.string("text", "third and second")
-            ))
-            .object(item -> (
-              item.string("text", " | ")
-            ))
-            .object(item -> (
-              item.string("text", "first and second")
-            ))
-        ))
+        .string("text", "third and second | first and second")
     );
   }
 

@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -30,6 +31,7 @@ public class ComponentSequence {
   private final ComponentConstructor componentConstructor;
 
   private final @Nullable NonTerminalClosure applyKnownNonTerminal;
+  private final boolean isInitial;
 
   private @Nullable List<MemberAndStyle> memberEntries;
 
@@ -251,13 +253,10 @@ public class ComponentSequence {
   }
 
   public Object addSequence(ComponentSequence sequence) {
-    CombinationResult result = sequence.combineAndClearMembers(this);
+    CombinationResult result = sequence.combineOrBubbleUpAndClearMembers(this);
 
-    if (result == null) {
-      Object emptyComponent = componentConstructor.createTextComponent("");
-      addMember(emptyComponent, null);
-      return emptyComponent;
-    }
+    if (result == CombinationResult.NO_OP_SENTINEL)
+      return componentConstructor.createTextComponent("");
 
     if (result.deferredAddresses != null) {
       if (deferredAddresses == null)
@@ -309,13 +308,45 @@ public class ComponentSequence {
     this.memberEntries.add(new MemberAndStyle(member, memberStyle));
   }
 
-  public @Nullable CombinationResult combineAndClearMembers(
-    @Nullable Supplier<EnumMap<MembersSlot, AddressTree>> addressTree
-  ) {
+  public @NotNull CombinationResult combineOrBubbleUpAndClearMembers(ComponentSequence parentSequence) {
+    // There's no reason to create a wrapper-component because we're neither at the root,
+    // nor are there any equal member-styles which could be extracted, nor does the non-terminal
+    // which initiated this sequence take any effect via style or interactivity. Bubble up
+    // all elements to the parent-sequence, effectively making this instance invisible.
+    if (
+      !isInitial
+        && applyKnownNonTerminal == null
+        && !ComputedStyle.hasEffect(this.membersEqualStyle)
+        && !ComputedStyle.hasEffect(this.computedStyle)
+        && (textCreationHandler == null)
+    ) {
+      if (memberEntries != null) {
+        for (MemberAndStyle memberAndStyle : memberEntries)
+          parentSequence.addMember(memberAndStyle.member, memberAndStyle.style);
+
+        this.memberEntries.clear();
+      }
+
+      if (bufferedTexts != null) {
+        for (String bufferedText : bufferedTexts)
+          parentSequence.addBufferedText(bufferedText, bufferedTextsStyle, textCreationHandler);
+
+        this.bufferedTexts.clear();
+        this.bufferedTextsStyle = null;
+        this.textCreationHandler = null;
+      }
+
+      this.membersEqualStyle = null;
+      this.membersCommonStyle = null;
+      this.deferredAddresses = null;
+
+      return CombinationResult.NO_OP_SENTINEL;
+    }
+
     concatAndInstantiateBufferedTexts();
 
     if (this.memberEntries == null || this.memberEntries.isEmpty())
-      return null;
+      return CombinationResult.empty(componentConstructor);
 
     Object result;
 
@@ -590,7 +621,7 @@ public class ComponentSequence {
     else
       childParentStyle = this.parentStyle;
 
-    return new ComponentSequence(recipient, childParentStyle, childNode, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, childParentStyle, childNode, false, slotContext, resetContext, componentConstructor, interpreter);
   }
 
   public static ComponentSequence initial(
@@ -600,13 +631,14 @@ public class ComponentSequence {
     ComponentConstructor componentConstructor,
     Interpreter interpreter
   ) {
-    return new ComponentSequence(recipient, slotContext.defaultStyle, null, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, slotContext.defaultStyle, null, true, slotContext, resetContext, componentConstructor, interpreter);
   }
 
   private ComponentSequence(
     @Nullable Object recipient,
     ComputedStyle parentStyle,
     @Nullable MarkupNode nonTerminal,
+    boolean isInitial,
     SlotContext slotContext,
     SlotContext resetContext,
     ComponentConstructor componentConstructor,
@@ -623,6 +655,8 @@ public class ComponentSequence {
     // Captures the required environment-variable values at the time of entering this tag
     // and also makes applying this exact same non-terminal again reusable.
     this.applyKnownNonTerminal = makeKnownNonTerminalClosure(nonTerminal);
+
+    this.isInitial = isInitial;
 
     // The style is also captured at this very moment
     this.computedStyle = ComputedStyle.computeFor(nonTerminal, interpreter);
