@@ -1,16 +1,10 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
-import java.awt.color.ColorSpace;
-
 /*
   Credits to: https://stackoverflow.com/a/77687937
  */
-public class SRGBColorSpace extends ColorSpace {
+public class SRGBColorSpace {
   private static SRGBColorSpace sRGBColorSpace;
-
-  private SRGBColorSpace() {
-    super(ColorSpace.TYPE_RGB, 3);
-  }
 
   public static SRGBColorSpace getInstance() {
     if (sRGBColorSpace == null) {
@@ -18,16 +12,6 @@ public class SRGBColorSpace extends ColorSpace {
     }
 
     return sRGBColorSpace;
-  }
-
-  @Override
-  public float[] toRGB(float[] colorValue) {
-    return colorValue;
-  }
-
-  @Override
-  public float[] fromRGB(float[] rgbValue) {
-    return rgbValue;
   }
 
   private float fTo(float t) {
@@ -38,7 +22,6 @@ public class SRGBColorSpace extends ColorSpace {
     }
   }
 
-  @Override
   public float[] toCIEXYZ(float[] colorValue) {
     // Also normalize RGB values here.
     float r = fTo(colorValue[0] / 255.0f);
@@ -51,31 +34,5 @@ public class SRGBColorSpace extends ColorSpace {
     float Z = (0.0139322f * r) + (0.0971045f * g) + (0.7141733f * b);
 
     return new float[] {X, Y, Z};
-  }
-
-  private float fFrom(float t) {
-    if (t > 0.0031308f) {
-      return (1.055f * ((float) Math.pow(t, 1 / 2.4))) - 0.055f;
-    } else {
-      return t * 12.92f;
-    }
-  }
-
-  @Override
-  public float[] fromCIEXYZ(float[] colorValue) {
-    float X = colorValue[0];
-    float Y = colorValue[1];
-    float Z = colorValue[2];
-
-    //  Use D50 chromatically adapted matrix as Photoshop does.
-    float tR = (3.1338561f * X) + (-1.6168667f * Y) + (-0.4906146f * Z);
-    float tG = (-0.9787684f * X) + (1.9161415f * Y) + (0.0334540f * Z);
-    float tB = (0.0719453f * X) + (-0.2289914f * Y) + (1.4052427f * Z);
-
-    float r = fFrom(tR) * 255.0f;
-    float g = fFrom(tG) * 255.0f;
-    float b = fFrom(tB) * 255.0f;
-
-    return new float[] {r, g, b};
   }
 }
