@@ -12,19 +12,22 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 public abstract class Jsonifier {
 
-  private static final Gson GSON_INSTANCE = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+  private static final Gson GSON_INSTANCE = new GsonBuilder()
+    .serializeNulls()
+    .setPrettyPrinting()
+    .disableHtmlEscaping()
+    .create();
 
   public static String jsonify(@Nullable Object instance) {
-    return GSON_INSTANCE.toJson(_jsonify(instance));
+    return GSON_INSTANCE.toJson(jsonifyObject(null, instance));
   }
 
-  private static JsonElement _jsonify(@Nullable Object instance) {
+  private static JsonElement jsonifyClass(@Nullable Object instance) {
     if (instance == null)
       return JsonNull.INSTANCE;
 
@@ -152,7 +155,7 @@ public abstract class Jsonifier {
       return result;
     }
 
-    return _jsonify(item);
+    return jsonifyClass(item);
   }
 
   private static boolean isJavaStandardClass(Class<?> clazz) {
