@@ -1,24 +1,34 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.SubstringBuilder;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.Stack;
+import java.util.logging.Level;
 
 public class ExpressionTokenizer {
 
   private final Stack<Token> pendingStack;
+  private boolean isNextPendingPeek;
+
   private final String input;
+  private final int beginIndexWithinInput;
+  private final @Nullable TokenOutput tokenOutput;
   private int nextCharIndex;
   private boolean dashIsPrefix;
   private final SubstringBuilder substringBuilder;
 
-  public ExpressionTokenizer(String input) {
+  public ExpressionTokenizer(String input, int beginIndexWithinInput, @Nullable TokenOutput tokenOutput) {
     this.pendingStack = new Stack<>();
     this.input = input;
+    this.beginIndexWithinInput = beginIndexWithinInput;
+    this.tokenOutput = tokenOutput;
     this.nextCharIndex = 0;
     this.substringBuilder = new SubstringBuilder(input);
 
@@ -77,6 +87,8 @@ public class ExpressionTokenizer {
     substringBuilder.setEndExclusive(nextCharIndex - 1);
 
     String contents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
+
+    substringBuilder.resetIndices();
 
     return new StringToken(beginIndex, contents, quoteChar);
   }
@@ -393,13 +405,25 @@ public class ExpressionTokenizer {
 
   public @Nullable Token nextToken() {
     Token result;
+    boolean wasPeek = false;
 
-    if (!this.pendingStack.isEmpty())
+    if (!this.pendingStack.isEmpty()) {
       result = this.pendingStack.pop();
+      if (isNextPendingPeek)
+        wasPeek = true;
+
+      isNextPendingPeek = false;
+    }
 
     else {
-      while (Character.isWhitespace(peekChar()))
+      char whitespace;
+
+      while (Character.isWhitespace(whitespace = peekChar())) {
+        if (tokenOutput != null)
+          tokenOutput.emitToken(nextCharIndex + beginIndexWithinInput, TokenType.ANY__WHITESPACE, String.valueOf(whitespace));
+
         nextChar();
+      }
 
       char upcomingChar = peekChar();
 
@@ -420,13 +444,70 @@ public class ExpressionTokenizer {
 
     dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken || result instanceof PunctuationToken;
 
+    if (!wasPeek)
+      emitTokenToOutput(result);
+
     return result;
   }
 
   public @Nullable Token peekToken() {
-    if (this.pendingStack.isEmpty())
+    if (this.pendingStack.isEmpty()) {
       this.pendingStack.push(nextToken());
+      isNextPendingPeek = true;
+    }
 
     return this.pendingStack.peek();
+  }
+
+  private void emitTokenToOutput(Token token) {
+    if (tokenOutput == null)
+      return;
+
+    if (token instanceof BooleanToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__LITERAL, ((BooleanToken) token).raw);
+      return;
+    }
+
+    if (token instanceof NullToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__LITERAL, ((NullToken) token).raw);
+      return;
+    }
+
+    if (token instanceof DoubleToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__NUMBER, ((DoubleToken) token).raw);
+      return;
+    }
+
+    if (token instanceof LongToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__NUMBER, ((LongToken) token).raw);
+      return;
+    }
+
+    if (token instanceof StringToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__STRING, ((StringToken) token).raw);
+      return;
+    }
+
+    if (token instanceof IdentifierToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__IDENTIFIER_ANY, ((IdentifierToken) token).raw);
+      return;
+    }
+
+    if (token instanceof PrefixOperatorToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, ((PrefixOperatorToken) token).operator.representation);
+      return;
+    }
+
+    if (token instanceof InfixOperatorToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, ((InfixOperatorToken) token).operator.representation);
+      return;
+    }
+
+    if (token instanceof PunctuationToken) {
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__PUNCTUATION__ANY, String.valueOf(((PunctuationToken) token).punctuation.representation));
+      return;
+    }
+
+    LoggerProvider.log(Level.WARNING, "Encountered unaccounted-for token: " + token.getClass());
   }
 }

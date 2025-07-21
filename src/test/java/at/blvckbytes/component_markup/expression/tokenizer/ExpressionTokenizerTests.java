@@ -284,7 +284,7 @@ public class ExpressionTokenizerTests {
     ExpressionTokenizeException thrownException = null;
 
     try {
-      ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text);
+      ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text, -1, null);
 
       while (tokenizer.peekToken() != null)
         tokenizer.nextToken();
@@ -349,7 +349,7 @@ public class ExpressionTokenizerTests {
   private static void makeCase(TextWithAnchors input, Object... expectedValues) {
     StringBuilder actualTokensString = new StringBuilder();
 
-    ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text);
+    ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text, -1, null);
 
     while (tokenizer.peekToken() != null) {
       if (actualTokensString.length() != 0)

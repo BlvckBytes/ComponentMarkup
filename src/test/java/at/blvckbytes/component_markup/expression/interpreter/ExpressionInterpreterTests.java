@@ -208,7 +208,7 @@ public class ExpressionInterpreterTests {
   }
 
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
-    ExpressionNode node = ExpressionParser.parse(expression);
+    ExpressionNode node = ExpressionParser.parse(expression, -1, null);
     Assertions.assertEquals(expectedResult, ExpressionInterpreter.interpret(node, environment));
   }
 }

@@ -632,7 +632,7 @@ public class ExpressionParserTests {
   }
 
   private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {
-    ExpressionNode actualNode = ExpressionParser.parse(input.text);
+    ExpressionNode actualNode = ExpressionParser.parse(input.text, -1, null);
 
     if (expectedNode == null) {
       Assertions.assertNull(actualNode, "Expected the parse-result to be null");
@@ -644,7 +644,7 @@ public class ExpressionParserTests {
   }
 
   private void makeCasePlain(String expression) {
-    ExpressionNode actualNode = ExpressionParser.parse(expression);
+    ExpressionNode actualNode = ExpressionParser.parse(expression, -1, null);
 
     Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
     Assertions.assertEquals(expression, actualNode.toExpression());

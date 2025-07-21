@@ -345,7 +345,7 @@ public class ExpressionParserErrorTests {
     ExpressionParseException thrownException = null;
 
     try {
-      ExpressionParser.parse(input.text);
+      ExpressionParser.parse(input.text, -1, null);
     } catch (ExpressionParseException exception) {
       thrownException = exception;
     }

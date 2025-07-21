@@ -17,7 +17,7 @@ public class SubstringBuilder {
     this.resetIndices();
   }
 
-  private void resetIndices() {
+  public void resetIndices() {
     this.startInclusive = -1;
     this.endExclusive = 0;
     this.nextRemoveIndicesIndex = 0;
@@ -50,14 +50,22 @@ public class SubstringBuilder {
     this.endExclusive = index;
   }
 
-  public String build(EnumSet<SubstringFlag> flags) {
+  private void validateBounds() {
     if (this.startInclusive < 0)
       throw new IllegalStateException("Cannot build a substring without a determined start");
 
     if (this.endExclusive == 0)
       throw new IllegalStateException("Cannot build a substring without a determined end");
+  }
 
-    int substringLength = (endExclusive - startInclusive) - nextRemoveIndicesIndex;
+  public String build(EnumSet<SubstringFlag> flags) {
+    validateBounds();
+
+    boolean keepRemoveIndices = flags.contains(SubstringFlag.KEEP_REMOVE_INDICES);
+    int substringLength = endExclusive - startInclusive;
+
+    if (!keepRemoveIndices)
+      substringLength -= nextRemoveIndicesIndex;
 
     if (substringLength < 0)
       throw new IllegalStateException("There were more characters to be removed than the substring was in total length");
@@ -68,11 +76,13 @@ public class SubstringBuilder {
     boolean doIgnoreWhitespace = false;
 
     inputLoop: for (int inputIndex = startInclusive; inputIndex < endExclusive; ++inputIndex) {
-      // Remove-indices are strictly increasing, thus avoid looping useless slots
-      for (int removeIndicesIndex = lastMatchedRemoveIndicesIndex; removeIndicesIndex < nextRemoveIndicesIndex; ++removeIndicesIndex) {
-        if (removeIndices[removeIndicesIndex] == inputIndex) {
-          lastMatchedRemoveIndicesIndex = removeIndicesIndex;
-          continue inputLoop;
+      if (!keepRemoveIndices) {
+        // Remove-indices are strictly increasing, thus avoid looping useless slots
+        for (int removeIndicesIndex = lastMatchedRemoveIndicesIndex; removeIndicesIndex < nextRemoveIndicesIndex; ++removeIndicesIndex) {
+          if (removeIndices[removeIndicesIndex] == inputIndex) {
+            lastMatchedRemoveIndicesIndex = removeIndicesIndex;
+            continue inputLoop;
+          }
         }
       }
 
@@ -105,8 +115,6 @@ public class SubstringBuilder {
       while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
         --nextResultIndex;
     }
-
-    this.resetIndices();
 
     return new String(result, 0, nextResultIndex);
   }

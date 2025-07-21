@@ -648,6 +648,7 @@ public class XmlEventParserTests {
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "-");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "--");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".5.5");
+    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "- 5.5");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "5AB");
   }
 

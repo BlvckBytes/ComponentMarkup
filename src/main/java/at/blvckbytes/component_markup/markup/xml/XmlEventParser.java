@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.SubstringBuilder;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
@@ -12,23 +14,34 @@ public class XmlEventParser {
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
-  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
+  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT;
+
+  static {
+    SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
+    SUBSTRING_ONLY_TEXT.remove(SubstringFlag.KEEP_REMOVE_INDICES);
+  }
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
   private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
 
   private final XmlEventConsumer consumer;
+  private final TokenOutput tokenOutput;
   private final SubstringBuilder substringBuilder;
   private final InputCursor cursor;
 
-  private XmlEventParser(String input, XmlEventConsumer consumer) {
+  private XmlEventParser(String input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     this.consumer = consumer;
+    this.tokenOutput = tokenOutput;
     this.substringBuilder = new SubstringBuilder(input);
-    this.cursor = new InputCursor(input);
+    this.cursor = new InputCursor(input, tokenOutput);
   }
 
   public static void parse(String input, XmlEventConsumer consumer) {
-    new XmlEventParser(input, consumer).parseInput(false);
+    new XmlEventParser(input, consumer, null).parseInput(false);
+  }
+
+  public static void parse(String input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+    new XmlEventParser(input, consumer, tokenOutput).parseInput(false);
   }
 
   private final InStringDetector inStringDetector = new InStringDetector();
@@ -50,6 +63,9 @@ public class XmlEventParser {
       int possibleNonTextBeginIndex = cursor.getNextCharIndex();
 
       if (cursor.peekChar() == '{' && priorChar != '\\') {
+        if (tokenOutput != null)
+          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__INTERPOLATION, "{");
+
         cursor.nextChar();
 
         CursorPosition beginPosition = cursor.getPosition();
@@ -59,11 +75,9 @@ public class XmlEventParser {
 
           emitText(
             textContentBeginPosition,
-            substringBuilder.build(
-              wasPriorTagOrInterpolation
-                ? SUBSTRING_INNER_TEXT
-                : SUBSTRING_FIRST_TEXT
-            )
+            wasPriorTagOrInterpolation
+              ? SUBSTRING_INNER_TEXT
+              : SUBSTRING_FIRST_TEXT
           );
         }
 
@@ -72,7 +86,7 @@ public class XmlEventParser {
         CursorPosition valueBeginPosition = null;
 
         while (cursor.peekChar() != 0) {
-          int possiblePreTerminationIndex = cursor.getNextCharIndex();
+          int possibleTerminationIndex = cursor.getNextCharIndex();
           char currentChar = cursor.nextChar();
 
           if (currentChar == '\n' || currentChar == '{') {
@@ -89,7 +103,10 @@ public class XmlEventParser {
             continue;
 
           if (currentChar == '}') {
-            substringBuilder.setEndExclusive(possiblePreTerminationIndex);
+            if (tokenOutput != null)
+              tokenOutput.emitToken(possibleTerminationIndex, TokenType.MARKUP__PUNCTUATION__INTERPOLATION, "}");
+
+            substringBuilder.setEndExclusive(possibleTerminationIndex);
             break;
           }
         }
@@ -101,7 +118,12 @@ public class XmlEventParser {
 
         inStringDetector.reset();
 
-        consumer.onInterpolation(substringBuilder.build(SUBSTRING_NOT_TEXT), valueBeginPosition);
+        // The interpolation-expression will generate tokens within the expression-parser later on.
+
+        String interpolationContents = substringBuilder.build(SUBSTRING_NOT_TEXT);
+        substringBuilder.resetIndices();
+
+        consumer.onInterpolation(interpolationContents, valueBeginPosition);
         wasPriorTagOrInterpolation = true;
         continue;
       }
@@ -109,6 +131,9 @@ public class XmlEventParser {
       CursorPosition firstSpacePosition = null;
 
       if (cursor.peekChar() == ' ') {
+        if (tokenOutput != null)
+          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.ANY__WHITESPACE, " ");
+
         cursor.nextChar();
         firstSpacePosition = cursor.getPosition();
       }
@@ -121,11 +146,9 @@ public class XmlEventParser {
 
           emitText(
             textContentBeginPosition,
-            substringBuilder.build(
-              wasPriorTagOrInterpolation
-                ? SUBSTRING_INNER_TEXT
-                : SUBSTRING_FIRST_TEXT
-            )
+            wasPriorTagOrInterpolation
+              ? SUBSTRING_INNER_TEXT
+              : SUBSTRING_FIRST_TEXT
           );
         }
 
@@ -133,7 +156,7 @@ public class XmlEventParser {
           substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
           substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-          emitText(firstSpacePosition, substringBuilder.build(SUBSTRING_NOT_TEXT));
+          emitText(firstSpacePosition, SUBSTRING_NOT_TEXT);
         }
 
         parseOpeningOrClosingTag();
@@ -175,11 +198,9 @@ public class XmlEventParser {
 
       emitText(
         textContentBeginPosition,
-        substringBuilder.build(
-          wasPriorTagOrInterpolation
-            ? SUBSTRING_LAST_TEXT
-            : SUBSTRING_ONLY_TEXT
-        )
+        wasPriorTagOrInterpolation
+          ? SUBSTRING_LAST_TEXT
+          : SUBSTRING_ONLY_TEXT
       );
     }
 
@@ -187,9 +208,21 @@ public class XmlEventParser {
       consumer.onInputEnd();
   }
 
-  private void emitText(CursorPosition position, String text) {
-    if (text.isEmpty())
+  private void emitText(CursorPosition position, EnumSet<SubstringFlag> flags) {
+    String text = substringBuilder.build(flags);
+
+    if (text.isEmpty()) {
+      substringBuilder.resetIndices();
       return;
+    }
+
+    if (tokenOutput != null) {
+      flags = EnumSet.copyOf(flags);
+      flags.add(SubstringFlag.KEEP_REMOVE_INDICES);
+      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(flags));
+    }
+
+    substringBuilder.resetIndices();
 
     consumer.onCursorPosition(position);
     consumer.onText(text);
@@ -211,10 +244,16 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    return substringBuilder.build(SUBSTRING_NOT_TEXT);
+    String identifier = substringBuilder.build(SUBSTRING_NOT_TEXT);
+
+    substringBuilder.resetIndices();
+
+    return identifier;
   }
 
   private void parseAndEmitStringAttributeValue(String attributeName) {
+    int beginIndex = cursor.getNextCharIndex();
+
     if (cursor.nextChar() != '"')
       throw new IllegalStateException("Expected opening double-quotes");
 
@@ -252,6 +291,11 @@ public class XmlEventParser {
 
     String value = substringBuilder.build(SUBSTRING_NOT_TEXT);
 
+    substringBuilder.resetIndices();
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(beginIndex, TokenType.MARKUP__STRING, '"' + value + '"');
+
     consumer.onStringAttribute(attributeName, valueBeginPosition, value);
   }
 
@@ -269,12 +313,11 @@ public class XmlEventParser {
   }
 
   private void parseNumericAttributeValue(String attributeName) {
-    substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+    int numberBeginIndex = cursor.getNextCharIndex();
+    substringBuilder.setStartInclusive(numberBeginIndex);
 
     if (cursor.peekChar() == '-')
       cursor.nextChar();
-
-    cursor.consumeWhitespace();
 
     boolean encounteredDecimalPoint = false;
     boolean encounteredDigit = false;
@@ -306,8 +349,15 @@ public class XmlEventParser {
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
-    substringBuilder.setEndExclusive(cursor.getNextCharIndex());
+    int numberEndIndex = cursor.getNextCharIndex();
+
+    substringBuilder.setEndExclusive(numberEndIndex);
     String numberString = substringBuilder.build(SUBSTRING_NOT_TEXT);
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(numberBeginIndex, TokenType.MARKUP__NUMBER, numberString);
+
+    substringBuilder.resetIndices();
 
     if (encounteredDecimalPoint) {
       try {
@@ -328,6 +378,7 @@ public class XmlEventParser {
   private boolean tryParseAttribute() {
     cursor.consumeWhitespace();
 
+    // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
     String attributeName = tryParseIdentifier(true);
 
     if (attributeName == null) {
@@ -356,6 +407,9 @@ public class XmlEventParser {
       return true;
     }
 
+    if (tokenOutput != null)
+      tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__EQUALS, "=");
+
     cursor.nextChar();
 
     cursor.consumeWhitespace();
@@ -366,6 +420,9 @@ public class XmlEventParser {
         return true;
 
       case '{':
+        if (tokenOutput != null)
+          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__SUBTREE, "{");
+
         cursor.nextChar();
 
         CursorPosition openingCurlyPosition = cursor.getPosition();
@@ -381,43 +438,48 @@ public class XmlEventParser {
           throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE);
         }
 
+        if (tokenOutput != null)
+          tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__SUBTREE, "}");
+
         consumer.onCursorPosition(cursor.getPosition());
         consumer.onTagAttributeEnd(attributeName);
         return true;
 
       case 'T':
       case 't': {
-        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+        int beginIndex = cursor.getNextCharIndex();
 
         for (char c : TRUE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
             throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
         }
 
-        substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
 
-        consumer.onBooleanAttribute(attributeName, substringBuilder.build(SUBSTRING_NOT_TEXT), true);
+        if (tokenOutput != null)
+          tokenOutput.emitToken(beginIndex, TokenType.MARKUP__LITERAL__ANY, "true");
+
+        consumer.onBooleanAttribute(attributeName, "true", true);
         return true;
       }
 
       case 'F':
       case 'f':
-        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+        int beginIndex = cursor.getNextCharIndex();
 
         for (char c : FALSE_LITERAL_CHARS) {
           if (Character.toLowerCase(cursor.nextChar()) != c)
             throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
         }
 
-        substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
         if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
 
-        consumer.onBooleanAttribute(attributeName, substringBuilder.build(SUBSTRING_NOT_TEXT), false);
+        if (tokenOutput != null)
+          tokenOutput.emitToken(beginIndex, TokenType.MARKUP__LITERAL__ANY, "false");
+
+        consumer.onBooleanAttribute(attributeName, "false", false);
         return true;
 
       case '0':
@@ -463,8 +525,13 @@ public class XmlEventParser {
   }
 
   private void parseOpeningOrClosingTag() {
+    int openingIndex = cursor.getNextCharIndex();
+
     if (cursor.nextChar() != '<')
       throw new IllegalStateException("Expected an opening pointy-bracket!");
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(openingIndex, TokenType.MARKUP__PUNCTUATION__TAG, "<");
 
     CursorPosition savedPosition = cursor.getPosition();
 
@@ -473,10 +540,16 @@ public class XmlEventParser {
     boolean wasClosingTag = false;
 
     if (cursor.peekChar() == '/') {
+      if (tokenOutput != null)
+        tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG, "/");
+
       cursor.nextChar();
       wasClosingTag = true;
     }
 
+    cursor.consumeWhitespace();
+
+    int tagNameIndex = cursor.getNextCharIndex();
     String tagName = tryParseIdentifier(false);
 
     if (wasClosingTag) {
@@ -484,6 +557,11 @@ public class XmlEventParser {
 
       if (cursor.nextChar() != '>')
         throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
+
+      if (tokenOutput != null) {
+        tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+        tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG, ">");
+      }
 
       consumer.onTagClose(tagName);
       return;
@@ -494,11 +572,17 @@ public class XmlEventParser {
       throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
     }
 
-    if (tryConsumeCommentTag(tagName))
+    if (tryConsumeCommentTag(tagName)) {
+      if (tokenOutput != null)
+        tokenOutput.emitToken(openingIndex, TokenType.MARKUP__COMMENT, cursor.input.substring(openingIndex, cursor.getNextCharIndex()));
+
       return;
+    }
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
     consumer.onCursorPosition(savedPosition);
-
     consumer.onTagOpenBegin(tagName);
 
     while (cursor.peekChar() != 0) {
@@ -509,6 +593,9 @@ public class XmlEventParser {
     boolean wasSelfClosing = false;
 
     if (cursor.peekChar() == '/') {
+      if (tokenOutput != null)
+        tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG, "/");
+
       wasSelfClosing = true;
       cursor.nextChar();
     }
@@ -517,6 +604,9 @@ public class XmlEventParser {
 
     if (cursor.nextChar() != '>')
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG, ">");
 
     consumer.onCursorPosition(cursor.getPosition());
     consumer.onTagOpenEnd(tagName, wasSelfClosing);

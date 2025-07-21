@@ -893,7 +893,7 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnEmptyLetBindings() {
     makeErrorCase(
-      MarkupParseError.EMPTY_BINDING,
+      MarkupParseError.VALUELESS_BINDING,
       "<red @*let-my_var>"
     );
   }

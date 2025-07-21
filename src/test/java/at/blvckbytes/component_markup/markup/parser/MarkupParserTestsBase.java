@@ -76,7 +76,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static ExpressionNode expr(String expression) {
-    return ExpressionParser.parse(expression);
+    return ExpressionParser.parse(expression, -1, null);
   }
 
   protected static NodeWrapper<ContainerNode> container(CursorPosition position) {

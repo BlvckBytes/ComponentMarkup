@@ -1,13 +1,18 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
+import org.jetbrains.annotations.Nullable;
+
 public class InputCursor {
 
-  private final String input;
-
+  public final String input;
+  private final @Nullable TokenOutput tokenOutput;
   private int nextCharIndex, lineNumber, columnNumber;
 
-  public InputCursor(String input) {
+  public InputCursor(String input, @Nullable TokenOutput tokenOutput) {
     this.input = input;
+    this.tokenOutput = tokenOutput;
     this.lineNumber = 1;
   }
 
@@ -43,8 +48,14 @@ public class InputCursor {
   }
 
   public void consumeWhitespace() {
-    while (Character.isWhitespace(peekChar()))
+    char c;
+
+    while (Character.isWhitespace(c = peekChar())) {
+      if (tokenOutput != null)
+        tokenOutput.emitToken(nextCharIndex, TokenType.ANY__WHITESPACE, String.valueOf(c));
+
       nextChar();
+    }
   }
 
   public CursorPosition getPosition() {

@@ -5,6 +5,8 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,14 +15,18 @@ import java.util.List;
 public class ExpressionParser {
 
   private final ExpressionTokenizer tokenizer;
+  private final int beginIndexWithinInput;
+  private final @Nullable TokenOutput tokenOutput;
 
-  private ExpressionParser(ExpressionTokenizer tokenizer) {
+  private ExpressionParser(ExpressionTokenizer tokenizer, @Nullable TokenOutput tokenOutput,int beginIndexWithinInput) {
     this.tokenizer = tokenizer;
+    this.beginIndexWithinInput = beginIndexWithinInput;
+    this.tokenOutput = tokenOutput;
   }
 
-  public static @Nullable ExpressionNode parse(String input) {
-    ExpressionTokenizer tokenizer = new ExpressionTokenizer(input);
-    ExpressionParser parser = new ExpressionParser(tokenizer);
+  public static @Nullable ExpressionNode parse(String input, int beginIndexWithinInput, @Nullable TokenOutput tokenOutput) {
+    ExpressionTokenizer tokenizer = new ExpressionTokenizer(input, beginIndexWithinInput, tokenOutput);
+    ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput, beginIndexWithinInput);
     ExpressionNode result = parser.parseExpression(null);
 
     Token trailingToken;
@@ -203,6 +209,10 @@ public class ExpressionParser {
 
     if (introductionToken.operator != InfixOperator.SUBSCRIPTING)
       return parsePrefixExpression();
+
+    // In this context, it's not really an operator
+    if (tokenOutput != null)
+      tokenOutput.emitToken(introductionToken.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__PUNCTUATION__ANY, "[");
 
     tokenizer.nextToken();
 
