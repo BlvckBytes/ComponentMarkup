@@ -1145,7 +1145,10 @@ public class MarkupInterpreterTests {
         return;
       }
 
-      Assertions.assertEquals(expectedJson, actualJson);
+      Assertions.assertEquals(
+        gsonInstance.toJson(sortKeysRecursively(gsonInstance.fromJson(expectedJson, JsonElement.class))),
+        gsonInstance.toJson(sortKeysRecursively(gsonInstance.fromJson(actualJson, JsonElement.class)))
+      );
       return;
     }
 
