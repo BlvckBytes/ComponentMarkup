@@ -8,21 +8,19 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
-import at.blvckbytes.component_markup.util.CachedSupplier;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class ComponentSequence {
 
   @FunctionalInterface
   private interface NonTerminalClosure {
-    void apply(Object component, CachedSupplier<EnumMap<MembersSlot, AddressTree>> addressTree);
+    void apply(Object component, ComponentSequence addressHolder);
   }
 
   private final @Nullable Object recipient;
@@ -253,12 +251,7 @@ public class ComponentSequence {
   }
 
   public Object addSequence(ComponentSequence sequence) {
-    CombinationResult result = sequence.combineAndClearMembers(() -> {
-      if (deferredAddresses == null)
-        deferredAddresses = AddressTree.emptyValue();
-
-      return deferredAddresses;
-    });
+    CombinationResult result = sequence.combineAndClearMembers(this);
 
     if (result == null) {
       Object emptyComponent = componentConstructor.createTextComponent("");
@@ -329,12 +322,6 @@ public class ComponentSequence {
     // Apply no styles, as they're all kept in the common-style
     if (memberEntries.size() == 1) {
       MemberAndStyle onlyMember = memberEntries.get(0);
-
-      if (onlyMember.style != null) {
-        onlyMember.style.subtractStylesOnEquality(membersEqualStyle, true);
-        onlyMember.style.applyStyles(onlyMember.member, componentConstructor);
-      }
-
       result = onlyMember.member;
     }
 
@@ -356,17 +343,8 @@ public class ComponentSequence {
       result = setChildren(result, members);
     }
 
-    if (applyKnownNonTerminal != null) {
-      applyKnownNonTerminal.apply(
-        result,
-        new CachedSupplier<>(addressTree != null ? addressTree : () -> {
-          if (deferredAddresses == null)
-            deferredAddresses = AddressTree.emptyValue();
-
-          return deferredAddresses;
-        })
-      );
-    }
+    if (applyKnownNonTerminal != null)
+      applyKnownNonTerminal.apply(result, parentSequence == null ? this : parentSequence);
 
     ComputedStyle styleToApply;
 
@@ -386,9 +364,7 @@ public class ComponentSequence {
       styleToApply.subtractStylesOnEquality(this.parentStyle, true);
     }
 
-    if (this.memberEntries != null)
-      memberEntries.clear();
-
+    this.memberEntries.clear();
     this.membersEqualStyle = null;
     this.membersCommonStyle = null;
 
@@ -477,7 +453,7 @@ public class ComponentSequence {
         return null;
       }
 
-      return (result, addressTree) -> {
+      return (result, addressHolder) -> {
         Object nameComponent = null;
 
         if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
@@ -486,8 +462,12 @@ public class ComponentSequence {
           if (nameOutput.deferredAddresses != null) {
             EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
 
-            if (first != null)
-              addressTree.get().put(MembersSlot.HOVER_ENTITY_NAME, AddressTree.singleton(first));
+            if (first != null) {
+              if (addressHolder.deferredAddresses == null)
+                addressHolder.deferredAddresses = AddressTree.emptyValue();
+
+              addressHolder.deferredAddresses.put(MembersSlot.HOVER_ENTITY_NAME, AddressTree.singleton(first));
+            }
           }
         }
 
@@ -539,7 +519,7 @@ public class ComponentSequence {
       else
         hideProperties = false;
 
-      return (result, addressTree) -> {
+      return (result, addressHolder) -> {
         Object nameComponent = null;
 
         if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
@@ -548,8 +528,12 @@ public class ComponentSequence {
           if (nameOutput.deferredAddresses != null) {
             EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
 
-            if (first != null)
-              addressTree.get().put(MembersSlot.HOVER_ITEM_NAME, AddressTree.singleton(first));
+            if (first != null) {
+              if (addressHolder.deferredAddresses == null)
+                addressHolder.deferredAddresses = AddressTree.emptyValue();
+
+              addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_NAME, AddressTree.singleton(first));
+            }
           }
         }
 
@@ -558,8 +542,12 @@ public class ComponentSequence {
         if (loreOutput != null && !loreOutput.unprocessedComponents.isEmpty()) {
           loreComponents = loreOutput.unprocessedComponents;
 
-          if (loreOutput.deferredAddresses != null)
-            addressTree.get().put(MembersSlot.HOVER_ITEM_LORE, loreOutput.deferredAddresses);
+          if (loreOutput.deferredAddresses != null) {
+            if (addressHolder.deferredAddresses == null)
+              addressHolder.deferredAddresses = AddressTree.emptyValue();
+
+            addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_LORE, loreOutput.deferredAddresses);
+          }
         }
 
         componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
@@ -579,9 +567,13 @@ public class ComponentSequence {
 
       Object textComponent = textOutput.unprocessedComponents.get(0);
 
-      return (result, addressTree) -> {
-        if (textOutput.deferredAddresses != null)
-          addressTree.get().put(MembersSlot.HOVER_TEXT_VALUE, textOutput.deferredAddresses);
+      return (result, addressHolder) -> {
+        if (textOutput.deferredAddresses != null) {
+          if (addressHolder.deferredAddresses == null)
+            addressHolder.deferredAddresses = AddressTree.emptyValue();
+
+          addressHolder.deferredAddresses.put(MembersSlot.HOVER_TEXT_VALUE, textOutput.deferredAddresses);
+        }
 
         componentConstructor.setHoverTextAction(result, textComponent);
       };

@@ -77,7 +77,7 @@ public class OutputBuilder {
       ComponentSequence sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        CombinationResult combinationResult = sequence.combineAndClearMembers(null);
+        CombinationResult combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
         if (combinationResult != null) {
 
