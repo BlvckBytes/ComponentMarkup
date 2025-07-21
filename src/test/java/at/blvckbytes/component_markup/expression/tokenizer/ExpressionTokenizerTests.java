@@ -332,7 +332,7 @@ public class ExpressionTokenizerTests {
         if (stringValue.charAt(stringLength - 1) != quoteChar)
           throw new IllegalStateException("Invalid string: " + stringValue);
 
-        token = new StringToken(beginIndex, stringValue.substring(1, stringLength - 1));
+        token = new StringToken(beginIndex, stringValue.substring(1, stringLength - 1), quoteChar);
       }
       else
         token = new IdentifierToken(beginIndex, stringValue);

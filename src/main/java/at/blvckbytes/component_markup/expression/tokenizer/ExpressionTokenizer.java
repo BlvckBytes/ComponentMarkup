@@ -78,7 +78,7 @@ public class ExpressionTokenizer {
 
     String contents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
 
-    return new StringToken(beginIndex, contents);
+    return new StringToken(beginIndex, contents, quoteChar);
   }
 
   private Token parseIdentifierOrLiteralToken() {
@@ -138,6 +138,7 @@ public class ExpressionTokenizer {
     return new IdentifierToken(beginIndex, value);
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean collectSubsequentDigits() {
     int beginIndex = nextCharIndex;
 

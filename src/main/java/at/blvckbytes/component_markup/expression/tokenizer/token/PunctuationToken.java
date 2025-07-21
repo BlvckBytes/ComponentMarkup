@@ -7,7 +7,7 @@ public class PunctuationToken extends Token {
   public final Punctuation punctuation;
 
   public PunctuationToken(int beginIndex, Punctuation punctuation) {
-    super(beginIndex, beginIndex + (punctuation.length - 1));
+    super(beginIndex, beginIndex);
 
     this.punctuation = punctuation;
   }
