@@ -10,7 +10,7 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final EnumSet<SubstringFlag> SUBSTRING_NOT_TEXT = EnumSet.noneOf(SubstringFlag.class);
+  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS = EnumSet.noneOf(SubstringFlag.class);
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
@@ -120,7 +120,7 @@ public class XmlEventParser {
 
         // The interpolation-expression will generate tokens within the expression-parser later on.
 
-        String interpolationContents = substringBuilder.build(SUBSTRING_NOT_TEXT);
+        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS);
         substringBuilder.resetIndices();
 
         consumer.onInterpolation(interpolationContents, valueBeginPosition);
@@ -156,7 +156,7 @@ public class XmlEventParser {
           substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
           substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-          emitText(firstSpacePosition, SUBSTRING_NOT_TEXT);
+          emitText(firstSpacePosition, SUBSTRING_AS_IS);
         }
 
         parseOpeningOrClosingTag();
@@ -216,11 +216,8 @@ public class XmlEventParser {
       return;
     }
 
-    if (tokenOutput != null) {
-      flags = EnumSet.copyOf(flags);
-      flags.add(SubstringFlag.KEEP_REMOVE_INDICES);
-      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(flags));
-    }
+    if (tokenOutput != null)
+      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(SUBSTRING_AS_IS));
 
     substringBuilder.resetIndices();
 
@@ -244,7 +241,7 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    String identifier = substringBuilder.build(SUBSTRING_NOT_TEXT);
+    String identifier = substringBuilder.build(SUBSTRING_AS_IS);
 
     substringBuilder.resetIndices();
 
@@ -289,7 +286,7 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    String value = substringBuilder.build(SUBSTRING_NOT_TEXT);
+    String value = substringBuilder.build(SUBSTRING_AS_IS);
 
     substringBuilder.resetIndices();
 
@@ -352,7 +349,7 @@ public class XmlEventParser {
     int numberEndIndex = cursor.getNextCharIndex();
 
     substringBuilder.setEndExclusive(numberEndIndex);
-    String numberString = substringBuilder.build(SUBSTRING_NOT_TEXT);
+    String numberString = substringBuilder.build(SUBSTRING_AS_IS);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(numberBeginIndex, TokenType.MARKUP__NUMBER, numberString);

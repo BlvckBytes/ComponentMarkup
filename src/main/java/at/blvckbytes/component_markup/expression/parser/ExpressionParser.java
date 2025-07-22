@@ -153,6 +153,10 @@ public class ExpressionParser {
     if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
       throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET, terminationToken.beginIndex);
 
+    // For visual consistency, it's considered a two-part operator
+    if (tokenOutput != null)
+      tokenOutput.emitToken(terminationToken.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, "]");
+
     return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
 
@@ -163,8 +167,13 @@ public class ExpressionParser {
       if (delimiterToken == null)
         throw new ExpressionParseException(ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET, rhs.getEndIndex());
 
-      if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
+      if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET) {
+        // For visual consistency, it's considered a two-part operator
+        if (tokenOutput != null)
+          tokenOutput.emitToken(delimiterToken.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, "]");
+
         return new InfixOperationNode(lhs, operatorToken.operator, rhs, delimiterToken);
+      }
 
       if (delimiterToken.punctuation == Punctuation.COLON)
         return parseSubstringExpression(lhs, operatorToken, rhs, delimiterToken);
