@@ -21,6 +21,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.DummyTag;
+import at.blvckbytes.component_markup.markup.parser.token.OutputFlag;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
@@ -86,7 +87,7 @@ public class MarkupParser implements XmlEventConsumer {
     TagDefinition tag = tagRegistry.locateTag(tagName);
 
     if (tag == null) {
-      if (tokenOutput == null || !tokenOutput.enableDummyTag)
+      if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
         throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
 
       tag = DummyTag.INSTANCE;
@@ -307,6 +308,9 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
+    if (tokenOutput != null && tokenOutput.outputFlags.contains(OutputFlag.IGNORE_CLOSING_TAGS))
+      return;
+
     if (tagName == null) {
       if (tagStack.size() <= 1)
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK);
@@ -333,7 +337,7 @@ public class MarkupParser implements XmlEventConsumer {
     TagDefinition closedTag = tagRegistry.locateTag(tagName);
 
     if (closedTag == null) {
-      if (tokenOutput == null || !tokenOutput.enableDummyTag)
+      if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
         throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
     }
 

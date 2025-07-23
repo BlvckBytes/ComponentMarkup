@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -14,10 +15,10 @@ public class TokenOutput {
   private final List<Token> result = new ArrayList<>();
   private boolean hasEnded;
 
-  public final boolean enableDummyTag;
+  public final EnumSet<OutputFlag> outputFlags;
 
-  public TokenOutput(boolean enableDummyTag) {
-    this.enableDummyTag = enableDummyTag;
+  public TokenOutput(EnumSet<OutputFlag> outputFlags) {
+    this.outputFlags = outputFlags;
   }
 
   public void onInitialization(String input) {
