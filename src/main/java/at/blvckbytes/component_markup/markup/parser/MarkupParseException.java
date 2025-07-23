@@ -13,9 +13,9 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
   public final CursorPosition position;
   public final MarkupParseError error;
-  public final Object[] messagePlaceholders;
+  public final String[] messagePlaceholders;
 
-  public MarkupParseException(CursorPosition position, MarkupParseError error, Object... messagePlaceholders) {
+  public MarkupParseException(CursorPosition position, MarkupParseError error, String... messagePlaceholders) {
     this.position = position;
     this.error = error;
     this.messagePlaceholders = messagePlaceholders;
@@ -26,7 +26,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.XML_PARSE_ERROR;
-    this.messagePlaceholders = new Object[0];
+    this.messagePlaceholders = new String[0];
   }
 
   public MarkupParseException(CursorPosition position, ExpressionParseException expressionParseException) {
@@ -34,7 +34,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.EXPRESSION_PARSE_ERROR;
-    this.messagePlaceholders = new Object[0];
+    this.messagePlaceholders = new String[0];
   }
 
   public MarkupParseException(CursorPosition position, ExpressionTokenizeException expressionTokenizeException) {
@@ -42,7 +42,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     this.position = position;
     this.error = MarkupParseError.EXPRESSION_TOKENIZE_ERROR;
-    this.messagePlaceholders = new Object[0];
+    this.messagePlaceholders = new String[0];
   }
 
   @Override
@@ -58,7 +58,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
         return ((ExpressionTokenizeException) getCause()).getErrorMessage();
 
       default:
-        return String.format(this.error.getErrorMessage(), messagePlaceholders);
+        return this.error.messageBuilder.apply(messagePlaceholders);
     }
   }
 
@@ -108,7 +108,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
         if (isLastChar)
           ++index;
 
-        String lineNumber = String.format("%0" + maxLineNumberDigits + "d", nextLineNumber++) + ": ";
+        String lineNumber = padLeft(nextLineNumber++, maxLineNumberDigits) + ": ";
         String lineContents = position.input.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
@@ -141,6 +141,24 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
     for (int i = 0; i < count; ++i)
       result.append(c);
+
+    return result.toString();
+  }
+
+  private String padLeft(int number, int width) {
+    String numberString = Integer.toString(number);
+
+    int pad = width - numberString.length();
+
+    if (pad <= 0)
+      return numberString;
+
+    StringBuilder result = new StringBuilder(width);
+
+    for (int i = 0; i < pad; i++)
+      result.append('0');
+
+    result.append(numberString);
 
     return result.toString();
   }
