@@ -131,6 +131,18 @@ public class TextWithAnchors {
     return nextCharIndex;
   }
 
+  public int auxAnchorIndex(int index) {
+    if (index < 0 || index >= auxAnchors.size())
+      throw new IllegalStateException("Required aux-anchor at index " + index);
+
+    int nextCharIndex = auxAnchors.get(index).position.nextCharIndex;
+
+    if (nextCharIndex > 0)
+      --nextCharIndex;
+
+    return nextCharIndex;
+  }
+
   public @Nullable CursorPositionEvent anchorEvent(int index) {
     if (index < 0 || index >= anchors.size())
       return null;

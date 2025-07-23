@@ -86,13 +86,16 @@ public class XmlEventParser {
         CursorPosition valueBeginPosition = null;
 
         while (cursor.peekChar() != 0) {
-          int possibleTerminationIndex = cursor.getNextCharIndex();
+          int currentIndex = cursor.getNextCharIndex();
           char currentChar = cursor.nextChar();
 
           if (currentChar == '\n' || currentChar == '{') {
             consumer.onCursorPosition(beginPosition);
             throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
           }
+
+          if (tokenOutput != null && Character.isWhitespace(currentChar))
+            tokenOutput.emitToken(currentIndex, TokenType.ANY__WHITESPACE, currentChar);
 
           if (valueBeginPosition == null)
             valueBeginPosition = cursor.getPosition();
@@ -103,7 +106,7 @@ public class XmlEventParser {
             continue;
 
           if (currentChar == '}') {
-            substringBuilder.setEndExclusive(possibleTerminationIndex);
+            substringBuilder.setEndExclusive(currentIndex);
             break;
           }
         }

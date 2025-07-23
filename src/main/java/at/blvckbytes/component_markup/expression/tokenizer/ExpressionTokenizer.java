@@ -78,9 +78,6 @@ public class ExpressionTokenizer {
         substringBuilder.addIndexToBeRemoved(nextCharIndex - 2);
       }
 
-      if (tokenOutput != null && Character.isWhitespace(upcomingChar))
-        tokenOutput.emitToken(nextCharIndex - 1 + beginIndexWithinInput, TokenType.ANY__WHITESPACE, upcomingChar);
-
       priorChar = upcomingChar;
     }
 
@@ -420,14 +417,8 @@ public class ExpressionTokenizer {
     }
 
     else {
-      char whitespace;
-
-      while (Character.isWhitespace(whitespace = peekChar())) {
-        if (tokenOutput != null)
-          tokenOutput.emitToken(nextCharIndex + beginIndexWithinInput, TokenType.ANY__WHITESPACE, whitespace);
-
+      while (Character.isWhitespace(peekChar()))
         nextChar();
-      }
 
       char upcomingChar = peekChar();
 

@@ -28,7 +28,7 @@ public class TokenOutputTests {
       "  @>",
       "    @<@run-command",
       "      @[@value@]@=@\"@'/tp@ '@ @+@ @player_name@\"",
-      "    @>@\\#@{@position_number@}@ @{@player_name@}@<@/@>",
+      "    @>@\\#@{@position_number@}@ @{# # @player_name# @}@<@/@>",
       "  @<@/@>",
       "@<@/@>"
     );
@@ -142,8 +142,11 @@ public class TokenOutputTests {
         // 77 - closing-bracket
         .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(78), " "))
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(79), "{player_name}")
+          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(79), "{  player_name }")
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(0), " "))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(1), " "))
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(80), "player_name"))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(2), " "))
         )
         // 81 - closing-bracket
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(82), "<"))
@@ -256,7 +259,10 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(77), "}"))
         .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(78), " "))
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(79), "{"))
+        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(0), " "))
+        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(1), " "))
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(80), "player_name"))
+        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(2), " "))
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(81), "}"))
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(82), "<"))
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(83), "/"))
