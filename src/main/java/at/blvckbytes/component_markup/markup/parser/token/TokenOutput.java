@@ -29,6 +29,37 @@ public class TokenOutput {
     this.input = input;
   }
 
+  private int collectChildrenAndGetNextIndex(HierarchicalToken parent) {
+    for (int childBeginIndex = parent.beginIndex + 1; childBeginIndex <= parent.endIndex; ++childBeginIndex) {
+      HierarchicalToken child = tokenByCharIndex[childBeginIndex];
+
+      if (child == null)
+        continue;
+
+      childBeginIndex = collectChildrenAndGetNextIndex(child);
+
+      parent.addChild(child);
+    }
+
+    return parent.endIndex;
+  }
+
+  private void throwMissingTokenError(int index) {
+    int lineCounter = 1;
+    int charCounter = 0;
+
+    for (int i = 0; i < index; ++i) {
+      if (input.charAt(i) == '\n') {
+        ++lineCounter;
+        charCounter = 0;
+      }
+
+      ++charCounter;
+    }
+
+    throw new IllegalStateException("Missing token for index line " + lineCounter + " column " + charCounter + " (" + index + "/" + (tokenByCharIndex.length - 1) + ")");
+  }
+
   public void onInputEnd() {
     if (hasEnded)
       throw new IllegalStateException("Do not call TokenOutput#onInputEnd more than once");
@@ -42,47 +73,12 @@ public class TokenOutput {
       HierarchicalToken currentToken = tokenByCharIndex[currentBeginIndex];
 
       if (currentToken == null) {
-        int lineCounter = 1;
-        int charCounter = 0;
-
-        for (int i = 0; i < currentBeginIndex; ++i) {
-          if (input.charAt(i) == '\n') {
-            ++lineCounter;
-            charCounter = 0;
-          }
-
-          ++charCounter;
-        }
-
-        throw new IllegalStateException("Missing token for index line " + lineCounter + " column " + charCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + ")");
-      }
-
-      int tokenLength = currentToken.value.length();
-
-      if (tokenLength == 0) {
-        LoggerProvider.log(Level.WARNING, "Encountered zero-length token of type " + currentToken.type + " at index " + currentBeginIndex);
+        throwMissingTokenError(currentBeginIndex);
         continue;
       }
 
-      int tokenEndIndex = currentBeginIndex + (tokenLength - 1);
-
-      if (tokenLength == 1) {
-        result.add(currentToken);
-        currentBeginIndex = tokenEndIndex;
-        continue;
-      }
-
-      for (int childBeginIndex = currentBeginIndex + 1; childBeginIndex <= tokenEndIndex; ++childBeginIndex) {
-        HierarchicalToken child = tokenByCharIndex[childBeginIndex];
-
-        if (child == null)
-          continue;
-
-        currentToken.addChild(child);
-      }
-
+      currentBeginIndex = collectChildrenAndGetNextIndex(currentToken);
       result.add(currentToken);
-      currentBeginIndex = tokenEndIndex;
     }
   }
 
