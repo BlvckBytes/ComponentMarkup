@@ -29,8 +29,6 @@ public class HierarchicalToken extends Token {
     return children;
   }
 
-  // TODO: Add test-cases for both hierarchical and sequential tokens
-
   public static void toSequence(List<HierarchicalToken> hierarchicalTokens, SequenceTokenConsumer output) {
     for (HierarchicalToken hierarchicalToken : hierarchicalTokens)
       appendTokenAndChildren(hierarchicalToken, output);
