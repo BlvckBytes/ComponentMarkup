@@ -10,9 +10,9 @@ import java.util.logging.Level;
 
 public class TokenOutput {
 
-  private @Nullable Token[] tokenByCharIndex;
+  private @Nullable HierarchicalToken[] tokenByCharIndex;
   private String input;
-  private final List<Token> result = new ArrayList<>();
+  private final List<HierarchicalToken> result = new ArrayList<>();
   private boolean hasEnded;
 
   public final EnumSet<OutputFlag> outputFlags;
@@ -25,7 +25,7 @@ public class TokenOutput {
     if (tokenByCharIndex != null)
       throw new IllegalStateException("Do not call TokenOutput#onInitialization more than once");
 
-    tokenByCharIndex = new Token[input.length()];
+    tokenByCharIndex = new HierarchicalToken[input.length()];
     this.input = input;
   }
 
@@ -39,7 +39,7 @@ public class TokenOutput {
     hasEnded = true;
 
     for (int currentBeginIndex = 0; currentBeginIndex < tokenByCharIndex.length; ++currentBeginIndex) {
-      Token currentToken = tokenByCharIndex[currentBeginIndex];
+      HierarchicalToken currentToken = tokenByCharIndex[currentBeginIndex];
 
       if (currentToken == null) {
         int lineCounter = 1;
@@ -73,7 +73,7 @@ public class TokenOutput {
       }
 
       for (int childBeginIndex = currentBeginIndex + 1; childBeginIndex <= tokenEndIndex; ++childBeginIndex) {
-        Token child = tokenByCharIndex[childBeginIndex];
+        HierarchicalToken child = tokenByCharIndex[childBeginIndex];
 
         if (child == null)
           continue;
@@ -86,7 +86,7 @@ public class TokenOutput {
     }
   }
 
-  public List<Token> getResult() {
+  public List<HierarchicalToken> getResult() {
     return result;
   }
 
@@ -99,6 +99,6 @@ public class TokenOutput {
       return;
     }
 
-    tokenByCharIndex[beginIndex] = new Token(type, beginIndex, value);
+    tokenByCharIndex[beginIndex] = new HierarchicalToken(type, beginIndex, value);
   }
 }
