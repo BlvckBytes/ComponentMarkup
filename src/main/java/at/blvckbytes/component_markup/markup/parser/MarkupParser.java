@@ -453,7 +453,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (handleStaticallyNamedIntrinsicAttribute(fullName, attributePosition, value, immediateValue)) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(attributeBeginIndex + 1, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, name);
+        tokenOutput.emitToken(attributeBeginIndex + 1, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name);
 
       return;
     }

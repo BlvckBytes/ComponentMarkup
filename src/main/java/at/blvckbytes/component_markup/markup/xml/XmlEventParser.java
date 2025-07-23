@@ -64,8 +64,7 @@ public class XmlEventParser {
       int possibleNonTextBeginIndex = cursor.getNextCharIndex();
 
       if (cursor.peekChar() == '{' && priorChar != '\\') {
-        if (tokenOutput != null)
-          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__INTERPOLATION, "{");
+        int interpolationBeginIndex = cursor.getNextCharIndex();
 
         cursor.nextChar();
 
@@ -104,9 +103,6 @@ public class XmlEventParser {
             continue;
 
           if (currentChar == '}') {
-            if (tokenOutput != null)
-              tokenOutput.emitToken(possibleTerminationIndex, TokenType.MARKUP__PUNCTUATION__INTERPOLATION, "}");
-
             substringBuilder.setEndExclusive(possibleTerminationIndex);
             break;
           }
@@ -119,10 +115,11 @@ public class XmlEventParser {
 
         inStringDetector.reset();
 
-        // The interpolation-expression will generate tokens within the expression-parser later on.
-
         String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
         substringBuilder.resetIndices();
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(interpolationBeginIndex, TokenType.MARKUP__INTERPOLATION, "{" + interpolationContents + "}");
 
         consumer.onInterpolation(interpolationContents, valueBeginPosition);
         wasPriorTagOrInterpolation = true;
@@ -263,6 +260,7 @@ public class XmlEventParser {
     char priorChar = 0;
 
     while (cursor.peekChar() != 0) {
+      int charIndex = cursor.getNextCharIndex();
       char currentChar = cursor.nextChar();
 
       if (currentChar == '\r' || currentChar == '\n')
@@ -273,13 +271,16 @@ public class XmlEventParser {
 
       if (currentChar == '"') {
         if (priorChar == '\\') {
-          substringBuilder.addIndexToBeRemoved(cursor.getNextCharIndex() - 2);
+          substringBuilder.addIndexToBeRemoved(charIndex - 1);
         } else {
-          substringBuilder.setEndExclusive(cursor.getNextCharIndex() - 1);
+          substringBuilder.setEndExclusive(charIndex);
           encounteredEnd = true;
           break;
         }
       }
+
+      if (tokenOutput != null && Character.isWhitespace(currentChar))
+        tokenOutput.emitToken(charIndex, TokenType.ANY__WHITESPACE, currentChar);
 
       priorChar = currentChar;
     }
@@ -557,7 +558,9 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
       if (tokenOutput != null) {
-        tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+        if (tagName != null)
+          tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+
         tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG, ">");
       }
 

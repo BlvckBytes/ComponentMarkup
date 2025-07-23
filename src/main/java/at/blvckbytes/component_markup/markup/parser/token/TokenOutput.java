@@ -90,6 +90,10 @@ public class TokenOutput {
     return result;
   }
 
+  public void emitToken(int beginIndex, TokenType type, char value) {
+    emitToken(beginIndex, type, String.valueOf(value));
+  }
+
   public void emitToken(int beginIndex, TokenType type, String value) {
     if (tokenByCharIndex == null)
       throw new IllegalStateException("Do not emit tokens before calling TokenOutput#onInitialization");

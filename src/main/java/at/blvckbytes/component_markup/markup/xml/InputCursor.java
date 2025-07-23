@@ -52,7 +52,7 @@ public class InputCursor {
 
     while (Character.isWhitespace(c = peekChar())) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(nextCharIndex, TokenType.ANY__WHITESPACE, String.valueOf(c));
+        tokenOutput.emitToken(nextCharIndex, TokenType.ANY__WHITESPACE, c);
 
       nextChar();
     }

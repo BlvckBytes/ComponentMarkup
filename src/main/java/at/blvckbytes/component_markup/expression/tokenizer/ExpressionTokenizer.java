@@ -78,6 +78,9 @@ public class ExpressionTokenizer {
         substringBuilder.addIndexToBeRemoved(nextCharIndex - 2);
       }
 
+      if (tokenOutput != null && Character.isWhitespace(upcomingChar))
+        tokenOutput.emitToken(nextCharIndex - 1 + beginIndexWithinInput, TokenType.ANY__WHITESPACE, upcomingChar);
+
       priorChar = upcomingChar;
     }
 
@@ -421,7 +424,7 @@ public class ExpressionTokenizer {
 
       while (Character.isWhitespace(whitespace = peekChar())) {
         if (tokenOutput != null)
-          tokenOutput.emitToken(nextCharIndex + beginIndexWithinInput, TokenType.ANY__WHITESPACE, String.valueOf(whitespace));
+          tokenOutput.emitToken(nextCharIndex + beginIndexWithinInput, TokenType.ANY__WHITESPACE, whitespace);
 
         nextChar();
       }
@@ -505,7 +508,7 @@ public class ExpressionTokenizer {
     }
 
     if (token instanceof PunctuationToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__PUNCTUATION__ANY, String.valueOf(((PunctuationToken) token).punctuation.representation));
+      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__PUNCTUATION__ANY, ((PunctuationToken) token).punctuation.representation);
       return;
     }
 
