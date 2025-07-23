@@ -308,12 +308,15 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    if (tokenOutput != null && tokenOutput.outputFlags.contains(OutputFlag.IGNORE_CLOSING_TAGS))
-      return;
+    boolean noOpUnmatched = tokenOutput != null && tokenOutput.outputFlags.contains(OutputFlag.UNMATCHED_CLOSING_TAGS_ARE_NO_OPS);
 
     if (tagName == null) {
-      if (tagStack.size() <= 1)
+      if (tagStack.size() <= 1) {
+        if (noOpUnmatched)
+          return;
+
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK);
+      }
 
       TagAndBuffers openedTag = tagStack.pop();
       tagStack.peek().addChild(openedTag);
@@ -321,8 +324,12 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (tagName.equals("*")) {
-      if (tagStack.size() <= 1)
+      if (tagStack.size() <= 1) {
+        if (noOpUnmatched)
+          return;
+
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK, tagName);
+      }
 
       while (tagStack.size() > 1) {
         TagAndBuffers openedTag = tagStack.pop();
@@ -339,6 +346,23 @@ public class MarkupParser implements XmlEventConsumer {
     if (closedTag == null) {
       if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
         throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
+    }
+
+    if (noOpUnmatched) {
+      if (tagStack.size() == 1)
+        return;
+
+      boolean didAnyMatch = false;
+
+      for (int index = 1; index < tagStack.size(); ++index) {
+        if (tagStack.get(index).tagNameLower.equals(tagName)) {
+          didAnyMatch = true;
+          break;
+        }
+      }
+
+      if (!didAnyMatch)
+        return;
     }
 
     TagAndBuffers openedTag;
