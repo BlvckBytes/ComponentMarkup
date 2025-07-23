@@ -86,11 +86,12 @@ public class ExpressionTokenizer {
 
     substringBuilder.setEndExclusive(nextCharIndex - 1);
 
-    String contents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
+    String stringContents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
+    String rawContents = substringBuilder.build(EnumSet.of(SubstringFlag.KEEP_REMOVE_INDICES));
 
     substringBuilder.resetIndices();
 
-    return new StringToken(beginIndex, contents, quoteChar);
+    return new StringToken(beginIndex, stringContents, quoteChar + rawContents + quoteChar);
   }
 
   private Token parseIdentifierOrLiteralToken() {

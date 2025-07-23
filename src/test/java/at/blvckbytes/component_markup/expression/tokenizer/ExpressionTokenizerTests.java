@@ -332,7 +332,10 @@ public class ExpressionTokenizerTests {
         if (stringValue.charAt(stringLength - 1) != quoteChar)
           throw new IllegalStateException("Invalid string: " + stringValue);
 
-        token = new StringToken(beginIndex, stringValue.substring(1, stringLength - 1), quoteChar);
+        String stringContents = stringValue.substring(1, stringLength - 1);
+        String rawStringContents = stringContents.replace(String.valueOf(quoteChar), "\\" + quoteChar);
+
+        token = new StringToken(beginIndex, stringContents, quoteChar + rawStringContents + quoteChar);
       }
       else
         token = new IdentifierToken(beginIndex, stringValue);

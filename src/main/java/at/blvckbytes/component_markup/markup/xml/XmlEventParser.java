@@ -289,10 +289,10 @@ public class XmlEventParser {
 
     String value = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
-    substringBuilder.resetIndices();
-
     if (tokenOutput != null)
-      tokenOutput.emitToken(beginIndex, TokenType.MARKUP__STRING, '"' + value + '"');
+      tokenOutput.emitToken(beginIndex, TokenType.MARKUP__STRING, '"' + substringBuilder.build(SUBSTRING_AS_IS_SKIP_REMOVES) + '"');
+
+    substringBuilder.resetIndices();
 
     consumer.onStringAttribute(attributeName, valueBeginPosition, value);
   }
