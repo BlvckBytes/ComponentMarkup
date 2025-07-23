@@ -15,6 +15,9 @@ public class TokenOutput {
   private boolean hasEnded;
 
   public void onInitialization(String input) {
+    if (tokenByCharIndex != null)
+      throw new IllegalStateException("Do not call TokenOutput#onInitialization more than once");
+
     tokenByCharIndex = new Token[input.length()];
     this.input = input;
   }
