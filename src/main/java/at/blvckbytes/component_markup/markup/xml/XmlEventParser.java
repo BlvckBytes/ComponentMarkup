@@ -10,7 +10,8 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS = EnumSet.noneOf(SubstringFlag.class);
+  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS_SKIP_REMOVES = EnumSet.of(SubstringFlag.KEEP_REMOVE_INDICES);
+  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS_DO_REMOVES = EnumSet.noneOf(SubstringFlag.class);
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
@@ -120,7 +121,7 @@ public class XmlEventParser {
 
         // The interpolation-expression will generate tokens within the expression-parser later on.
 
-        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS);
+        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
         substringBuilder.resetIndices();
 
         consumer.onInterpolation(interpolationContents, valueBeginPosition);
@@ -156,7 +157,7 @@ public class XmlEventParser {
           substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
           substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-          emitText(firstSpacePosition, SUBSTRING_AS_IS);
+          emitText(firstSpacePosition, SUBSTRING_AS_IS_DO_REMOVES);
         }
 
         parseOpeningOrClosingTag();
@@ -217,7 +218,7 @@ public class XmlEventParser {
     }
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(SUBSTRING_AS_IS));
+      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(SUBSTRING_AS_IS_SKIP_REMOVES));
 
     substringBuilder.resetIndices();
 
@@ -241,7 +242,7 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    String identifier = substringBuilder.build(SUBSTRING_AS_IS);
+    String identifier = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
     substringBuilder.resetIndices();
 
@@ -286,7 +287,7 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    String value = substringBuilder.build(SUBSTRING_AS_IS);
+    String value = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
     substringBuilder.resetIndices();
 
@@ -349,7 +350,7 @@ public class XmlEventParser {
     int numberEndIndex = cursor.getNextCharIndex();
 
     substringBuilder.setEndExclusive(numberEndIndex);
-    String numberString = substringBuilder.build(SUBSTRING_AS_IS);
+    String numberString = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(numberBeginIndex, TokenType.MARKUP__NUMBER, numberString);
