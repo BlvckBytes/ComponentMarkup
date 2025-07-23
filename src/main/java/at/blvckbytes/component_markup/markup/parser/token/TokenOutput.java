@@ -14,6 +14,12 @@ public class TokenOutput {
   private final List<Token> result = new ArrayList<>();
   private boolean hasEnded;
 
+  public final boolean enableDummyTag;
+
+  public TokenOutput(boolean enableDummyTag) {
+    this.enableDummyTag = enableDummyTag;
+  }
+
   public void onInitialization(String input) {
     if (tokenByCharIndex != null)
       throw new IllegalStateException("Do not call TokenOutput#onInitialization more than once");

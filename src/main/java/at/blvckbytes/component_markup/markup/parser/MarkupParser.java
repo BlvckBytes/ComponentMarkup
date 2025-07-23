@@ -20,6 +20,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.LongToken;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.DummyTag;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
@@ -84,8 +85,12 @@ public class MarkupParser implements XmlEventConsumer {
     tagName = lower(tagName);
     TagDefinition tag = tagRegistry.locateTag(tagName);
 
-    if (tag == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
+    if (tag == null) {
+      if (tokenOutput == null || !tokenOutput.enableDummyTag)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
+
+      tag = DummyTag.INSTANCE;
+    }
 
     TagAndBuffers parent = tagStack.isEmpty() ? null : tagStack.peek();
 
@@ -327,8 +332,10 @@ public class MarkupParser implements XmlEventConsumer {
 
     TagDefinition closedTag = tagRegistry.locateTag(tagName);
 
-    if (closedTag == null)
-      throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
+    if (closedTag == null) {
+      if (tokenOutput == null || !tokenOutput.enableDummyTag)
+        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName);
+    }
 
     TagAndBuffers openedTag;
 

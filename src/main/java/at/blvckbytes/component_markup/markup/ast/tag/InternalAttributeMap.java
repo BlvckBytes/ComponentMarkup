@@ -42,6 +42,13 @@ public class InternalAttributeMap implements AttributeMap {
     }
   }
 
+  public void markAllUsed() {
+    for (List<Attribute> attributeBucket : attributeMap.values()) {
+      for (Attribute attribute : attributeBucket)
+        attribute.hasBeenUsed = true;
+    }
+  }
+
   // ================================================================================
   // NON_MULTI
   // ================================================================================
