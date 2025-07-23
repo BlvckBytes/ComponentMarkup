@@ -15,7 +15,7 @@ public class DummyTag extends TagDefinition {
   public static final DummyTag INSTANCE = new DummyTag();
 
   private DummyTag() {
-    super(TagClosing.OPEN_CLOSE, TagPriority.LOWEST);
+    super(TagClosing.INVARIANT, TagPriority.LOWEST);
   }
 
   @Override
