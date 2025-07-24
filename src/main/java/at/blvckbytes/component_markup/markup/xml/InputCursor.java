@@ -48,11 +48,9 @@ public class InputCursor {
   }
 
   public void consumeWhitespace() {
-    char c;
-
-    while (Character.isWhitespace(c = peekChar())) {
+    while (Character.isWhitespace(peekChar())) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(nextCharIndex, TokenType.ANY__WHITESPACE, c);
+        tokenOutput.emitCharToken(nextCharIndex, TokenType.ANY__WHITESPACE);
 
       nextChar();
     }

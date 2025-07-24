@@ -86,18 +86,21 @@ public class TokenOutput {
     return result;
   }
 
-  public void emitToken(int beginIndex, TokenType type, char value) {
-    emitToken(beginIndex, type, String.valueOf(value));
+  public void emitCharToken(int beginIndex, TokenType type) {
+    emitToken(beginIndex, beginIndex, type);
   }
 
-  public void emitToken(int beginIndex, TokenType type, String value) {
+  public void emitToken(int beginIndex, int endIndex, TokenType type) {
     if (tokenByCharIndex == null)
       throw new IllegalStateException("Do not emit tokens before calling TokenOutput#onInitialization");
 
     if (beginIndex < 0 || beginIndex >= tokenByCharIndex.length) {
-      LoggerProvider.log(Level.WARNING, "Encountered out-of-range token \"" + value + "\" at index " + beginIndex);
+      LoggerProvider.log(Level.WARNING, "Encountered out-of-range token \"" + type + "\" at index " + beginIndex);
       return;
     }
+
+    // TODO: Keep only indices on tokens
+    String value = input.substring(beginIndex, endIndex + 1);
 
     tokenByCharIndex[beginIndex] = new HierarchicalToken(type, beginIndex, value);
   }

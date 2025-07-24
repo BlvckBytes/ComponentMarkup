@@ -43,6 +43,13 @@ public class SubstringBuilder {
     removeIndices[nextRemoveIndicesIndex++] = index;
   }
 
+  public int getEndExclusive() {
+    if (endExclusive == 0)
+      throw new IllegalStateException("End-exclusive has not been set");
+
+    return endExclusive;
+  }
+
   public void setEndExclusive(int index) {
     if (index == 0)
       throw new IllegalStateException("End-exclusive cannot be zero");
@@ -61,11 +68,7 @@ public class SubstringBuilder {
   public String build(EnumSet<SubstringFlag> flags) {
     validateBounds();
 
-    boolean keepRemoveIndices = flags.contains(SubstringFlag.KEEP_REMOVE_INDICES);
-    int substringLength = endExclusive - startInclusive;
-
-    if (!keepRemoveIndices)
-      substringLength -= nextRemoveIndicesIndex;
+    int substringLength = endExclusive - startInclusive - nextRemoveIndicesIndex;
 
     if (substringLength < 0)
       throw new IllegalStateException("There were more characters to be removed than the substring was in total length");
@@ -76,13 +79,11 @@ public class SubstringBuilder {
     boolean doIgnoreWhitespace = false;
 
     inputLoop: for (int inputIndex = startInclusive; inputIndex < endExclusive; ++inputIndex) {
-      if (!keepRemoveIndices) {
-        // Remove-indices are strictly increasing, thus avoid looping useless slots
-        for (int removeIndicesIndex = lastMatchedRemoveIndicesIndex; removeIndicesIndex < nextRemoveIndicesIndex; ++removeIndicesIndex) {
-          if (removeIndices[removeIndicesIndex] == inputIndex) {
-            lastMatchedRemoveIndicesIndex = removeIndicesIndex;
-            continue inputLoop;
-          }
+      // Remove-indices are strictly increasing, thus avoid looping useless slots
+      for (int removeIndicesIndex = lastMatchedRemoveIndicesIndex; removeIndicesIndex < nextRemoveIndicesIndex; ++removeIndicesIndex) {
+        if (removeIndices[removeIndicesIndex] == inputIndex) {
+          lastMatchedRemoveIndicesIndex = removeIndicesIndex;
+          continue inputLoop;
         }
       }
 

@@ -443,9 +443,9 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (tokenOutput != null) {
       if (isLiteral)
-        tokenOutput.emitToken(attributeBeginIndex, TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL, "+");
+        tokenOutput.emitCharToken(attributeBeginIndex, TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL);
       else
-        tokenOutput.emitToken(attributeBeginIndex, TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, "*");
+        tokenOutput.emitCharToken(attributeBeginIndex, TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION);
     }
 
     String fullName = name;
@@ -453,7 +453,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (handleStaticallyNamedIntrinsicAttribute(fullName, attributePosition, value, immediateValue)) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(attributeBeginIndex + 1, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name);
+        tokenOutput.emitToken(attributeBeginIndex + 1, attributeBeginIndex + name.length(), TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC);
 
       return;
     }
@@ -463,7 +463,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(attributePosition, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName);
 
       if (tokenOutput != null)
-        tokenOutput.emitToken(attributeBeginIndex + 1, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, "for");
+        tokenOutput.emitToken(attributeBeginIndex + 1, attributeBeginIndex + 3, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC);
 
       String iterationVariable = null;
 
@@ -474,8 +474,8 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(attributePosition, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable);
 
         if (tokenOutput != null) {
-          tokenOutput.emitToken(attributeBeginIndex + 4, TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, "-");
-          tokenOutput.emitToken(attributeBeginIndex + 5, TokenType.MARKUP__IDENTIFIER__BINDING, iterationVariable);
+          tokenOutput.emitCharToken(attributeBeginIndex + 4, TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR);
+          tokenOutput.emitToken(attributeBeginIndex + 5, attributeBeginIndex + 4 + iterationVariable.length(), TokenType.MARKUP__IDENTIFIER__BINDING);
         }
       }
 
@@ -494,8 +494,8 @@ public class MarkupParser implements XmlEventConsumer {
       String bindingName = name.substring(4);
 
       if (tokenOutput != null) {
-        tokenOutput.emitToken(attributeBeginIndex + 1, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, "let");
-        tokenOutput.emitToken(attributeBeginIndex + 4, TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, "-");
+        tokenOutput.emitToken(attributeBeginIndex + 1, attributeBeginIndex + 3, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC);
+        tokenOutput.emitCharToken(attributeBeginIndex + 4, TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR);
       }
 
       int nameBeginIndex = attributeBeginIndex + 5;
@@ -518,7 +518,7 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(lastPosition, MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES);
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(nameBeginIndex, TokenType.MARKUP__OPERATOR__CAPTURE, "(");
+          tokenOutput.emitCharToken(nameBeginIndex, TokenType.MARKUP__OPERATOR__CAPTURE);
 
         isCaptureMode = true;
         bindingName = bindingName.substring(1, nameLength - 1);
@@ -534,9 +534,9 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (tokenOutput != null) {
         if (isCaptureMode)
-          tokenOutput.emitToken(nameBeginIndex + bindingName.length(), TokenType.MARKUP__OPERATOR__CAPTURE, ")");
+          tokenOutput.emitCharToken(nameBeginIndex + bindingName.length(), TokenType.MARKUP__OPERATOR__CAPTURE);
 
-        tokenOutput.emitToken(nameBeginIndex, TokenType.MARKUP__IDENTIFIER__BINDING, bindingName);
+        tokenOutput.emitToken(nameBeginIndex, nameBeginIndex + (bindingName.length() - 1), TokenType.MARKUP__IDENTIFIER__BINDING);
       }
 
       if (bindingName.equals(currentLayer.forIterationVariable))
@@ -756,7 +756,7 @@ public class MarkupParser implements XmlEventConsumer {
       name = name.substring(1, nameLength - 1);
 
       if (tokenOutput != null)
-        tokenOutput.emitToken(beginIndex + beginOffset, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, "[");
+        tokenOutput.emitCharToken(beginIndex + beginOffset, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
 
       ++beginOffset;
     }
@@ -782,7 +782,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(lastPosition, MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION, name);
 
       if (tokenOutput != null)
-        tokenOutput.emitToken(beginIndex + beginOffset, TokenType.MARKUP__OPERATOR__SPREAD, "...");
+        tokenOutput.emitToken(beginIndex + beginOffset, beginIndex + beginOffset + 2, TokenType.MARKUP__OPERATOR__SPREAD);
 
       beginOffset += 3;
     }
@@ -794,10 +794,10 @@ public class MarkupParser implements XmlEventConsumer {
       throw new MarkupParseException(lastPosition, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, name);
 
     if (tokenOutput != null) {
-      tokenOutput.emitToken(beginIndex + beginOffset, TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, name);
+      tokenOutput.emitToken(beginIndex + beginOffset, beginIndex + beginOffset + (name.length() - 1), TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER);
 
       if (isExpressionMode)
-        tokenOutput.emitToken(beginIndex + beginOffset + name.length(), TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, "]");
+        tokenOutput.emitCharToken(beginIndex + beginOffset + name.length(), TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
     }
 
     TagAndBuffers currentLayer = tagStack.peek();

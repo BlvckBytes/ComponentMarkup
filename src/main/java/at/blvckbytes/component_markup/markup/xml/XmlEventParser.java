@@ -10,17 +10,11 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS_SKIP_REMOVES = EnumSet.of(SubstringFlag.KEEP_REMOVE_INDICES);
   private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS_DO_REMOVES = EnumSet.noneOf(SubstringFlag.class);
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
-  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT;
-
-  static {
-    SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
-    SUBSTRING_ONLY_TEXT.remove(SubstringFlag.KEEP_REMOVE_INDICES);
-  }
+  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
   private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
@@ -95,7 +89,7 @@ public class XmlEventParser {
           }
 
           if (tokenOutput != null && Character.isWhitespace(currentChar))
-            tokenOutput.emitToken(currentIndex, TokenType.ANY__WHITESPACE, currentChar);
+            tokenOutput.emitCharToken(currentIndex, TokenType.ANY__WHITESPACE);
 
           if (valueBeginPosition == null)
             valueBeginPosition = cursor.getPosition();
@@ -116,13 +110,14 @@ public class XmlEventParser {
         if (!substringBuilder.hasEndSet())
           throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
 
-        inStringDetector.reset();
 
         String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
-        substringBuilder.resetIndices();
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(interpolationBeginIndex, TokenType.MARKUP__INTERPOLATION, "{" + interpolationContents + "}");
+          tokenOutput.emitToken(interpolationBeginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__INTERPOLATION);
+
+        inStringDetector.reset();
+        substringBuilder.resetIndices();
 
         consumer.onInterpolation(interpolationContents, valueBeginPosition);
         wasPriorTagOrInterpolation = true;
@@ -133,7 +128,7 @@ public class XmlEventParser {
 
       if (cursor.peekChar() == ' ') {
         if (tokenOutput != null)
-          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.ANY__WHITESPACE, " ");
+          tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.ANY__WHITESPACE);
 
         cursor.nextChar();
         firstSpacePosition = cursor.getPosition();
@@ -218,7 +213,7 @@ public class XmlEventParser {
     }
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(position.nextCharIndex - 1, TokenType.MARKUP__PLAIN_TEXT, substringBuilder.build(SUBSTRING_AS_IS_SKIP_REMOVES));
+      tokenOutput.emitToken(position.nextCharIndex - 1, substringBuilder.getEndExclusive() - 1, TokenType.MARKUP__PLAIN_TEXT);
 
     substringBuilder.resetIndices();
 
@@ -283,7 +278,7 @@ public class XmlEventParser {
       }
 
       if (tokenOutput != null && Character.isWhitespace(currentChar))
-        tokenOutput.emitToken(charIndex, TokenType.ANY__WHITESPACE, currentChar);
+        tokenOutput.emitCharToken(charIndex, TokenType.ANY__WHITESPACE);
 
       priorChar = currentChar;
     }
@@ -294,7 +289,7 @@ public class XmlEventParser {
     String value = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(beginIndex, TokenType.MARKUP__STRING, '"' + substringBuilder.build(SUBSTRING_AS_IS_SKIP_REMOVES) + '"');
+      tokenOutput.emitToken(beginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__STRING);
 
     substringBuilder.resetIndices();
 
@@ -357,7 +352,7 @@ public class XmlEventParser {
     String numberString = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(numberBeginIndex, TokenType.MARKUP__NUMBER, numberString);
+      tokenOutput.emitToken(numberBeginIndex, numberEndIndex - 1, TokenType.MARKUP__NUMBER);
 
     substringBuilder.resetIndices();
 
@@ -410,7 +405,7 @@ public class XmlEventParser {
     }
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__EQUALS, "=");
+      tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__EQUALS);
 
     cursor.nextChar();
 
@@ -423,7 +418,7 @@ public class XmlEventParser {
 
       case '{':
         if (tokenOutput != null)
-          tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__SUBTREE, "{");
+          tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
         cursor.nextChar();
 
@@ -441,7 +436,7 @@ public class XmlEventParser {
         }
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__SUBTREE, "}");
+          tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
         consumer.onCursorPosition(cursor.getPosition());
         consumer.onTagAttributeEnd(attributeName);
@@ -460,7 +455,7 @@ public class XmlEventParser {
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(beginIndex, TokenType.MARKUP__LITERAL__ANY, "true");
+          tokenOutput.emitToken(beginIndex, beginIndex + 3, TokenType.MARKUP__LITERAL__ANY);
 
         consumer.onBooleanAttribute(attributeName, "true", true);
         return true;
@@ -479,7 +474,7 @@ public class XmlEventParser {
           throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(beginIndex, TokenType.MARKUP__LITERAL__ANY, "false");
+          tokenOutput.emitToken(beginIndex, beginIndex + 4, TokenType.MARKUP__LITERAL__ANY);
 
         consumer.onBooleanAttribute(attributeName, "false", false);
         return true;
@@ -533,7 +528,7 @@ public class XmlEventParser {
       throw new IllegalStateException("Expected an opening pointy-bracket!");
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(openingIndex, TokenType.MARKUP__PUNCTUATION__TAG, "<");
+      tokenOutput.emitCharToken(openingIndex, TokenType.MARKUP__PUNCTUATION__TAG);
 
     CursorPosition savedPosition = cursor.getPosition();
 
@@ -543,7 +538,7 @@ public class XmlEventParser {
 
     if (cursor.peekChar() == '/') {
       if (tokenOutput != null)
-        tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG, "/");
+        tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG);
 
       cursor.nextChar();
       wasClosingTag = true;
@@ -562,9 +557,9 @@ public class XmlEventParser {
 
       if (tokenOutput != null) {
         if (tagName != null)
-          tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+          tokenOutput.emitToken(tagNameIndex, tagNameIndex + (tagName.length() - 1), TokenType.MARKUP__IDENTIFIER__TAG);
 
-        tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG, ">");
+        tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG);
       }
 
       consumer.onTagClose(tagName);
@@ -578,13 +573,13 @@ public class XmlEventParser {
 
     if (tryConsumeCommentTag(tagName)) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(openingIndex, TokenType.MARKUP__COMMENT, cursor.input.substring(openingIndex, cursor.getNextCharIndex()));
+        tokenOutput.emitToken(openingIndex, cursor.getNextCharIndex() - 1, TokenType.MARKUP__COMMENT);
 
       return;
     }
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(tagNameIndex, TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+      tokenOutput.emitToken(tagNameIndex, tagNameIndex + (tagName.length() - 1), TokenType.MARKUP__IDENTIFIER__TAG);
 
     consumer.onCursorPosition(savedPosition);
     consumer.onTagOpenBegin(tagName);
@@ -598,7 +593,7 @@ public class XmlEventParser {
 
     if (cursor.peekChar() == '/') {
       if (tokenOutput != null)
-        tokenOutput.emitToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG, "/");
+        tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG);
 
       wasSelfClosing = true;
       cursor.nextChar();
@@ -610,7 +605,7 @@ public class XmlEventParser {
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG, ">");
+      tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG);
 
     consumer.onCursorPosition(cursor.getPosition());
     consumer.onTagOpenEnd(tagName, wasSelfClosing);

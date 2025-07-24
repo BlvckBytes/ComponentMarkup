@@ -87,11 +87,11 @@ public class ExpressionTokenizer {
     substringBuilder.setEndExclusive(nextCharIndex - 1);
 
     String stringContents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
-    String rawContents = substringBuilder.build(EnumSet.of(SubstringFlag.KEEP_REMOVE_INDICES));
+    String rawContents = input.substring(beginIndex, nextCharIndex);
 
     substringBuilder.resetIndices();
 
-    return new StringToken(beginIndex, stringContents, quoteChar + rawContents + quoteChar);
+    return new StringToken(beginIndex, stringContents, rawContents);
   }
 
   private Token parseIdentifierOrLiteralToken() {
@@ -454,52 +454,45 @@ public class ExpressionTokenizer {
     return this.pendingStack.peek();
   }
 
-  private void emitTokenToOutput(Token token) {
+  private void emitTokenWithType(Token token, TokenType type) {
     if (tokenOutput == null)
       return;
 
-    if (token instanceof BooleanToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__LITERAL, ((BooleanToken) token).raw);
+    tokenOutput.emitToken(
+      token.beginIndex + beginIndexWithinInput,
+      token.endIndex + beginIndexWithinInput,
+      type
+    );
+  }
+
+  private void emitTokenToOutput(Token token) {
+    if (token instanceof BooleanToken || token instanceof NullToken) {
+      emitTokenWithType(token, TokenType.EXPRESSION__LITERAL);
       return;
     }
 
-    if (token instanceof NullToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__LITERAL, ((NullToken) token).raw);
-      return;
-    }
-
-    if (token instanceof DoubleToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__NUMBER, ((DoubleToken) token).raw);
-      return;
-    }
-
-    if (token instanceof LongToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__NUMBER, ((LongToken) token).raw);
+    if (token instanceof DoubleToken || token instanceof LongToken) {
+      emitTokenWithType(token, TokenType.EXPRESSION__NUMBER);
       return;
     }
 
     if (token instanceof StringToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__STRING, ((StringToken) token).raw);
+      emitTokenWithType(token, TokenType.EXPRESSION__STRING);
       return;
     }
 
     if (token instanceof IdentifierToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__IDENTIFIER_ANY, ((IdentifierToken) token).raw);
+      emitTokenWithType(token, TokenType.EXPRESSION__IDENTIFIER_ANY);
       return;
     }
 
-    if (token instanceof PrefixOperatorToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, ((PrefixOperatorToken) token).operator.representation);
-      return;
-    }
-
-    if (token instanceof InfixOperatorToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__OPERATOR__ANY, ((InfixOperatorToken) token).operator.representation);
+    if (token instanceof PrefixOperatorToken || token instanceof InfixOperatorToken) {
+      emitTokenWithType(token, TokenType.EXPRESSION__OPERATOR__ANY);
       return;
     }
 
     if (token instanceof PunctuationToken) {
-      tokenOutput.emitToken(token.beginIndex + beginIndexWithinInput, TokenType.EXPRESSION__PUNCTUATION__ANY, ((PunctuationToken) token).punctuation.representation);
+      emitTokenWithType(token, TokenType.EXPRESSION__PUNCTUATION__ANY);
       return;
     }
 
