@@ -10,7 +10,7 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS_DO_REMOVES = EnumSet.noneOf(SubstringFlag.class);
+  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS = EnumSet.noneOf(SubstringFlag.class);
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
@@ -111,7 +111,7 @@ public class XmlEventParser {
           throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
 
 
-        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
+        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS);
 
         if (tokenOutput != null)
           tokenOutput.emitToken(interpolationBeginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__INTERPOLATION);
@@ -152,7 +152,7 @@ public class XmlEventParser {
           substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
           substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-          emitText(firstSpacePosition, SUBSTRING_AS_IS_DO_REMOVES);
+          emitText(firstSpacePosition, SUBSTRING_AS_IS);
         }
 
         parseOpeningOrClosingTag();
@@ -237,7 +237,7 @@ public class XmlEventParser {
 
     substringBuilder.setEndExclusive(cursor.getNextCharIndex());
 
-    String identifier = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
+    String identifier = substringBuilder.build(SUBSTRING_AS_IS);
 
     substringBuilder.resetIndices();
 
@@ -286,7 +286,7 @@ public class XmlEventParser {
     if (!encounteredEnd)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    String value = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
+    String value = substringBuilder.build(SUBSTRING_AS_IS);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(beginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__STRING);
@@ -349,7 +349,7 @@ public class XmlEventParser {
     int numberEndIndex = cursor.getNextCharIndex();
 
     substringBuilder.setEndExclusive(numberEndIndex);
-    String numberString = substringBuilder.build(SUBSTRING_AS_IS_DO_REMOVES);
+    String numberString = substringBuilder.build(SUBSTRING_AS_IS);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(numberBeginIndex, numberEndIndex - 1, TokenType.MARKUP__NUMBER);
