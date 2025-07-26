@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.KeyNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,14 +24,13 @@ public class KeyTag extends TagDefinition {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull StringView tagName,
-    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     return new KeyNode(
       attributes.getMandatoryExpressionNode("key"),
-      position, letBindings
+      tagName.viewStart, letBindings
     );
   }
 }

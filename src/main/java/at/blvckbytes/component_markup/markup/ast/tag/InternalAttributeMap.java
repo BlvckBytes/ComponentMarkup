@@ -8,7 +8,6 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,14 +17,12 @@ import java.util.*;
 public class InternalAttributeMap implements AttributeMap {
 
   private final StringView tagName;
-  private final StringPosition tagPosition;
 
   private final Map<String, List<Attribute>> attributeMap;
 
-  public InternalAttributeMap(StringView tagName, StringPosition tagPosition) {
+  public InternalAttributeMap(StringView tagName) {
     this.attributeMap = new HashMap<>();
     this.tagName = tagName;
-    this.tagPosition = tagPosition;
   }
 
   public void add(Attribute attribute) {
@@ -59,7 +56,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionNode result = getOptionalExpressionNode(name);
 
     if (result == null)
-      throw new MarkupParseException(tagPosition, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -87,7 +84,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupNode result = getOptionalMarkupNode(name);
 
     if (result == null)
-      throw new MarkupParseException(tagPosition, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -135,7 +132,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionList result = unwrapExpressionAttributes(selectMultiAttributeOrNull(name, true));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagPosition, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -150,7 +147,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupList result = unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagPosition, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }

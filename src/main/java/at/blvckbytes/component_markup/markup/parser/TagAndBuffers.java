@@ -296,7 +296,7 @@ public class TagAndBuffers implements ParserChildItem {
       return new ContainerNode(position, processedChildren, bindings);
 
     try {
-      result = tag.createNode(tagName, position, attributeMap, bindings, processedChildren);
+      result = tag.createNode(tagName, attributeMap, bindings, getProcessedChildren());
     } catch (Throwable thrownError) {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;

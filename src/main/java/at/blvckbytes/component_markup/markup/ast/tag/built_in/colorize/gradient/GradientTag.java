@@ -5,7 +5,6 @@ import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeAttributes;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeCharsNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +26,6 @@ public class GradientTag extends ColorizeTag {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull StringView tagName,
-    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -50,7 +48,7 @@ public class GradientTag extends ColorizeTag {
           interpreter
         )
       ),
-      position, children, letBindings
+      tagName.viewStart, children, letBindings
     );
   }
 }

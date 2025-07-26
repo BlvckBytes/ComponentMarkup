@@ -6,7 +6,6 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,12 +27,11 @@ public class ImmediateFormatTag extends TagDefinition {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull StringView tagName,
-    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ContainerNode wrapper = new ContainerNode(position, children, letBindings);
+    ContainerNode wrapper = new ContainerNode(tagName.viewStart, children, letBindings);
     applyFormat(tagName, wrapper.getOrInstantiateStyle());
     return wrapper;
   }

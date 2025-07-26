@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +31,6 @@ public abstract class NbtTag extends TagDefinition {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull StringView tagName,
-    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -43,7 +41,7 @@ public abstract class NbtTag extends TagDefinition {
       attributes.getMandatoryExpressionNode("path"),
       attributes.getOptionalExpressionNode("interpret"),
       attributes.getOptionalMarkupNode("separator"),
-      position, letBindings
+      tagName.viewStart, letBindings
     );
   }
 }

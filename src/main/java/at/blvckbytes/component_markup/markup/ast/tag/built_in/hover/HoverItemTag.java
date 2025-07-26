@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.hover;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,6 @@ public class HoverItemTag extends HoverTag {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull StringView tagName,
-    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -31,7 +29,7 @@ public class HoverItemTag extends HoverTag {
       attributes.getOptionalMarkupNode("name"),
       attributes.getOptionalMarkupNode("lore"),
       attributes.getOptionalExpressionNode("hide-properties"),
-      position, children, letBindings
+      tagName.viewStart, children, letBindings
     );
   }
 }

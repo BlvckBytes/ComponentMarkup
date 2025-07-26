@@ -4,8 +4,6 @@ import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
-
 public interface XmlEventConsumer {
 
   void onPosition(StringPosition position);
