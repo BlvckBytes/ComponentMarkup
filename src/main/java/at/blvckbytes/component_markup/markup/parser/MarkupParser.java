@@ -278,8 +278,14 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addChild(new TextNode(text.buildString(), text.viewStart));
+    TextNode node = new TextNode(text.buildString(), text.viewStart);
+
+    if (tagStack.isEmpty()) {
+      topLevelMembers.add(node);
+      return;
+    }
+
+    tagStack.peek().addChild(node);
   }
 
   @Override
@@ -289,8 +295,14 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addChild(new InterpolationNode(parseExpression(expression)));
+    InterpolationNode node = new InterpolationNode(parseExpression(expression));
+
+    if (tagStack.isEmpty()) {
+      topLevelMembers.add(node);
+      return;
+    }
+
+    tagStack.peek().addChild(node);
   }
 
   @Override
@@ -463,7 +475,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     StringView fullName = name;
-    name = name.buildSubViewUntilEnd(1);
+    name = name.buildSubViewRelative(1);
 
     if (handleStaticallyNamedIntrinsicAttribute(fullName, name.viewStart, value, immediateValue)) {
       if (tokenOutput != null)
@@ -482,7 +494,7 @@ public class MarkupParser implements XmlEventConsumer {
       StringView iterationVariable = null;
 
       if (name.length() > 4) {
-        iterationVariable = name.buildSubViewUntilEnd(4);
+        iterationVariable = name.buildSubViewAbsolute(4);
 
         if (isInvalidIdentifier(iterationVariable, true))
           throw new MarkupParseException(name.viewStart, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable.buildString());
@@ -505,7 +517,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (name.startsWith("let-", true)) {
-      StringView bindingName = name.buildSubViewUntilEnd(4);
+      StringView bindingName = name.buildSubViewAbsolute(4);
 
       if (tokenOutput != null) {
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(0, 2));
@@ -587,7 +599,7 @@ public class MarkupParser implements XmlEventConsumer {
     TagAndBuffers currentLayer = tagStack.peek();
 
     StringView fullName = name;
-    name = name.buildSubViewUntilEnd(1);
+    name = name.buildSubViewRelative(1);
 
     switch (name.buildString()) {
       case "if": {
@@ -784,7 +796,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       StringView spreadOperator = name.buildSubViewRelative(0, 2);
 
-      name = name.buildSubViewUntilEnd(3);
+      name = name.buildSubViewAbsolute(3);
       isSpreadMode = true;
 
       if (!isExpressionMode)

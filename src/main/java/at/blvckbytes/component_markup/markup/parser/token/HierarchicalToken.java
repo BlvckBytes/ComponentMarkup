@@ -60,6 +60,6 @@ public class HierarchicalToken extends Token {
     HierarchicalToken lastChild = parentToken.children.get(parentToken.children.size() - 1);
 
     if (lastChild.endIndex < parentToken.endIndex)
-      output.handle(parentToken.type, parentToken.value.buildSubViewUntilEnd(lastChild.endIndex + 1));
+      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(lastChild.endIndex + 1));
   }
 }

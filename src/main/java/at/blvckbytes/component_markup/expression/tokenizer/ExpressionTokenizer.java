@@ -60,7 +60,8 @@ public class ExpressionTokenizer {
   }
 
   private Token parseIdentifierOrLiteralToken() {
-    input.setSubViewStart(input.getPosition(PositionMode.NEXT));
+    StringPosition begin = input.getPosition(PositionMode.NEXT);
+    StringPosition end = begin;
 
     boolean isFirst = true;
     char upcomingChar;
@@ -83,19 +84,21 @@ public class ExpressionTokenizer {
       boolean isNumeric = upcomingChar >= '0' && upcomingChar <= '9';
 
       if (!(isAlphabetic || isNumeric || upcomingChar == '_'))
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       if (isFirst && (upcomingChar == '_' || isNumeric))
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       if (upcomingChar == '_' && input.priorNextChar() == '_')
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       input.nextChar();
       isFirst = false;
+      end = input.getPosition();
     }
 
-    StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
+    input.setSubViewStart(begin);
+    StringView value = input.buildSubViewUntilPosition(end);
 
     if (value.isEmpty())
       throw new IllegalStateException("Expected to only be called if peekChar() != 0 or ' ' or '.'");
@@ -116,14 +119,15 @@ public class ExpressionTokenizer {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean collectSubsequentDigits() {
-    int beginIndex = input.getCharIndex();
-
     char currentChar;
+    boolean collectedDigits = false;
 
-    while ((currentChar = input.peekChar()) >= '0' && currentChar <= '9')
+    while ((currentChar = input.peekChar()) >= '0' && currentChar <= '9') {
+      collectedDigits = true;
       input.nextChar();
+    }
 
-    return beginIndex != input.getCharIndex();
+    return collectedDigits;
   }
 
   private Token parseLongOrDoubleToken() {
@@ -140,7 +144,7 @@ public class ExpressionTokenizer {
       if (input.peekChar() == '.') {
         input.restorePosition(savePoint);
 
-        StringView value = input.buildSubViewUntilPosition(PositionMode.PRIOR);
+        StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
         return new LongToken(value, value.parseLong());
       }

@@ -140,4 +140,11 @@ public class TextWithAnchors {
 
     return anchors.get(index);
   }
+
+  public static String escape(Object input) {
+    return String.valueOf(input)
+      .replace("@", "\\@")
+      .replace("`", "\\`")
+      .replace("´", "\\´");
+  }
 }

@@ -1,8 +1,9 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,9 +17,9 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeAllTypes() {
     TextWithAnchors input = new TextWithAnchors(
-      "@? @( @! @'hello, world' @+ @: @[ @8192 @> @- @&& @2.7182 @>= @* @|| @true",
-      "@< @/ @?? @] @false @<= @% @null @== @^ @my_variable @!= @& @) @.. @.5",
-      "@~^ @~_ @~\\# @~! @~- @~? @~| @~< @\\@ @\\@\\@ @**"
+      "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `&&´ `2.7182´ `>=´ `*´ `||´ `true´",
+      "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `==´ `^´ `my_variable´ `!=´ `&´ `)´ `..´ `.5´",
+      "`~^´ `~_´ `~#´ `~!´ `~-´ `~?´ `~|´ `~<´ `\\@´ `\\@\\@´ `**´"
     );
 
     makeCase(
@@ -84,7 +85,7 @@ public class ExpressionTokenizerTests {
     };
 
     for (String identifier : identifiers) {
-      TextWithAnchors text = new TextWithAnchors("@" + identifier);
+      TextWithAnchors text = new TextWithAnchors("`" + identifier + "´");
       makeCase(text, identifier);
     }
   }
@@ -92,7 +93,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeIdentifiersWedgedWithDoubles() {
     TextWithAnchors text = new TextWithAnchors(
-      "@.3@a@.5@b@.4"
+      "`.3´`a´`.5´`b´`.4´"
     );
 
     makeCase(
@@ -104,7 +105,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeRangeWedgedWithDoubles() {
     TextWithAnchors text = new TextWithAnchors(
-      "@.5@..@.3"
+      "`.5´`..´`.3´"
     );
 
     makeCase(
@@ -122,7 +123,7 @@ public class ExpressionTokenizerTests {
 
     for (Object item : items) {
       TextWithAnchors text = new TextWithAnchors(
-        "@before @a@" + TextWithAnchors.escape(item) + "@b @after"
+        "`before´ `a´`" + TextWithAnchors.escape(item) + "´`b´ `after´"
       );
 
       makeCase(
@@ -134,19 +135,19 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeDashesCorrectly() {
-    TextWithAnchors text = new TextWithAnchors("@-@identifier");
+    TextWithAnchors text = new TextWithAnchors("`-´`identifier´");
     makeCase(text, PrefixOperator.FLIP_SIGN, "identifier");
 
-    text = new TextWithAnchors("@-@5.0");
+    text = new TextWithAnchors("`-´`5.0´");
     makeCase(text, PrefixOperator.FLIP_SIGN, 5.0);
 
-    text = new TextWithAnchors("@-@.5");
+    text = new TextWithAnchors("`-´`.5´");
     makeCase(text, PrefixOperator.FLIP_SIGN, DotDouble.of(.5));
 
-    text = new TextWithAnchors("@5 @- @- @3");
+    text = new TextWithAnchors("`5´ `-´ `-´ `3´");
     makeCase(text, 5, InfixOperator.SUBTRACTION, PrefixOperator.FLIP_SIGN, 3);
 
-    text = new TextWithAnchors("@5 @-@- @- @3 @- @[");
+    text = new TextWithAnchors("`5´ `-´`-´ `-´ `3´ `-´ `[´");
 
     makeCase(
       text,
@@ -163,7 +164,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeRangeOperator() {
     TextWithAnchors text = new TextWithAnchors(
-      "@0@..@100"
+      "`0´`..´`100´"
     );
 
     makeCase(
@@ -172,7 +173,7 @@ public class ExpressionTokenizerTests {
     );
 
     text = new TextWithAnchors(
-      "@a@..@b"
+      "`a´`..´`b´"
     );
 
     makeCase(
@@ -184,8 +185,11 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeValidStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "@'hello, \" world \\' \\\"' @\"double ' quotes \\' \\\"\""
+      "`'hello, \" world @\\' \\\"'´ `\"double ' quotes \\' @\\\"\"´"
     );
+
+    text.addViewIndexToBeRemoved(text.anchor(0));
+    text.addViewIndexToBeRemoved(text.anchor(1));
 
     makeCase(
       text,
@@ -284,7 +288,7 @@ public class ExpressionTokenizerTests {
     ExpressionTokenizeException thrownException = null;
 
     try {
-      ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text, -1, null);
+      ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
 
       while (tokenizer.peekToken() != null)
         tokenizer.nextToken();
@@ -296,29 +300,33 @@ public class ExpressionTokenizerTests {
       throw new IllegalStateException("Expected there to be an error of " + expectedError + ", but encountered none");
 
     assertEquals(expectedError, thrownException.error, "Encountered mismatch on thrown error-types");
-    assertEquals(input.anchorIndex(0), thrownException.beginIndex, "Encountered mismatch on thrown error beginIndex");
+    assertEquals(
+      Jsonifier.jsonify(input.anchor(0)),
+      Jsonifier.jsonify(thrownException.position),
+      "Encountered mismatch on thrown error beginIndex"
+    );
   }
 
-  public static Token makeToken(Object value, int beginIndex) {
+  public static Token makeToken(Object value, StringView subView) {
     Token token;
 
     if (value instanceof Boolean)
-      token = new BooleanToken(beginIndex, String.valueOf(value), (boolean) value);
+      token = new BooleanToken(subView, (boolean) value);
     else if (value instanceof DotDouble) {
       DotDouble dotDouble = (DotDouble) value;
-      token = new DoubleToken(beginIndex, String.valueOf(dotDouble.value).substring(1), dotDouble.value);
+      token = new DoubleToken(subView, dotDouble.value);
     } else if (value instanceof Double || value instanceof Float) {
       double number = ((Number) value).doubleValue();
-      token = new DoubleToken(beginIndex, String.valueOf(number), number);
+      token = new DoubleToken(subView, number);
     } else if (value instanceof Integer || value instanceof Long) {
       long number = ((Number) value).longValue();
-      token = new LongToken(beginIndex, String.valueOf(number), number);
+      token = new LongToken(subView, number);
     } else if (value instanceof InfixOperator)
-      token = new InfixOperatorToken(beginIndex, (InfixOperator) value);
+      token = new InfixOperatorToken(subView, (InfixOperator) value);
     else if (value instanceof PrefixOperator)
-      token = new PrefixOperatorToken(beginIndex, (PrefixOperator) value);
+      token = new PrefixOperatorToken(subView, (PrefixOperator) value);
     else if (value instanceof Punctuation)
-      token = new PunctuationToken(beginIndex, (Punctuation) value);
+      token = new PunctuationToken(subView, (Punctuation) value);
     else if (value instanceof String) {
       String stringValue = (String) value;
       int stringLength = stringValue.length();
@@ -333,15 +341,14 @@ public class ExpressionTokenizerTests {
           throw new IllegalStateException("Invalid string: " + stringValue);
 
         String stringContents = stringValue.substring(1, stringLength - 1);
-        String rawStringContents = stringContents.replace(String.valueOf(quoteChar), "\\" + quoteChar);
 
-        token = new StringToken(beginIndex, stringContents, quoteChar + rawStringContents + quoteChar);
+        token = new StringToken(subView, stringContents);
       }
       else
-        token = new IdentifierToken(beginIndex, stringValue);
+        token = new IdentifierToken(subView);
     }
     else if (value == null)
-      token = new NullToken(beginIndex, "null");
+      token = new NullToken(subView);
 
     else
       throw new IllegalStateException("Invalid token-representing value: " + value);
@@ -350,15 +357,19 @@ public class ExpressionTokenizerTests {
   }
 
   private static void makeCase(TextWithAnchors input, Object... expectedValues) {
+    List<Token> actualTokens = new ArrayList<>();
+    ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
+
+    while (tokenizer.peekToken() != null)
+      actualTokens.add(tokenizer.nextToken());
+
     StringBuilder actualTokensString = new StringBuilder();
 
-    ExpressionTokenizer tokenizer = new ExpressionTokenizer(input.text, -1, null);
-
-    while (tokenizer.peekToken() != null) {
+    for (Token actualToken : actualTokens) {
       if (actualTokensString.length() != 0)
         actualTokensString.append('\n');
 
-      actualTokensString.append(Jsonifier.jsonify(tokenizer.nextToken()));
+      actualTokensString.append(Jsonifier.jsonify(actualToken));
     }
 
     StringBuilder expectedTokensString = new StringBuilder();
@@ -369,7 +380,7 @@ public class ExpressionTokenizerTests {
       if (expectedTokensString.length() != 0)
         expectedTokensString.append('\n');
 
-      expectedTokensString.append(Jsonifier.jsonify(makeToken(expectedValue, input.anchorIndex(valueIndex))));
+      expectedTokensString.append(Jsonifier.jsonify(makeToken(expectedValue, input.subView(valueIndex))));
     }
 
     assertEquals(expectedTokensString.toString(), actualTokensString.toString());

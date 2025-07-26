@@ -94,7 +94,7 @@ public class StringView {
     return new StringView(contents, null, new BitFlagArray(contentsLength), false, null, null);
   }
 
-  public StringView buildSubViewUntilEnd(int start) {
+  public StringView buildSubViewAbsolute(int start) {
     return buildSubViewAbsolute(start, viewEnd.charIndex);
   }
 

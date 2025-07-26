@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class DeferredAddressesTests {
   }
 
   private void makeCase(TextWithAnchors input, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
-    MarkupNode ast = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
+    MarkupNode ast = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
 
     ComponentOutput output = MarkupInterpreter.interpret(
       componentConstructor,
