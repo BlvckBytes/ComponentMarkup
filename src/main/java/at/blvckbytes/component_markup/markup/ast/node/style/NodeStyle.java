@@ -1,16 +1,16 @@
 package at.blvckbytes.component_markup.markup.ast.node.style;
 
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeStyle {
-
-  private static final TerminalNode NULL_TERMINAL = new TerminalNode(new NullToken(0, "null"));
 
   private @Nullable ExpressionNode @Nullable [] formatStates;
   public @Nullable ExpressionNode color;
@@ -24,28 +24,28 @@ public class NodeStyle {
 
     if (this.color == null && (otherValue = other.color) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, NULL_TERMINAL);
+        otherValue = new BranchingNode(condition, otherValue, nullValueFromCondition(condition));
 
       this.color = otherValue;
     }
 
     if (this.shadowColor == null && (otherValue = other.shadowColor) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, NULL_TERMINAL);
+        otherValue = new BranchingNode(condition, otherValue, nullValueFromCondition(condition));
 
       this.shadowColor = otherValue;
     }
 
     if (this.shadowColorOpacity == null && (otherValue = other.shadowColorOpacity) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, NULL_TERMINAL);
+        otherValue = new BranchingNode(condition, otherValue, nullValueFromCondition(condition));
 
       this.shadowColorOpacity = otherValue;
     }
 
     if (this.font == null && (otherValue = other.font) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, NULL_TERMINAL);
+        otherValue = new BranchingNode(condition, otherValue, nullValueFromCondition(condition));
 
       this.font = otherValue;
     }
@@ -69,12 +69,23 @@ public class NodeStyle {
       return thisValue;
 
     if (otherCondition != null)
-      otherValue = new BranchingNode(otherCondition, otherValue, NULL_TERMINAL);
+      otherValue = new BranchingNode(otherCondition, otherValue, nullValueFromCondition(otherCondition));
 
     if (thisValue == null)
       return otherValue;
 
     return new InfixOperationNode(thisValue, InfixOperator.DISJUNCTION, otherValue, null);
+  }
+
+  private static TerminalNode nullValueFromCondition(ExpressionNode condition) {
+    StringPosition begin = condition.getBegin();
+
+    StringView sourceView = begin.rootView.buildSubViewAbsolute(
+      begin.charIndex,
+      condition.getEnd().charIndex
+    );
+
+    return ImmediateExpression.ofNull(sourceView);
   }
 
   public boolean hasNonNullProperties() {

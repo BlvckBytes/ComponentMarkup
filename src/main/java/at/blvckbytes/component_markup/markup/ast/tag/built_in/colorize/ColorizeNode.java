@@ -8,8 +8,9 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -24,18 +25,18 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   @JsonifyIgnore
   private final Function<Interpreter, ColorizeNodeState> stateCreator;
 
-  public final String tagNameLower;
+  public final StringView tagName;
 
   public ColorizeNode(
-    String tagNameLower,
+    StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    CursorPosition position,
+    StringPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, children, letBindings);
 
-    this.tagNameLower = tagNameLower;
+    this.tagName = tagName;
     this.stateCreator = stateCreator;
   }
 

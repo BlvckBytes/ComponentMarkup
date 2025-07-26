@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ public abstract class StyledNode extends MarkupNode {
   private @Nullable NodeStyle style;
 
   public StyledNode(
-    CursorPosition position,
+    StringPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {

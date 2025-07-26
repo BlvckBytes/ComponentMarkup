@@ -1,6 +1,6 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.markup.xml.event.CursorPositionEvent;
+import at.blvckbytes.component_markup.markup.xml.event.PositionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,8 +9,8 @@ import java.util.List;
 
 public class TextWithAnchors {
 
-  private final List<CursorPositionEvent> anchors;
-  private final List<CursorPositionEvent> auxAnchors;
+  private final List<PositionEvent> anchors;
+  private final List<PositionEvent> auxAnchors;
 
   public final String text;
 
@@ -84,7 +84,7 @@ public class TextWithAnchors {
     this.text = result.toString();
 
     for (CursorPosition anchorPosition : anchorPositions) {
-      this.anchors.add(new CursorPositionEvent(
+      this.anchors.add(new PositionEvent(
         new CursorPosition(
           anchorPosition.nextCharIndex,
           anchorPosition.lineNumber,
@@ -95,7 +95,7 @@ public class TextWithAnchors {
     }
 
     for (CursorPosition auxAnchorPosition : auxAnchorPositions) {
-      this.auxAnchors.add(new CursorPositionEvent(
+      this.auxAnchors.add(new PositionEvent(
         new CursorPosition(
           auxAnchorPosition.nextCharIndex,
           auxAnchorPosition.lineNumber,
@@ -111,7 +111,7 @@ public class TextWithAnchors {
   }
 
   public @NotNull CursorPosition anchor(int index) {
-    CursorPositionEvent positionEvent = anchorEvent(index);
+    PositionEvent positionEvent = anchorEvent(index);
 
     if (positionEvent == null)
       throw new IllegalStateException("Required anchor at index " + index);
@@ -143,14 +143,14 @@ public class TextWithAnchors {
     return nextCharIndex;
   }
 
-  public @Nullable CursorPositionEvent anchorEvent(int index) {
+  public @Nullable PositionEvent anchorEvent(int index) {
     if (index < 0 || index >= anchors.size())
       return null;
 
     return anchors.get(index);
   }
 
-  public @Nullable CursorPositionEvent auxAnchorEvent(int index) {
+  public @Nullable PositionEvent auxAnchorEvent(int index) {
     if (index < 0 || index >= auxAnchors.size())
       return null;
 
@@ -158,7 +158,7 @@ public class TextWithAnchors {
   }
 
   public @NotNull CursorPosition auxAnchor(int index) {
-    CursorPositionEvent positionEvent = auxAnchorEvent(index);
+    PositionEvent positionEvent = auxAnchorEvent(index);
 
     if (positionEvent == null)
       throw new IllegalStateException("Required aux-anchor at index " + index);

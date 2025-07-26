@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
+import at.blvckbytes.component_markup.util.StringPosition;
 
 public class BranchingNode extends ExpressionNode {
 
@@ -20,13 +21,13 @@ public class BranchingNode extends ExpressionNode {
   }
 
   @Override
-  public int getBeginIndex() {
-    return condition.getBeginIndex();
+  public StringPosition getBegin() {
+    return condition.getBegin();
   }
 
   @Override
-  public int getEndIndex() {
-    return branchFalse.getEndIndex();
+  public StringPosition getEnd() {
+    return branchFalse.getEnd();
   }
 
   @Override

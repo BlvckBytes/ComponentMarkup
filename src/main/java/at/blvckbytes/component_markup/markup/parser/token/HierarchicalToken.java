@@ -1,5 +1,6 @@
 package at.blvckbytes.component_markup.markup.parser.token;
 
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -9,12 +10,8 @@ public class HierarchicalToken extends Token {
 
   private @Nullable List<HierarchicalToken> children;
 
-  public HierarchicalToken(TokenType type, int beginIndex, char value) {
-    super(type, beginIndex, value);
-  }
-
-  public HierarchicalToken(TokenType type, int beginIndex, String value) {
-    super(type, beginIndex, value);
+  public HierarchicalToken(TokenType type, StringView value) {
+    super(type, value);
   }
 
   public HierarchicalToken addChild(HierarchicalToken token) {
@@ -36,34 +33,22 @@ public class HierarchicalToken extends Token {
 
   private static void appendTokenAndChildren(HierarchicalToken parentToken, SequenceTokenConsumer output) {
     if (parentToken.children == null || parentToken.children.isEmpty()) {
-      output.handle(parentToken.type, parentToken.beginIndex, parentToken.value);
+      output.handle(parentToken.type, parentToken.value);
       return;
     }
 
     HierarchicalToken firstChild = parentToken.children.get(0);
 
-    if (firstChild.beginIndex > parentToken.beginIndex) {
-      output.handle(
-        parentToken.type,
-        parentToken.beginIndex,
-        parentToken.value.substring(0, firstChild.beginIndex - parentToken.beginIndex)
-      );
-    }
+    if (firstChild.beginIndex > parentToken.beginIndex)
+      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(0, firstChild.beginIndex));
 
     HierarchicalToken previousToken = null;
 
     for (HierarchicalToken childToken : parentToken.children) {
       if (previousToken != null) {
-        int previousEnd = previousToken.beginIndex + previousToken.value.length() - 1;
-        if (childToken.beginIndex - previousEnd > 1) {
-          output.handle(
-            parentToken.type,
-            previousEnd + 1,
-            parentToken.value.substring(
-              previousEnd - parentToken.beginIndex + 1,
-              childToken.beginIndex - parentToken.beginIndex
-            )
-          );
+        if (childToken.beginIndex - previousToken.endIndex > 1) {
+          StringView newValue = parentToken.value.buildSubViewAbsolute(previousToken.endIndex + 1, childToken.beginIndex);
+          output.handle(parentToken.type, newValue);
         }
       }
 
@@ -74,15 +59,7 @@ public class HierarchicalToken extends Token {
 
     HierarchicalToken lastChild = parentToken.children.get(parentToken.children.size() - 1);
 
-    int lastChildEnd = lastChild.beginIndex + lastChild.value.length() - 1;
-    int parentEnd = parentToken.beginIndex + parentToken.value.length() - 1;
-
-    if (lastChildEnd < parentEnd) {
-      output.handle(
-        parentToken.type,
-        lastChildEnd + 1,
-        parentToken.value.substring(lastChildEnd - parentToken.beginIndex + 1)
-      );
-    }
+    if (lastChild.endIndex < parentToken.endIndex)
+      output.handle(parentToken.type, parentToken.value.buildSubViewUntilEnd(lastChild.endIndex + 1));
   }
 }

@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -16,12 +17,12 @@ public abstract class TagRegistry {
     this.registeredClasses = new HashSet<>();
   }
 
-  public @Nullable TagDefinition locateTag(String nameLower) {
+  public @Nullable TagDefinition locateTag(StringView name) {
     List<TagDefinition> candidates = new ArrayList<>();
 
     for (TagDefinition definition : tagDefinitions) {
       try {
-        if (definition.matchName(nameLower))
+        if (definition.matchName(name))
           candidates.add(definition);
       } catch (Throwable thrownError) {
         LoggerProvider.log(Level.SEVERE, "An error occurred while trying to match via " + definition.getClass() + "#matchName", thrownError);

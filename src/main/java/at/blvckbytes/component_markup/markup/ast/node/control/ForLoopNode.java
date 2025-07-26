@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.node.control;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -18,7 +19,7 @@ public class ForLoopNode extends MarkupNode {
 
   public ForLoopNode(
     ExpressionNode iterable,
-    @Nullable String iterationVariable,
+    @Nullable StringView iterationVariable,
     MarkupNode body,
     @Nullable MarkupNode separator,
     @Nullable MarkupNode empty,
@@ -28,7 +29,7 @@ public class ForLoopNode extends MarkupNode {
     super(body.position, null, letBindings);
 
     this.iterable = iterable;
-    this.iterationVariable = iterationVariable;
+    this.iterationVariable = iterationVariable == null ? null : iterationVariable.buildString();
     this.body = body;
     this.separator = separator;
     this.empty = empty;

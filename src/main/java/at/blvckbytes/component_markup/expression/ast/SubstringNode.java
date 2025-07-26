@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 public class SubstringNode extends ExpressionNode {
@@ -30,13 +31,13 @@ public class SubstringNode extends ExpressionNode {
   }
 
   @Override
-  public int getBeginIndex() {
-    return operand.getBeginIndex();
+  public StringPosition getBegin() {
+    return operand.getBegin();
   }
 
   @Override
-  public int getEndIndex() {
-    return closingBracket.endIndex;
+  public StringPosition getEnd() {
+    return closingBracket.raw.viewEnd;
   }
 
   @Override

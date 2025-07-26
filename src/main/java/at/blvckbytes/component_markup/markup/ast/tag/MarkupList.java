@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribu
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,31 +48,32 @@ public class MarkupList {
       ExpressionNode expression = expressionAttribute.value;
 
       if (!expressionAttribute.flags.contains(ExpressionFlag.SPREAD_MODE)) {
-        result.add(new ExpressionDrivenNode(expression, attribute.position));
+        result.add(new ExpressionDrivenNode(expression));
         continue;
       }
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(expression);
+      StringPosition beginPosition = expression.getBegin();
 
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;
 
         for (Object item : collection)
-          result.add(toNode(item, attribute));
+          result.add(toNode(item, beginPosition));
 
         continue;
       }
 
-      result.add(toNode(evaluatedValue, attribute));
+      result.add(toNode(evaluatedValue, beginPosition));
     }
 
     return result;
   }
 
-  private MarkupNode toNode(@Nullable Object value, Attribute parentAttribute) {
+  private MarkupNode toNode(@Nullable Object value, StringPosition beginPosition) {
     if (value instanceof MarkupNode)
       return (MarkupNode) value;
 
-    return new TextNode(String.valueOf(value), parentAttribute.position);
+    return new TextNode(String.valueOf(value), beginPosition);
   }
 }

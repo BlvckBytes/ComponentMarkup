@@ -1,16 +1,14 @@
 package at.blvckbytes.component_markup.markup.ast.tag.attribute;
 
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringView;
 
 public abstract class Attribute {
 
-  public final CursorPosition position;
-  public final String name;
+  public final StringView name;
 
   public boolean hasBeenUsed;
 
-  protected Attribute(CursorPosition position, String name) {
-    this.position = position;
+  protected Attribute(StringView name) {
     this.name = name;
   }
 }

@@ -5,7 +5,8 @@ import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeAttributes;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeCharsNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,14 +20,14 @@ public class GradientTag extends ColorizeTag {
   }
 
   @Override
-  public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals("gradient");
+  public boolean matchName(StringView tagName) {
+    return tagName.contentEquals("gradient", true);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull String tagNameLower,
-    @NotNull CursorPosition position,
+    @NotNull StringView tagName,
+    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -37,10 +38,10 @@ public class GradientTag extends ColorizeTag {
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 
     return new ColorizeCharsNode(
-      tagNameLower,
+      tagName,
       interpreter -> (
         new GradientNodeState(
-          tagNameLower,
+          tagName,
           colors,
           offsets,
           zIndices,

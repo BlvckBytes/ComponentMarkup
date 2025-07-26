@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node.hover;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -14,7 +14,7 @@ public class TextHoverNode extends HoverNode {
 
   public TextHoverNode(
     MarkupNode value,
-    CursorPosition position,
+    StringPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {

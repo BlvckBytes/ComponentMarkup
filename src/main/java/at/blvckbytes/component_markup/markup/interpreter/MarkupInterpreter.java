@@ -251,7 +251,7 @@ public class MarkupInterpreter implements Interpreter {
       if (variableValue instanceof InternalCopyable)
         variableValue = ((InternalCopyable) variableValue).copy();
 
-      capturedBindings.add(new CaptureLetBinding(variableValue, name, binding));
+      capturedBindings.add(new CaptureLetBinding(variableValue, name, binding.name));
     });
 
     return new CaptureNode(node, capturedBindings);
@@ -272,7 +272,7 @@ public class MarkupInterpreter implements Interpreter {
 
         if (expressionBinding.capture) {
           if (!(value instanceof MarkupNode))
-            value = new TextNode(String.valueOf(value), letBinding.position);
+            value = new TextNode(String.valueOf(value), letBinding.name.viewStart);
 
           value = createVariableCapture((MarkupNode) value, letBinding);
         }
@@ -285,14 +285,14 @@ public class MarkupInterpreter implements Interpreter {
           value = createVariableCapture((MarkupNode) value, letBinding);
       }
       else if (letBinding instanceof CaptureLetBinding)
-        value = ((CaptureLetBinding) letBinding).value;
+        value = ((CaptureLetBinding) letBinding).capturedValue;
       else {
         LoggerProvider.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
         continue;
       }
 
-      environment.pushVariable(letBinding.name, value);
-      introducedNames.add(letBinding.name);
+      environment.pushVariable(letBinding.plainName, value);
+      introducedNames.add(letBinding.plainName);
     }
 
     return introducedNames;

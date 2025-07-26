@@ -4,7 +4,8 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,20 +19,20 @@ public class ResetTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals("r") || tagNameLower.equals("reset");
+  public boolean matchName(StringView tagName) {
+    return tagName.contentEquals("r", true) || tagName.contentEquals("reset", true);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull String tagNameLower,
-    @NotNull CursorPosition position,
+    @NotNull StringView tagName,
+    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     ContainerNode result = new ContainerNode(position, children, letBindings);
-    result.getOrInstantiateStyle().reset = ImmediateExpression.of(true);
+    result.getOrInstantiateStyle().reset = ImmediateExpression.ofBoolean(tagName, true);
     return result;
   }
 }

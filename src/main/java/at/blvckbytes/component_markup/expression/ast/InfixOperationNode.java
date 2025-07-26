@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 public class InfixOperationNode extends ExpressionNode {
@@ -24,16 +25,16 @@ public class InfixOperationNode extends ExpressionNode {
   }
 
   @Override
-  public int getBeginIndex() {
-    return lhs.getBeginIndex();
+  public StringPosition getBegin() {
+    return lhs.getBegin();
   }
 
   @Override
-  public int getEndIndex() {
+  public StringPosition getEnd() {
     if (terminator == null)
-      return rhs.getEndIndex();
+      return rhs.getEnd();
 
-    return terminator.endIndex;
+    return terminator.raw.viewEnd;
   }
 
   @Override

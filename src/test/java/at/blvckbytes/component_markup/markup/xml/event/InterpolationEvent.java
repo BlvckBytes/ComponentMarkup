@@ -1,14 +1,13 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringView;
 
 public class InterpolationEvent extends XmlEvent {
 
-  public final String expression;
-  public final CursorPosition valueBeginPosition;
+  public final StringView expression;
 
-  public InterpolationEvent(String expression, CursorPosition valueBeginPosition) {
+  public InterpolationEvent(StringView expression) {
     this.expression = expression;
-    this.valueBeginPosition = valueBeginPosition;
   }
 }

@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeN
 import at.blvckbytes.component_markup.markup.interpreter.AnsiStyleColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
+import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -16,7 +17,7 @@ public class GradientNodeState extends ColorizeNodeState {
   private final GradientGenerator gradientGenerator;
 
   public GradientNodeState(
-    String tagNameLower,
+    StringView tagName,
     ExpressionList colors,
     ExpressionList offsets,
     ExpressionList zIndices,
@@ -24,7 +25,7 @@ public class GradientNodeState extends ColorizeNodeState {
     EnumSet<ColorizeFlag> flags,
     Interpreter interpreter
   ) {
-    super(tagNameLower, phase, flags);
+    super(tagName, phase, flags);
 
     this.gradientGenerator = new GradientGenerator(
       evaluatePackedColors(colors, interpreter),

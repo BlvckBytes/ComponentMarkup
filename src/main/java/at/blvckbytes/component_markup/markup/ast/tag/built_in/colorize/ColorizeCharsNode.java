@@ -8,7 +8,8 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.OutputBuilder;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -18,13 +19,13 @@ import java.util.function.Function;
 public class ColorizeCharsNode extends ColorizeNode {
 
   public ColorizeCharsNode(
-    String tagNameLower,
+    StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    CursorPosition position,
+    StringPosition position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(tagNameLower, stateCreator, position, children, letBindings);
+    super(tagName, stateCreator, position, children, letBindings);
   }
 
   @Override

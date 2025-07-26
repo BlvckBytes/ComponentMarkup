@@ -1,11 +1,13 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
+import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,36 +42,41 @@ public class ExpressionList {
       }
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(attribute.value);
-      int beginIndex = attribute.value.getBeginIndex();
+
+      StringPosition attributeBegin = attribute.value.getBegin();
+      StringView valueView = attributeBegin.rootView.buildSubViewAbsolute(
+        attributeBegin.charIndex,
+        attribute.value.getEnd().charIndex
+      );
 
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;
 
         for (Object item : collection)
-          result.add(toTerminal(item, beginIndex));
+          result.add(toTerminal(item, valueView));
 
         continue;
       }
 
-      result.add(toTerminal(evaluatedValue, beginIndex));
+      result.add(toTerminal(evaluatedValue, valueView));
     }
 
     return result;
   }
 
-  private TerminalNode toTerminal(@Nullable Object value, int beginIndex) {
+  private TerminalNode toTerminal(@Nullable Object value, StringView valueView) {
     if (value == null)
-      return new TerminalNode(new NullToken(beginIndex, ""));
+      return ImmediateExpression.ofNull(valueView);
 
     if (value instanceof Double || value instanceof Float)
-      return new TerminalNode(new DoubleToken(beginIndex, "", ((Number) value).doubleValue()));
+      return ImmediateExpression.ofDouble(valueView, ((Number) value).doubleValue());
 
     if (value instanceof Number)
-      return new TerminalNode(new LongToken(beginIndex, "", ((Number) value).longValue()));
+      return ImmediateExpression.ofLong(valueView, ((Number) value).longValue());
 
     if (value instanceof Boolean)
-      return new TerminalNode(new BooleanToken(beginIndex, "", (boolean) value));
+      return ImmediateExpression.ofBoolean(valueView, (boolean) value);
 
-    return new TerminalNode(new StringToken(beginIndex, String.valueOf(value)));
+    return ImmediateExpression.ofString(valueView, String.valueOf(value));
   }
 }

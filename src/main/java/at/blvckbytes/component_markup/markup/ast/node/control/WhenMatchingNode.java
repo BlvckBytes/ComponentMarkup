@@ -2,7 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node.control;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -14,7 +14,7 @@ public class WhenMatchingNode extends MarkupNode {
   public final @Nullable MarkupNode other;
 
   public WhenMatchingNode(
-    CursorPosition position,
+    StringPosition position,
     ExpressionNode input,
     Map<String, MarkupNode> casesLower,
     @Nullable MarkupNode other

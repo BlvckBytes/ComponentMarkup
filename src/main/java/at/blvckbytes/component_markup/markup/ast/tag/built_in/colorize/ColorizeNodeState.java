@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
+import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -10,14 +11,14 @@ import java.util.Stack;
 
 public abstract class ColorizeNodeState {
 
-  public final String tagNameLower;
+  public final StringView tagName;
   public final double phase;
   public final EnumSet<ColorizeFlag> flags;
 
   private final Stack<List<Object>> injectedComponentsStack;
 
-  public ColorizeNodeState(String tagNameLower, double phase, EnumSet<ColorizeFlag> flags) {
-    this.tagNameLower = tagNameLower;
+  public ColorizeNodeState(StringView tagName, double phase, EnumSet<ColorizeFlag> flags) {
+    this.tagName = tagName;
     this.phase = phase;
     this.flags = flags;
 
@@ -41,7 +42,7 @@ public abstract class ColorizeNodeState {
   protected abstract long getPackedColor(double progressionPercentage);
 
   public boolean doesTargetNode(ColorizeNode node) {
-    return node.tagNameLower.equals(this.tagNameLower);
+    return node.tagName.contentEquals(this.tagName, true);
   }
 
   public void begin() {

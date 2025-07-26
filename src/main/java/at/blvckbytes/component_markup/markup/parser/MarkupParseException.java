@@ -3,25 +3,25 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.ErrorMessage;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
+import at.blvckbytes.component_markup.util.StringPosition;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MarkupParseException extends RuntimeException implements ErrorMessage {
 
-  public final CursorPosition position;
+  public final StringPosition position;
   public final MarkupParseError error;
   public final String[] messagePlaceholders;
 
-  public MarkupParseException(CursorPosition position, MarkupParseError error, String... messagePlaceholders) {
+  public MarkupParseException(StringPosition position, MarkupParseError error, String... messagePlaceholders) {
     this.position = position;
     this.error = error;
     this.messagePlaceholders = messagePlaceholders;
   }
 
-  public MarkupParseException(CursorPosition position, XmlParseException xmlException) {
+  public MarkupParseException(StringPosition position, XmlParseException xmlException) {
     super(xmlException);
 
     this.position = position;
@@ -29,7 +29,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(CursorPosition position, ExpressionParseException expressionParseException) {
+  public MarkupParseException(StringPosition position, ExpressionParseException expressionParseException) {
     super(expressionParseException);
 
     this.position = position;
@@ -37,7 +37,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(CursorPosition position, ExpressionTokenizeException expressionTokenizeException) {
+  public MarkupParseException(StringPosition position, ExpressionTokenizeException expressionTokenizeException) {
     super(expressionTokenizeException);
 
     this.position = position;
@@ -63,15 +63,15 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   }
 
   public int getCharIndex() {
-    int charIndex = position.nextCharIndex == 0 ? 0 : position.nextCharIndex - 1;
+    int charIndex = position.charIndex;
 
     switch (this.error) {
       case EXPRESSION_PARSE_ERROR:
-        charIndex += ((ExpressionParseException) getCause()).charIndex;
+        charIndex += ((ExpressionParseException) getCause()).position.charIndex;
         break;
 
       case EXPRESSION_TOKENIZE_ERROR:
-        charIndex += ((ExpressionTokenizeException) getCause()).beginIndex;
+        charIndex += ((ExpressionTokenizeException) getCause()).position.charIndex;
         break;
     }
 
@@ -81,13 +81,15 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   public List<String> makeErrorScreen() {
     List<String> result = new ArrayList<>();
 
-    int inputLength = position.input.length();
+    String input = position.rootView.contents;
+
+    int inputLength = input.length();
     int targetCharIndex = getCharIndex();
 
     int lineCounter = 1;
 
     for (int index = 0; index < inputLength; ++index) {
-      if (position.input.charAt(index) == '\n')
+      if (input.charAt(index) == '\n')
         ++lineCounter;
     }
 
@@ -97,7 +99,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
-      char currentChar = position.input.charAt(index);
+      char currentChar = input.charAt(index);
 
       if (currentChar == '\r')
         continue;
@@ -109,7 +111,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
           ++index;
 
         String lineNumber = padLeft(nextLineNumber++, maxLineNumberDigits) + ": ";
-        String lineContents = position.input.substring(lineBegin, index);
+        String lineContents = input.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
 

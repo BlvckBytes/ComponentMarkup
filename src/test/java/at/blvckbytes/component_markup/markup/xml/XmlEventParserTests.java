@@ -779,7 +779,7 @@ public class XmlEventParserTests {
 
       XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
 
-      if (!((expectedEvent instanceof InputEndEvent) || expectedEvent instanceof CursorPositionEvent)) {
+      if (!((expectedEvent instanceof InputEndEvent) || expectedEvent instanceof PositionEvent)) {
         XmlEvent anchorEvent = input.anchorEvent(expectedEventIndex);
 
         if (anchorEvent == null)

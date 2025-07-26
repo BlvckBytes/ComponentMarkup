@@ -1,76 +1,80 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public class XmlEventJoiner implements XmlEventConsumer {
 
   private final StringBuilder eventsString = new StringBuilder();
 
   @Override
-  public void onCursorPosition(CursorPosition position) {
-    appendEvent(new CursorPositionEvent(position));
+  public void onPosition(StringPosition position) {
+    appendEvent(new PositionEvent(position));
   }
 
   @Override
-  public void onTagOpenBegin(String tagName) {
+  public void onTagOpenBegin(StringView tagName) {
     appendEvent(new TagOpenBeginEvent(tagName));
   }
 
   @Override
-  public void onStringAttribute(String name, CursorPosition valueBeginPosition, String value) {
-    appendEvent(new StringAttributeEvent(name, valueBeginPosition, value));
+  public void onStringAttribute(StringView name, StringView value) {
+    appendEvent(new StringAttributeEvent(name, value));
   }
 
   @Override
-  public void onLongAttribute(String name, String raw, long value) {
+  public void onLongAttribute(StringView name, StringView raw, long value) {
     appendEvent(new LongAttributeEvent(name, raw, value));
   }
 
   @Override
-  public void onDoubleAttribute(String name, String raw, double value) {
+  public void onDoubleAttribute(StringView name, StringView raw, double value) {
     appendEvent(new DoubleAttributeEvent(name, raw, value));
   }
 
   @Override
-  public void onBooleanAttribute(String name, String raw, boolean value) {
+  public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
     appendEvent(new BooleanAttributeEvent(name, raw, value));
   }
 
   @Override
-  public void onTagOpenEnd(String tagName, boolean wasSelfClosing) {
+  public void onTagOpenEnd(StringView tagName, boolean wasSelfClosing) {
     appendEvent(new TagOpenEndEvent(tagName, wasSelfClosing));
   }
 
   @Override
-  public void onTagAttributeBegin(String name) {
+  public void onTagAttributeBegin(StringView name) {
     appendEvent(new TagAttributeBeginEvent(name));
   }
 
   @Override
-  public void onTagAttributeEnd(String name) {
+  public void onTagAttributeEnd(StringView name) {
     appendEvent(new TagAttributeEndEvent(name));
   }
 
   @Override
-  public void onFlagAttribute(String name) {
+  public void onFlagAttribute(StringView name) {
     appendEvent(new FlagAttributeEvent(name));
   }
 
   @Override
-  public void onText(String text) {
-    appendEvent(new TextEvent(text));
+  public void onText(StringView text, EnumSet<SubstringFlag> flags) {
+    appendEvent(new TextEvent(text, flags));
   }
 
   @Override
-  public void onInterpolation(String expression, CursorPosition valueBeginPosition) {
-    appendEvent(new InterpolationEvent(expression, valueBeginPosition));
+  public void onInterpolation(StringView expression) {
+    appendEvent(new InterpolationEvent(expression));
   }
 
   @Override
-  public void onTagClose(@Nullable String tagName) {
+  public void onTagClose(@Nullable StringView tagName) {
     appendEvent(new TagCloseEvent(tagName));
   }
 

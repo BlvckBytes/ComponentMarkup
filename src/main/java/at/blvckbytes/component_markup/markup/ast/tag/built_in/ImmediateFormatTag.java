@@ -6,7 +6,8 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,37 +21,37 @@ public class ImmediateFormatTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(String tagNameLower) {
-    return applyFormat(tagNameLower, null);
+  public boolean matchName(StringView tagName) {
+    return applyFormat(tagName, null);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull String tagNameLower,
-    @NotNull CursorPosition position,
+    @NotNull StringView tagName,
+    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
     ContainerNode wrapper = new ContainerNode(position, children, letBindings);
-    applyFormat(tagNameLower, wrapper.getOrInstantiateStyle());
+    applyFormat(tagName, wrapper.getOrInstantiateStyle());
     return wrapper;
   }
 
-  private boolean applyFormat(String tagNameLower, @Nullable NodeStyle style) {
-    if (tagNameLower.isEmpty())
+  private boolean applyFormat(StringView tagName, @Nullable NodeStyle style) {
+    if (tagName.isEmpty())
       return false;
 
-    char firstChar = tagNameLower.charAt(0);
+    char firstChar = tagName.nthChar(0);
 
     boolean isNegative = (
       firstChar == '!'
-        || (firstChar == '&' && tagNameLower.length() > 1 && tagNameLower.charAt(1) == '!')
+        || (firstChar == '&' && tagName.length() > 1 && tagName.nthChar(1) == '!')
     );
 
     Format format;
 
-    switch (tagNameLower) {
+    switch (tagName.buildString()) {
       case "&l":
       case "&!l":
       case "b":
@@ -101,7 +102,7 @@ public class ImmediateFormatTag extends TagDefinition {
     }
 
     if (style != null)
-      style.setFormat(format, ImmediateExpression.of(!isNegative));
+      style.setFormat(format, ImmediateExpression.ofBoolean(tagName, !isNegative));
 
     return true;
   }

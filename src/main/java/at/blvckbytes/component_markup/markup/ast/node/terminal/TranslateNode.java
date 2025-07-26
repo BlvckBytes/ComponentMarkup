@@ -3,7 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.node.terminal;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -18,7 +18,7 @@ public class TranslateNode extends UnitNode {
     ExpressionNode key,
     MarkupList with,
     @Nullable ExpressionNode fallback,
-    CursorPosition position,
+    StringPosition position,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);

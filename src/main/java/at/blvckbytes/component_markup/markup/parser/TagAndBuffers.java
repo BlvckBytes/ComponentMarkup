@@ -8,8 +8,10 @@ import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.ContainerTag;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -17,13 +19,13 @@ import java.util.logging.Level;
 
 public class TagAndBuffers implements ParserChildItem {
 
-  public final TagDefinition tag;
-  public final String tagNameLower;
-  public final CursorPosition position;
+  public final @Nullable TagDefinition tag;
+  public final @Nullable StringView tagName;
+  public final StringPosition position;
   public final @Nullable TagAndBuffers parent;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
-  private @Nullable Set<String> bindingNames;
+  private @Nullable Set<StringView> bindingNames;
 
   public final InternalAttributeMap attributeMap;
 
@@ -37,26 +39,26 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable MarkupNode forSeparator;
   public @Nullable MarkupNode forEmpty;
   public @Nullable ExpressionNode forReversed;
-  public @Nullable String forIterationVariable;
+  public @Nullable StringView forIterationVariable;
 
   public @Nullable ExpressionNode whenInput;
   public @Nullable String whenIsValue;
   public boolean isWhenOther;
 
   public TagAndBuffers(
-    TagDefinition tag,
-    String tagNameLower,
-    CursorPosition position,
+    @Nullable TagDefinition tag,
+    @Nullable StringView tagName,
+    StringPosition position,
     @Nullable TagAndBuffers parent
   ) {
     this.tag = tag;
-    this.tagNameLower = tagNameLower;
+    this.tagName = tagName;
     this.position = position;
     this.parent = parent;
-    this.attributeMap = new InternalAttributeMap(tagNameLower, position);
+    this.attributeMap = new InternalAttributeMap(tagName, position);
   }
 
-  public boolean hasLetBinding(String name) {
+  public boolean hasLetBinding(StringView name) {
     if (this.bindingNames == null)
       return false;
 
@@ -290,13 +292,16 @@ public class TagAndBuffers implements ParserChildItem {
   private @Nullable MarkupNode createNodeOrNull(@Nullable List<MarkupNode> processedChildren) {
     MarkupNode result;
 
+    if (tag == null || tagName == null)
+      return new ContainerNode(position, processedChildren, bindings);
+
     try {
-      result = tag.createNode(tagNameLower, position, attributeMap, bindings, processedChildren);
+      result = tag.createNode(tagName, position, attributeMap, bindings, processedChildren);
     } catch (Throwable thrownError) {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;
 
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagNameLower + "> via " + tag.getClass() + "#createNode", thrownError);
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagName.buildString() + "> via " + tag.getClass() + "#createNode", thrownError);
       return null;
     }
 

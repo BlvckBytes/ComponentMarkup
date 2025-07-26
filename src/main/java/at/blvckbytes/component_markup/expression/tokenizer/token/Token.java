@@ -1,12 +1,15 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
+import at.blvckbytes.component_markup.util.StringView;
+
 public abstract class Token {
 
-  public final int beginIndex;
-  public final int endIndex;
+  public final StringView raw;
 
-  protected Token(int beginIndex, int endIndex) {
-    this.beginIndex = beginIndex;
-    this.endIndex = endIndex;
+  protected Token(StringView raw) {
+    this.raw = raw;
   }
+
+  public abstract TokenType getType();
 }

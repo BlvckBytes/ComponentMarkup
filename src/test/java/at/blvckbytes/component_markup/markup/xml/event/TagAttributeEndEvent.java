@@ -1,10 +1,12 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
+import at.blvckbytes.component_markup.util.StringView;
+
 public class TagAttributeEndEvent extends XmlEvent {
 
-  public final String name;
+  public final StringView name;
 
-  public TagAttributeEndEvent(String name) {
+  public TagAttributeEndEvent(StringView name) {
     this.name = name;
   }
 }

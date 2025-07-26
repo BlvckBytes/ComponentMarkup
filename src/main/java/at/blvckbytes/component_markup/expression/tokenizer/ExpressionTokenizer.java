@@ -2,106 +2,70 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
-import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.SubstringBuilder;
-import at.blvckbytes.component_markup.util.SubstringFlag;
+import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
 import java.util.Stack;
-import java.util.logging.Level;
 
 public class ExpressionTokenizer {
 
   private final Stack<Token> pendingStack;
   private boolean isNextPendingPeek;
 
-  private final String input;
-  private final int beginIndexWithinInput;
+  private final StringView input;
   private final @Nullable TokenOutput tokenOutput;
-  private int nextCharIndex;
   private boolean dashIsPrefix;
-  private final SubstringBuilder substringBuilder;
 
-  public ExpressionTokenizer(String input, int beginIndexWithinInput, @Nullable TokenOutput tokenOutput) {
+  public ExpressionTokenizer(StringView input, @Nullable TokenOutput tokenOutput) {
     this.pendingStack = new Stack<>();
     this.input = input;
-    this.beginIndexWithinInput = beginIndexWithinInput;
     this.tokenOutput = tokenOutput;
-    this.nextCharIndex = 0;
-    this.substringBuilder = new SubstringBuilder(input);
 
     // The only purpose of a dash at the very beginning is to flip a sign
     this.dashIsPrefix = true;
   }
 
-  private char nextChar() {
-    if (this.nextCharIndex == input.length())
-      return 0;
-
-    return input.charAt(this.nextCharIndex++);
-  }
-
-  private char peekChar() {
-    if (this.nextCharIndex == input.length())
-      return 0;
-
-    return input.charAt(this.nextCharIndex);
-  }
-
   private Token parseStringToken() {
-    int beginIndex = nextCharIndex;
-
     char quoteChar;
 
-    if ((quoteChar = nextChar()) != '\'' && quoteChar != '"')
+    if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
       throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
 
-    substringBuilder.setStartInclusive(beginIndex + 1);
-
-    char priorChar = quoteChar;
+    input.setSubViewStart(input.getPosition());
 
     char upcomingChar;
     boolean isTerminated = false;
 
-    while ((upcomingChar = nextChar()) != 0) {
+    while ((upcomingChar = input.nextChar()) != 0) {
       if (upcomingChar == '\n')
         break;
 
       if (upcomingChar == quoteChar) {
-        if (priorChar != '\\') {
+        if (input.priorChar() != '\\') {
           isTerminated = true;
           break;
         }
 
-        substringBuilder.addIndexToBeRemoved(nextCharIndex - 2);
+        input.addIndexToBeRemoved(input.getCharIndex() - 1);
       }
-
-      priorChar = upcomingChar;
     }
 
     if (!isTerminated)
-      throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.UNTERMINATED_STRING);
+      throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.UNTERMINATED_STRING);
 
-    substringBuilder.setEndExclusive(nextCharIndex - 1);
+    StringView rawContents = input.buildSubViewUntilPosition(PositionMode.CURRENT);
+    StringView stringContents = rawContents.buildSubViewRelative(1, -1);
 
-    String stringContents = substringBuilder.build(EnumSet.noneOf(SubstringFlag.class));
-    String rawContents = input.substring(beginIndex, nextCharIndex);
-
-    substringBuilder.resetIndices();
-
-    return new StringToken(beginIndex, stringContents, rawContents);
+    return new StringToken(rawContents, stringContents);
   }
 
   private Token parseIdentifierOrLiteralToken() {
-    int beginIndex = nextCharIndex;
-    int endIndexExclusive = beginIndex;
+    input.setSubViewStart(input.getPosition(PositionMode.NEXT));
 
+    boolean isFirst = true;
     char upcomingChar;
-    char priorChar = 0;
 
-    while ((upcomingChar = peekChar()) != 0) {
+    while ((upcomingChar = input.peekChar()) != 0) {
       if (Character.isWhitespace(upcomingChar))
         break;
 
@@ -115,276 +79,283 @@ public class ExpressionTokenizer {
         break;
       }
 
-      boolean isFirst = beginIndex == nextCharIndex;
       boolean isAlphabetic = upcomingChar >= 'a' && upcomingChar <= 'z';
       boolean isNumeric = upcomingChar >= '0' && upcomingChar <= '9';
 
       if (!(isAlphabetic || isNumeric || upcomingChar == '_'))
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       if (isFirst && (upcomingChar == '_' || isNumeric))
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      if (upcomingChar == '_' && priorChar == '_')
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+      if (upcomingChar == '_' && input.priorChar() == '_')
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      priorChar = nextChar();
-      endIndexExclusive = nextCharIndex;
+      input.nextChar();
+      isFirst = false;
     }
 
-    if (beginIndex == nextCharIndex)
+    StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
+
+    if (value.isEmpty())
       throw new IllegalStateException("Expected to only be called if peekChar() != 0 or ' ' or '.'");
 
-    String value = input.substring(beginIndex, endIndexExclusive);
-
-    switch (value) {
+    switch (value.buildString()) {
       case "true":
-        return new BooleanToken(beginIndex, "true", true);
+        return new BooleanToken(value, true);
 
       case "false":
-        return new BooleanToken(beginIndex, "false", false);
+        return new BooleanToken(value, false);
 
       case "null":
-        return new NullToken(beginIndex, "null");
+        return new NullToken(value);
     }
 
-    return new IdentifierToken(beginIndex, value);
+    return new IdentifierToken(value);
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean collectSubsequentDigits() {
-    int beginIndex = nextCharIndex;
+    int beginIndex = input.getCharIndex();
 
     char currentChar;
 
-    while ((currentChar = peekChar()) >= '0' && currentChar <= '9')
-      nextChar();
+    while ((currentChar = input.peekChar()) >= '0' && currentChar <= '9')
+      input.nextChar();
 
-    return beginIndex != nextCharIndex;
+    return beginIndex != input.getCharIndex();
   }
 
   private Token parseLongOrDoubleToken() {
-    int beginIndex = nextCharIndex;
+    input.setSubViewStart(input.getPosition(PositionMode.NEXT));
 
     if (!collectSubsequentDigits())
       throw new IllegalStateException("Expected to only be called if nextChar() is a digit");
 
-    int savePoint = nextCharIndex;
+    StringPosition savePoint = input.getPosition();
 
-    if (peekChar() == '.') {
-      nextChar();
+    if (input.peekChar() == '.') {
+      input.nextChar();
 
-      if (peekChar() == '.') {
-        nextCharIndex = savePoint;
+      if (input.peekChar() == '.') {
+        input.restorePosition(savePoint);
 
-        String numberString = input.substring(beginIndex, nextCharIndex);
+        StringView value = input.buildSubViewUntilPosition(PositionMode.PRIOR);
 
-        return new LongToken(beginIndex, numberString, Long.parseLong(numberString));
+        return new LongToken(value, value.parseLong());
       }
-    }
 
-    if (nextCharIndex != savePoint) {
       if (!collectSubsequentDigits())
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
 
-      String numberString = input.substring(beginIndex, nextCharIndex);
+      StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
-      return new DoubleToken(beginIndex, numberString, Double.parseDouble(numberString));
+      return new DoubleToken(value, value.parseDouble());
     }
 
-    String numberString = input.substring(beginIndex, nextCharIndex);
+    StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
-    return new LongToken(beginIndex, numberString, Long.parseLong(numberString));
+    return new LongToken(value, value.parseLong());
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
-    int beginIndex = nextCharIndex;
+    StringPosition savePoint = input.getPosition();
 
-    if (nextChar() != '.')
+    if (input.nextChar() != '.')
       throw new IllegalStateException("Expected to only be called if nextChar() = '.'");
 
+    StringPosition beginPosition = input.getPosition();
+
     if (!collectSubsequentDigits()) {
-      nextCharIndex = beginIndex;
+      input.restorePosition(savePoint);
       return null;
     }
 
-    String numberString = input.substring(beginIndex, nextCharIndex);
+    input.setSubViewStart(beginPosition);
+    StringView rawValue = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
-    return new DoubleToken(beginIndex, numberString, Double.parseDouble(numberString));
+    return new DoubleToken(rawValue, rawValue.parseDouble());
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationToken() {
-    int beginIndex = nextCharIndex;
+    StringPosition savePoint = input.getPosition();
 
-    switch (nextChar()) {
+    char firstChar = input.nextChar();
+    input.setSubViewStart(input.getPosition());
+
+    switch (firstChar) {
       case '(':
-        return new PunctuationToken(beginIndex, Punctuation.OPENING_PARENTHESIS);
+        return new PunctuationToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), Punctuation.OPENING_PARENTHESIS);
 
       case ')':
-        return new PunctuationToken(beginIndex, Punctuation.CLOSING_PARENTHESIS);
+        return new PunctuationToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), Punctuation.CLOSING_PARENTHESIS);
 
       case '[':
-        return new InfixOperatorToken(beginIndex, InfixOperator.SUBSCRIPTING);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.SUBSCRIPTING);
 
       case ']':
-        return new PunctuationToken(beginIndex, Punctuation.CLOSING_BRACKET);
+        return new PunctuationToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), Punctuation.CLOSING_BRACKET);
 
       case ',':
-        return new PunctuationToken(beginIndex, Punctuation.COMMA);
+        return new PunctuationToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), Punctuation.COMMA);
 
       case '+':
-        return new InfixOperatorToken(beginIndex, InfixOperator.ADDITION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.ADDITION);
 
       case '-':
         if (dashIsPrefix)
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.FLIP_SIGN);
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.FLIP_SIGN);
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.SUBTRACTION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.SUBTRACTION);
 
       case '*':
-        if (peekChar() == '*') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.REPEAT);
+        if (input.peekChar() == '*') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.REPEAT);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.MULTIPLICATION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.MULTIPLICATION);
 
       case '/':
-        return new InfixOperatorToken(beginIndex, InfixOperator.DIVISION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.DIVISION);
 
       case '%':
-        return new InfixOperatorToken(beginIndex, InfixOperator.MODULO);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.MODULO);
 
       case '^':
-        return new InfixOperatorToken(beginIndex, InfixOperator.EXPONENTIATION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.EXPONENTIATION);
 
       case '&':
-        if (peekChar() == '&') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.CONJUNCTION);
+        if (input.peekChar() == '&') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.CONJUNCTION);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.CONCATENATION);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.CONCATENATION);
 
       case '|':
-        if (peekChar() == '|') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.DISJUNCTION);
+        if (input.peekChar() == '|') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.DISJUNCTION);
         }
 
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_PIPE);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_PIPE);
 
       case '?':
-        if (peekChar() == '?') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.FALLBACK);
+        if (input.peekChar() == '?') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.FALLBACK);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.BRANCHING);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.BRANCHING);
 
       case '@':
-        if (peekChar() == '@') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.EXPLODE_REGEX);
+        if (input.peekChar() == '@') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.EXPLODE_REGEX);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.EXPLODE);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.EXPLODE);
 
       case ':':
-        return new PunctuationToken(beginIndex, Punctuation.COLON);
+        return new PunctuationToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), Punctuation.COLON);
 
       case '>':
-        if (peekChar() == '=') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.GREATER_THAN_OR_EQUAL);
+        if (input.peekChar() == '=') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.GREATER_THAN_OR_EQUAL);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.GREATER_THAN);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.GREATER_THAN);
 
       case '<':
-        if (peekChar() == '=') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.LESS_THAN_OR_EQUAL);
+        if (input.peekChar() == '=') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.LESS_THAN_OR_EQUAL);
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.LESS_THAN);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.LESS_THAN);
 
       case '=':
-        if (peekChar() == '=') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.EQUAL_TO);
+        if (input.peekChar() == '=') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.EQUAL_TO);
         }
 
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_EQUALS);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_EQUALS);
 
       case '!':
-        if (peekChar() == '=') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.NOT_EQUAL_TO);
+        if (input.peekChar() == '=') {
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.NOT_EQUAL_TO);
         }
 
-        return new PrefixOperatorToken(beginIndex, PrefixOperator.NEGATION);
+        return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.NEGATION);
 
       case '~':
-        if (peekChar() == '^') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.UPPER_CASE);
+        if (input.peekChar() == '^') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.UPPER_CASE);
         }
 
-        if (peekChar() == '_') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.LOWER_CASE);
+        if (input.peekChar() == '_') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.LOWER_CASE);
         }
 
-        if (peekChar() == '#') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.TITLE_CASE);
+        if (input.peekChar() == '#') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.TITLE_CASE);
         }
 
-        if (peekChar() == '!') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.TOGGLE_CASE);
+        if (input.peekChar() == '!') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.TOGGLE_CASE);
         }
 
-        if (peekChar() == '-') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.SLUGIFY);
+        if (input.peekChar() == '-') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.SLUGIFY);
         }
 
-        if (peekChar() == '?') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.ASCIIFY);
+        if (input.peekChar() == '?') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.ASCIIFY);
         }
 
-        if (peekChar() == '|') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.TRIM);
+        if (input.peekChar() == '|') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.TRIM);
         }
 
-        if (peekChar() == '<') {
-          nextChar();
-          return new PrefixOperatorToken(beginIndex, PrefixOperator.REVERSE);
+        if (input.peekChar() == '<') {
+          input.nextChar();
+          return new PrefixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), PrefixOperator.REVERSE);
         }
 
-        throw new ExpressionTokenizeException(beginIndex, ExpressionTokenizeError.SINGLE_TILDE);
+        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_TILDE);
 
       case '.':
-        char upcomingChar = peekChar();
+        char upcomingChar = input.peekChar();
 
         if (upcomingChar == '.') {
-          nextChar();
-          return new InfixOperatorToken(beginIndex, InfixOperator.RANGE);
+          input.nextChar();
+          return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.RANGE);
         }
 
         if (upcomingChar >= '0' && upcomingChar <= '9') {
-          nextCharIndex = beginIndex;
+          input.restorePosition(savePoint);
+          input.clearSubViewStart();
+
           return tryParseDotDoubleToken();
         }
 
-        return new InfixOperatorToken(beginIndex, InfixOperator.MEMBER);
+        return new InfixOperatorToken(input.buildSubViewUntilPosition(PositionMode.CURRENT), InfixOperator.MEMBER);
     }
 
-    nextCharIndex = beginIndex;
+    input.restorePosition(savePoint);
+    input.clearSubViewStart();
+
     return null;
   }
 
@@ -417,10 +388,9 @@ public class ExpressionTokenizer {
     }
 
     else {
-      while (Character.isWhitespace(peekChar()))
-        nextChar();
+      input.consumeWhitespace(tokenOutput);
 
-      char upcomingChar = peekChar();
+      char upcomingChar = input.peekChar();
 
       if (upcomingChar == 0)
         return null;
@@ -454,48 +424,10 @@ public class ExpressionTokenizer {
     return this.pendingStack.peek();
   }
 
-  private void emitTokenWithType(Token token, TokenType type) {
+  private void emitTokenToOutput(Token token) {
     if (tokenOutput == null)
       return;
 
-    tokenOutput.emitToken(
-      token.beginIndex + beginIndexWithinInput,
-      token.endIndex + beginIndexWithinInput,
-      type
-    );
-  }
-
-  private void emitTokenToOutput(Token token) {
-    if (token instanceof BooleanToken || token instanceof NullToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__LITERAL);
-      return;
-    }
-
-    if (token instanceof DoubleToken || token instanceof LongToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__NUMBER);
-      return;
-    }
-
-    if (token instanceof StringToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__STRING);
-      return;
-    }
-
-    if (token instanceof IdentifierToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__IDENTIFIER_ANY);
-      return;
-    }
-
-    if (token instanceof PrefixOperatorToken || token instanceof InfixOperatorToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__OPERATOR__ANY);
-      return;
-    }
-
-    if (token instanceof PunctuationToken) {
-      emitTokenWithType(token, TokenType.EXPRESSION__PUNCTUATION__ANY);
-      return;
-    }
-
-    LoggerProvider.log(Level.WARNING, "Encountered unaccounted-for token: " + token.getClass());
+    tokenOutput.emitToken(token.getType(), token.raw);
   }
 }

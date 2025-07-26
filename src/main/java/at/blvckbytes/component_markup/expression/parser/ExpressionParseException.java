@@ -1,16 +1,17 @@
 package at.blvckbytes.component_markup.expression.parser;
 
 import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.StringPosition;
 
 public class ExpressionParseException extends RuntimeException implements ErrorMessage {
 
+  public final StringPosition position;
   public final ExpressionParserError error;
-  public final int charIndex;
   private final String[] messagePlaceholders;
 
-  public ExpressionParseException(ExpressionParserError error, int charIndex, String... messagePlaceholders) {
+  public ExpressionParseException(StringPosition position, ExpressionParserError error, String... messagePlaceholders) {
+    this.position = position;
     this.error = error;
-    this.charIndex = charIndex;
     this.messagePlaceholders = messagePlaceholders;
   }
 

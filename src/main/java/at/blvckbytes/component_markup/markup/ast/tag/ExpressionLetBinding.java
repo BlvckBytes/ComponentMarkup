@@ -1,7 +1,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringView;
 
 public class ExpressionLetBinding extends LetBinding {
 
@@ -11,10 +11,9 @@ public class ExpressionLetBinding extends LetBinding {
   public ExpressionLetBinding(
     ExpressionNode expression,
     boolean capture,
-    String name,
-    CursorPosition position
+    StringView name
   ) {
-    super(name, position);
+    super(name);
 
     this.expression = expression;
     this.capture = capture;

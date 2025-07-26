@@ -1,17 +1,17 @@
 package at.blvckbytes.component_markup.markup.parser.token;
 
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.logging.Level;
 
 public class TokenOutput {
 
   private @Nullable HierarchicalToken[] tokenByCharIndex;
-  private String input;
+  private StringView input;
   private final List<HierarchicalToken> result = new ArrayList<>();
   private boolean hasEnded;
 
@@ -21,7 +21,7 @@ public class TokenOutput {
     this.outputFlags = outputFlags;
   }
 
-  public void onInitialization(String input) {
+  public void onInitialization(StringView input) {
     if (tokenByCharIndex != null)
       throw new IllegalStateException("Do not call TokenOutput#onInitialization more than once");
 
@@ -44,22 +44,6 @@ public class TokenOutput {
     return parent.endIndex;
   }
 
-  private void throwMissingTokenError(int index) {
-    int lineCounter = 1;
-    int charCounter = 0;
-
-    for (int i = 0; i < index; ++i) {
-      if (input.charAt(i) == '\n') {
-        ++lineCounter;
-        charCounter = 0;
-      }
-
-      ++charCounter;
-    }
-
-    throw new IllegalStateException("Missing token for index line " + lineCounter + " column " + charCounter + " (" + index + "/" + (tokenByCharIndex.length - 1) + ")");
-  }
-
   public void onInputEnd() {
     if (hasEnded)
       throw new IllegalStateException("Do not call TokenOutput#onInputEnd more than once");
@@ -73,8 +57,19 @@ public class TokenOutput {
       HierarchicalToken currentToken = tokenByCharIndex[currentBeginIndex];
 
       if (currentToken == null) {
-        throwMissingTokenError(currentBeginIndex);
-        continue;
+        int lineCounter = 1;
+        int charCounter = 0;
+
+        for (int i = 0; i < currentBeginIndex; ++i) {
+          if (input.contents.charAt(i) == '\n') {
+            ++lineCounter;
+            charCounter = 0;
+          }
+
+          ++charCounter;
+        }
+
+        throw new IllegalStateException("Missing token for index line " + lineCounter + " column " + charCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + ")");
       }
 
       currentBeginIndex = collectChildrenAndGetNextIndex(currentToken);
@@ -86,22 +81,23 @@ public class TokenOutput {
     return result;
   }
 
-  public void emitCharToken(int beginIndex, TokenType type) {
-    emitToken(beginIndex, beginIndex, type);
+  public void emitCharToken(StringPosition position, TokenType type) {
+    emitToken(type, position.rootView.buildSubViewAbsolute(position.charIndex, position.charIndex));
   }
 
-  public void emitToken(int beginIndex, int endIndex, TokenType type) {
+  public void emitToken(TokenType type, StringView value) {
+    int tokenIndex = value.viewStart.charIndex;
+
+    validateTokenIndex(type, tokenIndex);
+
+    tokenByCharIndex[tokenIndex] = new HierarchicalToken(type, value);
+  }
+
+  private void validateTokenIndex(TokenType type, int index) {
     if (tokenByCharIndex == null)
       throw new IllegalStateException("Do not emit tokens before calling TokenOutput#onInitialization");
 
-    if (beginIndex < 0 || beginIndex >= tokenByCharIndex.length) {
-      LoggerProvider.log(Level.WARNING, "Encountered out-of-range token \"" + type + "\" at index " + beginIndex);
-      return;
-    }
-
-    // TODO: Keep only indices on tokens
-    String value = input.substring(beginIndex, endIndex + 1);
-
-    tokenByCharIndex[beginIndex] = new HierarchicalToken(type, beginIndex, value);
+    if (index < 0 || index >= tokenByCharIndex.length)
+      throw new IllegalStateException("Encountered out-of-range token \"" + type + "\" at index " + index);
   }
 }

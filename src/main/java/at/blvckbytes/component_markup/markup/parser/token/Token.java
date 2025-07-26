@@ -1,23 +1,20 @@
 package at.blvckbytes.component_markup.markup.parser.token;
 
+import at.blvckbytes.component_markup.util.StringView;
+
 public class Token {
 
   public final TokenType type;
+  public final StringView value;
+
   public final int beginIndex;
   public final int endIndex;
-  public final String value;
 
-  public Token(TokenType type, int beginIndex, char value) {
-    this(type, beginIndex, String.valueOf(value));
-  }
-
-  public Token(TokenType type, int beginIndex, String value) {
-    if (value == null || value.isEmpty())
-      throw new IllegalStateException("Illegal " + (value == null ? "null" : "empty") + " token " + type + " at index " + beginIndex);
-
+  public Token(TokenType type, StringView value) {
     this.type = type;
-    this.beginIndex = beginIndex;
-    this.endIndex = beginIndex + (value.length() - 1);
     this.value = value;
+
+    this.beginIndex = value.viewStart.charIndex;
+    this.endIndex = value.viewEnd.charIndex;
   }
 }

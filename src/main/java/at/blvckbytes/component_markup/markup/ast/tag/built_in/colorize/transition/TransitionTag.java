@@ -4,7 +4,8 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeAttributes;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeTag;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,14 +19,14 @@ public class TransitionTag extends ColorizeTag {
   }
 
   @Override
-  public boolean matchName(String tagNameLower) {
-    return tagNameLower.equals("transition");
+  public boolean matchName(StringView tagName) {
+    return tagName.contentEquals("transition", true);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull String tagNameLower,
-    @NotNull CursorPosition position,
+    @NotNull StringView tagName,
+    @NotNull StringPosition position,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -36,10 +37,10 @@ public class TransitionTag extends ColorizeTag {
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 
     return new ColorizeMonochromeNode(
-      tagNameLower,
+      tagName,
       interpreter -> (
         new TransitionNodeState(
-          tagNameLower,
+          tagName,
           colors,
           offsets,
           zIndices,

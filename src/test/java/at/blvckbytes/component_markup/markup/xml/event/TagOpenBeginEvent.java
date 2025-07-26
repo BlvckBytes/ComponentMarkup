@@ -1,10 +1,12 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
+import at.blvckbytes.component_markup.util.StringView;
+
 public class TagOpenBeginEvent extends XmlEvent {
 
-  public final String tagName;
+  public final StringView tagName;
 
-  public TagOpenBeginEvent(String tagName) {
+  public TagOpenBeginEvent(StringView tagName) {
     this.tagName = tagName;
   }
 }

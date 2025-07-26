@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.util.StringPosition;
+
 public class TransformerNode extends ExpressionNode {
 
   public final ExpressionNode wrapped;
@@ -11,13 +13,13 @@ public class TransformerNode extends ExpressionNode {
   }
 
   @Override
-  public int getBeginIndex() {
-    return wrapped.getBeginIndex();
+  public StringPosition getBegin() {
+    return wrapped.getBegin();
   }
 
   @Override
-  public int getEndIndex() {
-    return wrapped.getEndIndex();
+  public StringPosition getEnd() {
+    return wrapped.getEnd();
   }
 
   @Override

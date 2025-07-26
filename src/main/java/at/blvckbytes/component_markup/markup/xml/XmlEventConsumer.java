@@ -1,34 +1,39 @@
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public interface XmlEventConsumer {
 
-  void onCursorPosition(CursorPosition position);
+  void onPosition(StringPosition position);
 
-  void onTagOpenBegin(String tagName);
+  void onTagOpenBegin(StringView tagName);
 
-  void onStringAttribute(String name, CursorPosition valueBeginPosition, String value);
+  void onStringAttribute(StringView name, StringView value);
 
-  void onLongAttribute(String name, String raw, long value);
+  void onLongAttribute(StringView name, StringView raw, long value);
 
-  void onDoubleAttribute(String name, String raw, double value);
+  void onDoubleAttribute(StringView name, StringView raw, double value);
 
-  void onBooleanAttribute(String name, String raw, boolean value);
+  void onBooleanAttribute(StringView name, StringView raw, boolean value);
 
-  void onTagAttributeBegin(String name);
+  void onTagAttributeBegin(StringView name);
 
-  void onTagAttributeEnd(String name);
+  void onTagAttributeEnd(StringView name);
 
-  void onFlagAttribute(String name);
+  void onFlagAttribute(StringView name);
 
-  void onTagOpenEnd(String tagName, boolean wasSelfClosing);
+  void onTagOpenEnd(StringView tagName, boolean wasSelfClosing);
 
-  void onText(String text);
+  void onText(StringView text, EnumSet<SubstringFlag> flags);
 
-  void onInterpolation(String expression, CursorPosition valueBeginPosition);
+  void onInterpolation(StringView expression);
 
-  void onTagClose(@Nullable String tagName);
+  void onTagClose(@Nullable StringView tagName);
 
   void onInputEnd();
 

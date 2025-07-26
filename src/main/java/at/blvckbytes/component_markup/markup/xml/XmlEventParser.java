@@ -2,7 +2,9 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.SubstringBuilder;
+import at.blvckbytes.component_markup.util.PositionMode;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +12,6 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final EnumSet<SubstringFlag> SUBSTRING_AS_IS = EnumSet.noneOf(SubstringFlag.class);
   private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
   private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
   private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
@@ -21,78 +22,60 @@ public class XmlEventParser {
 
   private final XmlEventConsumer consumer;
   private final TokenOutput tokenOutput;
-  private final SubstringBuilder substringBuilder;
-  private final InputCursor cursor;
+  private final StringView input;
 
-  private XmlEventParser(String input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+  private XmlEventParser(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     this.consumer = consumer;
     this.tokenOutput = tokenOutput;
-    this.substringBuilder = new SubstringBuilder(input);
-    this.cursor = new InputCursor(input, tokenOutput);
+    this.input = input;
   }
 
-  public static void parse(String input, XmlEventConsumer consumer) {
+  public static void parse(StringView input, XmlEventConsumer consumer) {
     new XmlEventParser(input, consumer, null).parseInput(false);
   }
 
-  public static void parse(String input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+  public static void parse(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     new XmlEventParser(input, consumer, tokenOutput).parseInput(false);
   }
 
   private final InStringDetector inStringDetector = new InStringDetector();
 
   private void parseInput(boolean isWithinCurlyBrackets) {
-    char priorChar = 0;
-    CursorPosition textContentBeginPosition = null;
     boolean wasPriorTagOrInterpolation = false;
 
-    while (cursor.peekChar() != 0) {
-      if (cursor.peekChar() == '}' && priorChar != '\\') {
+    while (input.peekChar() != 0) {
+      if (input.peekChar() == '}' && input.priorChar() != '\\') {
         if (isWithinCurlyBrackets)
           break;
 
         throw new XmlParseException(XmlParseError.UNESCAPED_CURLY);
       }
 
-      CursorPosition preConsumePosition = cursor.getPosition();
-      int possibleNonTextBeginIndex = cursor.getNextCharIndex();
+      StringPosition preConsumePosition = input.getPosition();
 
-      if (cursor.peekChar() == '{' && priorChar != '\\') {
-        int interpolationBeginIndex = cursor.getNextCharIndex();
-
-        cursor.nextChar();
-
-        CursorPosition beginPosition = cursor.getPosition();
-
-        if (substringBuilder.hasStartSet()) {
-          substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-
+      if (input.peekChar() == '{' && input.priorChar() != '\\') {
+        if (input.getSubViewStart() != null) {
           emitText(
-            textContentBeginPosition,
-            wasPriorTagOrInterpolation
-              ? SUBSTRING_INNER_TEXT
-              : SUBSTRING_FIRST_TEXT
+            input.buildSubViewUntilPosition(PositionMode.CURRENT),
+            wasPriorTagOrInterpolation ? SUBSTRING_INNER_TEXT : SUBSTRING_FIRST_TEXT
           );
         }
 
-        substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+        input.nextChar();
+        input.setSubViewStart(input.getPosition());
 
-        CursorPosition valueBeginPosition = null;
+        StringView interpolationValue = null;
 
-        while (cursor.peekChar() != 0) {
-          int currentIndex = cursor.getNextCharIndex();
-          char currentChar = cursor.nextChar();
+        while (input.peekChar() != 0) {
+          char currentChar = input.nextChar();
 
           if (currentChar == '\n' || currentChar == '{') {
-            consumer.onCursorPosition(beginPosition);
+            consumer.onPosition(input.getSubViewStart());
             throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
           }
 
           if (tokenOutput != null && Character.isWhitespace(currentChar))
-            tokenOutput.emitCharToken(currentIndex, TokenType.ANY__WHITESPACE);
-
-          if (valueBeginPosition == null)
-            valueBeginPosition = cursor.getPosition();
+            tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
 
           inStringDetector.onEncounter(currentChar);
 
@@ -100,100 +83,81 @@ public class XmlEventParser {
             continue;
 
           if (currentChar == '}') {
-            substringBuilder.setEndExclusive(currentIndex);
+            interpolationValue = input.buildSubViewUntilPosition(PositionMode.CURRENT);
             break;
           }
         }
 
-        consumer.onCursorPosition(beginPosition);
+        inStringDetector.reset();
 
-        if (!substringBuilder.hasEndSet())
+        if (interpolationValue == null) {
+          consumer.onPosition(input.getSubViewStart());
           throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
-
-
-        String interpolationContents = substringBuilder.build(SUBSTRING_AS_IS);
+        }
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(interpolationBeginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__INTERPOLATION);
+          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, interpolationValue);
 
-        inStringDetector.reset();
-        substringBuilder.resetIndices();
+        consumer.onInterpolation(interpolationValue.buildSubViewRelative(1, -1));
 
-        consumer.onInterpolation(interpolationContents, valueBeginPosition);
         wasPriorTagOrInterpolation = true;
         continue;
       }
 
-      CursorPosition firstSpacePosition = null;
+      StringPosition firstSpacePosition = null;
 
-      if (cursor.peekChar() == ' ') {
+      if (input.peekChar() == ' ') {
+        input.nextChar();
+        firstSpacePosition = input.getPosition();
+
         if (tokenOutput != null)
-          tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.ANY__WHITESPACE);
-
-        cursor.nextChar();
-        firstSpacePosition = cursor.getPosition();
+          tokenOutput.emitCharToken(firstSpacePosition, TokenType.ANY__WHITESPACE);
       }
 
-      cursor.consumeWhitespace();
+      input.consumeWhitespace(tokenOutput);
 
-      if (cursor.peekChar() == '<') {
-        if (substringBuilder.hasStartSet()) {
-          substringBuilder.setEndExclusive(possibleNonTextBeginIndex);
-
+      if (input.peekChar() == '<') {
+        if (input.getSubViewStart() != null) {
           emitText(
-            textContentBeginPosition,
+            input.buildSubViewUntilPosition(PositionMode.CURRENT),
             wasPriorTagOrInterpolation
               ? SUBSTRING_INNER_TEXT
               : SUBSTRING_FIRST_TEXT
           );
         }
 
-        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && firstSpacePosition.lineNumber == cursor.getLineNumber()) {
-          substringBuilder.setStartInclusive(preConsumePosition.nextCharIndex);
-          substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
-          emitText(firstSpacePosition, SUBSTRING_AS_IS);
+        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && firstSpacePosition.lineNumber == input.getLineNumber()) {
+          input.setSubViewStart(preConsumePosition);
+          emitText(input.buildSubViewUntilPosition(PositionMode.CURRENT), SubstringFlag.NONE);
         }
 
         parseOpeningOrClosingTag();
         wasPriorTagOrInterpolation = true;
-        priorChar = 0;
         continue;
       }
 
-      cursor.restoreState(preConsumePosition);
+      input.restorePosition(preConsumePosition);
 
-      int nextCharIndex = cursor.getNextCharIndex();
+      char currentChar = input.nextChar();
 
-      boolean beginContentText = !substringBuilder.hasStartSet();
-
-      char nextChar = cursor.nextChar();
-
-      if (beginContentText) {
-        if (nextChar == '\n') {
-          cursor.consumeWhitespace();
+      if (input.getSubViewStart() == null) {
+        if (currentChar == '\n') {
+          input.consumeWhitespace(tokenOutput);
           continue;
         }
 
-        substringBuilder.setStartInclusive(nextCharIndex);
-        textContentBeginPosition = cursor.getPosition();
+        input.setSubViewStart(input.getPosition(PositionMode.NEXT));
       }
 
-      if (nextChar == '\\' && (cursor.peekChar() == '<' || cursor.peekChar() == '}' || cursor.peekChar() == '{')) {
-        substringBuilder.addIndexToBeRemoved(nextCharIndex);
-        nextChar = cursor.nextChar();
-      }
+      if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{'))
+        input.addIndexToBeRemoved(input.getCharIndex());
 
-      priorChar = nextChar;
-
-      cursor.consumeWhitespace();
+      input.consumeWhitespace(tokenOutput);
     }
 
-    if (substringBuilder.hasStartSet()) {
-      substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
+    if (input.getSubViewStart() != null) {
       emitText(
-        textContentBeginPosition,
+        input.buildSubViewUntilPosition(PositionMode.CURRENT),
         wasPriorTagOrInterpolation
           ? SUBSTRING_LAST_TEXT
           : SUBSTRING_ONLY_TEXT
@@ -204,104 +168,69 @@ public class XmlEventParser {
       consumer.onInputEnd();
   }
 
-  private void emitText(CursorPosition position, EnumSet<SubstringFlag> flags) {
-    String text = substringBuilder.build(flags);
-
-    if (text.isEmpty()) {
-      substringBuilder.resetIndices();
-      return;
-    }
+  private void emitText(StringView text, EnumSet<SubstringFlag> flags) {
+    consumer.onPosition(text.viewStart);
+    consumer.onText(text, flags);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(position.nextCharIndex - 1, substringBuilder.getEndExclusive() - 1, TokenType.MARKUP__PLAIN_TEXT);
-
-    substringBuilder.resetIndices();
-
-    consumer.onCursorPosition(position);
-    consumer.onText(text);
+      tokenOutput.emitToken(TokenType.MARKUP__PLAIN_TEXT, text);
   }
 
-  private @Nullable String tryParseIdentifier(boolean emitState) {
-    if (!isIdentifierChar(cursor.peekChar()))
+  private @Nullable StringView tryParseIdentifier() {
+    if (!isIdentifierChar(input.peekChar()))
       return null;
 
-    substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+    input.nextChar();
+    input.setSubViewStart(input.getPosition());
 
-    cursor.nextChar();
+    while (isIdentifierChar(input.peekChar()))
+      input.nextChar();
 
-    if (emitState)
-      consumer.onCursorPosition(cursor.getPosition());
-
-    while (isIdentifierChar(cursor.peekChar()))
-      cursor.nextChar();
-
-    substringBuilder.setEndExclusive(cursor.getNextCharIndex());
-
-    String identifier = substringBuilder.build(SUBSTRING_AS_IS);
-
-    substringBuilder.resetIndices();
-
-    return identifier;
+    return input.buildSubViewUntilPosition(PositionMode.CURRENT);
   }
 
-  private void parseAndEmitStringAttributeValue(String attributeName) {
-    int beginIndex = cursor.getNextCharIndex();
-
-    if (cursor.nextChar() != '"')
+  private void parseAndEmitStringAttributeValue(StringView attributeName) {
+    if (input.nextChar() != '"')
       throw new IllegalStateException("Expected opening double-quotes");
 
-    CursorPosition valueBeginPosition = null;
+    input.setSubViewStart(input.getPosition());
 
-    substringBuilder.setStartInclusive(cursor.getNextCharIndex());
+    StringView value = null;
 
-    boolean encounteredEnd = false;
-    char priorChar = 0;
+    char currentChar;
 
-    while (cursor.peekChar() != 0) {
-      int charIndex = cursor.getNextCharIndex();
-      char currentChar = cursor.nextChar();
-
+    while ((currentChar = input.nextChar()) != 0) {
       if (currentChar == '\r' || currentChar == '\n')
         throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-      if (valueBeginPosition == null)
-        valueBeginPosition = cursor.getPosition();
-
       if (currentChar == '"') {
-        if (priorChar == '\\') {
-          substringBuilder.addIndexToBeRemoved(charIndex - 1);
+        if (input.priorChar() == '\\') {
+          input.addIndexToBeRemoved(input.getCharIndex() - 1);
         } else {
-          substringBuilder.setEndExclusive(charIndex);
-          encounteredEnd = true;
+          value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
           break;
         }
       }
 
       if (tokenOutput != null && Character.isWhitespace(currentChar))
-        tokenOutput.emitCharToken(charIndex, TokenType.ANY__WHITESPACE);
-
-      priorChar = currentChar;
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
     }
 
-    if (!encounteredEnd)
+    if (value == null)
       throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
 
-    String value = substringBuilder.build(SUBSTRING_AS_IS);
-
     if (tokenOutput != null)
-      tokenOutput.emitToken(beginIndex, substringBuilder.getEndExclusive(), TokenType.MARKUP__STRING);
+      tokenOutput.emitToken(TokenType.MARKUP__STRING, value);
 
-    substringBuilder.resetIndices();
-
-    consumer.onStringAttribute(attributeName, valueBeginPosition, value);
+    consumer.onStringAttribute(attributeName, value.buildSubViewRelative(1, -1));
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
-    if (cursor.peekChar() == 0)
+    if (input.peekChar() == 0)
       return true;
 
-    char peekedChar = cursor.peekChar();
+    char peekedChar = input.peekChar();
 
     if (Character.isWhitespace(peekedChar))
       return true;
@@ -309,21 +238,24 @@ public class XmlEventParser {
     return peekedChar == '>';
   }
 
-  private void parseNumericAttributeValue(String attributeName) {
-    int numberBeginIndex = cursor.getNextCharIndex();
-    substringBuilder.setStartInclusive(numberBeginIndex);
-
-    if (cursor.peekChar() == '-')
-      cursor.nextChar();
+  private void parseNumericAttributeValue(StringView attributeName) {
+    if (input.peekChar() == '-') {
+      input.nextChar();
+      input.setSubViewStart(input.getPosition());
+    }
 
     boolean encounteredDecimalPoint = false;
     boolean encounteredDigit = false;
 
-    while (cursor.peekChar() != 0) {
-      char peekedChar = cursor.peekChar();
+    while (input.peekChar() != 0) {
+      char peekedChar = input.peekChar();
 
       if (peekedChar >= '0' && peekedChar <= '9') {
-        cursor.nextChar();
+        input.nextChar();
+
+        if (input.getSubViewStart() == null)
+          input.setSubViewStart(input.getPosition());
+
         encounteredDigit = true;
         continue;
       }
@@ -332,7 +264,11 @@ public class XmlEventParser {
         if (encounteredDecimalPoint)
           throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
-        cursor.nextChar();
+        input.nextChar();
+
+        if (input.getSubViewStart() == null)
+          input.setSubViewStart(input.getPosition());
+
         encounteredDecimalPoint = true;
         continue;
       }
@@ -346,19 +282,14 @@ public class XmlEventParser {
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
 
-    int numberEndIndex = cursor.getNextCharIndex();
-
-    substringBuilder.setEndExclusive(numberEndIndex);
-    String numberString = substringBuilder.build(SUBSTRING_AS_IS);
+    StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(numberBeginIndex, numberEndIndex - 1, TokenType.MARKUP__NUMBER);
-
-    substringBuilder.resetIndices();
+      tokenOutput.emitToken(TokenType.MARKUP__NUMBER, value);
 
     if (encounteredDecimalPoint) {
       try {
-        consumer.onDoubleAttribute(attributeName, numberString, Double.parseDouble(numberString));
+        consumer.onDoubleAttribute(attributeName, value, value.parseDouble());
       } catch (NumberFormatException e) {
         throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
       }
@@ -366,117 +297,94 @@ public class XmlEventParser {
     }
 
     try {
-      consumer.onLongAttribute(attributeName, numberString, Long.parseLong(numberString));
+      consumer.onLongAttribute(attributeName, value, value.parseLong());
     } catch (NumberFormatException e) {
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
     }
   }
 
   private boolean tryParseAttribute() {
-    cursor.consumeWhitespace();
+    input.consumeWhitespace(tokenOutput);
 
     // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
-    String attributeName = tryParseIdentifier(true);
+    StringView attributeName = tryParseIdentifier();
 
     if (attributeName == null) {
-      if (cursor.peekChar() == '"') {
-        cursor.nextChar();
-        consumer.onCursorPosition(cursor.getPosition());
+      if (input.peekChar() == '"') {
+        input.nextChar();
+        consumer.onPosition(input.getPosition());
         throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
       }
 
       return false;
     }
 
+    consumer.onPosition(attributeName.getPosition());
+
     // Attribute-identifiers do not support leading digits, as this constraint allows for
     // proper detection of malformed input; example: my-attr 53 (missing an equals-sign).
-    if (Character.isDigit(attributeName.charAt(0)))
+    if (Character.isDigit(attributeName.nthChar(0)))
       throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
 
-    cursor.consumeWhitespace();
+    input.consumeWhitespace(tokenOutput);
 
-    if (cursor.peekChar() != '=') {
+    if (input.peekChar() != '=') {
       // These "keywords" are reserved; again - for proper detection of malformed input.
-      if (attributeName.equalsIgnoreCase("true") || attributeName.equalsIgnoreCase("false"))
+      if (attributeName.contentEquals("true", true) || attributeName.contentEquals("false", true))
         throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
 
       consumer.onFlagAttribute(attributeName);
       return true;
     }
 
+    input.nextChar();
+
     if (tokenOutput != null)
-      tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__EQUALS);
+      tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__EQUALS);
 
-    cursor.nextChar();
+    input.consumeWhitespace(tokenOutput);
 
-    cursor.consumeWhitespace();
-
-    switch (cursor.peekChar()) {
+    switch (input.peekChar()) {
       case '"':
         parseAndEmitStringAttributeValue(attributeName);
         return true;
 
       case '{':
+        input.nextChar();
+
+        StringPosition openingCurlyPosition = input.getPosition();
+
         if (tokenOutput != null)
-          tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__SUBTREE);
-
-        cursor.nextChar();
-
-        CursorPosition openingCurlyPosition = cursor.getPosition();
+          tokenOutput.emitCharToken(openingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
         consumer.onTagAttributeBegin(attributeName);
 
         parseInput(true);
 
-        char nextChar = cursor.nextChar();
+        char nextChar = input.nextChar();
 
         if (nextChar != '}') {
-          consumer.onCursorPosition(openingCurlyPosition);
+          consumer.onPosition(openingCurlyPosition);
           throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE);
         }
 
-        if (tokenOutput != null)
-          tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__SUBTREE);
+        StringPosition closingCurlyPosition = input.getPosition();
 
-        consumer.onCursorPosition(cursor.getPosition());
+        if (tokenOutput != null)
+          tokenOutput.emitCharToken(closingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
+
+        consumer.onPosition(closingCurlyPosition);
         consumer.onTagAttributeEnd(attributeName);
         return true;
 
       case 'T':
-      case 't': {
-        int beginIndex = cursor.getNextCharIndex();
-
-        for (char c : TRUE_LITERAL_CHARS) {
-          if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
-        }
-
-        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-          throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_TRUE);
-
-        if (tokenOutput != null)
-          tokenOutput.emitToken(beginIndex, beginIndex + 3, TokenType.MARKUP__LITERAL__ANY);
-
-        consumer.onBooleanAttribute(attributeName, "true", true);
+      case 't':
+        consumer.onBooleanAttribute(attributeName, parseLiteral(TRUE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_TRUE), true);
         return true;
-      }
 
       case 'F':
       case 'f':
-        int beginIndex = cursor.getNextCharIndex();
-
-        for (char c : FALSE_LITERAL_CHARS) {
-          if (Character.toLowerCase(cursor.nextChar()) != c)
-            throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
-        }
-
-        if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-          throw new XmlParseException(XmlParseError.MALFORMED_LITERAL_FALSE);
-
-        if (tokenOutput != null)
-          tokenOutput.emitToken(beginIndex, beginIndex + 4, TokenType.MARKUP__LITERAL__ANY);
-
-        consumer.onBooleanAttribute(attributeName, "false", false);
+        consumer.onBooleanAttribute(attributeName, parseLiteral(FALSE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_FALSE), false);
         return true;
 
       case '0':
@@ -499,67 +407,91 @@ public class XmlEventParser {
     }
   }
 
-  private boolean tryConsumeCommentTag(String tagName) {
-    if (!tagName.equalsIgnoreCase("!--"))
-      return false;
+  private StringView parseLiteral(char[] chars, XmlParseError error) {
+    StringPosition begin = null;
 
-    CursorPosition savedPosition = cursor.getPosition();
+    for (char c : chars) {
+      if (Character.toLowerCase(input.nextChar()) != c)
+        throw new XmlParseException(error);
 
-    while (cursor.peekChar() != '-')
-      cursor.nextChar();
-
-    if (cursor.nextChar() != '-' || cursor.nextChar() != '-') {
-      cursor.restoreState(savedPosition);
-      return false;
+      if (begin == null)
+        begin = input.getPosition();
     }
 
-    if (cursor.nextChar() != '>') {
-      cursor.restoreState(savedPosition);
-      return false;
+    // Let's assume that we're not passing empty literals...
+    assert begin != null;
+
+    if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
+      throw new XmlParseException(error);
+
+    input.setSubViewStart(begin);
+    StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
+
+    if (tokenOutput != null)
+      tokenOutput.emitToken(TokenType.MARKUP__LITERAL__ANY, value);
+
+    return value;
+  }
+
+  private @Nullable StringView tryConsumeCommentTag(StringView tagName) {
+    if (!tagName.contentEquals("!--", true))
+      return null;
+
+    StringPosition savedPosition = input.getPosition();
+
+    while (input.peekChar() != '-')
+      input.nextChar();
+
+    if (input.nextChar() != '-' || input.nextChar() != '-') {
+      input.restorePosition(savedPosition);
+      return null;
     }
 
-    return true;
+    if (input.nextChar() != '>') {
+      input.restorePosition(savedPosition);
+      return null;
+    }
+
+    input.setSubViewStart(tagName.viewStart);
+    return input.buildSubViewUntilPosition(PositionMode.CURRENT);
   }
 
   private void parseOpeningOrClosingTag() {
-    int openingIndex = cursor.getNextCharIndex();
-
-    if (cursor.nextChar() != '<')
+    if (input.nextChar() != '<')
       throw new IllegalStateException("Expected an opening pointy-bracket!");
 
+    StringPosition openingPosition = input.getPosition();
+
     if (tokenOutput != null)
-      tokenOutput.emitCharToken(openingIndex, TokenType.MARKUP__PUNCTUATION__TAG);
+      tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
-    CursorPosition savedPosition = cursor.getPosition();
-
-    cursor.consumeWhitespace();
+    input.consumeWhitespace(tokenOutput);
 
     boolean wasClosingTag = false;
 
-    if (cursor.peekChar() == '/') {
+    if (input.peekChar() == '/') {
       if (tokenOutput != null)
-        tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG);
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
 
-      cursor.nextChar();
+      input.nextChar();
       wasClosingTag = true;
     }
 
-    cursor.consumeWhitespace();
+    input.consumeWhitespace(tokenOutput);
 
-    int tagNameIndex = cursor.getNextCharIndex();
-    String tagName = tryParseIdentifier(false);
+    StringView tagName = tryParseIdentifier();
 
     if (wasClosingTag) {
-      consumer.onCursorPosition(savedPosition);
+      consumer.onPosition(openingPosition);
 
-      if (cursor.nextChar() != '>')
+      if (input.nextChar() != '>')
         throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
       if (tokenOutput != null) {
         if (tagName != null)
-          tokenOutput.emitToken(tagNameIndex, tagNameIndex + (tagName.length() - 1), TokenType.MARKUP__IDENTIFIER__TAG);
+          tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
-        tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG);
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
       }
 
       consumer.onTagClose(tagName);
@@ -567,47 +499,51 @@ public class XmlEventParser {
     }
 
     if (tagName == null) {
-      consumer.onCursorPosition(savedPosition);
+      consumer.onPosition(openingPosition);
       throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
     }
 
-    if (tryConsumeCommentTag(tagName)) {
+    StringView comment;
+
+    if ((comment = tryConsumeCommentTag(tagName)) != null) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(openingIndex, cursor.getNextCharIndex() - 1, TokenType.MARKUP__COMMENT);
+        tokenOutput.emitToken(TokenType.MARKUP__COMMENT, comment);
 
       return;
     }
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(tagNameIndex, tagNameIndex + (tagName.length() - 1), TokenType.MARKUP__IDENTIFIER__TAG);
+      tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
-    consumer.onCursorPosition(savedPosition);
+    consumer.onPosition(openingPosition);
     consumer.onTagOpenBegin(tagName);
 
-    while (cursor.peekChar() != 0) {
+    while (input.peekChar() != 0) {
       if (!tryParseAttribute())
         break;
     }
 
     boolean wasSelfClosing = false;
 
-    if (cursor.peekChar() == '/') {
-      if (tokenOutput != null)
-        tokenOutput.emitCharToken(cursor.getNextCharIndex(), TokenType.MARKUP__PUNCTUATION__TAG);
-
+    if (input.peekChar() == '/') {
+      input.nextChar();
       wasSelfClosing = true;
-      cursor.nextChar();
+
+      if (tokenOutput != null)
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
     }
 
-    cursor.consumeWhitespace();
+    input.consumeWhitespace(tokenOutput);
 
-    if (cursor.nextChar() != '>')
+    if (input.nextChar() != '>')
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
 
-    if (tokenOutput != null)
-      tokenOutput.emitCharToken(cursor.getNextCharIndex() - 1, TokenType.MARKUP__PUNCTUATION__TAG);
+    StringPosition closingPosition = input.getPosition();
 
-    consumer.onCursorPosition(cursor.getPosition());
+    if (tokenOutput != null)
+      tokenOutput.emitCharToken(closingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
+
+    consumer.onPosition(closingPosition);
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
   }
 
