@@ -1,70 +1,87 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.markup.xml.event.PositionEvent;
+import at.blvckbytes.component_markup.util.Jsonifier;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Stack;
 
 public class TextWithAnchors {
 
-  private final List<PositionEvent> anchors;
-  private final List<PositionEvent> auxAnchors;
+  private static class ViewIndices {
+    final int startCharIndex;
+    int endCharIndex;
+
+    private ViewIndices(int startCharIndex) {
+      this.startCharIndex = startCharIndex;
+    }
+  }
 
   public final String text;
+  private final StringView rootView;
+  private final List<StringView> subViews;
+  private final List<StringPosition> anchors;
 
   public TextWithAnchors(String... lines) {
+    this.subViews = new ArrayList<>();
     this.anchors = new ArrayList<>();
-    this.auxAnchors = new ArrayList<>();
-
-    List<CursorPosition> anchorPositions = new ArrayList<>();
-    List<CursorPosition> auxAnchorPositions = new ArrayList<>();
 
     StringBuilder result = new StringBuilder();
-    int lineNumber = 1, columnNumber = 1, charIndex = 0;
+    int charIndex = 0;
+
+    Stack<ViewIndices> indicesStack = new Stack<>();
+    List<ViewIndices> indicesInOrder = new ArrayList<>();
 
     for (int linesIndex = 0; linesIndex < lines.length; ++linesIndex) {
       String line = lines[linesIndex];
 
       for (int lineCharIndex = 0; lineCharIndex < line.length(); ++lineCharIndex) {
         char currentChar = line.charAt(lineCharIndex);
+
         boolean isEscaped = lineCharIndex != 0 && line.charAt(lineCharIndex - 1) == '\\';
 
-        CursorPosition position = new CursorPosition(charIndex + 1, lineNumber, columnNumber, null);
+        boolean isOpening;
+
+        if ((isOpening = currentChar == '`') || currentChar == '´') {
+          if (isEscaped) {
+            result.deleteCharAt(result.length() - 1);
+            --charIndex;
+          }
+
+          else {
+            if (isOpening) {
+              ViewIndices indices = new ViewIndices(charIndex);
+              indicesStack.push(indices);
+              indicesInOrder.add(indices);
+            }
+            else {
+              if (indicesStack.isEmpty())
+                throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex);
+
+              ViewIndices indices = indicesStack.pop();
+              indices.endCharIndex = charIndex - 1;
+            }
+
+            continue;
+          }
+        }
 
         if (currentChar == '@') {
           if (isEscaped) {
             result.deleteCharAt(result.length() - 1);
             --charIndex;
-            --columnNumber;
           }
 
           else {
-            anchorPositions.add(position);
+            anchors.add(new StringPosition(null, charIndex));
             continue;
           }
         }
-
-        if (currentChar == '#') {
-          if (isEscaped) {
-            result.deleteCharAt(result.length() - 1);
-            --charIndex;
-            --columnNumber;
-          }
-
-          else {
-            auxAnchorPositions.add(position);
-            continue;
-          }
-        }
-
-        if (currentChar == '\n') {
-          ++lineNumber;
-          columnNumber = 1;
-        }
-        else
-          ++columnNumber;
 
         ++charIndex;
 
@@ -75,100 +92,52 @@ public class TextWithAnchors {
         break;
 
       result.append('\n');
-
-      ++lineNumber;
-      columnNumber = 1;
       ++charIndex;
     }
 
+    if (!indicesStack.isEmpty()) {
+      ViewIndices firstItem = indicesStack.get(0);
+      throw new IllegalStateException("Unbalanced stack: " + Jsonifier.jsonify(firstItem));
+    }
+
     this.text = result.toString();
+    this.rootView = StringView.of(text);
 
-    for (CursorPosition anchorPosition : anchorPositions) {
-      this.anchors.add(new PositionEvent(
-        new CursorPosition(
-          anchorPosition.nextCharIndex,
-          anchorPosition.lineNumber,
-          anchorPosition.columnNumber,
-          this.text
-        )
-      ));
-    }
-
-    for (CursorPosition auxAnchorPosition : auxAnchorPositions) {
-      this.auxAnchors.add(new PositionEvent(
-        new CursorPosition(
-          auxAnchorPosition.nextCharIndex,
-          auxAnchorPosition.lineNumber,
-          auxAnchorPosition.columnNumber,
-          this.text
-        )
-      ));
+    for (ViewIndices indices : indicesInOrder) {
+      StringPosition start = new StringPosition(rootView, indices.startCharIndex);
+      rootView.setSubViewStart(start);
+      StringPosition end = new StringPosition(rootView, indices.endCharIndex);
+      this.subViews.add(rootView.buildSubViewUntilPosition(end));
     }
   }
 
-  public int getAnchorCount() {
-    return anchors.size();
+  public void addViewIndexToBeRemoved(StringPosition position) {
+    this.rootView.addIndexToBeRemoved(position.charIndex);
   }
 
-  public @NotNull CursorPosition anchor(int index) {
-    PositionEvent positionEvent = anchorEvent(index);
-
-    if (positionEvent == null)
-      throw new IllegalStateException("Required anchor at index " + index);
-
-    return positionEvent.position;
+  public @NotNull StringView subView(int index, EnumSet<SubstringFlag> flags) {
+    StringView view = subView(index);
+    view.setBuildFlags(flags);
+    return view;
   }
 
-  public int anchorIndex(int index) {
-    if (index < 0 || index >= anchors.size())
-      throw new IllegalStateException("Required anchor at index " + index);
+  public @NotNull StringView subView(int index) {
+    if (index < 0)
+      throw new IllegalStateException("Cannot request negative indices");
 
-    int nextCharIndex = anchors.get(index).position.nextCharIndex;
+    if (index >= subViews.size())
+      throw new IllegalStateException("Requested index " + index + "; only got " + subViews.size() + " sub-views");
 
-    if (nextCharIndex > 0)
-      --nextCharIndex;
-
-    return nextCharIndex;
+    return subViews.get(index);
   }
 
-  public int auxAnchorIndex(int index) {
-    if (index < 0 || index >= auxAnchors.size())
-      throw new IllegalStateException("Required aux-anchor at index " + index);
+  public @NotNull StringPosition anchor(int index) {
+    if (index < 0)
+      throw new IllegalStateException("Cannot request negative indices");
 
-    int nextCharIndex = auxAnchors.get(index).position.nextCharIndex;
-
-    if (nextCharIndex > 0)
-      --nextCharIndex;
-
-    return nextCharIndex;
-  }
-
-  public @Nullable PositionEvent anchorEvent(int index) {
-    if (index < 0 || index >= anchors.size())
-      return null;
+    if (index >= anchors.size())
+      throw new IllegalStateException("Requested index " + index + "; only got " + subViews.size() + " anchors");
 
     return anchors.get(index);
-  }
-
-  public @Nullable PositionEvent auxAnchorEvent(int index) {
-    if (index < 0 || index >= auxAnchors.size())
-      return null;
-
-    return auxAnchors.get(index);
-  }
-
-  public @NotNull CursorPosition auxAnchor(int index) {
-    PositionEvent positionEvent = auxAnchorEvent(index);
-
-    if (positionEvent == null)
-      throw new IllegalStateException("Required aux-anchor at index " + index);
-
-    return positionEvent.position;
-  }
-
-  public static String escape(Object input) {
-    return String.valueOf(input)
-      .replace("@", "\\@")
-      .replace("#", "\\#");
   }
 }

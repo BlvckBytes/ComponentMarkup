@@ -41,7 +41,7 @@ public class ExpressionTokenizer {
         break;
 
       if (upcomingChar == quoteChar) {
-        if (input.priorChar() != '\\') {
+        if (input.priorNextChar() != '\\') {
           isTerminated = true;
           break;
         }
@@ -88,7 +88,7 @@ public class ExpressionTokenizer {
       if (isFirst && (upcomingChar == '_' || isNumeric))
         throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      if (upcomingChar == '_' && input.priorChar() == '_')
+      if (upcomingChar == '_' && input.priorNextChar() == '_')
         throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       input.nextChar();

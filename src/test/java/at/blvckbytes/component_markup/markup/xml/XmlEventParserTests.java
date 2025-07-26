@@ -2,6 +2,8 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.event.*;
+import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +18,14 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseNoAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, world! :)"
+      "<`red´>`Hello, world! :)´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello, world! :)"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.LAST_TEXT), "Hello, world! :)"),
       new InputEndEvent()
     );
   }
@@ -31,19 +33,19 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "  @<red @attr-1=\"#string\" @attr-2=true @attr-3=false @attr-4=.3 @attr-5=-3@>@ my content"
+      "  <`red´ `attr-1´=\"` string´\" `attr-2´=`true´ `attr-3´=`false´ `attr-4´=`.3´ `attr-5´=`-3´>` my content´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("attr-1", text.auxAnchor(0), "string"),
-      new BooleanAttributeEvent("attr-2", "true", true),
-      new BooleanAttributeEvent("attr-3", "false", false),
-      new DoubleAttributeEvent("attr-4", ".3", .3),
-      new LongAttributeEvent("attr-5", "-3", -3),
-      new TagOpenEndEvent("red", false),
-      new TextEvent(" my content"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "attr-1", " string"),
+      new BooleanAttributeEvent(text.subView(3), text.subView(4), true, "attr-2", "true"),
+      new BooleanAttributeEvent(text.subView(5), text.subView(6), false, "attr-3", "false"),
+      new DoubleAttributeEvent(text.subView(7), text.subView(8), .3, "attr-4", ".3"),
+      new LongAttributeEvent(text.subView(9), text.subView(10), -3, "attr-5", "-3"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(11, SubstringFlag.LAST_TEXT), " my content"),
       new InputEndEvent()
     );
   }
@@ -51,20 +53,20 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseMultilineAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red",
-      "  @attr-1=\"#value 1\"",
-      "  @attr-2=\"#value 2\"",
-      "  @attr-3=\"#value 3\"",
-      "@>"
+      "<`red´",
+      "  `attr-1´=\"`value 1´\"",
+      "  `attr-2´=\"`value 2´\"",
+      "  `attr-3´=\"`value 3´\"",
+      ">"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("attr-1", text.auxAnchor(0), "value 1"),
-      new StringAttributeEvent("attr-2", text.auxAnchor(1), "value 2"),
-      new StringAttributeEvent("attr-3", text.auxAnchor(2), "value 3"),
-      new TagOpenEndEvent("red", false),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "attr-1", "value 1"),
+      new StringAttributeEvent(text.subView(3), text.subView(4), "attr-2", "value 2"),
+      new StringAttributeEvent(text.subView(5), text.subView(6), "attr-3", "value 3"),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
   }
@@ -72,24 +74,24 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseSelfClosingTag() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<br /@>"
+      "<  `br´ />"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
+      new TagOpenBeginEvent(text.subView(0), "br"),
+      new TagOpenEndEvent(text.subView(0), true),
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
-      "@<br/@>"
+      "<`br´/>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
+      new TagOpenBeginEvent(text.subView(0), "br"),
+      new TagOpenEndEvent(text.subView(0), true),
       new InputEndEvent()
     );
   }
@@ -97,15 +99,15 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseOpeningAndClosingTagWithText() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello@</red>"
+      "<`red´>`Hello´@</`red´>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello"),
-      new TagCloseEvent("red"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello"),
+      new TagCloseEvent(text.subView(2), text.anchor(0), "red"),
       new InputEndEvent()
     );
   }
@@ -113,17 +115,17 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseIndentedTags() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>",
-      "  @<bold@>@hi"
+      "<`red´>",
+      "  <`bold´>`hi´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TagOpenBeginEvent("bold"),
-      new TagOpenEndEvent("bold", false),
-      new TextEvent("hi"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TagOpenBeginEvent(text.subView(1), "bold"),
+      new TagOpenEndEvent(text.subView(1), false),
+      new TextEvent(text.subView(2, SubstringFlag.LAST_TEXT), "hi"),
       new InputEndEvent()
     );
   }
@@ -131,20 +133,20 @@ public class XmlEventParserTests {
   @Test
   public void shouldRemoveTrailingWhitespace() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello ",
+      "<`red´>`Hello ",
       "world ",
-      "test@<bold@>",
-      "@test2"
+      "test´<`bold´>",
+      "`test2´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Helloworldtest"),
-      new TagOpenBeginEvent("bold"),
-      new TagOpenEndEvent("bold", false),
-      new TextEvent("test2"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Helloworldtest"),
+      new TagOpenBeginEvent(text.subView(2), "bold"),
+      new TagOpenEndEvent(text.subView(2), false),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "test2"),
       new InputEndEvent()
     );
   }
@@ -152,23 +154,25 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseMarkupAttribute() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<tag-outer",
-      "  @attr-1={",
-      "    @<red@>@Hello curly \\} bracket@</red>",
-      "  @}",
-      "@>"
+      "<`tag-outer´",
+      "  `attr-1´=@{",
+      "    <`red´>`Hello curly @\\} bracket´@</`red´>",
+      "  }",
+      ">"
     );
 
-    makeCaseWithInterleavedAnchors(
+    text.addViewIndexToBeRemoved(text.anchor(1));
+
+    makeCase(
       text,
-      new TagOpenBeginEvent("tag-outer"),
-      new TagAttributeBeginEvent("attr-1"),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello curly } bracket"),
-      new TagCloseEvent("red"),
-      new TagAttributeEndEvent("attr-1"),
-      new TagOpenEndEvent("tag-outer", false),
+      new TagOpenBeginEvent(text.subView(0), "tag-outer"),
+      new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "attr-1"),
+      new TagOpenBeginEvent(text.subView(2), "red"),
+      new TagOpenEndEvent(text.subView(2), false),
+      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), "Hello curly } bracket"),
+      new TagCloseEvent(text.subView(4), text.anchor(2), "red"),
+      new TagAttributeEndEvent(text.subView(1)),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
   }
@@ -176,16 +180,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationExpressions() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{#user.name}@!"
+      "<`red´>`Hello, ´{`user.name´}`!´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello, "),
-      new InterpolationEvent("user.name", text.auxAnchor(0)),
-      new TextEvent("!"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello, "),
+      new InterpolationEvent(text.subView(2), "user.name"),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
   }
@@ -193,69 +197,73 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseFairlyComplexExpression() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<show-item",
-      "  @name={@<red@>@My item!@</red>@}",
-      "  @lore={@<blue@>@First line@<br/@>",
-      "       @<green@>@Second line@<br/@>",
-      "       @<gray",
-      "         @*for-member=\"#members\"",
-      "         @limit=5",
-      "         @separator={@<br/@>@}",
-      "         @empty={@<red@>@No items found!@}",
-      "       @>@- @<yellow@>@{# member.item }@</gray>@<br/@>",
-      "       @<gray@>@Last line! :)",
-      "  @}",
-      "@>@hover over @{#\"me\"}@! :)"
+      "<`show-item´",
+      "  `name´=@{<`red´>`My item!´@</`red´>}",
+      "  `lore´=@{<`blue´>`First line´<`br´/>",
+      "       <`green´>`Second line´<`br´/>",
+      "       <`gray´",
+      "         `*for-member´=\"`members´\"",
+      "         `limit´=`5´",
+      "         `separator´=@{<`br´/>}",
+      "         `empty´=@{<`red´>`No items found!´}",
+      "       >`- ´<`yellow´>{` member.item ´}@</`gray´><`br´/>",
+      "       <`gray´>`Last line! :)",
+      "  ´}",
+      ">`hover over ´{`\"me\"´}`! ´<`red´ `my_flag´>`:)´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("show-item"),
-      new TagAttributeBeginEvent("name"),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("My item!"),
-      new TagCloseEvent("red"),
-      new TagAttributeEndEvent("name"),
-      new TagAttributeBeginEvent("lore"),
-      new TagOpenBeginEvent("blue"),
-      new TagOpenEndEvent("blue", false),
-      new TextEvent("First line"),
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
-      new TagOpenBeginEvent("green"),
-      new TagOpenEndEvent("green", false),
-      new TextEvent("Second line"),
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
-      new TagOpenBeginEvent("gray"),
-      new StringAttributeEvent("*for-member", text.auxAnchor(0), "members"),
-      new LongAttributeEvent("limit", "5", 5),
-      new TagAttributeBeginEvent("separator"),
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
-      new TagAttributeEndEvent("separator"),
-      new TagAttributeBeginEvent("empty"),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("No items found!"),
-      new TagAttributeEndEvent("empty"),
-      new TagOpenEndEvent("gray", false),
-      new TextEvent("- "),
-      new TagOpenBeginEvent("yellow"),
-      new TagOpenEndEvent("yellow", false),
-      new InterpolationEvent(" member.item ", text.auxAnchor(1)),
-      new TagCloseEvent("gray"),
-      new TagOpenBeginEvent("br"),
-      new TagOpenEndEvent("br", true),
-      new TagOpenBeginEvent("gray"),
-      new TagOpenEndEvent("gray", false),
-      new TextEvent("Last line! :)"),
-      new TagAttributeEndEvent("lore"),
-      new TagOpenEndEvent("show-item", false),
-      new TextEvent("hover over "),
-      new InterpolationEvent("\"me\"", text.auxAnchor(2)),
-      new TextEvent("! :)"),
+      new TagOpenBeginEvent(text.subView(0), "show-item"),
+      new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "name"),
+      new TagOpenBeginEvent(text.subView(2), "red"),
+      new TagOpenEndEvent(text.subView(2), false),
+      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), "My item!"),
+      new TagCloseEvent(text.subView(4), text.anchor(1), "red"),
+      new TagAttributeEndEvent(text.subView(1)),
+      new TagAttributeBeginEvent(text.subView(5), text.anchor(2), "lore"),
+      new TagOpenBeginEvent(text.subView(6), "blue"),
+      new TagOpenEndEvent(text.subView(6), false),
+      new TextEvent(text.subView(7, SubstringFlag.INNER_TEXT), "First line"),
+      new TagOpenBeginEvent(text.subView(8), "br"),
+      new TagOpenEndEvent(text.subView(8), true),
+      new TagOpenBeginEvent(text.subView(9), "green"),
+      new TagOpenEndEvent(text.subView(9), false),
+      new TextEvent(text.subView(10, SubstringFlag.INNER_TEXT), "Second line"),
+      new TagOpenBeginEvent(text.subView(11), "br"),
+      new TagOpenEndEvent(text.subView(11), true),
+      new TagOpenBeginEvent(text.subView(12), "gray"),
+      new StringAttributeEvent(text.subView(13), text.subView(14), "*for-member", "members"),
+      new LongAttributeEvent(text.subView(15), text.subView(16), 5, "limit", "5"),
+      new TagAttributeBeginEvent(text.subView(17), text.anchor(3), "separator"),
+      new TagOpenBeginEvent(text.subView(18), "br"),
+      new TagOpenEndEvent(text.subView(18), true),
+      new TagAttributeEndEvent(text.subView(17)),
+      new TagAttributeBeginEvent(text.subView(19), text.anchor(4), "empty"),
+      new TagOpenBeginEvent(text.subView(20), "red"),
+      new TagOpenEndEvent(text.subView(20), false),
+      new TextEvent(text.subView(21, SubstringFlag.LAST_TEXT), "No items found!"),
+      new TagAttributeEndEvent(text.subView(19)),
+      new TagOpenEndEvent(text.subView(12), false),
+      new TextEvent(text.subView(22, SubstringFlag.INNER_TEXT), "- "),
+      new TagOpenBeginEvent(text.subView(23), "yellow"),
+      new TagOpenEndEvent(text.subView(23), false),
+      new InterpolationEvent(text.subView(24), " member.item "),
+      new TagCloseEvent(text.subView(25), text.anchor(5), "gray"),
+      new TagOpenBeginEvent(text.subView(26), "br"),
+      new TagOpenEndEvent(text.subView(26), true),
+      new TagOpenBeginEvent(text.subView(27), "gray"),
+      new TagOpenEndEvent(text.subView(27), false),
+      new TextEvent(text.subView(28, SubstringFlag.LAST_TEXT), "Last line! :)"),
+      new TagAttributeEndEvent(text.subView(5)),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(29, SubstringFlag.INNER_TEXT), "hover over "),
+      new InterpolationEvent(text.subView(30), "\"me\""),
+      new TextEvent(text.subView(31, SubstringFlag.INNER_TEXT), "! "),
+      new TagOpenBeginEvent(text.subView(32), "red"),
+      new FlagAttributeEvent(text.subView(33), "my_flag"),
+      new TagOpenEndEvent(text.subView(32), false),
+      new TextEvent(text.subView(34, SubstringFlag.LAST_TEXT), ":)"),
       new InputEndEvent()
     );
   }
@@ -263,16 +271,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationWithCurlyBracketsInStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello, @{#user.name + \"}\" + '}'}@!"
+      "<`red´>`Hello, ´{`user.name + \"}\" + '}'´}`!´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello, "),
-      new InterpolationEvent("user.name + \"}\" + '}'", text.auxAnchor(0)),
-      new TextEvent("!"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello, "),
+      new InterpolationEvent(text.subView(2), "user.name + \"}\" + '}'"),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
   }
@@ -280,18 +288,28 @@ public class XmlEventParserTests {
   @Test
   public void shouldHandleAllTypesOfTextLocations() {
     TextWithAnchors text = new TextWithAnchors(
-      "@  abcde @<red@>@ hello @<blue@>@ world!  "
+      "`  abcde ´<`red´>` hello ´<`blue´>` world!  ´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TextEvent("abcde "),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent(" hello "),
-      new TagOpenBeginEvent("blue"),
-      new TagOpenEndEvent("blue", false),
-      new TextEvent(" world!"),
+      new TextEvent(text.subView(0, SubstringFlag.FIRST_TEXT), "abcde "),
+      new TagOpenBeginEvent(text.subView(1), "red"),
+      new TagOpenEndEvent(text.subView(1), false),
+      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), " hello "),
+      new TagOpenBeginEvent(text.subView(3), "blue"),
+      new TagOpenEndEvent(text.subView(3), false),
+      new TextEvent(text.subView(4, SubstringFlag.LAST_TEXT), " world!"),
+      new InputEndEvent()
+    );
+
+    text = new TextWithAnchors(
+      "`  abcde ´"
+    );
+
+    makeCase(
+      text,
+      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "abcde"),
       new InputEndEvent()
     );
   }
@@ -299,16 +317,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldStripTrailingSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@Online players:   ",
-      "@<red@>@test"
+      "`Online players:   ",
+      "´<`red´>`test´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TextEvent("Online players:"),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("test"),
+      new TextEvent(text.subView(0, SubstringFlag.FIRST_TEXT), "Online players:"),
+      new TagOpenBeginEvent(text.subView(1), "red"),
+      new TagOpenEndEvent(text.subView(1), false),
+      new TextEvent(text.subView(2, SubstringFlag.LAST_TEXT), "test"),
       new InputEndEvent()
     );
   }
@@ -316,14 +334,14 @@ public class XmlEventParserTests {
   @Test
   public void shouldRemoveNewlineTrailingSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@  hello",
+      "`  hello",
       "    world",
-      "   test"
+      "   test´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TextEvent("helloworldtest"),
+      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "helloworldtest"),
       new InputEndEvent()
     );
   }
@@ -331,18 +349,18 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveSurroundingContentSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<bold@>",
-      "  @<red@>@  surrounding spaces  @</red>"
+      "<`bold´>",
+      "  <`red´>`  surrounding spaces  ´@</`red´>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("bold"),
-      new TagOpenEndEvent("bold", false),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("  surrounding spaces  "),
-      new TagCloseEvent("red"),
+      new TagOpenBeginEvent(text.subView(0), "bold"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TagOpenBeginEvent(text.subView(1), "red"),
+      new TagOpenEndEvent(text.subView(1), false),
+      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), "  surrounding spaces  "),
+      new TagCloseEvent(text.subView(3), text.anchor(0), "red"),
       new InputEndEvent()
     );
   }
@@ -350,16 +368,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveSurroundingInterpolationSpaces() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@Hello @{#user.name}@ world!"
+      "<`red´>`Hello ´{`user.name´}` world!´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello "),
-      new InterpolationEvent("user.name", text.auxAnchor(0)),
-      new TextEvent(" world!"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello "),
+      new InterpolationEvent(text.subView(2), "user.name"),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), " world!"),
       new InputEndEvent()
     );
   }
@@ -367,44 +385,46 @@ public class XmlEventParserTests {
   @Test
   public void shouldEscapeCharactersInAttributeValues() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red @a=\"#hello \\\" quote\"@>"
+      "<`red´ `a´=\"`hello @\\\" quote´\">"
     );
 
-    makeCaseWithInterleavedAnchors(
+    text.addViewIndexToBeRemoved(text.anchor(0));
+
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", text.auxAnchor(0), "hello \" quote"),
-      new TagOpenEndEvent("red", false),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "a", "hello \" quote"),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
-      "@<red @a=\"#these > should < not require escaping\"@>"
+      "<`red´ `a´=\"`these > should < not require escaping´\">"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", text.auxAnchor(0), "these > should < not require escaping"),
-      new TagOpenEndEvent("red", false),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "a", "these > should < not require escaping"),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
-      "@<red @a={",
-      "  @<green @b=\"#neither } should { these\"@>",
-      "@}@>"
+      "<`red´ `a´=@{",
+      "  <`green´ `b´=\"`neither } should { these´\">",
+      "}>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagAttributeBeginEvent("a"),
-      new TagOpenBeginEvent("green"),
-      new StringAttributeEvent("b", text.auxAnchor(0), "neither } should { these"),
-      new TagOpenEndEvent("green", false),
-      new TagAttributeEndEvent("a"),
-      new TagOpenEndEvent("red", false),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "a"),
+      new TagOpenBeginEvent(text.subView(2), "green"),
+      new StringAttributeEvent(text.subView(3), text.subView(4), "b", "neither } should { these"),
+      new TagOpenEndEvent(text.subView(2), false),
+      new TagAttributeEndEvent(text.subView(1)),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
   }
@@ -412,12 +432,14 @@ public class XmlEventParserTests {
   @Test
   public void shouldEscapeLeadingCharacterInText() {
     TextWithAnchors text = new TextWithAnchors(
-      "@\\<hello, world!"
+      "`@\\<hello, world!´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    text.addViewIndexToBeRemoved(text.anchor(0));
+
+    makeCase(
       text,
-      new TextEvent("<hello, world!"),
+      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "<hello, world!"),
       new InputEndEvent()
     );
   }
@@ -425,21 +447,28 @@ public class XmlEventParserTests {
   @Test
   public void shouldEscapeCharactersInText() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@' escaping \" closing \\> opening \\<; closing \\} opening \\{ \" and '@</red>"
+      "<`red´>`' escaping \" closing \\> opening @\\<; closing @\\} opening @\\{ \" and '´@</`red´>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    text.addViewIndexToBeRemoved(text.anchor(0));
+    text.addViewIndexToBeRemoved(text.anchor(1));
+    text.addViewIndexToBeRemoved(text.anchor(2));
+
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      // Within text-content, there's no need to escape quotes, as strings only occur
-      // at values of attributes; also, there's no need to escape closing pointy-brackets,
-      // as the predecessor tag (if any) is already closed.
-      // I am >not< looking for general "consistency" here, but rather want to keep it as
-      // syntactically terse as possible, while maintaining readability - thus, only escape
-      // what's absolutely required as to avoid ambiguity while parsing.
-      new TextEvent("' escaping \" closing \\> opening <; closing } opening { \" and '"),
-      new TagCloseEvent("red"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(
+        text.subView(1, SubstringFlag.INNER_TEXT),
+        // Within text-content, there's no need to escape quotes, as strings only occur
+        // at values of attributes; also, there's no need to escape closing pointy-brackets,
+        // as the predecessor tag (if any) is already closed.
+        // I am >not< looking for general "consistency" here, but rather want to keep it as
+        // syntactically terse as possible, while maintaining readability - thus, only escape
+        // what's absolutely required as to avoid ambiguity while parsing.
+        "' escaping \" closing \\> opening <; closing } opening { \" and '"
+      ),
+      new TagCloseEvent(text.subView(2), text.anchor(3), "red"),
       new InputEndEvent()
     );
   }
@@ -447,19 +476,19 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveNonEscapingBackslashes() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red @a=\"#a \\ backslash\"@>@another \\ backslash"
+      "<`red´ `a´=\"`a \\ backslash´\">`another \\ backslash´"
     );
 
     // Because why not? :) There's absolutely no reason to treat backslashes which do not
     // actually escape critical characters any differently. I do not care about being "compatible"
     // with some general syntax out there, because I'm building a DSL!
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new StringAttributeEvent("a", text.auxAnchor(0), "a \\ backslash"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("another \\ backslash"),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "a", "a \\ backslash"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "another \\ backslash"),
       new InputEndEvent()
     );
   }
@@ -467,15 +496,15 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseFlagAttributes() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red @a @b@>"
+      "<`red´ `a´ `b´>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("red"),
-      new FlagAttributeEvent("a"),
-      new FlagAttributeEvent("b"),
-      new TagOpenEndEvent("red", false),
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new FlagAttributeEvent(text.subView(1), "a"),
+      new FlagAttributeEvent(text.subView(2), "b"),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
   }
@@ -486,26 +515,27 @@ public class XmlEventParserTests {
       "<!-- My comment! :) -->"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       new InputEndEvent()
     );
 
     text = new TextWithAnchors(
       "<!-- A shiny new container! -->",
-      "@<container@>",
+      "<`container´>",
       "  <!-- An indented comment, :) -->",
-      "  @<red@>@Hello, world! <!-- Trailing comment -->",
-      "<!-- Trailing comment -->"
+      "  <`red´>`Hello, world! ´<!-- Trailing comment -->",
+      "<!-- Trailing comment -->` more text´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("container"),
-      new TagOpenEndEvent("container", false),
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      new TextEvent("Hello, world! "),
+      new TagOpenBeginEvent(text.subView(0), "container"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new TagOpenBeginEvent(text.subView(1), "red"),
+      new TagOpenEndEvent(text.subView(1), false),
+      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), "Hello, world! "),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), " more text"),
       new InputEndEvent()
     );
   }
@@ -513,18 +543,18 @@ public class XmlEventParserTests {
   @Test
   public void shouldNotEmitEmptyStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<container @*let-test={ @{#a}@ and @{#b} @}@>"
+      "<`container´ `*let-test´=@{ {`a´}` and ´{`b´} }>"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagOpenBeginEvent("container"),
-      new TagAttributeBeginEvent("*let-test"),
-      new InterpolationEvent("a", text.auxAnchor(0)),
-      new TextEvent(" and "),
-      new InterpolationEvent("b", text.auxAnchor(1)),
-      new TagAttributeEndEvent("*let-test"),
-      new TagOpenEndEvent("container", false),
+      new TagOpenBeginEvent(text.subView(0), "container"),
+      new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "*let-test"),
+      new InterpolationEvent(text.subView(2), "a"),
+      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), " and "),
+      new InterpolationEvent(text.subView(4), "b"),
+      new TagAttributeEndEvent(text.subView(1)),
+      new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );
   }
@@ -536,47 +566,47 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedOpeningTag() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red"
+      "<`red´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_TAG,
-      new TagOpenBeginEvent("red")
+      new TagOpenBeginEvent(text.subView(0), "red")
     );
   }
 
   @Test
   public void shouldThrowOnUnterminatedClosingTag() {
     TextWithAnchors text = new TextWithAnchors(
-      "@</red"
+      "</red"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      XmlParseError.UNTERMINATED_TAG,
-      text.anchorEvent(0)
+      XmlParseError.UNTERMINATED_TAG
     );
   }
 
   @Test
   public void shouldThrowOnUnterminatedMarkupValue() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red",
-      "  @my-attr=#{",
-      "    @<green@>@Hello, \\} world!",
-      ">"
+      "<`red´",
+      "  `my-attr´=@{",
+      "    <`green´>`Hello, @\\} world!",
+      ">´"
     );
 
-    makeCaseWithInterleavedAnchors(
+    text.addViewIndexToBeRemoved(text.anchor(1));
+
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_MARKUP_VALUE,
-      new TagOpenBeginEvent("red"),
-      new TagAttributeBeginEvent("my-attr"),
-      new TagOpenBeginEvent("green"),
-      new TagOpenEndEvent("green", false),
-      new TextEvent("Hello, } world!>"),
-      text.auxAnchorEvent(0)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "my-attr"),
+      new TagOpenBeginEvent(text.subView(2), "green"),
+      new TagOpenEndEvent(text.subView(2), false),
+      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "Hello, } world!>")
     );
   }
 
@@ -588,51 +618,47 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<red@>@{user.name + \"}\" + '}'"
+      "<`red´>{user.name + \"}\" + '}'"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "@<red@>@{user.name\n}"
+      "<`red´>{user.name\n}"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "@<red@>@{user.name{"
+      "<`red´>{user.name{"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "@<red@>@{{"
+      "<`red´>{{"
     );
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
-      new TagOpenBeginEvent("red"),
-      new TagOpenEndEvent("red", false),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
     );
   }
 
@@ -668,96 +694,87 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnsupportedAttributeValues() {
     makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "`test`");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "\\`test\\`");
     makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "<red>");
     makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "'test'");
   }
 
   @Test
   public void shouldThrowOnMissingTagName() {
-    TextWithAnchors text = new TextWithAnchors("@<>");
-
-    makeCaseWithInterleavedAnchors(
-      text,
-      XmlParseError.MISSING_TAG_NAME,
-      text.anchorEvent(0)
-    );
+    TextWithAnchors text = new TextWithAnchors("<>");
+    makeCase(text, XmlParseError.MISSING_TAG_NAME);
   }
 
   @Test
   public void shouldAllowNullNamedClosingTag() {
     TextWithAnchors text = new TextWithAnchors("@</>");
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
-      new TagCloseEvent(null),
+      new TagCloseEvent(null, text.anchor(0), null),
       new InputEndEvent()
     );
   }
 
   @Test
   public void shouldThrowOnMalformedAttributeKeys() {
-    TextWithAnchors text = new TextWithAnchors("@<red @my-attr @true>");
+    TextWithAnchors text = new TextWithAnchors("<`red´ `my-attr´ true>");
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.EXPECTED_ATTRIBUTE_KEY,
-      new TagOpenBeginEvent("red"),
-      new FlagAttributeEvent("my-attr"),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new FlagAttributeEvent(text.subView(1), "my-attr")
     );
 
-    text = new TextWithAnchors("@<red @my-attr @5var>");
+    text = new TextWithAnchors("<`red´ `my-attr´ 5var>");
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.EXPECTED_ATTRIBUTE_KEY,
-      new TagOpenBeginEvent("red"),
-      new FlagAttributeEvent("my-attr"),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new FlagAttributeEvent(text.subView(1), "my-attr")
     );
 
-    text = new TextWithAnchors("@<red @my-attr @\"my-string\">");
+    text = new TextWithAnchors("<`red´ `my-attr´ \"my-string\">");
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       XmlParseError.EXPECTED_ATTRIBUTE_KEY,
-      new TagOpenBeginEvent("red"),
-      new FlagAttributeEvent("my-attr"),
-      text.anchorEvent(2)
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new FlagAttributeEvent(text.subView(1), "my-attr")
     );
   }
 
   @Test
   public void shouldThrowOnUnescapedCurlyBrackets() {
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       new TextWithAnchors("hello } world"),
       XmlParseError.UNESCAPED_CURLY
     );
   }
 
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
-    TextWithAnchors text = new TextWithAnchors("@<red @a=" + valueExpression);
+    TextWithAnchors text = new TextWithAnchors("<`red´ a=" + valueExpression);
 
-    makeCaseWithInterleavedAnchors(
+    makeCase(
       text,
       expectedError,
-      new TagOpenBeginEvent("red"),
-      text.anchorEvent(1)
+      new TagOpenBeginEvent(text.subView(0), "red")
     );
   }
 
-  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, XmlEvent... expectedEvents) {
-    makeCaseWithInterleavedAnchors(input, null, expectedEvents);
+  private static void makeCase(TextWithAnchors input, XmlEvent... expectedEvents) {
+    makeCase(input, null, expectedEvents);
   }
 
-  private static void makeCaseWithInterleavedAnchors(TextWithAnchors input, @Nullable XmlParseError expectedError, XmlEvent... expectedEvents) {
+  private static void makeCase(TextWithAnchors input, @Nullable XmlParseError expectedError, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
 
     XmlParseException thrownException = null;
 
     try {
-      XmlEventParser.parse(input.text, actualEventsJoiner);
+      XmlEventParser.parse(StringView.of(input.text), actualEventsJoiner);
     } catch (XmlParseException exception) {
       thrownException = exception;
     }
@@ -778,16 +795,6 @@ public class XmlEventParserTests {
         expectedEventsString.append('\n');
 
       XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
-
-      if (!((expectedEvent instanceof InputEndEvent) || expectedEvent instanceof PositionEvent)) {
-        XmlEvent anchorEvent = input.anchorEvent(expectedEventIndex);
-
-        if (anchorEvent == null)
-          throw new IllegalStateException("Required " + (expectedEvents.length - 1) + " anchors, but only got " + input.getAnchorCount());
-
-        expectedEventsString.append(Jsonifier.jsonify(anchorEvent));
-        expectedEventsString.append('\n');
-      }
 
       expectedEventsString.append(Jsonifier.jsonify(expectedEvent));
     }

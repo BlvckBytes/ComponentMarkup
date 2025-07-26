@@ -1,5 +1,8 @@
 package at.blvckbytes.component_markup.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BitFlagArray {
 
   @JsonifyIgnore
@@ -7,8 +10,6 @@ public class BitFlagArray {
 
   @JsonifyIgnore
   private final int size;
-
-  private int setCount;
 
   public BitFlagArray(int size) {
     int requiredLongs = (size + (Long.SIZE - 1)) / Long.SIZE;
@@ -27,7 +28,6 @@ public class BitFlagArray {
       throw new IllegalStateException("Bit at index " + index + " was already set");
 
     longs[index / Long.SIZE] = targetLong | targetBit;
-    ++setCount;
   }
 
   public boolean get(int index) {
@@ -68,15 +68,14 @@ public class BitFlagArray {
   }
 
   @JsonifyGetter
-  public int[] getRemovedIndices() {
-    int[] result = new int[setCount];
-    int resultIndex = 0;
+  public List<Integer> getRemovedIndices() {
+    List<Integer> result = new ArrayList<>();
 
     for (int index = 0; index < size; ++index) {
       if (!get(index))
         continue;
 
-      result[resultIndex++] = index;
+      result.add(index);
     }
 
     return result;

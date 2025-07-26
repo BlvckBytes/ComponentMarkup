@@ -4,94 +4,91 @@ import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
-import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlEventJoiner implements XmlEventConsumer {
 
-  private final StringBuilder eventsString = new StringBuilder();
-
-  @Override
-  public void onPosition(StringPosition position) {
-    appendEvent(new PositionEvent(position));
-  }
+  private final List<XmlEvent> events = new ArrayList<>();
 
   @Override
   public void onTagOpenBegin(StringView tagName) {
-    appendEvent(new TagOpenBeginEvent(tagName));
+    events.add(new TagOpenBeginEvent(tagName, tagName.buildString()));
   }
 
   @Override
   public void onStringAttribute(StringView name, StringView value) {
-    appendEvent(new StringAttributeEvent(name, value));
+    events.add(new StringAttributeEvent(name, value, name.buildString(), value.buildString()));
   }
 
   @Override
   public void onLongAttribute(StringView name, StringView raw, long value) {
-    appendEvent(new LongAttributeEvent(name, raw, value));
+    events.add(new LongAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
   public void onDoubleAttribute(StringView name, StringView raw, double value) {
-    appendEvent(new DoubleAttributeEvent(name, raw, value));
+    events.add(new DoubleAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
   public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
-    appendEvent(new BooleanAttributeEvent(name, raw, value));
+    events.add(new BooleanAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
   public void onTagOpenEnd(StringView tagName, boolean wasSelfClosing) {
-    appendEvent(new TagOpenEndEvent(tagName, wasSelfClosing));
+    events.add(new TagOpenEndEvent(tagName, wasSelfClosing));
   }
 
   @Override
-  public void onTagAttributeBegin(StringView name) {
-    appendEvent(new TagAttributeBeginEvent(name));
+  public void onTagAttributeBegin(StringView name, StringPosition valueBeginPosition) {
+    events.add(new TagAttributeBeginEvent(name, valueBeginPosition, name.buildString()));
   }
 
   @Override
   public void onTagAttributeEnd(StringView name) {
-    appendEvent(new TagAttributeEndEvent(name));
+    events.add(new TagAttributeEndEvent(name));
   }
 
   @Override
   public void onFlagAttribute(StringView name) {
-    appendEvent(new FlagAttributeEvent(name));
+    events.add(new FlagAttributeEvent(name, name.buildString()));
   }
 
   @Override
-  public void onText(StringView text, EnumSet<SubstringFlag> flags) {
-    appendEvent(new TextEvent(text, flags));
+  public void onText(StringView text) {
+    events.add(new TextEvent(text, text.buildString()));
   }
 
   @Override
   public void onInterpolation(StringView expression) {
-    appendEvent(new InterpolationEvent(expression));
+    events.add(new InterpolationEvent(expression, expression.buildString()));
   }
 
   @Override
-  public void onTagClose(@Nullable StringView tagName) {
-    appendEvent(new TagCloseEvent(tagName));
+  public void onTagClose(@Nullable StringView tagName, StringPosition pointyPosition) {
+    events.add(new TagCloseEvent(tagName, pointyPosition, tagName == null ? null : tagName.buildString()));
   }
 
   @Override
   public void onInputEnd() {
-    appendEvent(new InputEndEvent());
+    events.add(new InputEndEvent());
   }
 
   @Override
   public String toString() {
+    StringBuilder eventsString = new StringBuilder();
+
+    for (XmlEvent event : events) {
+      if (eventsString.length() > 0)
+        eventsString.append('\n');
+
+      eventsString.append(Jsonifier.jsonify(event));
+    }
+
     return eventsString.toString();
-  }
-
-  private void appendEvent(XmlEvent event) {
-    if (eventsString.length() > 0)
-      eventsString.append('\n');
-
-    eventsString.append(Jsonifier.jsonify(event));
   }
 }

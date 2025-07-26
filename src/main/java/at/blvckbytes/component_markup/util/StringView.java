@@ -26,12 +26,16 @@ public class StringView {
   private int charIndex;
 
   @JsonifyIgnore
-  private char priorChar;
+  private char priorNextChar;
+  private char currentChar;
 
   @JsonifyIgnore
   private @Nullable StringPosition subViewStart;
 
   private @Nullable EnumSet<SubstringFlag> buildFlags;
+
+  @JsonifyIgnore
+  private @Nullable String buildStringCache;
 
   private StringView(
     String contents,
@@ -64,7 +68,7 @@ public class StringView {
 
     maxCharIndex = length() - 1;
     charIndex = viewStart.charIndex - 1;
-    priorChar = 0;
+    priorNextChar = 0;
   }
 
   public void setLowercase() {
@@ -158,15 +162,18 @@ public class StringView {
     removeIndices.set(index);
   }
 
-  public char priorChar() {
-    return priorChar;
+  public char priorNextChar() {
+    return priorNextChar;
   }
 
   public char nextChar() {
     if (hasReachedEnd())
       return 0;
 
-    return priorChar = contents.charAt(++charIndex);
+    priorNextChar = currentChar;
+    currentChar = contents.charAt(++charIndex);
+
+    return currentChar;
   }
 
   private boolean hasReachedEnd() {
@@ -209,6 +216,9 @@ public class StringView {
 
   @JsonifyGetter
   public String buildString() {
+    if (buildStringCache != null)
+      return buildStringCache;
+
     int maxSubstringLength = viewEnd.charIndex - viewStart.charIndex + 1;
 
     char[] result = new char[maxSubstringLength];
@@ -253,7 +263,7 @@ public class StringView {
         --nextResultIndex;
     }
 
-    return new String(result, 0, nextResultIndex);
+    return buildStringCache = new String(result, 0, nextResultIndex);
   }
 
   public boolean consumeWhitespaceAndGetIfNewline(@Nullable TokenOutput tokenOutput) {
@@ -270,24 +280,32 @@ public class StringView {
   }
 
   public void restorePosition(StringPosition position) {
-    if (position.charIndex < viewStart.charIndex || position.charIndex > viewEnd.charIndex)
-      throw new IllegalStateException("Position at " + position.charIndex + " out of this view's range: [" + viewStart.charIndex + ";" + viewEnd.charIndex + "]");
+    if (position.charIndex < -1 || position.charIndex > maxCharIndex)
+      throw new IllegalStateException("Position at " + position.charIndex + " out of this view's range: [" + -1 + ";" + maxCharIndex + "]");
 
     if (position.charIndex != viewEnd.charIndex)
       removeIndices.clearRange(position.charIndex + 1, viewEnd.charIndex);
 
     charIndex = position.charIndex;
+
+    if (charIndex < 0) {
+      priorNextChar = 0;
+      currentChar = 0;
+    } else {
+      priorNextChar = contents.charAt(charIndex);
+      currentChar = contents.charAt(charIndex + 1);;
+    }
   }
 
   public StringPosition getPosition(PositionMode mode) {
     if (mode == PositionMode.CURRENT)
-      return new StringPosition(this, getCharIndex());
+      return new StringPosition(this, charIndex);
 
     if (mode == PositionMode.PRIOR) {
-      if (charIndex <= 0)
+      if (charIndex < 0)
         throw new IllegalStateException("No prior char available");
 
-      return new StringPosition(this, getCharIndex() - 1);
+      return new StringPosition(this, charIndex - 1);
     }
 
     if (mode != PositionMode.NEXT)
@@ -296,7 +314,7 @@ public class StringView {
     if (hasReachedEnd())
       throw new IllegalStateException("No next char available");
 
-    return new StringPosition(this, getCharIndex() + 1);
+    return new StringPosition(this, charIndex + 1);
   }
 
   public StringPosition getPosition() {
@@ -313,28 +331,19 @@ public class StringView {
   }
 
   public boolean contentEquals(@NotNull String value, boolean ignoreCase) {
-    if (remainingLength() != value.length())
+    if (length() != value.length())
       return false;
 
     return _getFirstMismatchIndex(value, ignoreCase) < 0;
   }
 
-  private int remainingLength() {
-    int value = length();
-
-    if (charIndex >= 0)
-      value -= charIndex + 1;
-
-    return value;
-  }
-
   public int _getFirstMismatchIndex(@NotNull String value, boolean ignoreCase) {
     int valueIndex = 0;
 
-    if (remainingLength() < value.length())
+    if (length() < value.length())
       return viewEnd.charIndex;
 
-    for (int index = getCharIndex(); index < viewEnd.charIndex; ++index) {
+    for (int index = viewStart.charIndex; index <= viewEnd.charIndex; ++index) {
       if (removeIndices.get(index))
         continue;
 

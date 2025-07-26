@@ -36,7 +36,7 @@ public class XmlEventParser {
     boolean wasPriorTagOrInterpolation = false;
 
     while (input.peekChar() != 0) {
-      if (input.peekChar() == '}' && input.priorChar() != '\\') {
+      if (input.peekChar() == '}' && input.priorNextChar() != '\\') {
         if (isWithinCurlyBrackets)
           break;
 
@@ -47,7 +47,7 @@ public class XmlEventParser {
 
       StringPosition preConsumePosition = input.getPosition();
 
-      if (input.peekChar() == '{' && input.priorChar() != '\\') {
+      if (input.peekChar() == '{' && input.priorNextChar() != '\\') {
         if (input.getSubViewStart() != null) {
           emitText(
             input.buildSubViewUntilPosition(PositionMode.CURRENT),
@@ -141,8 +141,10 @@ public class XmlEventParser {
         input.setSubViewStart(input.getPosition());
       }
 
-      if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{'))
+      if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{')) {
         input.addIndexToBeRemoved(input.getCharIndex());
+        input.nextChar();
+      }
 
       input.consumeWhitespaceAndGetIfNewline(tokenOutput);
     }
@@ -156,13 +158,20 @@ public class XmlEventParser {
       );
     }
 
-    if (!isWithinCurlyBrackets)
+    if (!isWithinCurlyBrackets) {
+      if (input.getSubViewStart() != null)
+        throw new IllegalStateException("There was still a sub-view set after encountering the input's end");
+
       consumer.onInputEnd();
+    }
   }
 
   private void emitText(StringView text, @Nullable EnumSet<SubstringFlag> flags) {
     if (flags != null)
       text.setBuildFlags(flags);
+
+    if (text.buildString().isEmpty())
+      return;
 
     consumer.onText(text);
 
@@ -198,7 +207,7 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, input.getSubViewStart());
 
       if (currentChar == '"') {
-        if (input.priorChar() == '\\') {
+        if (input.priorNextChar() == '\\') {
           input.addIndexToBeRemoved(input.getCharIndex() - 1);
         } else {
           value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
