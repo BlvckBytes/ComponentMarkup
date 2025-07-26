@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -27,6 +28,8 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class MarkupParser implements XmlEventConsumer {
@@ -34,6 +37,7 @@ public class MarkupParser implements XmlEventConsumer {
   private final @Nullable TokenOutput tokenOutput;
   private final TagRegistry tagRegistry;
   private final Stack<TagAndBuffers> tagStack;
+  private final List<MarkupNode> topLevelMembers;
 
   private StringPosition lastPosition;
   private final StringPosition initialPosition;
@@ -50,12 +54,11 @@ public class MarkupParser implements XmlEventConsumer {
     this.tokenOutput = tokenOutput;
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
+    this.topLevelMembers = new ArrayList<>();
     this.lastPosition = initialPosition;
     this.initialPosition = initialPosition;
     this.isSubParser = isSubParser;
     this.result = new TextNode("", lastPosition);
-
-    this.tagStack.push(new TagAndBuffers(null, null, lastPosition, null));
   }
 
   // ================================================================================
@@ -85,14 +88,14 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (tag == null) {
       if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
-        throw new MarkupParseException(lastPosition, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
+        throw new MarkupParseException(tagName.viewStart, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
 
       tag = DummyTag.INSTANCE;
     }
 
     TagAndBuffers parent = tagStack.isEmpty() ? null : tagStack.peek();
 
-    tagStack.push(new TagAndBuffers(tag, tagName, lastPosition, parent));
+    tagStack.push(new TagAndBuffers(tag, tagName, parent));
   }
 
   @Override
@@ -260,11 +263,6 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-
-    // Since a real tag has been pushed during the begin-call
-    assert currentLayer.tagName != null;
-    assert currentLayer.tag != null;
-
     TagClosing tagClosing = currentLayer.tag.tagClosing;
 
     if (!wasSelfClosing) {
@@ -278,6 +276,12 @@ public class MarkupParser implements XmlEventConsumer {
       throw new MarkupParseException(lastPosition, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG, currentLayer.tagName.buildString());
 
     tagStack.pop();
+
+    if (tagStack.isEmpty()) {
+      topLevelMembers.add(currentLayer.createNode());
+      return;
+    }
+
     tagStack.peek().addChild(currentLayer);
   }
 
@@ -313,7 +317,7 @@ public class MarkupParser implements XmlEventConsumer {
     boolean noOpUnmatched = tokenOutput != null && tokenOutput.outputFlags.contains(OutputFlag.UNMATCHED_CLOSING_TAGS_ARE_NO_OPS);
 
     if (tagName == null) {
-      if (tagStack.size() <= 1) {
+      if (tagStack.isEmpty()) {
         if (noOpUnmatched)
           return;
 
@@ -321,20 +325,32 @@ public class MarkupParser implements XmlEventConsumer {
       }
 
       TagAndBuffers openedTag = tagStack.pop();
+
+      if (tagStack.isEmpty()) {
+        topLevelMembers.add(openedTag.createNode());
+        return;
+      }
+
       tagStack.peek().addChild(openedTag);
       return;
     }
 
     if (tagName.contentEquals("*", true)) {
-      if (tagStack.size() <= 1) {
+      if (tagStack.isEmpty()) {
         if (noOpUnmatched)
           return;
 
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK, tagName.buildString());
       }
 
-      while (tagStack.size() > 1) {
+      while (!tagStack.isEmpty()) {
         TagAndBuffers openedTag = tagStack.pop();
+
+        if (tagStack.isEmpty()) {
+          topLevelMembers.add(openedTag.createNode());
+          return;
+        }
+
         tagStack.peek().addChild(openedTag);
       }
 
@@ -349,15 +365,10 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (noOpUnmatched) {
-      if (tagStack.size() == 1)
-        return;
-
       boolean didAnyMatch = false;
 
-      for (int index = 1; index < tagStack.size(); ++index) {
-        TagAndBuffers current = tagStack.get(index);
-
-        if (current.tagName != null && tagName.contentEquals(current.tagName, true)) {
+      for (TagAndBuffers current : tagStack) {
+        if (tagName.contentEquals(current.tagName, true)) {
           didAnyMatch = true;
           break;
         }
@@ -370,13 +381,16 @@ public class MarkupParser implements XmlEventConsumer {
     TagAndBuffers openedTag;
 
     do {
-      openedTag = tagStack.pop();
-
       if (tagStack.isEmpty())
         throw new MarkupParseException(lastPosition, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName.buildString());
 
-      tagStack.peek().addChild(openedTag);
-    } while(openedTag.tagName == null || !tagName.contentEquals(openedTag.tagName, true));
+      openedTag = tagStack.pop();
+
+      if (tagStack.isEmpty())
+        topLevelMembers.add(openedTag.createNode());
+      else
+        tagStack.peek().addChild(openedTag);
+    } while (!tagName.contentEquals(openedTag.tagName, true));
   }
 
   @Override
@@ -389,16 +403,23 @@ public class MarkupParser implements XmlEventConsumer {
     if (tokenOutput != null && !isSubParser)
       tokenOutput.onInputEnd();
 
-    while (true) {
+    while (!tagStack.isEmpty()) {
       TagAndBuffers currentLayer = tagStack.pop();
 
       if (tagStack.isEmpty()) {
-        this.result = currentLayer.createNode();
+        topLevelMembers.add(currentLayer.createNode());
         break;
       }
 
       tagStack.peek().addChild(currentLayer);
     }
+
+    if (topLevelMembers.size() == 1) {
+      this.result = topLevelMembers.get(0);
+      return;
+    }
+
+    this.result = new ContainerNode(initialPosition, topLevelMembers, null);
   }
 
   // ================================================================================
@@ -577,9 +598,6 @@ public class MarkupParser implements XmlEventConsumer {
 
     StringView fullName = name;
     name = name.buildSubViewUntilEnd(1);
-
-    // Since attributes only occur on a real tag
-    assert currentLayer.tagName != null;
 
     switch (name.buildString()) {
       case "if": {
