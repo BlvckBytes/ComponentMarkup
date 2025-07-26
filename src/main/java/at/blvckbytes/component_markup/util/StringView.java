@@ -22,9 +22,8 @@ public class StringView {
   public final StringPosition viewStart;
   public final StringPosition viewEnd;
 
+  private final int maxCharIndex;
   private int charIndex;
-  private int lineNumber;
-  private int columnNumber;
 
   @JsonifyIgnore
   private char priorChar;
@@ -32,7 +31,7 @@ public class StringView {
   @JsonifyIgnore
   private @Nullable StringPosition subViewStart;
 
-  private EnumSet<SubstringFlag> buildFlags;
+  private @Nullable EnumSet<SubstringFlag> buildFlags;
 
   private StringView(
     String contents,
@@ -52,24 +51,20 @@ public class StringView {
     this.rootView = rootView;
 
     if (viewStart == null)
-      viewStart = new StringPosition(rootView, 0, 0, 0);
+      viewStart = new StringPosition(rootView, 0);
 
     if (viewEnd == null)
-      viewEnd = new StringPosition(rootView, contents.length() - 1, 0, 0);
+      viewEnd = new StringPosition(rootView, contents.length() - 1);
 
     this.viewStart = viewStart;
     this.viewEnd = viewEnd;
 
-    this.charIndex = viewStart.charIndex;
+    if (viewEnd.charIndex < viewStart.charIndex)
+      throw new IllegalStateException("The end-index cannot lie before the start-index");
 
-    if (charIndex == 0)
-      --charIndex;
-
-    this.lineNumber = viewStart.lineNumber;
-    this.columnNumber = viewStart.columnNumber;
-    this.priorChar = 0;
-
-    buildFlags = SubstringFlag.NONE;
+    maxCharIndex = length() - 1;
+    charIndex = viewStart.charIndex - 1;
+    priorChar = 0;
   }
 
   public void setLowercase() {
@@ -116,7 +111,7 @@ public class StringView {
   }
 
   public StringView buildSubViewAbsolute(int start, int end) {
-    if (buildFlags != SubstringFlag.NONE)
+    if (buildFlags != null && !buildFlags.isEmpty())
       throw new IllegalStateException("Do not create sub-views while special flags are active");
 
     if (start < viewStart.charIndex || start > viewEnd.charIndex)
@@ -134,26 +129,26 @@ public class StringView {
     return new StringView(contents, rootView, removeIndices, lowercase, new StringPosition(this, start), new StringPosition(this, end));
   }
 
-  public StringView buildSubViewUntilPosition(PositionMode mode) {
-    if (buildFlags != SubstringFlag.NONE)
+  public StringView buildSubViewUntilPosition(StringPosition position) {
+    if (buildFlags != null && !buildFlags.isEmpty())
       throw new IllegalStateException("Do not create sub-views while special flags are active");
 
     if (subViewStart == null)
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 
-    StringView subView = new StringView(contents, rootView, removeIndices, lowercase, subViewStart, getPosition(mode));
+    StringView subView = new StringView(contents, rootView, removeIndices, lowercase, subViewStart, position);
 
     subViewStart = null;
 
     return subView;
   }
 
-  public int getCharIndex() {
-    return Math.max(this.charIndex, 0);
+  public StringView buildSubViewUntilPosition(PositionMode mode) {
+    return buildSubViewUntilPosition(getPosition(mode));
   }
 
-  public int getLineNumber() {
-    return lineNumber;
+  public int getCharIndex() {
+    return Math.max(this.charIndex, 0);
   }
 
   public void addIndexToBeRemoved(int index) {
@@ -168,30 +163,24 @@ public class StringView {
   }
 
   public char nextChar() {
-    if (charIndex >= viewEnd.charIndex)
+    if (hasReachedEnd())
       return 0;
 
-    priorChar = contents.charAt(++charIndex);
+    return priorChar = contents.charAt(++charIndex);
+  }
 
-    if (priorChar == '\n') {
-      ++lineNumber;
-      columnNumber = 0;
-      return priorChar;
-    }
+  private boolean hasReachedEnd() {
+    if (charIndex > maxCharIndex)
+      throw new IllegalStateException("The char-index should never exceed its length-dictated maximum");
 
-    ++columnNumber;
-
-    return priorChar;
+    return charIndex == maxCharIndex;
   }
 
   public char peekChar() {
-    if (charIndex >= viewEnd.charIndex)
+    if (hasReachedEnd())
       return 0;
 
-    if (charIndex < 0)
-      charIndex = 0;
-
-    return contents.charAt(charIndex);
+    return contents.charAt(charIndex + 1);
   }
 
   public void clearSubViewStart() {
@@ -218,6 +207,7 @@ public class StringView {
     return subViewStart;
   }
 
+  @JsonifyGetter
   public String buildString() {
     int maxSubstringLength = viewEnd.charIndex - viewStart.charIndex + 1;
 
@@ -232,7 +222,7 @@ public class StringView {
 
       char currentChar = contents.charAt(inputIndex);
 
-      if (currentChar == '\n' && buildFlags.contains(SubstringFlag.REMOVE_NEWLINES_INDENT)) {
+      if (currentChar == '\n' && buildFlags != null && buildFlags.contains(SubstringFlag.REMOVE_NEWLINES_INDENT)) {
         while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
           --nextResultIndex;
 
@@ -247,7 +237,7 @@ public class StringView {
         doIgnoreWhitespace = false;
       }
 
-      if (currentChar == ' ' && buildFlags.contains(SubstringFlag.REMOVE_LEADING_SPACE) && nextResultIndex == 0) {
+      if (currentChar == ' ' && buildFlags != null && buildFlags.contains(SubstringFlag.REMOVE_LEADING_SPACE) && nextResultIndex == 0) {
         doIgnoreWhitespace = true;
         continue;
       }
@@ -258,7 +248,7 @@ public class StringView {
       result[nextResultIndex++] = currentChar;
     }
 
-    if (buildFlags.contains(SubstringFlag.REMOVE_TRAILING_SPACE)) {
+    if (buildFlags != null && buildFlags.contains(SubstringFlag.REMOVE_TRAILING_SPACE)) {
       while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
         --nextResultIndex;
     }
@@ -266,13 +256,17 @@ public class StringView {
     return new String(result, 0, nextResultIndex);
   }
 
-  public void consumeWhitespace(@Nullable TokenOutput tokenOutput) {
+  public boolean consumeWhitespaceAndGetIfNewline(@Nullable TokenOutput tokenOutput) {
+    boolean encounteredNewline = false;
+
     while (Character.isWhitespace(peekChar())) {
-      nextChar();
+      encounteredNewline |= nextChar() == '\n';
 
       if (tokenOutput != null)
         tokenOutput.emitCharToken(getPosition(), TokenType.ANY__WHITESPACE);
     }
+
+    return encounteredNewline;
   }
 
   public void restorePosition(StringPosition position) {
@@ -283,34 +277,26 @@ public class StringView {
       removeIndices.clearRange(position.charIndex + 1, viewEnd.charIndex);
 
     charIndex = position.charIndex;
-    lineNumber = position.lineNumber;
-    columnNumber = position.columnNumber;
   }
 
   public StringPosition getPosition(PositionMode mode) {
     if (mode == PositionMode.CURRENT)
-      return new StringPosition(this, getCharIndex(), lineNumber, columnNumber);
+      return new StringPosition(this, getCharIndex());
 
     if (mode == PositionMode.PRIOR) {
-      // The last consumed character wasn't a newline, or we're already at the first line
-      if (columnNumber > 0 || lineNumber < 2)
-        return new StringPosition(this, getCharIndex() - 1, lineNumber, columnNumber - 1);
+      if (charIndex <= 0)
+        throw new IllegalStateException("No prior char available");
 
-      return new StringPosition(this, getCharIndex() - 1, lineNumber - 1, columnNumber - 1);
+      return new StringPosition(this, getCharIndex() - 1);
     }
 
     if (mode != PositionMode.NEXT)
       throw new IllegalStateException("Unaccounted-for position-mode: " + mode);
 
-    int newLineNumber = lineNumber;
-    int newColumnNumber = columnNumber;
+    if (hasReachedEnd())
+      throw new IllegalStateException("No next char available");
 
-    if (peekChar() == '\n') {
-      ++newLineNumber;
-      newColumnNumber = 1;
-    }
-
-    return new StringPosition(this, getCharIndex() + 1, newLineNumber, newColumnNumber);
+    return new StringPosition(this, getCharIndex() + 1);
   }
 
   public StringPosition getPosition() {

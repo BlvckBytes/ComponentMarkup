@@ -419,22 +419,20 @@ public class MarkupParser implements XmlEventConsumer {
   // Public API
   // ================================================================================
 
-  public static MarkupNode parse(String input, TagRegistry tagRegistry) {
-    return parse(input, tagRegistry, null);
+  public static MarkupNode parse(StringView rootView, TagRegistry tagRegistry) {
+    return parse(rootView, tagRegistry, null);
   }
 
-  public static MarkupNode parse(String input, TagRegistry tagRegistry, @Nullable TokenOutput tokenOutput) {
-    StringView inputView = StringView.of(input);
-
+  public static MarkupNode parse(StringView rootView, TagRegistry tagRegistry, @Nullable TokenOutput tokenOutput) {
     // The initial position, which will also be applied to the outermost implicit
     // container, is the zero-sentinel (unreachable by user-input)
-    MarkupParser parser = new MarkupParser(tokenOutput, tagRegistry, inputView.viewStart, false);
+    MarkupParser parser = new MarkupParser(tokenOutput, tagRegistry, rootView.viewStart, false);
 
     if (tokenOutput != null)
-      tokenOutput.onInitialization(inputView);
+      tokenOutput.onInitialization(rootView);
 
     try {
-      XmlEventParser.parse(inputView, parser, tokenOutput);
+      XmlEventParser.parse(rootView, parser, tokenOutput);
     } catch (XmlParseException xmlException) {
       throw new MarkupParseException(xmlException);
     }

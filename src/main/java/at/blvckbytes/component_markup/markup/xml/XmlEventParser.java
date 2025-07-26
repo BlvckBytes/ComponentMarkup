@@ -2,20 +2,12 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.PositionMode;
-import at.blvckbytes.component_markup.util.StringPosition;
-import at.blvckbytes.component_markup.util.StringView;
-import at.blvckbytes.component_markup.util.SubstringFlag;
+import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
 public class XmlEventParser {
-
-  private static final EnumSet<SubstringFlag> SUBSTRING_INNER_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT);
-  private static final EnumSet<SubstringFlag> SUBSTRING_FIRST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_LEADING_SPACE);
-  private static final EnumSet<SubstringFlag> SUBSTRING_LAST_TEXT = EnumSet.of(SubstringFlag.REMOVE_NEWLINES_INDENT, SubstringFlag.REMOVE_TRAILING_SPACE);
-  private static final EnumSet<SubstringFlag> SUBSTRING_ONLY_TEXT = EnumSet.allOf(SubstringFlag.class);
 
   private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
   private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
@@ -59,7 +51,9 @@ public class XmlEventParser {
         if (input.getSubViewStart() != null) {
           emitText(
             input.buildSubViewUntilPosition(PositionMode.CURRENT),
-            wasPriorTagOrInterpolation ? SUBSTRING_INNER_TEXT : SUBSTRING_FIRST_TEXT
+            wasPriorTagOrInterpolation
+              ? SubstringFlag.INNER_TEXT
+              : SubstringFlag.FIRST_TEXT
           );
         }
 
@@ -112,21 +106,21 @@ public class XmlEventParser {
           tokenOutput.emitCharToken(firstSpacePosition, TokenType.ANY__WHITESPACE);
       }
 
-      input.consumeWhitespace(tokenOutput);
+      boolean encounteredNewline = input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
       if (input.peekChar() == '<') {
         if (input.getSubViewStart() != null) {
           emitText(
             input.buildSubViewUntilPosition(PositionMode.CURRENT),
             wasPriorTagOrInterpolation
-              ? SUBSTRING_INNER_TEXT
-              : SUBSTRING_FIRST_TEXT
+              ? SubstringFlag.INNER_TEXT
+              : SubstringFlag.FIRST_TEXT
           );
         }
 
-        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && firstSpacePosition.lineNumber == input.getLineNumber()) {
+        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && !encounteredNewline) {
           input.setSubViewStart(preConsumePosition);
-          emitText(input.buildSubViewUntilPosition(PositionMode.CURRENT), SubstringFlag.NONE);
+          emitText(input.buildSubViewUntilPosition(PositionMode.CURRENT), null);
         }
 
         parseOpeningOrClosingTag();
@@ -140,25 +134,25 @@ public class XmlEventParser {
 
       if (input.getSubViewStart() == null) {
         if (currentChar == '\n') {
-          input.consumeWhitespace(tokenOutput);
+          input.consumeWhitespaceAndGetIfNewline(tokenOutput);
           continue;
         }
 
-        input.setSubViewStart(input.getPosition(PositionMode.NEXT));
+        input.setSubViewStart(input.getPosition());
       }
 
       if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{'))
         input.addIndexToBeRemoved(input.getCharIndex());
 
-      input.consumeWhitespace(tokenOutput);
+      input.consumeWhitespaceAndGetIfNewline(tokenOutput);
     }
 
     if (input.getSubViewStart() != null) {
       emitText(
         input.buildSubViewUntilPosition(PositionMode.CURRENT),
         wasPriorTagOrInterpolation
-          ? SUBSTRING_LAST_TEXT
-          : SUBSTRING_ONLY_TEXT
+          ? SubstringFlag.LAST_TEXT
+          : SubstringFlag.ONLY_TEXT
       );
     }
 
@@ -166,8 +160,9 @@ public class XmlEventParser {
       consumer.onInputEnd();
   }
 
-  private void emitText(StringView text, EnumSet<SubstringFlag> flags) {
-    text.setBuildFlags(flags);
+  private void emitText(StringView text, @Nullable EnumSet<SubstringFlag> flags) {
+    if (flags != null)
+      text.setBuildFlags(flags);
 
     consumer.onText(text);
 
@@ -305,7 +300,7 @@ public class XmlEventParser {
   }
 
   private boolean tryParseAttribute() {
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
     StringView attributeName = tryParseIdentifier();
@@ -324,7 +319,7 @@ public class XmlEventParser {
     if (Character.isDigit(attributeName.nthChar(0)))
       throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, attributeName.viewStart);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     if (input.peekChar() != '=') {
       // These "keywords" are reserved; again - for proper detection of malformed input.
@@ -340,7 +335,7 @@ public class XmlEventParser {
     if (tokenOutput != null)
       tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__EQUALS);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     switch (input.peekChar()) {
       case '"':
@@ -464,7 +459,7 @@ public class XmlEventParser {
     if (tokenOutput != null)
       tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     boolean wasClosingTag = false;
 
@@ -476,7 +471,7 @@ public class XmlEventParser {
       wasClosingTag = true;
     }
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     StringView tagName = tryParseIdentifier();
 
@@ -527,7 +522,7 @@ public class XmlEventParser {
         tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
     }
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
     if (input.nextChar() != '>')
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG, tagName.viewStart);
