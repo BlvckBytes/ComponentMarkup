@@ -21,10 +21,10 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = messagePlaceholders;
   }
 
-  public MarkupParseException(StringPosition position, XmlParseException xmlException) {
+  public MarkupParseException(XmlParseException xmlException) {
     super(xmlException);
 
-    this.position = position;
+    this.position = xmlException.position;
     this.error = MarkupParseError.XML_PARSE_ERROR;
     this.messagePlaceholders = new String[0];
   }

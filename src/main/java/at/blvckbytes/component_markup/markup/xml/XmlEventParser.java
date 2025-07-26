@@ -48,7 +48,9 @@ public class XmlEventParser {
         if (isWithinCurlyBrackets)
           break;
 
-        throw new XmlParseException(XmlParseError.UNESCAPED_CURLY);
+        input.nextChar();
+
+        throw new XmlParseException(XmlParseError.UNESCAPED_CURLY, input.getPosition());
       }
 
       StringPosition preConsumePosition = input.getPosition();
@@ -69,10 +71,8 @@ public class XmlEventParser {
         while (input.peekChar() != 0) {
           char currentChar = input.nextChar();
 
-          if (currentChar == '\n' || currentChar == '{') {
-            consumer.onPosition(input.getSubViewStart());
-            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
-          }
+          if (currentChar == '\n' || currentChar == '{')
+            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, input.getSubViewStart());
 
           if (tokenOutput != null && Character.isWhitespace(currentChar))
             tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
@@ -90,10 +90,8 @@ public class XmlEventParser {
 
         inStringDetector.reset();
 
-        if (interpolationValue == null) {
-          consumer.onPosition(input.getSubViewStart());
-          throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION);
-        }
+        if (interpolationValue == null)
+          throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, input.getSubViewStart());
 
         if (tokenOutput != null)
           tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, interpolationValue);
@@ -171,7 +169,6 @@ public class XmlEventParser {
   private void emitText(StringView text, EnumSet<SubstringFlag> flags) {
     text.setBuildFlags(flags);
 
-    consumer.onPosition(text.viewStart);
     consumer.onText(text);
 
     if (tokenOutput != null)
@@ -203,7 +200,7 @@ public class XmlEventParser {
 
     while ((currentChar = input.nextChar()) != 0) {
       if (currentChar == '\r' || currentChar == '\n')
-        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
+        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, input.getSubViewStart());
 
       if (currentChar == '"') {
         if (input.priorChar() == '\\') {
@@ -219,7 +216,7 @@ public class XmlEventParser {
     }
 
     if (value == null)
-      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING);
+      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, input.getSubViewStart());
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__STRING, value);
@@ -264,7 +261,7 @@ public class XmlEventParser {
 
       if (peekedChar == '.') {
         if (encounteredDecimalPoint)
-          throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
+          throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, input.getSubViewStart());
 
         input.nextChar();
 
@@ -278,11 +275,13 @@ public class XmlEventParser {
       break;
     }
 
+    StringPosition start = input.getSubViewStart();
+
     if (!encounteredDigit)
-      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
 
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
 
     StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
 
@@ -293,7 +292,7 @@ public class XmlEventParser {
       try {
         consumer.onDoubleAttribute(attributeName, value, value.parseDouble());
       } catch (NumberFormatException e) {
-        throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
+        throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
       }
       return;
     }
@@ -301,7 +300,7 @@ public class XmlEventParser {
     try {
       consumer.onLongAttribute(attributeName, value, value.parseLong());
     } catch (NumberFormatException e) {
-      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER);
+      throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
     }
   }
 
@@ -314,26 +313,23 @@ public class XmlEventParser {
     if (attributeName == null) {
       if (input.peekChar() == '"') {
         input.nextChar();
-        consumer.onPosition(input.getPosition());
-        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
+        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, input.getPosition());
       }
 
       return false;
     }
 
-    consumer.onPosition(attributeName.getPosition());
-
     // Attribute-identifiers do not support leading digits, as this constraint allows for
     // proper detection of malformed input; example: my-attr 53 (missing an equals-sign).
     if (Character.isDigit(attributeName.nthChar(0)))
-      throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
+      throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, attributeName.viewStart);
 
     input.consumeWhitespace(tokenOutput);
 
     if (input.peekChar() != '=') {
       // These "keywords" are reserved; again - for proper detection of malformed input.
       if (attributeName.contentEquals("true", true) || attributeName.contentEquals("false", true))
-        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY);
+        throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, attributeName.viewStart);
 
       consumer.onFlagAttribute(attributeName);
       return true;
@@ -359,23 +355,20 @@ public class XmlEventParser {
         if (tokenOutput != null)
           tokenOutput.emitCharToken(openingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
-        consumer.onTagAttributeBegin(attributeName);
+        consumer.onTagAttributeBegin(attributeName, openingCurlyPosition);
 
         parseInput(true);
 
         char nextChar = input.nextChar();
 
-        if (nextChar != '}') {
-          consumer.onPosition(openingCurlyPosition);
-          throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE);
-        }
+        if (nextChar != '}')
+          throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE, openingCurlyPosition);
 
         StringPosition closingCurlyPosition = input.getPosition();
 
         if (tokenOutput != null)
           tokenOutput.emitCharToken(closingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
-        consumer.onPosition(closingCurlyPosition);
         consumer.onTagAttributeEnd(attributeName);
         return true;
 
@@ -405,7 +398,11 @@ public class XmlEventParser {
         return true;
 
       default:
-        throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE);
+        if (input.nextChar() == 0) {
+          // TODO: Throw missing value exception
+        }
+
+        throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, input.getPosition());
     }
   }
 
@@ -414,7 +411,7 @@ public class XmlEventParser {
 
     for (char c : chars) {
       if (Character.toLowerCase(input.nextChar()) != c)
-        throw new XmlParseException(error);
+        throw new XmlParseException(error, input.getPosition());
 
       if (begin == null)
         begin = input.getPosition();
@@ -424,7 +421,7 @@ public class XmlEventParser {
     assert begin != null;
 
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-      throw new XmlParseException(error);
+      throw new XmlParseException(error, begin);
 
     input.setSubViewStart(begin);
     StringView value = input.buildSubViewUntilPosition(PositionMode.CURRENT);
@@ -484,10 +481,8 @@ public class XmlEventParser {
     StringView tagName = tryParseIdentifier();
 
     if (wasClosingTag) {
-      consumer.onPosition(openingPosition);
-
       if (input.nextChar() != '>')
-        throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
+        throw new XmlParseException(XmlParseError.UNTERMINATED_TAG, openingPosition);
 
       if (tokenOutput != null) {
         if (tagName != null)
@@ -496,14 +491,12 @@ public class XmlEventParser {
         tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
       }
 
-      consumer.onTagClose(tagName);
+      consumer.onTagClose(tagName, openingPosition);
       return;
     }
 
-    if (tagName == null) {
-      consumer.onPosition(openingPosition);
-      throw new XmlParseException(XmlParseError.MISSING_TAG_NAME);
-    }
+    if (tagName == null)
+      throw new XmlParseException(XmlParseError.MISSING_TAG_NAME, openingPosition);
 
     StringView comment;
 
@@ -517,7 +510,6 @@ public class XmlEventParser {
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
-    consumer.onPosition(openingPosition);
     consumer.onTagOpenBegin(tagName);
 
     while (input.peekChar() != 0) {
@@ -538,14 +530,13 @@ public class XmlEventParser {
     input.consumeWhitespace(tokenOutput);
 
     if (input.nextChar() != '>')
-      throw new XmlParseException(XmlParseError.UNTERMINATED_TAG);
+      throw new XmlParseException(XmlParseError.UNTERMINATED_TAG, tagName.viewStart);
 
     StringPosition closingPosition = input.getPosition();
 
     if (tokenOutput != null)
       tokenOutput.emitCharToken(closingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
-    consumer.onPosition(closingPosition);
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
   }
 

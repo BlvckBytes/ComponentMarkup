@@ -6,8 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 public interface XmlEventConsumer {
 
-  void onPosition(StringPosition position);
-
   void onTagOpenBegin(StringView tagName);
 
   void onStringAttribute(StringView name, StringView value);
@@ -18,7 +16,7 @@ public interface XmlEventConsumer {
 
   void onBooleanAttribute(StringView name, StringView raw, boolean value);
 
-  void onTagAttributeBegin(StringView name);
+  void onTagAttributeBegin(StringView name, StringPosition valueBeginPosition);
 
   void onTagAttributeEnd(StringView name);
 
@@ -30,7 +28,7 @@ public interface XmlEventConsumer {
 
   void onInterpolation(StringView expression);
 
-  void onTagClose(@Nullable StringView tagName);
+  void onTagClose(@Nullable StringView tagName, StringPosition pointyPosition);
 
   void onInputEnd();
 
