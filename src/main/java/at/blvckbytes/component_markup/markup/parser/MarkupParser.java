@@ -24,11 +24,9 @@ import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
 import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
-import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
 import java.util.Stack;
 
 public class MarkupParser implements XmlEventConsumer {
@@ -284,14 +282,14 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onText(StringView text, EnumSet<SubstringFlag> flags) {
+  public void onText(StringView text) {
     if (subtreeParser != null) {
-      subtreeParser.onText(text, flags);
+      subtreeParser.onText(text);
       return;
     }
 
     TagAndBuffers currentLayer = tagStack.peek();
-    currentLayer.addChild(new TextNode(text.buildString(flags), lastPosition));
+    currentLayer.addChild(new TextNode(text.buildString(), lastPosition));
   }
 
   @Override

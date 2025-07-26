@@ -32,6 +32,8 @@ public class StringView {
   @JsonifyIgnore
   private @Nullable StringPosition subViewStart;
 
+  private EnumSet<SubstringFlag> buildFlags;
+
   private StringView(
     String contents,
     @Nullable StringView rootView,
@@ -66,10 +68,22 @@ public class StringView {
     this.lineNumber = viewStart.lineNumber;
     this.columnNumber = viewStart.columnNumber;
     this.priorChar = 0;
+
+    buildFlags = SubstringFlag.NONE;
   }
 
   public void setLowercase() {
     lowercase = true;
+  }
+
+  public void setBuildFlags(EnumSet<SubstringFlag> flags) {
+    if (flags == null)
+      throw new IllegalStateException("Provided illegal null-value for build-flags");
+
+    if (buildFlags != null)
+      throw new IllegalStateException("Build-flags were already set");
+
+    this.buildFlags = flags;
   }
 
   public static StringView of(String contents) {
@@ -102,6 +116,9 @@ public class StringView {
   }
 
   public StringView buildSubViewAbsolute(int start, int end) {
+    if (buildFlags != SubstringFlag.NONE)
+      throw new IllegalStateException("Do not create sub-views while special flags are active");
+
     if (start < viewStart.charIndex || start > viewEnd.charIndex)
       throw new IllegalStateException("Start " + start + " out of this view's range: [" + viewStart.charIndex + ";" + viewEnd.charIndex + "]");
 
@@ -118,14 +135,13 @@ public class StringView {
   }
 
   public StringView buildSubViewUntilPosition(PositionMode mode) {
-    return buildSubViewUntilPosition(getPosition(mode));
-  }
+    if (buildFlags != SubstringFlag.NONE)
+      throw new IllegalStateException("Do not create sub-views while special flags are active");
 
-  public StringView buildSubViewUntilPosition(StringPosition position) {
     if (subViewStart == null)
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 
-    StringView subView = new StringView(contents, rootView, removeIndices, lowercase, subViewStart, position);
+    StringView subView = new StringView(contents, rootView, removeIndices, lowercase, subViewStart, getPosition(mode));
 
     subViewStart = null;
 
@@ -203,10 +219,6 @@ public class StringView {
   }
 
   public String buildString() {
-    return buildString(SubstringFlag.NONE);
-  }
-
-  public String buildString(EnumSet<SubstringFlag> flags) {
     int maxSubstringLength = viewEnd.charIndex - viewStart.charIndex + 1;
 
     char[] result = new char[maxSubstringLength];
@@ -220,7 +232,7 @@ public class StringView {
 
       char currentChar = contents.charAt(inputIndex);
 
-      if (currentChar == '\n' && flags.contains(SubstringFlag.REMOVE_NEWLINES_INDENT)) {
+      if (currentChar == '\n' && buildFlags.contains(SubstringFlag.REMOVE_NEWLINES_INDENT)) {
         while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
           --nextResultIndex;
 
@@ -235,7 +247,7 @@ public class StringView {
         doIgnoreWhitespace = false;
       }
 
-      if (currentChar == ' ' && flags.contains(SubstringFlag.REMOVE_LEADING_SPACE) && nextResultIndex == 0) {
+      if (currentChar == ' ' && buildFlags.contains(SubstringFlag.REMOVE_LEADING_SPACE) && nextResultIndex == 0) {
         doIgnoreWhitespace = true;
         continue;
       }
@@ -246,7 +258,7 @@ public class StringView {
       result[nextResultIndex++] = currentChar;
     }
 
-    if (flags.contains(SubstringFlag.REMOVE_TRAILING_SPACE)) {
+    if (buildFlags.contains(SubstringFlag.REMOVE_TRAILING_SPACE)) {
       while (nextResultIndex > 0 && result[nextResultIndex - 1] == ' ')
         --nextResultIndex;
     }

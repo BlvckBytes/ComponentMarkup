@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
-import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -29,7 +28,7 @@ public interface XmlEventConsumer {
 
   void onTagOpenEnd(StringView tagName, boolean wasSelfClosing);
 
-  void onText(StringView text, EnumSet<SubstringFlag> flags);
+  void onText(StringView text);
 
   void onInterpolation(StringView expression);
 

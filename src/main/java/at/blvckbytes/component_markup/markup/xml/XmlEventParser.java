@@ -169,8 +169,10 @@ public class XmlEventParser {
   }
 
   private void emitText(StringView text, EnumSet<SubstringFlag> flags) {
+    text.setBuildFlags(flags);
+
     consumer.onPosition(text.viewStart);
-    consumer.onText(text, flags);
+    consumer.onText(text);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__PLAIN_TEXT, text);
