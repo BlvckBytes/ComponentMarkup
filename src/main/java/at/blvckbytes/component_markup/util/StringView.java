@@ -71,7 +71,7 @@ public class StringView {
     if (endExclusive.charIndex > contents.length())
       throw new IllegalStateException("Start-inclusive cannot be greater than " + contents.length());
 
-    if (endExclusive.charIndex <= startInclusive.charIndex)
+    if (endExclusive.charIndex < startInclusive.charIndex)
       throw new IllegalStateException("The end-exclusive-index cannot lie before or at the start-inclusive-index");
 
     charIndex = startInclusive.charIndex - 1;

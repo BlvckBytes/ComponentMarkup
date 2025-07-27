@@ -378,12 +378,12 @@ public class XmlEventParser {
 
       case 'T':
       case 't':
-        consumer.onBooleanAttribute(attributeName, parseLiteral(TRUE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_TRUE), true);
+        consumer.onBooleanAttribute(attributeName, parseLiteral(attributeName, TRUE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_TRUE), true);
         return true;
 
       case 'F':
       case 'f':
-        consumer.onBooleanAttribute(attributeName, parseLiteral(FALSE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_FALSE), false);
+        consumer.onBooleanAttribute(attributeName, parseLiteral(attributeName, FALSE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_FALSE), false);
         return true;
 
       case '0':
@@ -410,12 +410,12 @@ public class XmlEventParser {
     }
   }
 
-  private StringView parseLiteral(char[] chars, XmlParseError error) {
+  private StringView parseLiteral(StringView attributeName, char[] chars, XmlParseError error) {
     StringPosition begin = null;
 
     for (char c : chars) {
       if (Character.toLowerCase(input.nextChar()) != c)
-        throw new XmlParseException(error, input.getPosition());
+        throw new XmlParseException(error, attributeName.startInclusive);
 
       if (begin == null)
         begin = input.getPosition();

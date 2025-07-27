@@ -13,4 +13,11 @@ public class StringPosition {
     this.rootView = rootView;
     this.charIndex = charIndex;
   }
+
+  public StringPosition prior() {
+    if (charIndex <= 0)
+      throw new IllegalStateException("There's no prior character");
+
+    return new StringPosition(rootView, charIndex - 1);
+  }
 }

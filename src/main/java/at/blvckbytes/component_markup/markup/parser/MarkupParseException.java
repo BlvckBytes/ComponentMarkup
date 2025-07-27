@@ -63,19 +63,15 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   }
 
   public int getCharIndex() {
-    int charIndex = position.charIndex;
-
     switch (this.error) {
       case EXPRESSION_PARSE_ERROR:
-        charIndex += ((ExpressionParseException) getCause()).position.charIndex;
-        break;
+        return ((ExpressionParseException) getCause()).position.charIndex;
 
       case EXPRESSION_TOKENIZE_ERROR:
-        charIndex += ((ExpressionTokenizeException) getCause()).position.charIndex;
-        break;
+        return ((ExpressionTokenizeException) getCause()).position.charIndex;
     }
 
-    return charIndex;
+    return position.charIndex;
   }
 
   public List<String> makeErrorScreen() {

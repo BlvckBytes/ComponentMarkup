@@ -25,7 +25,7 @@ public class TagAndBuffers implements ParserChildItem {
   public final @Nullable StringPosition initialPosition;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
-  private @Nullable Set<StringView> bindingNames;
+  private @Nullable Set<String> bindingNames;
 
   public final @Nullable InternalAttributeMap attributeMap;
 
@@ -61,7 +61,7 @@ public class TagAndBuffers implements ParserChildItem {
     this.initialPosition = null;
   }
 
-  public boolean hasLetBinding(StringView name) {
+  public boolean hasLetBinding(String name) {
     if (this.bindingNames == null)
       return false;
 
@@ -74,13 +74,13 @@ public class TagAndBuffers implements ParserChildItem {
       this.bindings = new LinkedHashSet<>();
       this.bindings.add(letBinding);
       this.bindingNames = new HashSet<>();
-      this.bindingNames.add(letBinding.name);
+      this.bindingNames.add(letBinding.name.buildString());
       return true;
     }
 
     assert this.bindingNames != null;
 
-    if (!this.bindingNames.add(letBinding.name))
+    if (!this.bindingNames.add(letBinding.name.buildString()))
       return false;
 
     this.bindings.add(letBinding);
@@ -148,13 +148,13 @@ public class TagAndBuffers implements ParserChildItem {
 
           else {
             if (childTag.whenIsValue == null)
-              throw new MarkupParseException(childTag.tagName.endExclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
             if (whenCases == null)
               whenCases = new HashMap<>();
 
             if (whenCases.put(childTag.whenIsValue.toLowerCase(), currentNode) != null)
-              throw new MarkupParseException(childTag.tagName.endExclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, whenIsValue);
+              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, whenIsValue);
           }
 
           continue;
