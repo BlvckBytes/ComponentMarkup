@@ -427,9 +427,9 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (tokenOutput != null) {
       if (isLiteral)
-        tokenOutput.emitCharToken(name.startInclusive, TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL);
+        tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL, name.buildSubViewRelative(0, 1));
       else
-        tokenOutput.emitCharToken(name.startInclusive, TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION);
+        tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, name.buildSubViewRelative(0, 1));
     }
 
     StringView fullName = name;
@@ -437,7 +437,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (handleStaticallyNamedIntrinsicAttribute(fullName, value, immediateValue)) {
       if (tokenOutput != null)
-        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(1));
+        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name);
 
       return;
     }
@@ -447,7 +447,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName.buildString());
 
       if (tokenOutput != null)
-        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(0, 2));
+        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(0, 3));
 
       StringView iterationVariable = null;
 
@@ -458,7 +458,7 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable.buildString());
 
         if (tokenOutput != null) {
-          tokenOutput.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, name.buildSubViewRelative(3, 3));
+          tokenOutput.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, name.buildSubViewRelative(3, 4));
           tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__BINDING, iterationVariable);
         }
 
@@ -478,8 +478,8 @@ public class MarkupParser implements XmlEventConsumer {
       StringView bindingName = name.buildSubViewRelative(4);
 
       if (tokenOutput != null) {
-        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(0, 2));
-        tokenOutput.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, name.buildSubViewRelative(3, 3));
+        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, name.buildSubViewRelative(0, 3));
+        tokenOutput.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, name.buildSubViewRelative(3, 4));
       }
 
       boolean isCaptureMode = false;
@@ -500,8 +500,8 @@ public class MarkupParser implements XmlEventConsumer {
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES);
 
         if (tokenOutput != null) {
-          tokenOutput.emitCharToken(bindingName.startInclusive, TokenType.MARKUP__OPERATOR__CAPTURE);
-          tokenOutput.emitCharToken(bindingName.endExclusive, TokenType.MARKUP__OPERATOR__CAPTURE);
+          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(0, 1));
+          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(-1, -2));
         }
 
         isCaptureMode = true;
@@ -732,7 +732,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (tokenOutput != null) {
         tokenOutput.emitCharToken(name.startInclusive, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
-        tokenOutput.emitCharToken(name.endExclusive, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
+        tokenOutput.emitCharToken(name.endExclusive - 1, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
       }
 
       isExpressionMode = true;
@@ -753,7 +753,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (isSpreadMode)
         throw new MarkupParseException(name.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS);
 
-      StringView spreadOperator = name.buildSubViewRelative(0, 2);
+      StringView spreadOperator = name.buildSubViewRelative(0, 3);
 
       if (name.length() == 3)
         throw new MarkupParseException(name.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);

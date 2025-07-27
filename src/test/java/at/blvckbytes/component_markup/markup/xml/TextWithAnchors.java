@@ -1,22 +1,20 @@
 package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.util.StringView;
-import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Stack;
 
 public class TextWithAnchors {
 
   private static class ViewIndices {
     final int startInclusive;
-    final int endInclusive;
+    int endInclusive;
 
-    ViewIndices(int startInclusive, int endInclusive) {
+    ViewIndices(int startInclusive) {
       this.startInclusive = startInclusive;
-      this.endInclusive = endInclusive;
     }
   }
 
@@ -33,7 +31,7 @@ public class TextWithAnchors {
     int charIndex = 0;
 
     List<ViewIndices> indicesInOrder = new ArrayList<>();
-    int startInclusive = -1;
+    Stack<ViewIndices> indicesStack = new Stack<>();
 
     for (int linesIndex = 0; linesIndex < lines.length; ++linesIndex) {
       String line = lines[linesIndex];
@@ -53,17 +51,15 @@ public class TextWithAnchors {
 
           else {
             if (isOpening) {
-              if (startInclusive != -1)
-                throw new IllegalStateException("Encountered unbalanced prior subview-marker");
-
-              startInclusive = charIndex;
+              ViewIndices indices = new ViewIndices(charIndex);
+              indicesStack.push(indices);
+              indicesInOrder.add(indices);
             }
             else {
-              if (startInclusive == -1)
-                throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex);
+              if (indicesStack.isEmpty())
+                throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex + "(line " + (linesIndex + 1) + ")");
 
-              indicesInOrder.add(new ViewIndices(startInclusive, charIndex - 1));
-              startInclusive = -1;
+              indicesStack.pop().endInclusive = charIndex - 1;
             }
 
             continue;
@@ -94,9 +90,8 @@ public class TextWithAnchors {
       ++charIndex;
     }
 
-    if (startInclusive != -1) {
+    if (!indicesStack.isEmpty())
       throw new IllegalStateException("Unbalanced subview-stack");
-    }
 
     this.text = result.toString();
     this.rootView = StringView.of(text);
@@ -109,12 +104,6 @@ public class TextWithAnchors {
 
   public void addViewIndexToBeRemoved(int position) {
     this.rootView.addIndexToBeRemoved(position);
-  }
-
-  public @NotNull StringView subView(int index, EnumSet<SubstringFlag> flags) {
-    StringView view = subView(index);
-    view.setBuildFlags(flags);
-    return view;
   }
 
   public @NotNull StringView subView(int index) {

@@ -39,27 +39,36 @@ public class HierarchicalToken extends Token {
 
     HierarchicalToken firstChild = parentToken.children.get(0);
 
-    if (firstChild.beginIndex > parentToken.beginIndex)
-      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(0, firstChild.beginIndex));
+    if (firstChild.value.startInclusive > parentToken.value.startInclusive)
+      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(parentToken.value.startInclusive, firstChild.value.startInclusive));
 
-    HierarchicalToken previousToken = null;
+    HierarchicalToken previousChild = null;
 
-    for (HierarchicalToken childToken : parentToken.children) {
-      if (previousToken != null) {
-        if (childToken.beginIndex - previousToken.endIndex > 1) {
-          StringView newValue = parentToken.value.buildSubViewAbsolute(previousToken.endIndex + 1, childToken.beginIndex);
-          output.handle(parentToken.type, newValue);
+    for (HierarchicalToken currentChild : parentToken.children) {
+      // <...-----------parent_token-------------...>
+      // prev_end_index -vv- new_begin_index
+      //  <previous_child><new_token><current_child>
+      //              new_end_index-^^- curr_begin_index
+      if (previousChild != null) {
+        if (currentChild.value.startInclusive - (previousChild.value.endExclusive - 1) > 1) {
+          output.handle(
+            parentToken.type,
+            parentToken.value.buildSubViewAbsolute(
+              previousChild.value.endExclusive,
+              currentChild.value.startInclusive
+            )
+          );
         }
       }
 
-      appendTokenAndChildren(childToken, output);
+      appendTokenAndChildren(currentChild, output);
 
-      previousToken = childToken;
+      previousChild = currentChild;
     }
 
     HierarchicalToken lastChild = parentToken.children.get(parentToken.children.size() - 1);
 
-    if (lastChild.endIndex < parentToken.endIndex)
-      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(lastChild.endIndex + 1));
+    if (lastChild.value.endExclusive < parentToken.value.endExclusive)
+      output.handle(parentToken.type, parentToken.value.buildSubViewAbsolute(lastChild.value.endExclusive));
   }
 }

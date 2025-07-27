@@ -470,10 +470,11 @@ public class XmlEventParser {
     boolean wasClosingTag = false;
 
     if (input.peekChar() == '/') {
+      input.nextChar();
+
       if (tokenOutput != null)
         tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
 
-      input.nextChar();
       wasClosingTag = true;
     }
 

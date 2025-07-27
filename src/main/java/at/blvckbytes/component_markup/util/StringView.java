@@ -73,11 +73,12 @@ public class StringView {
     subViewStart = -1;
   }
 
-  public void setLowercase() {
+  public StringView setLowercase() {
     lowercase = true;
+    return this;
   }
 
-  public void setBuildFlags(EnumSet<SubstringFlag> flags) {
+  public StringView setBuildFlags(EnumSet<SubstringFlag> flags) {
     if (flags == null)
       throw new IllegalStateException("Provided illegal null-value for build-flags");
 
@@ -85,6 +86,7 @@ public class StringView {
       throw new IllegalStateException("Build-flags were already set");
 
     this.buildFlags = flags;
+    return this;
   }
 
   public static StringView of(String contents) {
@@ -97,25 +99,19 @@ public class StringView {
 
   public StringView buildSubViewRelative(int start) {
     if (start < 0)
-      throw new IllegalStateException("Start " + start + " cannot be negative when in relative-mode");
+      throw new IllegalStateException("Start " + start + " cannot be negative");
 
     return buildSubViewAbsolute(startInclusive + start, endExclusive);
   }
 
-  public StringView buildSubViewRelative(int startInclusive, int endInclusive) {
-    if (startInclusive < 0)
-      throw new IllegalStateException("Start " + startInclusive + " cannot be negative when in relative-mode");
-
+  public StringView buildSubViewRelative(int startInclusive, int endExclusive) {
     return buildSubViewAbsolute(
-      this.startInclusive + startInclusive,
-      endInclusive + (endInclusive < 0 ? this.endExclusive : this.startInclusive + 1)
+      startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),
+      endExclusive + (endExclusive < 0 ? this.endExclusive : this.startInclusive)
     );
   }
 
   public StringView buildSubViewAbsolute(int startInclusive, int endExclusive) {
-    if (buildFlags != null && !buildFlags.isEmpty())
-      throw new IllegalStateException("Do not create sub-views while special flags are active");
-
     if (startInclusive < this.startInclusive || startInclusive >= this.endExclusive)
       throw new IllegalStateException("Start-inclusive " + startInclusive + " out of this view's range: [" + this.startInclusive + ";" + this.endExclusive + ")");
 

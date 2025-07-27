@@ -29,7 +29,7 @@ public class TokenOutput {
   }
 
   private int collectChildrenAndGetNextIndex(HierarchicalToken parent) {
-    for (int childBeginIndex = parent.beginIndex + 1; childBeginIndex <= parent.endIndex; ++childBeginIndex) {
+    for (int childBeginIndex = parent.value.startInclusive + 1; childBeginIndex < parent.value.endExclusive; ++childBeginIndex) {
       HierarchicalToken child = tokenByCharIndex[childBeginIndex];
 
       if (child == null)
@@ -40,7 +40,7 @@ public class TokenOutput {
       parent.addChild(child);
     }
 
-    return parent.endIndex;
+    return parent.value.endExclusive - 1;
   }
 
   public void onInputEnd() {
@@ -57,18 +57,18 @@ public class TokenOutput {
 
       if (currentToken == null) {
         int lineCounter = 1;
-        int charCounter = 0;
+        int columnCounter = 1;
 
         for (int i = 0; i < currentBeginIndex; ++i) {
           if (input.contents.charAt(i) == '\n') {
             ++lineCounter;
-            charCounter = 0;
+            columnCounter = 0;
           }
 
-          ++charCounter;
+          ++columnCounter;
         }
 
-        throw new IllegalStateException("Missing token for index line " + lineCounter + " column " + charCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + ")");
+        throw new IllegalStateException("Missing token on line " + lineCounter + " column " + columnCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + "; char '" + input.contents.charAt(currentBeginIndex) + "')");
       }
 
       currentBeginIndex = collectChildrenAndGetNextIndex(currentToken);
@@ -81,19 +81,25 @@ public class TokenOutput {
   }
 
   public void emitCharToken(int position, TokenType type) {
-    emitToken(type, input.buildSubViewAbsolute(position, position));
+    emitToken(type, input.buildSubViewAbsolute(position, position + 1));
   }
 
   public void emitToken(TokenType type, StringView value) {
-    validateTokenIndex(type, value.startInclusive);
+    validateTokenIndex(type, value);
     tokenByCharIndex[value.startInclusive] = new HierarchicalToken(type, value);
   }
 
-  private void validateTokenIndex(TokenType type, int index) {
+  private void validateTokenIndex(TokenType type, StringView value) {
     if (tokenByCharIndex == null)
       throw new IllegalStateException("Do not emit tokens before calling TokenOutput#onInitialization");
 
-    if (index < 0 || index >= tokenByCharIndex.length)
-      throw new IllegalStateException("Encountered out-of-range token \"" + type + "\" at index " + index);
+    if (value.startInclusive < 0 || value.startInclusive >= tokenByCharIndex.length)
+      throw new IllegalStateException("Encountered out-of-range token \"" + type + "\" at start-inclusive " + value.startInclusive);
+
+    if (value.endExclusive < 0 || value.endExclusive > tokenByCharIndex.length)
+      throw new IllegalStateException("Encountered out-of-range token \"" + type + "\" at end-exclusive " + value.endExclusive);
+
+    if (value.isEmpty())
+      throw new IllegalStateException("Encountered empty token \"" + type + "\" at start-inclusive " + value.startInclusive);
   }
 }

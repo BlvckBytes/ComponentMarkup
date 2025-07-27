@@ -6,6 +6,8 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.ListBuilder;
+import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -18,272 +20,268 @@ public class TokenOutputTests {
   @Test
   public void shouldTokenizeComplexInputHierarchicallyAndSequentially() {
     TextWithAnchors text = new TextWithAnchors(
-      "@<@gray@>",
-      "  @Currently,@ the@ following@ players@ are@ online:@<@space@/@>",
-      "  @<@red",
-      "    @*@for@-@player_name@=@\"@player_names@\"",
-      "    @*@if@=@\"@player_name@ @!=@ @'Steve'@\"",
-      "    @*@let@-@position_number@=@\"@ @loop@.@index@ @+@ @1@\"",
-      "    @*@for-separator@=@{@<@gray@>@,@ @}",
-      "  @>",
-      "    @<@run-command",
-      "      @[@value@]@=@\"@'/tp@ '@ @+@ @player_name@\"",
-      "    @>@\\#@{@position_number@}@ @{# # @player_name# @}@<@/@>",
-      "  @<@/@>",
-      "@<@/@>"
+      //  v- First subview-index within this line
+      /*   0 */ "`<´`gray´`>´",
+      /*   3 */ "  ``Currently,´` ´`the´` ´`following´` ´`players´` ´`are´` ´`online:´´`<´`space´`/´`>´",
+      /*  19 */ "  `<´`red´",
+      /*  21 */ "    `*´`for´`-´`player_name´`=´``\"´`player_names´`\"´´",
+      /*  30 */ "    `*´`if´`=´``\"´`player_name´` ´`!=´` ´`'Steve'´`\"´´",
+      /*  41 */ "    `*´`let´`-´`position_number´`=´``\"´` ´`loop´`.´`index´` ´`+´` ´`1´`\"´´",
+      /*  57 */ "    `*´`for-separator´`=´`{´`<´`gray´`>´``,´` ´´`}´",
+      /*  68 */ "  `>´",
+      /*  69 */ "    `<´`run-command´",
+      /*  71 */ "      `[´`value´`]´`=´``\"´``'/tp´` ´`'´´` ´`+´` ´`player_name´`\"´´",
+      /*  86 */ "    `>´`#´``{´`position_number´`}´´` ´``{´` ´` ´`player_name´` ´`}´´`<´`/´`>´",
+      /* 103 */ "  `<´`/´`>´",
+      /* 106 */ "`<´`/´`>´"
     );
 
+    StringView rootView = StringView.of(text.text);
+
     makeCase(
-      text,
+      rootView,
       new ListBuilder<>(HierarchicalToken.class)
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(0), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(1), "gray"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(2), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(2), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase())) // "gray"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(2))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(2), list))
         .add(
-          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(3), "Currently, the following players are online:")
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(4), " "))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(5), " "))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(6), " "))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(7), " "))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(8), " "))
+          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT)) // "Currently, the following players are online:"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(5))) // " "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(7))) // " "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(9))) // " "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(11))) // " "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(13))) // " "
         )
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(9), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(10), "space"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(11), "/"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(12), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(12), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(13), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(14), "red"))
-        .with(list -> addWhitespace(text, text.anchorIndex(14), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(15), "*"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(16), "for"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.anchorIndex(17), "-"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.anchorIndex(18), "player_name"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(19), "="))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(15))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(16).setLowercase())) // "space"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(17))) // "/"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(18))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(18), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(19))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(20).setLowercase())) // "red"
+        .with(list -> addWhitespace(rootView, text.subView(20), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(22).setLowercase())) // "for"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(23).setLowercase())) // "-"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(24).setLowercase())) // "player_name"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(25))) // "="
         .add(
-          new HierarchicalToken(TokenType.MARKUP__STRING, text.anchorIndex(20), "\"player_names\"")
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(21), "player_names"))
+          new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(26)) // "\"player_names\""
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(28))) // "player_names"
         )
-        // 22 - closing-quote
-        .with(list -> addWhitespace(text, text.anchorIndex(22), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(23), "*"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(24), "if"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(25), "="))
+        .with(list -> addWhitespace(rootView, text.subView(26), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(30).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(31).setLowercase())) // "if"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(32))) // "="
         .add(
-          new HierarchicalToken(TokenType.MARKUP__STRING, text.anchorIndex(26), "\"player_name != 'Steve'\"")
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(27), "player_name"))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(28), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(29), "!="))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(30), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.anchorIndex(31), "'Steve'"))
+          new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(33)) // "\"player_name != 'Steve'\""
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(37))) // "!="
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         )
-        // 32 - closing-quote
-        .with(list -> addWhitespace(text, text.anchorIndex(32), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(33), "*"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(34), "let"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.anchorIndex(35), "-"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.anchorIndex(36), "position_number"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(37), "="))
+        .with(list -> addWhitespace(rootView, text.subView(33), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(41).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(42).setLowercase())) // "let"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(43).setLowercase())) // "-"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(44).setLowercase())) // "position_number"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(45))) // "="
         .add(
-          new HierarchicalToken(TokenType.MARKUP__STRING, text.anchorIndex(38), "\" loop.index + 1\"")
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(39), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(40), "loop"))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(41), "."))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(42), "index"))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(43), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(44), "+"))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(45), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__NUMBER, text.anchorIndex(46), "1"))
+          new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(46)) // "\" loop.index + 1\""
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(48))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(49))) // "loop"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(50))) // "."
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(51))) // "index"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(52))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(53))) // "+"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(54))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__NUMBER, text.subView(55))) // "1"
         )
-        // 47 - closing-quote
-        .with(list -> addWhitespace(text, text.anchorIndex(47), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(48), "*"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(49), "for-separator"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(50), "="))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.anchorIndex(51), "{"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(52), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(53), "gray"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(54), ">"))
+        .with(list -> addWhitespace(rootView, text.subView(46), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(57).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(58).setLowercase())) // "for-separator"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(59))) // "="
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(60))) // "{"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(61))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(62).setLowercase())) // "gray"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(63))) // ">"
         .add(
-          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(55), ", ")
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(56), " "))
+          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(64).setBuildFlags(SubstringFlag.LAST_TEXT)) // ", "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(66))) // " "
         )
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.anchorIndex(57), "}"))
-        .with(list -> addWhitespace(text, text.anchorIndex(57), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(58), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(58), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(59), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(60), "run-command"))
-        .with(list -> addWhitespace(text, text.anchorIndex(60), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.anchorIndex(61), "["))
-        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.anchorIndex(62), "value"))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.anchorIndex(63), "]"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(64), "="))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(67))) // "}"
+        .with(list -> addWhitespace(rootView, text.subView(67), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(68))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(68), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(69))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(70).setLowercase())) // "run-command"
+        .with(list -> addWhitespace(rootView, text.subView(70), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71))) // "["
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72).setLowercase())) // "value"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73))) // "]"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(74))) // "="
         .add(
-          new HierarchicalToken(TokenType.MARKUP__STRING, text.anchorIndex(65), "\"'/tp ' + player_name\"")
+          new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(75)) // "\"'/tp ' + player_name\""
             .addChild(
-              new HierarchicalToken(TokenType.EXPRESSION__STRING, text.anchorIndex(66), "'/tp '")
-                .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(67), " "))
+              new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(77)) // "'/tp '"
+                .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(79))) // " "
             )
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(68), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(69), "+"))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.anchorIndex(70), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(71), "player_name"))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(81))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(82))) // "+"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(83))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(84))) // "player_name"
         )
-        // 72 - closing-quote
-        .with(list -> addWhitespace(text, text.anchorIndex(72), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(73), ">"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(74), "#"))
+        .with(list -> addWhitespace(rootView, text.subView(75), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(86))) // ">"
+        .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(87).setBuildFlags(SubstringFlag.INNER_TEXT))) // "#"
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(75), "{position_number}")
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(76), "position_number"))
+          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(88)) // "{position_number}"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
         )
-        // 77 - closing-bracket
-        .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(78), " "))
+        .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(92).setBuildFlags(SubstringFlag.INNER_TEXT))) // " "
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(79), "{  player_name }")
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(0), " "))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(1), " "))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(80), "player_name"))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(2), " "))
+          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(93)) // "{  player_name }
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(96))) // " "
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(97))) // "player_name"
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(98))) // " "
         )
-        // 81 - closing-bracket
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(82), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(83), "/"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(84), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(84), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(85), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(86), "/"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(87), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(87), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(88), "<"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(89), "/"))
-        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(90), ">"))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(100))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(101))) // "/"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(102))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(102), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(103))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(104))) // "/"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(105))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(104), list))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(106))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(107))) // "/"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(108))) // ">"
       ,
       new ListBuilder<>(Token.class)
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(0), "<"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(1), "gray"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(2), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(2), list))
-        // Currently, the following players are online:
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(3), "Currently,"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(4), " "))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(4) + 1, "the"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(5), " "))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(5) + 1, "following"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(6), " "))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(6) + 1, "players"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(7), " "))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(7) + 1, "are"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(8), " "))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(8) + 1, "online:"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(9), "<"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(10), "space"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(11), "/"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(12), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(12), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(13), "<"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(14), "red"))
-        .with(list -> addWhitespace(text, text.anchorIndex(14), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(15), "*"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(16), "for"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.anchorIndex(17), "-"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.anchorIndex(18), "player_name"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(19), "="))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(20), "\""))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(21), "player_names"))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(22), "\""))
-        .with(list -> addWhitespace(text, text.anchorIndex(22), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(23), "*"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(24), "if"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(25), "="))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(26), "\""))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(27), "player_name"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(28), " "))
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(29), "!="))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(30), " "))
-        .add(new Token(TokenType.EXPRESSION__STRING, text.anchorIndex(31), "'Steve'"))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(32), "\""))
-        .with(list -> addWhitespace(text, text.anchorIndex(32), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(33), "*"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(34), "let"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.anchorIndex(35), "-"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.anchorIndex(36), "position_number"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(37), "="))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(38), "\""))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(39), " "))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(40), "loop"))
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(41), "."))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(42), "index"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(43), " "))
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(44), "+"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(45), " "))
-        .add(new Token(TokenType.EXPRESSION__NUMBER, text.anchorIndex(46), "1"))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(47), "\""))
-        .with(list -> addWhitespace(text, text.anchorIndex(47), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.anchorIndex(48), "*"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.anchorIndex(49), "for-separator"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(50), "="))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.anchorIndex(51), "{"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(52), "<"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(53), "gray"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(54), ">"))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(55), ","))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(56), " "))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.anchorIndex(57), "}"))
-        .with(list -> addWhitespace(text, text.anchorIndex(57), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(58), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(58), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(59), "<"))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.anchorIndex(60), "run-command"))
-        .with(list -> addWhitespace(text, text.anchorIndex(60), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.anchorIndex(61), "["))
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.anchorIndex(62), "value"))
-        .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.anchorIndex(63), "]"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.anchorIndex(64), "="))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(65), "\""))
-        .add(new Token(TokenType.EXPRESSION__STRING, text.anchorIndex(66), "'/tp"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(67), " "))
-        .add(new Token(TokenType.EXPRESSION__STRING, text.anchorIndex(67) + 1, "'"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(68), " "))
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.anchorIndex(69), "+"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.anchorIndex(70), " "))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(71), "player_name"))
-        .add(new Token(TokenType.MARKUP__STRING, text.anchorIndex(72), "\""))
-        .with(list -> addWhitespace(text, text.anchorIndex(72), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(73), ">"))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(74), "#"))
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(75), "{"))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(76), "position_number"))
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(77), "}"))
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.anchorIndex(78), " "))
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(79), "{"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(0), " "))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(1), " "))
-        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.anchorIndex(80), "player_name"))
-        .add(new Token(TokenType.ANY__WHITESPACE, text.auxAnchorIndex(2), " "))
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.anchorIndex(81), "}"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(82), "<"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(83), "/"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(84), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(84), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(85), "<"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(86), "/"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(87), ">"))
-        .with(list -> addWhitespace(text, text.anchorIndex(87), list))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(88), "<"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(89), "/"))
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.anchorIndex(90), ">"))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase())) // "gray"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(2))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(2), list))
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(4))) // "Currently,"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(5))) // " "
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(6))) // "the"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(7))) // " "
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(8))) // "following"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(9))) // " "
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(10))) // "players"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(11))) // " "
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(12))) // "are"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(13))) // " "
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(14))) // "online:"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(15))) // "<"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(16).setLowercase())) // "space"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(17))) // "/"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(18))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(18), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(19))) // "<"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(20).setLowercase())) // "red"
+        .with(list -> addWhitespace(rootView, text.subView(20), list))
+        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21).setLowercase())) // "*"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(22).setLowercase())) // "for"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(23).setLowercase())) // "-"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(24).setLowercase())) // "player_name"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(25))) // "="
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(27))) // "\""
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(28))) // "player_names"
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(29))) // "\""
+        .with(list -> addWhitespace(rootView, text.subView(29), list))
+        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(30))) // "*"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(31))) // "if"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(32))) // "="
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(34))) // "\""
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
+        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(37))) // "!="
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
+        .add(new Token(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(40))) // "\""
+        .with(list -> addWhitespace(rootView, text.subView(40), list))
+        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(41))) // "*"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(42))) // "let"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(43))) // "-"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(44))) // "position_number"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(45))) // "="
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(47))) // "\""
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(48))) // " "
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(49))) // "loop"
+        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(50))) // "."
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(51))) // "index"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(52))) // " "
+        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(53))) // "+"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(54))) // " "
+        .add(new Token(TokenType.EXPRESSION__NUMBER, text.subView(55))) // "1"
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(56))) // "\""
+        .with(list -> addWhitespace(rootView, text.subView(56), list))
+        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(57))) // "*"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(58))) // "for-separator"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(59))) // "="
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(60))) // "{"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(61))) // "<"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(62))) // "gray"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(63))) // ">"
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(65))) // ","
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(66))) // " "
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(67))) // "}"
+        .with(list -> addWhitespace(rootView, text.subView(67), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(68))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(68), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(69))) // "<"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(70))) // "run-command"
+        .with(list -> addWhitespace(rootView, text.subView(70), list))
+        .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71))) // "["
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72))) // "value"
+        .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73))) // "]"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(74))) // "="
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(76))) // "\""
+        .add(new Token(TokenType.EXPRESSION__STRING, text.subView(78))) // "'/tp
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(79))) // " "
+        .add(new Token(TokenType.EXPRESSION__STRING, text.subView(80))) // "'"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(81))) // " "
+        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(82))) // "+"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(83))) // " "
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(84))) // "player_name"
+        .add(new Token(TokenType.MARKUP__STRING, text.subView(85))) // "\""
+        .with(list -> addWhitespace(rootView, text.subView(85), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(86))) // ">"
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(87))) // "#"
+        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(89))) // "{"
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
+        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(91))) // "}"
+        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(92))) // " "
+        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(94))) // "{"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(96))) // " "
+        .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(97))) // "player_name"
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(98))) // " "
+        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(99))) // "}"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(100))) // "<"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(101))) // "/"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(102))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(102), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(103))) // "<"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(104))) // "/"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(105))) // ">"
+        .with(list -> addWhitespace(rootView, text.subView(105), list))
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(106))) // "<"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(107))) // "/"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(108))) // ">"
     );
   }
 
-  private void addWhitespace(TextWithAnchors input, int position, ListBuilder<? extends Token> output) {
-    int textLength = input.text.length();
+  private void addWhitespace(StringView rootView, StringView predecessor, ListBuilder<? extends Token> output) {
+    int textLength = rootView.contents.length();
     boolean foundFirstWhitespace = false;
 
-    for (int charIndex = position + 1; charIndex < textLength; ++charIndex) {
-      char currentChar = input.text.charAt(charIndex);
+    for (int charIndex = predecessor.endExclusive; charIndex < textLength; ++charIndex) {
+      char currentChar = rootView.contents.charAt(charIndex);
 
       if (!Character.isWhitespace(currentChar)) {
         if (!foundFirstWhitespace)
@@ -294,11 +292,13 @@ public class TokenOutputTests {
 
       foundFirstWhitespace = true;
 
+      StringView charView = rootView.buildSubViewAbsolute(charIndex, charIndex + 1);
+
       if (output.type == HierarchicalToken.class)
-        output.add(new HierarchicalToken(TokenType.ANY__WHITESPACE, charIndex, currentChar));
+        output.add(new HierarchicalToken(TokenType.ANY__WHITESPACE, charView));
 
       else if (output.type == Token.class)
-        output.add(new Token(TokenType.ANY__WHITESPACE, charIndex, currentChar));
+        output.add(new Token(TokenType.ANY__WHITESPACE, charView));
 
       else
         throw new IllegalStateException("Unknown token-type: " + output.type);
@@ -306,14 +306,14 @@ public class TokenOutputTests {
   }
 
   private void makeCase(
-    TextWithAnchors input,
+    StringView rootView,
     ListBuilder<HierarchicalToken> expectedHierarchicalTokens,
     ListBuilder<Token> expectedSequenceTokens
   ) {
     TokenOutput tokenOutput = new TokenOutput(EnumSet.noneOf(OutputFlag.class));
 
     try {
-      MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE, tokenOutput);
+      MarkupParser.parse(rootView, BuiltInTagRegistry.INSTANCE, tokenOutput);
     } catch (MarkupParseException e) {
       for (String line : e.makeErrorScreen())
         System.out.println(line);
@@ -327,8 +327,8 @@ public class TokenOutputTests {
 
     List<Token> actualSequenceTokens = new ArrayList<>();
 
-    HierarchicalToken.toSequence(actualHierarchicalTokens, (type, beginIndex, value) -> {
-      actualSequenceTokens.add(new Token(type, beginIndex, value));
+    HierarchicalToken.toSequence(actualHierarchicalTokens, (type, value) -> {
+      actualSequenceTokens.add(new Token(type, value));
     });
 
     Assertions.assertEquals(Jsonifier.jsonify(expectedSequenceTokens.getResult()), Jsonifier.jsonify(actualSequenceTokens));

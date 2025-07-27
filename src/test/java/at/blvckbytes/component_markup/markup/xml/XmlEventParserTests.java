@@ -25,7 +25,7 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.LAST_TEXT), "Hello, world! :)"),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.LAST_TEXT), "Hello, world! :)"),
       new InputEndEvent()
     );
   }
@@ -45,7 +45,7 @@ public class XmlEventParserTests {
       new DoubleAttributeEvent(text.subView(7), text.subView(8), .3, "attr-4", ".3"),
       new LongAttributeEvent(text.subView(9), text.subView(10), -3, "attr-5", "-3"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(11, SubstringFlag.LAST_TEXT), " my content"),
+      new TextEvent(text.subView(11).setBuildFlags(SubstringFlag.LAST_TEXT), " my content"),
       new InputEndEvent()
     );
   }
@@ -106,7 +106,7 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello"),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello"),
       new TagCloseEvent(text.subView(2), text.anchor(0), "red"),
       new InputEndEvent()
     );
@@ -125,7 +125,7 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false),
       new TagOpenBeginEvent(text.subView(1), "bold"),
       new TagOpenEndEvent(text.subView(1), false),
-      new TextEvent(text.subView(2, SubstringFlag.LAST_TEXT), "hi"),
+      new TextEvent(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT), "hi"),
       new InputEndEvent()
     );
   }
@@ -143,10 +143,10 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Helloworldtest"),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Helloworldtest"),
       new TagOpenBeginEvent(text.subView(2), "bold"),
       new TagOpenEndEvent(text.subView(2), false),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "test2"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "test2"),
       new InputEndEvent()
     );
   }
@@ -169,7 +169,7 @@ public class XmlEventParserTests {
       new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "attr-1"),
       new TagOpenBeginEvent(text.subView(2), "red"),
       new TagOpenEndEvent(text.subView(2), false),
-      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), "Hello curly } bracket"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello curly } bracket"),
       new TagCloseEvent(text.subView(4), text.anchor(2), "red"),
       new TagAttributeEndEvent(text.subView(1)),
       new TagOpenEndEvent(text.subView(0), false),
@@ -187,9 +187,9 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello, "),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello, "),
       new InterpolationEvent(text.subView(2), "user.name"),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "!"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
   }
@@ -218,18 +218,18 @@ public class XmlEventParserTests {
       new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "name"),
       new TagOpenBeginEvent(text.subView(2), "red"),
       new TagOpenEndEvent(text.subView(2), false),
-      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), "My item!"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT), "My item!"),
       new TagCloseEvent(text.subView(4), text.anchor(1), "red"),
       new TagAttributeEndEvent(text.subView(1)),
       new TagAttributeBeginEvent(text.subView(5), text.anchor(2), "lore"),
       new TagOpenBeginEvent(text.subView(6), "blue"),
       new TagOpenEndEvent(text.subView(6), false),
-      new TextEvent(text.subView(7, SubstringFlag.INNER_TEXT), "First line"),
+      new TextEvent(text.subView(7).setBuildFlags(SubstringFlag.INNER_TEXT), "First line"),
       new TagOpenBeginEvent(text.subView(8), "br"),
       new TagOpenEndEvent(text.subView(8), true),
       new TagOpenBeginEvent(text.subView(9), "green"),
       new TagOpenEndEvent(text.subView(9), false),
-      new TextEvent(text.subView(10, SubstringFlag.INNER_TEXT), "Second line"),
+      new TextEvent(text.subView(10).setBuildFlags(SubstringFlag.INNER_TEXT), "Second line"),
       new TagOpenBeginEvent(text.subView(11), "br"),
       new TagOpenEndEvent(text.subView(11), true),
       new TagOpenBeginEvent(text.subView(12), "gray"),
@@ -242,10 +242,10 @@ public class XmlEventParserTests {
       new TagAttributeBeginEvent(text.subView(19), text.anchor(4), "empty"),
       new TagOpenBeginEvent(text.subView(20), "red"),
       new TagOpenEndEvent(text.subView(20), false),
-      new TextEvent(text.subView(21, SubstringFlag.LAST_TEXT), "No items found!"),
+      new TextEvent(text.subView(21).setBuildFlags(SubstringFlag.LAST_TEXT), "No items found!"),
       new TagAttributeEndEvent(text.subView(19)),
       new TagOpenEndEvent(text.subView(12), false),
-      new TextEvent(text.subView(22, SubstringFlag.INNER_TEXT), "- "),
+      new TextEvent(text.subView(22).setBuildFlags(SubstringFlag.INNER_TEXT), "- "),
       new TagOpenBeginEvent(text.subView(23), "yellow"),
       new TagOpenEndEvent(text.subView(23), false),
       new InterpolationEvent(text.subView(24), " member.item "),
@@ -254,16 +254,16 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(26), true),
       new TagOpenBeginEvent(text.subView(27), "gray"),
       new TagOpenEndEvent(text.subView(27), false),
-      new TextEvent(text.subView(28, SubstringFlag.LAST_TEXT), "Last line! :)"),
+      new TextEvent(text.subView(28).setBuildFlags(SubstringFlag.LAST_TEXT), "Last line! :)"),
       new TagAttributeEndEvent(text.subView(5)),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(29, SubstringFlag.INNER_TEXT), "hover over "),
+      new TextEvent(text.subView(29).setBuildFlags(SubstringFlag.INNER_TEXT), "hover over "),
       new InterpolationEvent(text.subView(30), "\"me\""),
-      new TextEvent(text.subView(31, SubstringFlag.INNER_TEXT), "! "),
+      new TextEvent(text.subView(31).setBuildFlags(SubstringFlag.INNER_TEXT), "! "),
       new TagOpenBeginEvent(text.subView(32), "red"),
       new FlagAttributeEvent(text.subView(33), "my_flag"),
       new TagOpenEndEvent(text.subView(32), false),
-      new TextEvent(text.subView(34, SubstringFlag.LAST_TEXT), ":)"),
+      new TextEvent(text.subView(34).setBuildFlags(SubstringFlag.LAST_TEXT), ":)"),
       new InputEndEvent()
     );
   }
@@ -278,9 +278,9 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello, "),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello, "),
       new InterpolationEvent(text.subView(2), "user.name + \"}\" + '}'"),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "!"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
   }
@@ -293,13 +293,13 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      new TextEvent(text.subView(0, SubstringFlag.FIRST_TEXT), "abcde "),
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "abcde "),
       new TagOpenBeginEvent(text.subView(1), "red"),
       new TagOpenEndEvent(text.subView(1), false),
-      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), " hello "),
+      new TextEvent(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT), " hello "),
       new TagOpenBeginEvent(text.subView(3), "blue"),
       new TagOpenEndEvent(text.subView(3), false),
-      new TextEvent(text.subView(4, SubstringFlag.LAST_TEXT), " world!"),
+      new TextEvent(text.subView(4).setBuildFlags(SubstringFlag.LAST_TEXT), " world!"),
       new InputEndEvent()
     );
 
@@ -309,7 +309,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "abcde"),
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.ONLY_TEXT), "abcde"),
       new InputEndEvent()
     );
   }
@@ -323,10 +323,10 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      new TextEvent(text.subView(0, SubstringFlag.FIRST_TEXT), "Online players:"),
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "Online players:"),
       new TagOpenBeginEvent(text.subView(1), "red"),
       new TagOpenEndEvent(text.subView(1), false),
-      new TextEvent(text.subView(2, SubstringFlag.LAST_TEXT), "test"),
+      new TextEvent(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT), "test"),
       new InputEndEvent()
     );
   }
@@ -341,7 +341,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "helloworldtest"),
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.ONLY_TEXT), "helloworldtest"),
       new InputEndEvent()
     );
   }
@@ -359,7 +359,7 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false),
       new TagOpenBeginEvent(text.subView(1), "red"),
       new TagOpenEndEvent(text.subView(1), false),
-      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), "  surrounding spaces  "),
+      new TextEvent(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT), "  surrounding spaces  "),
       new TagCloseEvent(text.subView(3), text.anchor(0), "red"),
       new InputEndEvent()
     );
@@ -375,9 +375,9 @@ public class XmlEventParserTests {
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(1, SubstringFlag.INNER_TEXT), "Hello "),
+      new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello "),
       new InterpolationEvent(text.subView(2), "user.name"),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), " world!"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), " world!"),
       new InputEndEvent()
     );
   }
@@ -439,7 +439,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      new TextEvent(text.subView(0, SubstringFlag.ONLY_TEXT), "<hello, world!"),
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.ONLY_TEXT), "<hello, world!"),
       new InputEndEvent()
     );
   }
@@ -459,7 +459,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
       new TextEvent(
-        text.subView(1, SubstringFlag.INNER_TEXT),
+        text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT),
         // Within text-content, there's no need to escape quotes, as strings only occur
         // at values of attributes; also, there's no need to escape closing pointy-brackets,
         // as the predecessor tag (if any) is already closed.
@@ -488,7 +488,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new StringAttributeEvent(text.subView(1), text.subView(2), "a", "a \\ backslash"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "another \\ backslash"),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "another \\ backslash"),
       new InputEndEvent()
     );
   }
@@ -534,8 +534,8 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false),
       new TagOpenBeginEvent(text.subView(1), "red"),
       new TagOpenEndEvent(text.subView(1), false),
-      new TextEvent(text.subView(2, SubstringFlag.INNER_TEXT), "Hello, world! "),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), " more text"),
+      new TextEvent(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello, world! "),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), " more text"),
       new InputEndEvent()
     );
   }
@@ -551,7 +551,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "container"),
       new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "*let-test"),
       new InterpolationEvent(text.subView(2), "a"),
-      new TextEvent(text.subView(3, SubstringFlag.INNER_TEXT), " and "),
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT), " and "),
       new InterpolationEvent(text.subView(4), "b"),
       new TagAttributeEndEvent(text.subView(1)),
       new TagOpenEndEvent(text.subView(0), false),
@@ -606,7 +606,7 @@ public class XmlEventParserTests {
       new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "my-attr"),
       new TagOpenBeginEvent(text.subView(2), "green"),
       new TagOpenEndEvent(text.subView(2), false),
-      new TextEvent(text.subView(3, SubstringFlag.LAST_TEXT), "Hello, } world!>")
+      new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "Hello, } world!>")
     );
   }
 
