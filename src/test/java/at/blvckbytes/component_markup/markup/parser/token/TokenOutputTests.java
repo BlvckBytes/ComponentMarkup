@@ -118,9 +118,9 @@ public class TokenOutputTests {
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(69))) // "<"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(70).setLowercase())) // "run-command"
         .with(list -> addWhitespace(rootView, text.subView(70), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71))) // "["
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71).setLowercase())) // "["
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72).setLowercase())) // "value"
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73))) // "]"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73).setLowercase())) // "]"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(74))) // "="
         .add(
           new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(75)) // "\"'/tp ' + player_name\""

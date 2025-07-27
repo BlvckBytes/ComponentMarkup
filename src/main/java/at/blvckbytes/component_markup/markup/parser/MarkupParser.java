@@ -501,7 +501,7 @@ public class MarkupParser implements XmlEventConsumer {
 
         if (tokenOutput != null) {
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(0, 1));
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(-1, -2));
+          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(-1));
         }
 
         isCaptureMode = true;
@@ -731,8 +731,8 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(name.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
 
       if (tokenOutput != null) {
-        tokenOutput.emitCharToken(name.startInclusive, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
-        tokenOutput.emitCharToken(name.endExclusive - 1, TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE);
+        tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, name.buildSubViewRelative(0, 1));
+        tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, name.buildSubViewRelative(-1));
       }
 
       isExpressionMode = true;

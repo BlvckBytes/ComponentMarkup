@@ -97,11 +97,11 @@ public class StringView {
     return buildSubViewAbsolute(start, endExclusive);
   }
 
-  public StringView buildSubViewRelative(int start) {
-    if (start < 0)
-      throw new IllegalStateException("Start " + start + " cannot be negative");
-
-    return buildSubViewAbsolute(startInclusive + start, endExclusive);
+  public StringView buildSubViewRelative(int startInclusive) {
+    return buildSubViewAbsolute(
+      startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),
+      endExclusive
+    );
   }
 
   public StringView buildSubViewRelative(int startInclusive, int endExclusive) {
