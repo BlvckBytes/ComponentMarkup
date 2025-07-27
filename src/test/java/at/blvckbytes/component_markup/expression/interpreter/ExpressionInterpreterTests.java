@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.expression.interpreter;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -208,7 +209,7 @@ public class ExpressionInterpreterTests {
   }
 
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
-    ExpressionNode node = ExpressionParser.parse(expression, -1, null);
+    ExpressionNode node = ExpressionParser.parse(StringView.of(expression), null);
     Assertions.assertEquals(expectedResult, ExpressionInterpreter.interpret(node, environment));
   }
 }
