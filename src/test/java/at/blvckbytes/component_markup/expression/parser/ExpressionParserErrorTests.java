@@ -4,6 +4,9 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.util.Jsonifier;
+import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +27,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_EOS,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -38,7 +41,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
   }
 
@@ -52,7 +55,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND,
-        text.anchorIndex(0) - 1
+        text.anchor(0).prior()
       );
     }
   }
@@ -66,7 +69,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -80,7 +83,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
 
@@ -95,7 +98,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -109,7 +112,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     text = new TextWithAnchors(
@@ -119,7 +122,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -133,7 +136,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -147,7 +150,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -161,7 +164,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -175,7 +178,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -189,7 +192,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -203,7 +206,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_FALSE_BRANCH,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
   }
 
@@ -217,7 +220,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_PREFIX_OPERAND,
-        text.anchorIndex(0) - 1
+        text.anchor(0).prior()
       );
     }
   }
@@ -231,7 +234,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_ITEM,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
   }
 
@@ -244,7 +247,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
 
     text = new TextWithAnchors(
@@ -254,7 +257,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     text = new TextWithAnchors(
@@ -264,7 +267,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -278,7 +281,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -292,7 +295,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_PARENTHESES_CONTENT,
-      text.anchorIndex(0)
+      text.anchor(0)
     );
   }
 
@@ -305,7 +308,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-      text.anchorIndex(0) - 1
+      text.anchor(0).prior()
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -319,7 +322,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
@@ -336,16 +339,16 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS,
-        text.anchorIndex(0)
+        text.anchor(0)
       );
     }
   }
 
-  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int charIndex) {
+  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, StringPosition position) {
     ExpressionParseException thrownException = null;
 
     try {
-      ExpressionParser.parse(input.text, -1, null);
+      ExpressionParser.parse(StringView.of(input.text),  null);
     } catch (ExpressionParseException exception) {
       thrownException = exception;
     }
@@ -356,6 +359,6 @@ public class ExpressionParserErrorTests {
     thrownException.printStackTrace(new PrintWriter(stringWriter));
 
     Assertions.assertEquals(error, thrownException.error, "Mismatched on the error-type");
-    Assertions.assertEquals(charIndex, thrownException.charIndex, "Mismatched on the char-index");
+    Assertions.assertEquals(Jsonifier.jsonify(position), Jsonifier.jsonify(thrownException.position), "Mismatched on the char-index");
   }
 }
