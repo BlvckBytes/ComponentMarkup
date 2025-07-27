@@ -33,21 +33,21 @@ public class MemberAndSubscriptChainGenerator {
     ExpressionNode lhs;
 
     if (identifiers.size() == 1) {
-      lhs = terminal(identifiers.remove(0), text.anchorIndex(anchorIndexOffset));
+      lhs = terminal(identifiers.remove(0), text.subView(anchorIndexOffset));
       ++anchorIndexOffset;
     }
 
     else
       lhs = make();
 
-    ExpressionNode rhs = terminal(rhsIdentifier, text.anchorIndex(anchorIndexOffset + 1));
+    ExpressionNode rhs = terminal(rhsIdentifier, text.subView(anchorIndexOffset + 1));
 
     InfixOperator operator;
     Token terminator;
 
     if (rhsIdentifier.startsWith("s_")) {
       operator = InfixOperator.SUBSCRIPTING;
-      terminator = token(Punctuation.CLOSING_BRACKET, text.anchorIndex(anchorIndexOffset + 2));
+      terminator = token(Punctuation.CLOSING_BRACKET, text.subView(anchorIndexOffset + 2));
       anchorIndexOffset += 3;
     }
     else if (rhsIdentifier.startsWith("m_")) {

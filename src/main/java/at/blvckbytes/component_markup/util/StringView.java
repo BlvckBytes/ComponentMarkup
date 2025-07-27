@@ -65,7 +65,8 @@ public class StringView {
     if (startInclusive.charIndex < 0)
       throw new IllegalStateException("Start-inclusive cannot be less than zero");
 
-    if (startInclusive.charIndex >= contents.length())
+    // Allow for empty views
+    if (startInclusive.charIndex != 0 && startInclusive.charIndex >= contents.length())
       throw new IllegalStateException("Start-inclusive cannot be greater than or equal to " + contents.length());
 
     if (endExclusive.charIndex > contents.length())
@@ -93,12 +94,7 @@ public class StringView {
   }
 
   public static StringView of(String contents) {
-    int contentsLength = contents.length();
-
-    if (contentsLength == 0)
-      throw new IllegalStateException("Cannot instantiate an empty view");
-
-    return new StringView(contents, null, new BitFlagArray(contentsLength), false, null, null);
+    return new StringView(contents, null, new BitFlagArray(contents.length()), false, null, null);
   }
 
   public StringView buildSubViewAbsolute(int start) {

@@ -1,13 +1,14 @@
 package at.blvckbytes.component_markup.expression.parser;
 
+import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
+import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizerTests;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ public class ExpressionParserTests {
   public void shouldParseEqualPrecedences() {
     TextWithAnchors text = new TextWithAnchors(
       // (((a + 5) - c) + d)
-      "@a + @5 - @c + @d"
+      "`a´ + `5´ - `c´ + `d´"
     );
 
     makeCase(
@@ -40,15 +41,15 @@ public class ExpressionParserTests {
       infix(
         infix(
           infix(
-            terminal("a", text.anchorIndex(0)),
+            terminal("a", text.subView(0)),
             InfixOperator.ADDITION,
-            terminal(5, text.anchorIndex(1))
+            terminal(5, text.subView(1))
           ),
           InfixOperator.SUBTRACTION,
-          terminal("c", text.anchorIndex(2))
+          terminal("c", text.subView(2))
         ),
         InfixOperator.ADDITION,
-        terminal("d", text.anchorIndex(3))
+        terminal("d", text.subView(3))
       )
     );
   }
@@ -57,22 +58,22 @@ public class ExpressionParserTests {
   public void shouldParseClimbingPrecedences() {
     TextWithAnchors text = new TextWithAnchors(
       // (a + ((b * 3) * d))
-      "@a + @b * @3 * @d"
+      "`a´ + `b´ * `3´ * `d´"
     );
 
     makeCase(
       text,
       infix(
-        terminal("a", text.anchorIndex(0)),
+        terminal("a", text.subView(0)),
         InfixOperator.ADDITION,
         infix(
           infix(
-            terminal("b", text.anchorIndex(1)),
+            terminal("b", text.subView(1)),
             InfixOperator.MULTIPLICATION,
-            terminal(3, text.anchorIndex(2))
+            terminal(3, text.subView(2))
           ),
           InfixOperator.MULTIPLICATION,
-          terminal("d", text.anchorIndex(3))
+          terminal("d", text.subView(3))
         )
       )
     );
@@ -82,7 +83,7 @@ public class ExpressionParserTests {
   public void shouldParseFallingPrecedences() {
     TextWithAnchors text = new TextWithAnchors(
       // (((a ^ 2) * c) + d)
-      "@a ^ @2 * @c + @d"
+      "`a´ ^ `2´ * `c´ + `d´"
     );
 
     makeCase(
@@ -90,15 +91,15 @@ public class ExpressionParserTests {
       infix(
         infix(
           infix(
-            terminal("a", text.anchorIndex(0)),
+            terminal("a", text.subView(0)),
             InfixOperator.EXPONENTIATION,
-            terminal(2, text.anchorIndex(1))
+            terminal(2, text.subView(1))
           ),
           InfixOperator.MULTIPLICATION,
-          terminal("c", text.anchorIndex(2))
+          terminal("c", text.subView(2))
         ),
         InfixOperator.ADDITION,
-        terminal("d", text.anchorIndex(3))
+        terminal("d", text.subView(3))
       )
     );
   }
@@ -107,30 +108,30 @@ public class ExpressionParserTests {
   public void shouldParseAlternatingPrecedences() {
     TextWithAnchors text = new TextWithAnchors(
       // ((a + (5 * c)) - ((d / 2) % x))
-      "@a + @5 * @c - @d / @2 % @x"
+      "`a´ + `5´ * `c´ - `d´ / `2´ % `x´"
     );
 
     makeCase(
       text,
       infix(
         infix(
-          terminal("a", text.anchorIndex(0)),
+          terminal("a", text.subView(0)),
           InfixOperator.ADDITION,
           infix(
-            terminal(5, text.anchorIndex(1)),
+            terminal(5, text.subView(1)),
             InfixOperator.MULTIPLICATION,
-            terminal("c", text.anchorIndex(2))
+            terminal("c", text.subView(2))
           )
         ),
         InfixOperator.SUBTRACTION,
         infix(
           infix(
-            terminal("d", text.anchorIndex(3)),
+            terminal("d", text.subView(3)),
             InfixOperator.DIVISION,
-            terminal(2, text.anchorIndex(4))
+            terminal(2, text.subView(4))
           ),
           InfixOperator.MODULO,
-          terminal("x", text.anchorIndex(5))
+          terminal("x", text.subView(5))
         )
       )
     );
@@ -140,21 +141,21 @@ public class ExpressionParserTests {
   public void shouldParseExponentiationWithRightAssociativity() {
     TextWithAnchors text = new TextWithAnchors(
       // (a ^ (b ^ (c ^ d)))
-      "@a ^ @b ^ @c ^ @d"
+      "`a´ ^ `b´ ^ `c´ ^ `d´"
     );
 
     makeCase(
       text,
       infix(
-        terminal("a", text.anchorIndex(0)),
+        terminal("a", text.subView(0)),
         InfixOperator.EXPONENTIATION,
         infix(
-          terminal("b", text.anchorIndex(1)),
+          terminal("b", text.subView(1)),
           InfixOperator.EXPONENTIATION,
           infix(
-            terminal("c", text.anchorIndex(2)),
+            terminal("c", text.subView(2)),
             InfixOperator.EXPONENTIATION,
-            terminal("d", text.anchorIndex(3))
+            terminal("d", text.subView(3))
           )
         )
       )
@@ -165,7 +166,7 @@ public class ExpressionParserTests {
   public void shouldRespectParentheses() {
     TextWithAnchors text = new TextWithAnchors(
       // ((a + b) * (c - d))
-      "(@a + @b) * (@c - @d)"
+      "(`a´ + `b´) * (`c´ - `d´)"
     );
 
     makeCase(
@@ -173,17 +174,17 @@ public class ExpressionParserTests {
       infix(
         parenthesised(
           infix(
-            terminal("a", text.anchorIndex(0)),
+            terminal("a", text.subView(0)),
             InfixOperator.ADDITION,
-            terminal("b", text.anchorIndex(1))
+            terminal("b", text.subView(1))
           )
         ),
         InfixOperator.MULTIPLICATION,
         parenthesised(
           infix(
-            terminal("c", text.anchorIndex(2)),
+            terminal("c", text.subView(2)),
             InfixOperator.SUBTRACTION,
-            terminal("d", text.anchorIndex(3))
+            terminal("d", text.subView(3))
           )
         )
       )
@@ -193,62 +194,62 @@ public class ExpressionParserTests {
   @Test
   public void shouldParsePrefixOperations() {
     TextWithAnchors text = new TextWithAnchors(
-      "@25 * @-@3"
+      "`25´ * `-´`3´"
     );
 
     makeCase(
       text,
       infix(
-        terminal(25, text.anchorIndex(0)),
+        terminal(25, text.subView(0)),
         InfixOperator.MULTIPLICATION,
         prefix(
-          terminal(3, text.anchorIndex(2)),
+          terminal(3, text.subView(2)),
           PrefixOperator.FLIP_SIGN,
-          text.anchorIndex(1)
+          text.subView(1)
         )
       )
     );
 
     text = new TextWithAnchors(
-      "@-@3"
+      "`-´`3´"
     );
 
     makeCase(
       text,
       prefix(
-        terminal(3, text.anchorIndex(1)),
+        terminal(3, text.subView(1)),
         PrefixOperator.FLIP_SIGN,
-        text.anchorIndex(0)
+        text.subView(0)
       )
     );
 
     text = new TextWithAnchors(
-      "@a && @!@b"
+      "`a´ && `!´`b´"
     );
 
     makeCase(
       text,
       infix(
-        terminal("a", text.anchorIndex(0)),
+        terminal("a", text.subView(0)),
         InfixOperator.CONJUNCTION,
         prefix(
-          terminal("b", text.anchorIndex(2)),
+          terminal("b", text.subView(2)),
           PrefixOperator.NEGATION,
-          text.anchorIndex(1)
+          text.subView(1)
         )
       )
     );
 
     text = new TextWithAnchors(
-      "@!@b"
+      "`!´`b´"
     );
 
     makeCase(
       text,
       prefix(
-        terminal("b", text.anchorIndex(1)),
+        terminal("b", text.subView(1)),
         PrefixOperator.NEGATION,
-        text.anchorIndex(0)
+        text.subView(0)
       )
     );
   }
@@ -266,18 +267,18 @@ public class ExpressionParserTests {
     String upperExpression = upperBound == null ? "" : String.valueOf(upperBound);
 
     TextWithAnchors text = new TextWithAnchors(
-      "@a@[@" + lowerExpression + "@:@" + upperExpression + "@]"
+      "`a´`[´`" + lowerExpression + "´`:´`" + upperExpression + "´`]´"
     );
 
     makeCase(
       text,
       substring(
-        terminal("a", text.anchorIndex(0)),
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(1)),
-        lowerBound == null ? null : terminal(lowerBound, text.anchorIndex(2)),
-        token(Punctuation.COLON, text.anchorIndex(3)),
-        upperBound == null ? null : terminal(upperBound, text.anchorIndex(4)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(5))
+        terminal("a", text.subView(0)),
+        token(InfixOperator.SUBSCRIPTING, text.subView(1)),
+        lowerBound == null ? null : terminal(lowerBound, text.subView(2)),
+        token(Punctuation.COLON, text.subView(3)),
+        upperBound == null ? null : terminal(upperBound, text.subView(4)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(5))
       )
     );
   }
@@ -285,16 +286,16 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseSubscriptingOperator() {
     TextWithAnchors text = new TextWithAnchors(
-      "@a[@b@]"
+      "`a´[`b´`]´"
     );
 
     makeCase(
       text,
       infix(
-        terminal("a", text.anchorIndex(0)),
+        terminal("a", text.subView(0)),
         InfixOperator.SUBSCRIPTING,
-        terminal("b", text.anchorIndex(1)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(2))
+        terminal("b", text.subView(1)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(2))
       )
     );
   }
@@ -302,15 +303,15 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseBranchingOperator() {
     TextWithAnchors text = new TextWithAnchors(
-      "@a ? @b : @c"
+      "`a´ ? `b´ : `c´"
     );
 
     makeCase(
       text,
       branching(
-        terminal("a", text.anchorIndex(0)),
-        terminal("b", text.anchorIndex(1)),
-        terminal("c", text.anchorIndex(2))
+        terminal("a", text.subView(0)),
+        terminal("b", text.subView(1)),
+        terminal("c", text.subView(2))
       )
     );
   }
@@ -318,32 +319,32 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseArraySyntax() {
     TextWithAnchors text = new TextWithAnchors(
-      "@[@5, @3, @'hello', @true, @false, @c@]"
+      "`[´`5´, `3´, `'hello'´, `true´, `false´, `c´`]´"
     );
 
     makeCase(
       text,
       array(
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(7)),
-        terminal(5, text.anchorIndex(1)),
-        terminal(3, text.anchorIndex(2)),
-        terminal("'hello'", text.anchorIndex(3)),
-        terminal(true, text.anchorIndex(4)),
-        terminal(false, text.anchorIndex(5)),
-        terminal("c", text.anchorIndex(6))
+        token(InfixOperator.SUBSCRIPTING, text.subView(0)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(7)),
+        terminal(5, text.subView(1)),
+        terminal(3, text.subView(2)),
+        terminal("'hello'", text.subView(3)),
+        terminal(true, text.subView(4)),
+        terminal(false, text.subView(5)),
+        terminal("c", text.subView(6))
       )
     );
 
     text = new TextWithAnchors(
-      "@[@]"
+      "`[´`]´"
     );
 
     makeCase(
       text,
       array(
-        token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(1))
+        token(InfixOperator.SUBSCRIPTING, text.subView(0)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(1))
       )
     );
   }
@@ -351,22 +352,22 @@ public class ExpressionParserTests {
   @Test
   public void shouldSubscriptIntoImmediateArray() {
     TextWithAnchors text = new TextWithAnchors(
-      "@[@0, @1, @2@][@0@]"
+      "`[´`0´, `1´, `2´`]´[`0´`]´"
     );
 
     makeCase(
       text,
       infix(
         array(
-          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
-          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4)),
-          terminal(0, text.anchorIndex(1)),
-          terminal(1, text.anchorIndex(2)),
-          terminal(2, text.anchorIndex(3))
+          token(InfixOperator.SUBSCRIPTING, text.subView(0)),
+          token(Punctuation.CLOSING_BRACKET, text.subView(4)),
+          terminal(0, text.subView(1)),
+          terminal(1, text.subView(2)),
+          terminal(2, text.subView(3))
         ),
         InfixOperator.SUBSCRIPTING,
-        terminal(0, text.anchorIndex(5)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(6))
+        terminal(0, text.subView(5)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(6))
       )
     );
   }
@@ -374,7 +375,7 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseNestedArrays() {
     TextWithAnchors text = new TextWithAnchors(
-      "@[@[@0, @1@], @[@2, @3@], @[@4, @5@]@][@0@][@1@]"
+      "`[´`[´`0´, `1´`]´, `[´`2´, `3´`]´, `[´`4´, `5´`]´`]´[`0´`]´[`1´`]´"
     );
 
     makeCase(
@@ -382,34 +383,34 @@ public class ExpressionParserTests {
       infix(
         infix(
           array(
-            token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
-            token(Punctuation.CLOSING_BRACKET, text.anchorIndex(13)),
+            token(InfixOperator.SUBSCRIPTING, text.subView(0)),
+            token(Punctuation.CLOSING_BRACKET, text.subView(13)),
             array(
-              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(1)),
-              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4)),
-              terminal(0, text.anchorIndex(2)),
-              terminal(1, text.anchorIndex(3))
+              token(InfixOperator.SUBSCRIPTING, text.subView(1)),
+              token(Punctuation.CLOSING_BRACKET, text.subView(4)),
+              terminal(0, text.subView(2)),
+              terminal(1, text.subView(3))
             ),
             array(
-              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(5)),
-              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(8)),
-              terminal(2, text.anchorIndex(6)),
-              terminal(3, text.anchorIndex(7))
+              token(InfixOperator.SUBSCRIPTING, text.subView(5)),
+              token(Punctuation.CLOSING_BRACKET, text.subView(8)),
+              terminal(2, text.subView(6)),
+              terminal(3, text.subView(7))
             ),
             array(
-              token(InfixOperator.SUBSCRIPTING, text.anchorIndex(9)),
-              token(Punctuation.CLOSING_BRACKET, text.anchorIndex(12)),
-              terminal(4, text.anchorIndex(10)),
-              terminal(5, text.anchorIndex(11))
+              token(InfixOperator.SUBSCRIPTING, text.subView(9)),
+              token(Punctuation.CLOSING_BRACKET, text.subView(12)),
+              terminal(4, text.subView(10)),
+              terminal(5, text.subView(11))
             )
           ),
           InfixOperator.SUBSCRIPTING,
-          terminal(0, text.anchorIndex(14)),
-          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(15))
+          terminal(0, text.subView(14)),
+          token(Punctuation.CLOSING_BRACKET, text.subView(15))
         ),
         InfixOperator.SUBSCRIPTING,
-        terminal(1, text.anchorIndex(16)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(17))
+        terminal(1, text.subView(16)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(17))
       )
     );
   }
@@ -417,20 +418,20 @@ public class ExpressionParserTests {
   @Test
   public void shouldSubscriptIntoSingleItemArray() {
     TextWithAnchors text = new TextWithAnchors(
-      "@[@0@][@0@]"
+      "`[´`0´`]´[`0´`]´"
     );
 
     makeCase(
       text,
       infix(
         array(
-          token(InfixOperator.SUBSCRIPTING, text.anchorIndex(0)),
-          token(Punctuation.CLOSING_BRACKET, text.anchorIndex(2)),
-          terminal(0, text.anchorIndex(1))
+          token(InfixOperator.SUBSCRIPTING, text.subView(0)),
+          token(Punctuation.CLOSING_BRACKET, text.subView(2)),
+          terminal(0, text.subView(1))
         ),
         InfixOperator.SUBSCRIPTING,
-        terminal(0, text.anchorIndex(3)),
-        token(Punctuation.CLOSING_BRACKET, text.anchorIndex(4))
+        terminal(0, text.subView(3)),
+        token(Punctuation.CLOSING_BRACKET, text.subView(4))
       )
     );
   }
@@ -446,7 +447,7 @@ public class ExpressionParserTests {
   public void shouldParsePrefixWithMemberAccess() {
     for (PrefixOperator[] prefixCase : prefixCases) {
       TextWithAnchors text = new TextWithAnchors(
-        joinAtPrependedPrefixes(prefixCase) + "@a@.@m_b@.@m_c"
+        joinAtPrependedPrefixes(prefixCase) + "`a´`.´`m_b´`.´`m_c´"
       );
 
       makeCase(
@@ -464,7 +465,7 @@ public class ExpressionParserTests {
   public void shouldParsePrefixWithSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
       TextWithAnchors text = new TextWithAnchors(
-        joinAtPrependedPrefixes(prefixCase) + "@a@[@s_b@]@[@s_c@]"
+        joinAtPrependedPrefixes(prefixCase) + "`a´`[´`s_b´`]´`[´`s_c´`]´"
       );
 
       makeCase(
@@ -482,7 +483,7 @@ public class ExpressionParserTests {
   public void shouldParsePrefixWithMemberAccessAndSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
       TextWithAnchors text = new TextWithAnchors(
-        joinAtPrependedPrefixes(prefixCase) + "@a@[@s_b@]@.@m_c@[@s_d@]@.@m_e@[@s_f@]"
+        joinAtPrependedPrefixes(prefixCase) + "`a´`[´`s_b´`]´`.´`m_c´`[´`s_d´`]´`.´`m_e´`[´`s_f´`]´"
       );
 
       makeCase(
@@ -508,7 +509,7 @@ public class ExpressionParserTests {
     );
 
     for (int i = prefixes.length - 1; i >= 0; --i)
-      node = prefix(node, prefixes[i], text.anchorIndex(i));
+      node = prefix(node, prefixes[i], text.subView(i));
 
     return node;
   }
@@ -517,7 +518,7 @@ public class ExpressionParserTests {
     StringBuilder result = new StringBuilder();
 
     for (PrefixOperator prefix : prefixes)
-      result.append('@').append(prefix);
+      result.append('`').append(prefix).append('´');
 
     return result.toString();
   }
@@ -526,22 +527,22 @@ public class ExpressionParserTests {
   public void shouldParsePrefixWithInfixOpRightBeforeSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
       TextWithAnchors text = new TextWithAnchors(
-        joinAtPrependedPrefixes(prefixCase) + "@a ?? @b"
+        joinAtPrependedPrefixes(prefixCase) + "`a´ ?? `b´"
       );
 
       int indexOffset = prefixCase.length;
 
-      ExpressionNode lhs = terminal("a", text.anchorIndex(indexOffset));
+      ExpressionNode lhs = terminal("a", text.subView(indexOffset));
 
       for (int i = prefixCase.length - 1; i >= 0; --i)
-        lhs = prefix(lhs, prefixCase[i], text.anchorIndex(i));
+        lhs = prefix(lhs, prefixCase[i], text.subView(i));
 
       makeCase(
         text,
         infix(
           lhs,
           InfixOperator.FALLBACK,
-          terminal("b", text.anchorIndex(indexOffset + 1))
+          terminal("b", text.subView(indexOffset + 1))
         )
       );
     }
@@ -601,12 +602,12 @@ public class ExpressionParserTests {
     );
   }
 
-  protected static Token token(Object value, int beginIndex) {
-    return ExpressionTokenizerTests.makeToken(value, beginIndex);
+  protected static Token token(Object value, StringView subView) {
+    return ExpressionTokenizerTests.makeToken(value, subView);
   }
 
-  protected static TerminalNode terminal(Object value, int beginIndex) {
-    Token token = ExpressionTokenizerTests.makeToken(value, beginIndex);
+  protected static TerminalNode terminal(Object value, StringView subView) {
+    Token token = ExpressionTokenizerTests.makeToken(value, subView);
 
     if (!(token instanceof TerminalToken))
       throw new IllegalStateException("Provided non-terminal representing value");
@@ -614,8 +615,8 @@ public class ExpressionParserTests {
     return new TerminalNode((TerminalToken) token);
   }
 
-  protected static ExpressionNode prefix(ExpressionNode operand, PrefixOperator operator, int operatorBeginIndex) {
-    return new PrefixOperationNode(new PrefixOperatorToken(operatorBeginIndex, operator), operand);
+  protected static ExpressionNode prefix(ExpressionNode operand, PrefixOperator operator, StringView raw) {
+    return new PrefixOperationNode(new PrefixOperatorToken(raw, operator), operand);
   }
 
   protected static ExpressionNode parenthesised(ExpressionNode node) {
@@ -632,7 +633,7 @@ public class ExpressionParserTests {
   }
 
   private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {
-    ExpressionNode actualNode = ExpressionParser.parse(input.text, -1, null);
+    ExpressionNode actualNode = ExpressionParser.parse(StringView.of(input.text), null);
 
     if (expectedNode == null) {
       Assertions.assertNull(actualNode, "Expected the parse-result to be null");
@@ -644,7 +645,7 @@ public class ExpressionParserTests {
   }
 
   private void makeCasePlain(String expression) {
-    ExpressionNode actualNode = ExpressionParser.parse(expression, -1, null);
+    ExpressionNode actualNode = ExpressionParser.parse(StringView.of(expression), null);
 
     Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
     Assertions.assertEquals(expression, actualNode.toExpression());
