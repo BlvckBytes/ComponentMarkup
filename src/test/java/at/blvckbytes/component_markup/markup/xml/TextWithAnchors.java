@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.util.Jsonifier;
 import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
@@ -9,16 +8,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Stack;
 
 public class TextWithAnchors {
 
   private static class ViewIndices {
     final int startInclusive;
-    int endInclusive;
+    final int endInclusive;
 
-    private ViewIndices(int startInclusive) {
+    ViewIndices(int startInclusive, int endInclusive) {
       this.startInclusive = startInclusive;
+      this.endInclusive = endInclusive;
     }
   }
 
@@ -34,8 +33,8 @@ public class TextWithAnchors {
     StringBuilder result = new StringBuilder();
     int charIndex = 0;
 
-    Stack<ViewIndices> indicesStack = new Stack<>();
     List<ViewIndices> indicesInOrder = new ArrayList<>();
+    int startInclusive = -1;
 
     for (int linesIndex = 0; linesIndex < lines.length; ++linesIndex) {
       String line = lines[linesIndex];
@@ -55,16 +54,17 @@ public class TextWithAnchors {
 
           else {
             if (isOpening) {
-              ViewIndices indices = new ViewIndices(charIndex);
-              indicesStack.push(indices);
-              indicesInOrder.add(indices);
+              if (startInclusive != -1)
+                throw new IllegalStateException("Encountered unbalanced prior subview-marker");
+
+              startInclusive = charIndex;
             }
             else {
-              if (indicesStack.isEmpty())
+              if (startInclusive == -1)
                 throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex);
 
-              ViewIndices indices = indicesStack.pop();
-              indices.endInclusive = charIndex - 1;
+              indicesInOrder.add(new ViewIndices(startInclusive, charIndex - 1));
+              startInclusive = -1;
             }
 
             continue;
@@ -78,7 +78,7 @@ public class TextWithAnchors {
           }
 
           else {
-            anchors.add(new StringPosition(null, charIndex));
+            anchors.add(new StringPosition(charIndex));
             continue;
           }
         }
@@ -95,18 +95,17 @@ public class TextWithAnchors {
       ++charIndex;
     }
 
-    if (!indicesStack.isEmpty()) {
-      ViewIndices firstItem = indicesStack.get(0);
-      throw new IllegalStateException("Unbalanced stack: " + Jsonifier.jsonify(firstItem));
+    if (startInclusive != -1) {
+      throw new IllegalStateException("Unbalanced subview-stack");
     }
 
     this.text = result.toString();
     this.rootView = StringView.of(text);
 
     for (ViewIndices indices : indicesInOrder) {
-      StringPosition start = new StringPosition(rootView, indices.startInclusive);
+      StringPosition start = new StringPosition(indices.startInclusive);
       rootView.setSubViewStart(start);
-      StringPosition end = new StringPosition(rootView, indices.endInclusive);
+      StringPosition end = new StringPosition(indices.endInclusive);
       this.subViews.add(rootView.buildSubViewInclusive(end));
     }
   }

@@ -82,7 +82,7 @@ public class TokenOutput {
   }
 
   public void emitCharToken(StringPosition position, TokenType type) {
-    emitToken(type, position.rootView.buildSubViewAbsolute(position.charIndex, position.charIndex));
+    emitToken(type, input.buildSubViewAbsolute(position.charIndex, position.charIndex));
   }
 
   public void emitToken(TokenType type, StringView value) {

@@ -31,6 +31,7 @@ import java.util.Stack;
 
 public class MarkupParser implements XmlEventConsumer {
 
+  private final StringView rootView;
   private final @Nullable TokenOutput tokenOutput;
   private final TagRegistry tagRegistry;
   private final Stack<TagAndBuffers> tagStack;
@@ -40,11 +41,13 @@ public class MarkupParser implements XmlEventConsumer {
   private MarkupNode result;
 
   private MarkupParser(
+    StringView rootView,
     @Nullable TokenOutput tokenOutput,
     TagRegistry tagRegistry,
     StringPosition initialPosition,
     boolean isSubParser
   ) {
+    this.rootView = rootView;
     this.tokenOutput = tokenOutput;
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
@@ -116,7 +119,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofLong(raw, value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofLong(value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -140,7 +143,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofDouble(raw, value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofDouble(value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -164,7 +167,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofBoolean(raw, value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofBoolean(value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -181,7 +184,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    subtreeParser = new MarkupParser(tokenOutput, tagRegistry, valueBeginPosition, true);
+    subtreeParser = new MarkupParser(rootView, tokenOutput, tagRegistry, valueBeginPosition, true);
   }
 
   @Override
@@ -233,7 +236,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, ImmediateExpression.ofBoolean(name, true), null);
+    handleUserAttribute(name, ImmediateExpression.ofBoolean(true), null);
   }
 
   @Override
@@ -391,7 +394,7 @@ public class MarkupParser implements XmlEventConsumer {
   public static MarkupNode parse(StringView rootView, TagRegistry tagRegistry, @Nullable TokenOutput tokenOutput) {
     // The initial position, which will also be applied to the outermost implicit
     // container, is the zero-sentinel (unreachable by user-input)
-    MarkupParser parser = new MarkupParser(tokenOutput, tagRegistry, rootView.startInclusive, false);
+    MarkupParser parser = new MarkupParser(rootView, tokenOutput, tagRegistry, rootView.startInclusive, false);
 
     if (tokenOutput != null)
       tokenOutput.onInitialization(rootView);
@@ -399,7 +402,10 @@ public class MarkupParser implements XmlEventConsumer {
     try {
       XmlEventParser.parse(rootView, parser, tokenOutput);
     } catch (XmlParseException xmlException) {
-      throw new MarkupParseException(xmlException);
+      throw new MarkupParseException(xmlException).setRootView(rootView);
+    } catch (MarkupParseException markupParseException) {
+      markupParseException.setRootView(rootView);
+      throw markupParseException;
     }
 
     return parser.result;
@@ -517,7 +523,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (value instanceof StringView) {
         StringView stringView = (StringView) value;
-        value = ImmediateExpression.ofString(stringView, stringView.buildString());
+        value = ImmediateExpression.ofString(stringView.buildString());
       }
 
       LetBinding binding;
@@ -659,7 +665,7 @@ public class MarkupParser implements XmlEventConsumer {
             throw new MarkupParseException(fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName.buildString());
 
           // Let's allow a flag-style declaration, for convenience
-          value = ImmediateExpression.ofBoolean(name, true);
+          value = ImmediateExpression.ofBoolean(true);
         }
 
         if (currentLayer.forIterable == null)
@@ -798,7 +804,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (rawValue == null)
           throw new IllegalStateException("Require a raw-value to instantiate a proper immediate-expression on");
 
-        expression = ImmediateExpression.ofString(rawValue, rawValue.buildString());
+        expression = ImmediateExpression.ofString(rawValue.buildString());
       }
     }
 

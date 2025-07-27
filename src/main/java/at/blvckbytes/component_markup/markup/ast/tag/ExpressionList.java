@@ -6,8 +6,6 @@ import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.util.StringPosition;
-import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,40 +41,34 @@ public class ExpressionList {
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(attribute.value);
 
-      StringPosition attributeBegin = attribute.value.getStartInclusive();
-      StringView valueView = attributeBegin.rootView.buildSubViewAbsolute(
-        attributeBegin.charIndex,
-        attribute.value.getEndExclusive().charIndex
-      );
-
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;
 
         for (Object item : collection)
-          result.add(toTerminal(item, valueView));
+          result.add(toTerminal(item));
 
         continue;
       }
 
-      result.add(toTerminal(evaluatedValue, valueView));
+      result.add(toTerminal(evaluatedValue));
     }
 
     return result;
   }
 
-  private TerminalNode toTerminal(@Nullable Object value, StringView valueView) {
+  private TerminalNode toTerminal(@Nullable Object value) {
     if (value == null)
-      return ImmediateExpression.ofNull(valueView);
+      return ImmediateExpression.ofNull();
 
     if (value instanceof Double || value instanceof Float)
-      return ImmediateExpression.ofDouble(valueView, ((Number) value).doubleValue());
+      return ImmediateExpression.ofDouble(((Number) value).doubleValue());
 
     if (value instanceof Number)
-      return ImmediateExpression.ofLong(valueView, ((Number) value).longValue());
+      return ImmediateExpression.ofLong(((Number) value).longValue());
 
     if (value instanceof Boolean)
-      return ImmediateExpression.ofBoolean(valueView, (boolean) value);
+      return ImmediateExpression.ofBoolean((boolean) value);
 
-    return ImmediateExpression.ofString(valueView, String.valueOf(value));
+    return ImmediateExpression.ofString(String.valueOf(value));
   }
 }

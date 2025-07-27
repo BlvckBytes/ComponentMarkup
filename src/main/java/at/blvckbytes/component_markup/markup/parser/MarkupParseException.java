@@ -5,11 +5,15 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParseException
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
 import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.util.StringView;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MarkupParseException extends RuntimeException implements ErrorMessage {
+
+  private @Nullable StringView rootView;
 
   public final StringPosition position;
   public final MarkupParseError error;
@@ -74,18 +78,30 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     return position.charIndex;
   }
 
+  public MarkupParseException setRootView(StringView rootView) {
+    if (this.rootView != null)
+      throw new IllegalStateException("Root-view was already set");
+
+    if (rootView == null)
+      throw new IllegalStateException("Do not set a null-value");
+
+    this.rootView = rootView;
+    return this;
+  }
+
   public List<String> makeErrorScreen() {
     List<String> result = new ArrayList<>();
 
-    String input = position.rootView.contents;
+    if (rootView == null)
+      throw new IllegalStateException("Have not been provided with a reference to the root-view");
 
-    int inputLength = input.length();
+    int inputLength = rootView.contents.length();
     int targetCharIndex = getCharIndex();
 
     int lineCounter = 1;
 
     for (int index = 0; index < inputLength; ++index) {
-      if (input.charAt(index) == '\n')
+      if (rootView.contents.charAt(index) == '\n')
         ++lineCounter;
     }
 
@@ -95,7 +111,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
-      char currentChar = input.charAt(index);
+      char currentChar = rootView.contents.charAt(index);
 
       if (currentChar == '\r')
         continue;
@@ -107,7 +123,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
           ++index;
 
         String lineNumber = padLeft(nextLineNumber++, maxLineNumberDigits) + ": ";
-        String lineContents = input.substring(lineBegin, index);
+        String lineContents = rootView.contents.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
 

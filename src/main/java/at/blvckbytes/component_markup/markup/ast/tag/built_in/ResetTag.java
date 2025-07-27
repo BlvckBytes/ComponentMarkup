@@ -30,7 +30,7 @@ public class ResetTag extends TagDefinition {
     @Nullable List<MarkupNode> children
   ) {
     ContainerNode result = new ContainerNode(tagName.startInclusive, children, letBindings);
-    result.getOrInstantiateStyle().reset = ImmediateExpression.ofBoolean(tagName, true);
+    result.getOrInstantiateStyle().reset = ImmediateExpression.ofBoolean(true);
     return result;
   }
 }

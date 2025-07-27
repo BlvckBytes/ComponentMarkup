@@ -9,11 +9,10 @@ import java.util.EnumSet;
 
 public class StringView {
 
-  @JsonifyIgnore
-  public final String contents;
+  public static final StringView EMPTY = new StringView("", null, false, null, null);
 
   @JsonifyIgnore
-  private final StringView rootView;
+  public final String contents;
 
   private final BitFlagArray removeIndices;
 
@@ -38,7 +37,6 @@ public class StringView {
 
   private StringView(
     String contents,
-    @Nullable StringView rootView,
     BitFlagArray removeIndices,
     boolean lowercase,
     @Nullable StringPosition startInclusive,
@@ -48,16 +46,11 @@ public class StringView {
     this.removeIndices = removeIndices;
     this.lowercase = lowercase;
 
-    if (rootView == null)
-      rootView = this;
-
-    this.rootView = rootView;
-
     if (startInclusive == null)
-      startInclusive = new StringPosition(rootView, 0);
+      startInclusive = new StringPosition(0);
 
     if (endExclusive == null)
-      endExclusive = new StringPosition(rootView, contents.length());
+      endExclusive = new StringPosition(contents.length());
 
     this.startInclusive = startInclusive;
     this.endExclusive = endExclusive;
@@ -94,7 +87,7 @@ public class StringView {
   }
 
   public static StringView of(String contents) {
-    return new StringView(contents, null, new BitFlagArray(contents.length()), false, null, null);
+    return new StringView(contents, new BitFlagArray(contents.length()), false, null, null);
   }
 
   public StringView buildSubViewAbsolute(int start) {
@@ -134,7 +127,7 @@ public class StringView {
     if (startInclusive == this.startInclusive.charIndex && endExclusive == this.endExclusive.charIndex)
       return this;
 
-    return new StringView(contents, rootView, removeIndices, lowercase, new StringPosition(this, startInclusive), new StringPosition(this, endExclusive));
+    return new StringView(contents, removeIndices, lowercase, new StringPosition(startInclusive), new StringPosition(endExclusive));
   }
 
   public StringView buildSubViewInclusive(StringPosition position) {
@@ -145,8 +138,8 @@ public class StringView {
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 
     StringView subView = new StringView(
-      contents, rootView, removeIndices, lowercase, subViewStart,
-      new StringPosition(position.rootView, position.charIndex + 1)
+      contents, removeIndices, lowercase, subViewStart,
+      new StringPosition(position.charIndex + 1)
     );
 
     subViewStart = null;
@@ -304,13 +297,13 @@ public class StringView {
 
   public StringPosition getPosition(PositionMode mode) {
     if (mode == PositionMode.CURRENT)
-      return new StringPosition(this, charIndex);
+      return new StringPosition(charIndex);
 
     if (mode == PositionMode.PRIOR) {
       if (charIndex < 0)
         throw new IllegalStateException("No prior char available");
 
-      return new StringPosition(this, charIndex - 1);
+      return new StringPosition(charIndex - 1);
     }
 
     if (mode != PositionMode.NEXT)
@@ -319,7 +312,7 @@ public class StringView {
     if (hasReachedEnd())
       throw new IllegalStateException("No next char available");
 
-    return new StringPosition(this, charIndex + 1);
+    return new StringPosition(charIndex + 1);
   }
 
   public StringPosition getPosition() {
