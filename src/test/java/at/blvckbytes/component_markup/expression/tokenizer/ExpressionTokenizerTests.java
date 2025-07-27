@@ -345,7 +345,7 @@ public class ExpressionTokenizerTests {
         token = new StringToken(subView, stringContents);
       }
       else
-        token = new IdentifierToken(subView);
+        token = new IdentifierToken(subView, stringValue);
     }
     else if (value == null)
       token = new NullToken(subView);

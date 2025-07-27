@@ -37,7 +37,7 @@ public class ExpressionParser {
   }
 
   private ExpressionNode patchInfixIfApplicable(InfixOperationNode node) {
-    if (node.operator.precedence < InfixOperator.SUBSCRIPTING.precedence)
+    if (node.operatorToken.operator.precedence < InfixOperator.SUBSCRIPTING.precedence)
       return node;
 
     if (node.lhs instanceof InfixOperationNode)
@@ -171,7 +171,7 @@ public class ExpressionParser {
         if (tokenOutput != null)
           tokenOutput.emitCharToken(delimiterToken.raw.startInclusive, TokenType.EXPRESSION__OPERATOR__ANY);
 
-        return new InfixOperationNode(lhs, operatorToken.operator, rhs, delimiterToken);
+        return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
       }
 
       if (delimiterToken.punctuation == Punctuation.COLON)
@@ -194,7 +194,7 @@ public class ExpressionParser {
       if (falseBranch == null)
         throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_FALSE_BRANCH);
 
-      return new BranchingNode(lhs, rhs, falseBranch);
+      return new BranchingNode(lhs, operatorToken, rhs, delimiterToken, falseBranch);
     }
 
     if (operatorToken.operator == InfixOperator.MEMBER) {
@@ -202,7 +202,7 @@ public class ExpressionParser {
         throw new ExpressionParseException(rhs.getStartInclusive(), ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS, lhs.toExpression());
     }
 
-    return new InfixOperationNode(lhs, operatorToken.operator, rhs, null);
+    return new InfixOperationNode(lhs, operatorToken, rhs, null);
   }
 
   // ================================================================================

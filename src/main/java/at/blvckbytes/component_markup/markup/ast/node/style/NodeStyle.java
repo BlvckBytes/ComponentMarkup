@@ -5,6 +5,8 @@ import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeStyle {
@@ -21,28 +23,28 @@ public class NodeStyle {
 
     if (this.color == null && (otherValue = other.color) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
 
       this.color = otherValue;
     }
 
     if (this.shadowColor == null && (otherValue = other.shadowColor) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
 
       this.shadowColor = otherValue;
     }
 
     if (this.shadowColorOpacity == null && (otherValue = other.shadowColorOpacity) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
 
       this.shadowColorOpacity = otherValue;
     }
 
     if (this.font == null && (otherValue = other.font) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, otherValue, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
 
       this.font = otherValue;
     }
@@ -66,12 +68,12 @@ public class NodeStyle {
       return thisValue;
 
     if (otherCondition != null)
-      otherValue = new BranchingNode(otherCondition, otherValue, ImmediateExpression.ofNull());
+      otherValue = new BranchingNode(otherCondition, null, otherValue, null, ImmediateExpression.ofNull());
 
     if (thisValue == null)
       return otherValue;
 
-    return new InfixOperationNode(thisValue, InfixOperator.DISJUNCTION, otherValue, null);
+    return new InfixOperationNode(thisValue, new InfixOperatorToken(StringView.EMPTY, InfixOperator.DISJUNCTION), otherValue, null);
   }
 
   public boolean hasNonNullProperties() {

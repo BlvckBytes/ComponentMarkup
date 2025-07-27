@@ -94,7 +94,7 @@ public class ExpressionInterpreter {
       InfixOperationNode node = (InfixOperationNode) expression;
       Object lhsValue = interpret(node.lhs, environment);
 
-      InfixOperator infixOperator = node.operator;
+      InfixOperator infixOperator = node.operatorToken.operator;
       ArithmeticOperator arithmeticOperator = ArithmeticOperator.fromInfix(infixOperator);
 
       if (infixOperator == InfixOperator.MEMBER) {

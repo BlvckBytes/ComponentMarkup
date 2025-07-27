@@ -8,10 +8,10 @@ public class IdentifierToken extends TerminalToken {
 
   public final String identifier;
 
-  public IdentifierToken(StringView identifier) {
-    super(identifier);
+  public IdentifierToken(StringView raw, String identifier) {
+    super(raw);
 
-    this.identifier = identifier.buildString();
+    this.identifier = identifier;
   }
 
   @Override

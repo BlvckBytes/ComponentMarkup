@@ -114,7 +114,7 @@ public class ExpressionTokenizer {
         return new NullToken(value);
     }
 
-    return new IdentifierToken(value);
+    return new IdentifierToken(value, value.buildString());
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

@@ -3,8 +3,10 @@ package at.blvckbytes.component_markup.expression.parser;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,16 +44,16 @@ public class MemberAndSubscriptChainGenerator {
 
     ExpressionNode rhs = terminal(rhsIdentifier, text.subView(anchorIndexOffset + 1));
 
-    InfixOperator operator;
+    InfixOperatorToken operator;
     Token terminator;
 
     if (rhsIdentifier.startsWith("s_")) {
-      operator = InfixOperator.SUBSCRIPTING;
+      operator = new InfixOperatorToken(text.subView(anchorIndexOffset), InfixOperator.SUBSCRIPTING);
       terminator = token(Punctuation.CLOSING_BRACKET, text.subView(anchorIndexOffset + 2));
       anchorIndexOffset += 3;
     }
     else if (rhsIdentifier.startsWith("m_")) {
-      operator = InfixOperator.MEMBER;
+      operator = new InfixOperatorToken(text.subView(anchorIndexOffset), InfixOperator.MEMBER);
       terminator = null;
       anchorIndexOffset += 2;
     }

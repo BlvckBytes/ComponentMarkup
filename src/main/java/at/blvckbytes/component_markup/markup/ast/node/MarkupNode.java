@@ -3,10 +3,12 @@ package at.blvckbytes.component_markup.markup.ast.node;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -60,7 +62,7 @@ public abstract class MarkupNode {
       if (this.ifCondition == null)
         this.ifCondition = other.ifCondition;
       else
-        this.ifCondition = new InfixOperationNode(this.ifCondition, InfixOperator.CONJUNCTION, other.ifCondition, null);
+        this.ifCondition = new InfixOperationNode(this.ifCondition, new InfixOperatorToken(StringView.EMPTY, InfixOperator.CONJUNCTION), other.ifCondition, null);
     }
 
     if (other.letBindings != null && !other.letBindings.isEmpty()) {
