@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +21,7 @@ public class TagAndBuffers implements ParserChildItem {
   public final @Nullable TagDefinition tag;
   public final @Nullable StringView tagName;
   public final @Nullable TagAndBuffers parent;
-  public final @Nullable StringPosition initialPosition;
+  public final int initialPosition;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
@@ -45,7 +44,7 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable String whenIsValue;
   public boolean isWhenOther;
 
-  public TagAndBuffers(@NotNull StringPosition initialPosition) {
+  public TagAndBuffers(int initialPosition) {
     this.tag = null;
     this.tagName = null;
     this.parent = null;
@@ -58,7 +57,7 @@ public class TagAndBuffers implements ParserChildItem {
     this.tagName = tagName;
     this.parent = parent;
     this.attributeMap = new InternalAttributeMap(tagName);
-    this.initialPosition = null;
+    this.initialPosition = 0;
   }
 
   public boolean hasLetBinding(String name) {

@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribu
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class MarkupList {
       }
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(expression);
-      StringPosition beginPosition = expression.getStartInclusive();
+      int beginPosition = expression.getStartInclusive();
 
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;
@@ -70,7 +69,7 @@ public class MarkupList {
     return result;
   }
 
-  private MarkupNode toNode(@Nullable Object value, StringPosition beginPosition) {
+  private MarkupNode toNode(@Nullable Object value, int beginPosition) {
     if (value instanceof MarkupNode)
       return (MarkupNode) value;
 

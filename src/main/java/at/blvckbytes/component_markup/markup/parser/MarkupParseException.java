@@ -4,7 +4,6 @@ import at.blvckbytes.component_markup.ErrorMessage;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,11 +14,11 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
 
   private @Nullable StringView rootView;
 
-  public final StringPosition position;
+  public final int position;
   public final MarkupParseError error;
   public final String[] messagePlaceholders;
 
-  public MarkupParseException(StringPosition position, MarkupParseError error, String... messagePlaceholders) {
+  public MarkupParseException(int position, MarkupParseError error, String... messagePlaceholders) {
     this.position = position;
     this.error = error;
     this.messagePlaceholders = messagePlaceholders;
@@ -33,7 +32,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(StringPosition position, ExpressionParseException expressionParseException) {
+  public MarkupParseException(int position, ExpressionParseException expressionParseException) {
     super(expressionParseException);
 
     this.position = position;
@@ -41,7 +40,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(StringPosition position, ExpressionTokenizeException expressionTokenizeException) {
+  public MarkupParseException(int position, ExpressionTokenizeException expressionTokenizeException) {
     super(expressionTokenizeException);
 
     this.position = position;
@@ -69,13 +68,13 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   public int getCharIndex() {
     switch (this.error) {
       case EXPRESSION_PARSE_ERROR:
-        return ((ExpressionParseException) getCause()).position.charIndex;
+        return ((ExpressionParseException) getCause()).position;
 
       case EXPRESSION_TOKENIZE_ERROR:
-        return ((ExpressionTokenizeException) getCause()).position.charIndex;
+        return ((ExpressionTokenizeException) getCause()).position;
     }
 
-    return position.charIndex;
+    return position;
   }
 
   public MarkupParseException setRootView(StringView rootView) {

@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,7 @@ public class TextWithAnchors {
   public final String text;
   private final StringView rootView;
   private final List<StringView> subViews;
-  private final List<StringPosition> anchors;
+  private final List<Integer> anchors;
 
   public TextWithAnchors(String... lines) {
     this.subViews = new ArrayList<>();
@@ -78,7 +77,7 @@ public class TextWithAnchors {
           }
 
           else {
-            anchors.add(new StringPosition(charIndex));
+            anchors.add(charIndex);
             continue;
           }
         }
@@ -103,15 +102,13 @@ public class TextWithAnchors {
     this.rootView = StringView.of(text);
 
     for (ViewIndices indices : indicesInOrder) {
-      StringPosition start = new StringPosition(indices.startInclusive);
-      rootView.setSubViewStart(start);
-      StringPosition end = new StringPosition(indices.endInclusive);
-      this.subViews.add(rootView.buildSubViewInclusive(end));
+      rootView.setSubViewStart(indices.startInclusive);
+      this.subViews.add(rootView.buildSubViewInclusive(indices.endInclusive));
     }
   }
 
-  public void addViewIndexToBeRemoved(StringPosition position) {
-    this.rootView.addIndexToBeRemoved(position.charIndex);
+  public void addViewIndexToBeRemoved(int position) {
+    this.rootView.addIndexToBeRemoved(position);
   }
 
   public @NotNull StringView subView(int index, EnumSet<SubstringFlag> flags) {
@@ -130,7 +127,7 @@ public class TextWithAnchors {
     return subViews.get(index);
   }
 
-  public @NotNull StringPosition anchor(int index) {
+  public int anchor(int index) {
     if (index < 0)
       throw new IllegalStateException("Cannot request negative indices");
 

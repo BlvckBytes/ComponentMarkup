@@ -45,10 +45,10 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNESCAPED_CURLY, input.getPosition());
       }
 
-      StringPosition preConsumePosition = input.getPosition();
+      int preConsumePosition = input.getPosition();
 
       if (input.peekChar() == '{' && input.priorNextChar() != '\\') {
-        if (input.getSubViewStart() != null) {
+        if (input.getSubViewStart() != -1) {
           emitText(
             input.buildSubViewInclusive(PositionMode.CURRENT),
             wasPriorTagOrInterpolation
@@ -96,7 +96,7 @@ public class XmlEventParser {
         continue;
       }
 
-      StringPosition firstSpacePosition = null;
+      int firstSpacePosition = -1;
 
       if (input.peekChar() == ' ') {
         input.nextChar();
@@ -109,7 +109,7 @@ public class XmlEventParser {
       boolean encounteredNewline = input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
       if (input.peekChar() == '<') {
-        if (input.getSubViewStart() != null) {
+        if (input.getSubViewStart() != -1) {
           emitText(
             input.buildSubViewInclusive(PositionMode.CURRENT),
             wasPriorTagOrInterpolation
@@ -118,7 +118,7 @@ public class XmlEventParser {
           );
         }
 
-        else if (wasPriorTagOrInterpolation && firstSpacePosition != null && !encounteredNewline) {
+        else if (wasPriorTagOrInterpolation && firstSpacePosition != -1 && !encounteredNewline) {
           input.setSubViewStart(firstSpacePosition);
           emitText(input.buildSubViewInclusive(PositionMode.CURRENT), null);
         }
@@ -132,7 +132,7 @@ public class XmlEventParser {
 
       char currentChar = input.nextChar();
 
-      if (input.getSubViewStart() == null) {
+      if (input.getSubViewStart() == -1) {
         if (currentChar == '\n') {
           input.consumeWhitespaceAndGetIfNewline(tokenOutput);
           continue;
@@ -149,7 +149,7 @@ public class XmlEventParser {
       input.consumeWhitespaceAndGetIfNewline(tokenOutput);
     }
 
-    if (input.getSubViewStart() != null) {
+    if (input.getSubViewStart() != -1) {
       emitText(
         input.buildSubViewInclusive(PositionMode.CURRENT),
         wasPriorTagOrInterpolation
@@ -159,7 +159,7 @@ public class XmlEventParser {
     }
 
     if (!isWithinCurlyBrackets) {
-      if (input.getSubViewStart() != null)
+      if (input.getSubViewStart() != -1)
         throw new IllegalStateException("There was still a sub-view set after encountering the input's end");
 
       consumer.onInputEnd();
@@ -256,7 +256,7 @@ public class XmlEventParser {
       if (peekedChar >= '0' && peekedChar <= '9') {
         input.nextChar();
 
-        if (input.getSubViewStart() == null)
+        if (input.getSubViewStart() == -1)
           input.setSubViewStart(input.getPosition());
 
         encounteredDigit = true;
@@ -269,7 +269,7 @@ public class XmlEventParser {
 
         input.nextChar();
 
-        if (input.getSubViewStart() == null)
+        if (input.getSubViewStart() == -1)
           input.setSubViewStart(input.getPosition());
 
         encounteredDecimalPoint = true;
@@ -279,7 +279,7 @@ public class XmlEventParser {
       break;
     }
 
-    StringPosition start = input.getSubViewStart();
+    int start = input.getSubViewStart();
 
     if (!encounteredDigit)
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
@@ -354,7 +354,7 @@ public class XmlEventParser {
       case '{':
         input.nextChar();
 
-        StringPosition openingCurlyPosition = input.getPosition();
+        int openingCurlyPosition = input.getPosition();
 
         if (tokenOutput != null)
           tokenOutput.emitCharToken(openingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
@@ -368,7 +368,7 @@ public class XmlEventParser {
         if (nextChar != '}')
           throw new XmlParseException(XmlParseError.UNTERMINATED_MARKUP_VALUE, openingCurlyPosition);
 
-        StringPosition closingCurlyPosition = input.getPosition();
+        int closingCurlyPosition = input.getPosition();
 
         if (tokenOutput != null)
           tokenOutput.emitCharToken(closingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
@@ -411,18 +411,15 @@ public class XmlEventParser {
   }
 
   private StringView parseLiteral(StringView attributeName, char[] chars, XmlParseError error) {
-    StringPosition begin = null;
+    int begin = -1;
 
     for (char c : chars) {
       if (Character.toLowerCase(input.nextChar()) != c)
         throw new XmlParseException(error, attributeName.startInclusive);
 
-      if (begin == null)
+      if (begin == -1)
         begin = input.getPosition();
     }
-
-    // Let's assume that we're not passing empty literals...
-    assert begin != null;
 
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
       throw new XmlParseException(error, begin);
@@ -440,7 +437,7 @@ public class XmlEventParser {
     if (!tagName.contentEquals("!--", true))
       return null;
 
-    StringPosition savedPosition = input.getPosition();
+    int savedPosition = input.getPosition();
 
     while (input.peekChar() != '-')
       input.nextChar();
@@ -463,7 +460,7 @@ public class XmlEventParser {
     if (input.nextChar() != '<')
       throw new IllegalStateException("Expected an opening pointy-bracket!");
 
-    StringPosition openingPosition = input.getPosition();
+    int openingPosition = input.getPosition();
 
     if (tokenOutput != null)
       tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
@@ -536,7 +533,7 @@ public class XmlEventParser {
     if (input.nextChar() != '>')
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG, tagName.startInclusive);
 
-    StringPosition closingPosition = input.getPosition();
+    int closingPosition = input.getPosition();
 
     if (tokenOutput != null)
       tokenOutput.emitCharToken(closingPosition, TokenType.MARKUP__PUNCTUATION__TAG);

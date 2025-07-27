@@ -6,7 +6,6 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
-import at.blvckbytes.component_markup.util.StringPosition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -21,7 +20,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
   public PlayerNameNode(
     @Nullable ExpressionNode displayName,
     @Nullable MarkupNode representation,
-    StringPosition position,
+    int position,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(position, letBindings);

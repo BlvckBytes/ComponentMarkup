@@ -7,7 +7,6 @@ import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -110,7 +109,7 @@ public class ExpressionParser {
           return rhs;
       }
 
-      throw new ExpressionParseException(upcomingToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingOperator.representation);
+      throw new ExpressionParseException(upcomingToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND, upcomingOperator.representation);
     }
 
     return makeInfixExpression(lhs, upcomingToken, rhs);
@@ -143,12 +142,12 @@ public class ExpressionParser {
     ExpressionNode upperBound = parseExpression(null);
 
     if (upperBound == null)
-      throw new ExpressionParseException(colonToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND);
+      throw new ExpressionParseException(colonToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND);
 
     terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminationToken == null)
-      throw new ExpressionParseException(upperBound.getEndExclusive().prior(), ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET);
+      throw new ExpressionParseException(upperBound.getEndExclusive() - 1, ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET);
 
     if (terminationToken.punctuation != Punctuation.CLOSING_BRACKET)
       throw new ExpressionParseException(terminationToken.raw.startInclusive, ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET);
@@ -165,7 +164,7 @@ public class ExpressionParser {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParseException(rhs.getEndExclusive().prior(), ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET);
+        throw new ExpressionParseException(rhs.getEndExclusive() - 1, ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET);
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET) {
         // For visual consistency, it's considered a two-part operator
@@ -185,7 +184,7 @@ public class ExpressionParser {
       PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParseException(rhs.getEndExclusive().prior(), ExpressionParserError.EXPECTED_BRANCH_DELIMITER);
+        throw new ExpressionParseException(rhs.getEndExclusive() - 1, ExpressionParserError.EXPECTED_BRANCH_DELIMITER);
 
       if (delimiterToken.punctuation != Punctuation.COLON)
         throw new ExpressionParseException(delimiterToken.raw.startInclusive, ExpressionParserError.EXPECTED_BRANCH_DELIMITER);
@@ -193,7 +192,7 @@ public class ExpressionParser {
       ExpressionNode falseBranch = parseExpression(null);
 
       if (falseBranch == null)
-        throw new ExpressionParseException(delimiterToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_FALSE_BRANCH);
+        throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_FALSE_BRANCH);
 
       return new BranchingNode(lhs, rhs, falseBranch);
     }
@@ -236,7 +235,7 @@ public class ExpressionParser {
         if (arrayItems.isEmpty())
           break;
 
-        throw new ExpressionParseException(delimiterToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_ARRAY_ITEM);
+        throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_ARRAY_ITEM);
       }
 
       arrayItems.add(arrayItem);
@@ -244,7 +243,7 @@ public class ExpressionParser {
       delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParseException(arrayItem.getEndExclusive().prior(), ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
+        throw new ExpressionParseException(arrayItem.getEndExclusive() - 1, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
         break;
@@ -260,12 +259,12 @@ public class ExpressionParser {
     PunctuationToken terminatorToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminatorToken == null) {
-      StringPosition position;
+      int position;
 
       if (!arrayItems.isEmpty())
-        position = arrayItems.get(arrayItems.size() - 1).getEndExclusive().prior();
+        position = arrayItems.get(arrayItems.size() - 1).getEndExclusive() - 1;
       else
-        position = introductionToken.raw.endExclusive.prior();
+        position = introductionToken.raw.endExclusive - 1;
 
       throw new ExpressionParseException(position, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
     }
@@ -290,7 +289,7 @@ public class ExpressionParser {
     ExpressionNode operand = parsePrefixExpression();
 
     if (operand == null)
-      throw new ExpressionParseException(operatorToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.operator.representation);
+      throw new ExpressionParseException(operatorToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.operator.representation);
 
     return new PrefixOperationNode(operatorToken, operand);
   }
@@ -313,12 +312,12 @@ public class ExpressionParser {
     ExpressionNode expression = parseExpression(null);
 
     if (expression == null)
-      throw new ExpressionParseException(introductionToken.raw.endExclusive.prior(), ExpressionParserError.EXPECTED_PARENTHESES_CONTENT);
+      throw new ExpressionParseException(introductionToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_PARENTHESES_CONTENT);
 
     PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminationToken == null)
-      throw new ExpressionParseException(expression.getEndExclusive().prior(), ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS);
+      throw new ExpressionParseException(expression.getEndExclusive() - 1, ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS);
 
     if (terminationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
       throw new ExpressionParseException(terminationToken.raw.startInclusive, ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS);

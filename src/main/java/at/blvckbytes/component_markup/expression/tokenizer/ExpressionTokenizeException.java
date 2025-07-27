@@ -1,14 +1,13 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.ErrorMessage;
-import at.blvckbytes.component_markup.util.StringPosition;
 
 public class ExpressionTokenizeException extends RuntimeException implements ErrorMessage {
 
-  public final StringPosition position;
+  public final int position;
   public final ExpressionTokenizeError error;
 
-  public ExpressionTokenizeException(StringPosition position, ExpressionTokenizeError error) {
+  public ExpressionTokenizeException(int position, ExpressionTokenizeError error) {
     this.position = position;
     this.error = error;
   }

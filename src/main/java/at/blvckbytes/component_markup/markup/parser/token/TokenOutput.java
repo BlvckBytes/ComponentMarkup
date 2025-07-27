@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.parser.token;
 
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,16 +80,13 @@ public class TokenOutput {
     return result;
   }
 
-  public void emitCharToken(StringPosition position, TokenType type) {
-    emitToken(type, input.buildSubViewAbsolute(position.charIndex, position.charIndex));
+  public void emitCharToken(int position, TokenType type) {
+    emitToken(type, input.buildSubViewAbsolute(position, position));
   }
 
   public void emitToken(TokenType type, StringView value) {
-    int tokenIndex = value.startInclusive.charIndex;
-
-    validateTokenIndex(type, tokenIndex);
-
-    tokenByCharIndex[tokenIndex] = new HierarchicalToken(type, value);
+    validateTokenIndex(type, value.startInclusive);
+    tokenByCharIndex[value.startInclusive] = new HierarchicalToken(type, value);
   }
 
   private void validateTokenIndex(TokenType type, int index) {

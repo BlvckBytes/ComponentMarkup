@@ -1,6 +1,5 @@
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +15,7 @@ public interface XmlEventConsumer {
 
   void onBooleanAttribute(StringView name, StringView raw, boolean value);
 
-  void onTagAttributeBegin(StringView name, StringPosition valueBeginPosition);
+  void onTagAttributeBegin(StringView name, int valueBeginPosition);
 
   void onTagAttributeEnd(StringView name);
 
@@ -28,7 +27,7 @@ public interface XmlEventConsumer {
 
   void onInterpolation(StringView expression);
 
-  void onTagClose(@Nullable StringView tagName, StringPosition pointyPosition);
+  void onTagClose(@Nullable StringView tagName, int pointyPosition);
 
   void onInputEnd();
 

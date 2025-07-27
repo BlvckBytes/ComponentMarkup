@@ -14,7 +14,7 @@ public class Token {
     this.type = type;
     this.value = value;
 
-    this.beginIndex = value.startInclusive.charIndex;
-    this.endIndex = value.endExclusive.charIndex;
+    this.beginIndex = value.startInclusive;
+    this.endIndex = value.endExclusive;
   }
 }

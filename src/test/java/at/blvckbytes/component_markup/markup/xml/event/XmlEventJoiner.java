@@ -2,7 +2,6 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +43,7 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagAttributeBegin(StringView name, StringPosition valueBeginPosition) {
+  public void onTagAttributeBegin(StringView name, int valueBeginPosition) {
     events.add(new TagAttributeBeginEvent(name, valueBeginPosition, name.buildString()));
   }
 
@@ -69,7 +68,7 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagClose(@Nullable StringView tagName, StringPosition pointyPosition) {
+  public void onTagClose(@Nullable StringView tagName, int pointyPosition) {
     events.add(new TagCloseEvent(tagName, pointyPosition, tagName == null ? null : tagName.buildString()));
   }
 

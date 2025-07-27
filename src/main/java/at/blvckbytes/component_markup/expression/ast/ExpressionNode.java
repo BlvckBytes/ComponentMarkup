@@ -1,7 +1,6 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.util.JsonifyGetter;
-import at.blvckbytes.component_markup.util.StringPosition;
 
 public abstract class ExpressionNode {
 
@@ -10,10 +9,10 @@ public abstract class ExpressionNode {
   protected ExpressionNode() {}
 
   @JsonifyGetter
-  public abstract StringPosition getStartInclusive();
+  public abstract int getStartInclusive();
 
   @JsonifyGetter
-  public abstract StringPosition getEndExclusive();
+  public abstract int getEndExclusive();
 
   public abstract String toExpression();
 

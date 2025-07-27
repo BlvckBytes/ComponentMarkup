@@ -22,7 +22,6 @@ import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +43,7 @@ public class MarkupParser implements XmlEventConsumer {
     StringView rootView,
     @Nullable TokenOutput tokenOutput,
     TagRegistry tagRegistry,
-    StringPosition initialPosition,
+    int initialPosition,
     boolean isSubParser
   ) {
     this.rootView = rootView;
@@ -178,7 +177,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagAttributeBegin(StringView name, StringPosition valueBeginPosition) {
+  public void onTagAttributeBegin(StringView name, int valueBeginPosition) {
     if (subtreeParser != null) {
       subtreeParser.onTagAttributeBegin(name, valueBeginPosition);
       return;
@@ -288,7 +287,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagClose(@Nullable StringView tagName, StringPosition pointyPosition) {
+  public void onTagClose(@Nullable StringView tagName, int pointyPosition) {
     if (subtreeParser != null) {
       subtreeParser.onTagClose(tagName, pointyPosition);
       return;

@@ -3,7 +3,6 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -939,7 +938,7 @@ public class MarkupParserErrorTests {
     if (!(thrownError instanceof MarkupParseException))
       throw new AssertionError("Expected an ast parse exception, but got " + finalThrownError.getClass(), finalThrownError);
 
-    StringPosition position = input.anchor(0);
+    int position = input.anchor(0);
 
     Assertions.assertEquals(error, ((MarkupParseException) thrownError).error);
     Assertions.assertEquals(Jsonifier.jsonify(position), Jsonifier.jsonify(((MarkupParseException) thrownError).position));

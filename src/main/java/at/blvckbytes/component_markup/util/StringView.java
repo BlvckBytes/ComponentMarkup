@@ -9,7 +9,7 @@ import java.util.EnumSet;
 
 public class StringView {
 
-  public static final StringView EMPTY = new StringView("", null, false, null, null);
+  public static final StringView EMPTY = new StringView("", null, false, -1, -1);
 
   @JsonifyIgnore
   public final String contents;
@@ -18,8 +18,8 @@ public class StringView {
 
   private boolean lowercase;
 
-  public final StringPosition startInclusive;
-  public final StringPosition endExclusive;
+  public final int startInclusive;
+  public final int endExclusive;
 
   private int charIndex;
 
@@ -28,7 +28,7 @@ public class StringView {
   private char currentChar;
 
   @JsonifyIgnore
-  private @Nullable StringPosition subViewStart;
+  private int subViewStart;
 
   private @Nullable EnumSet<SubstringFlag> buildFlags;
 
@@ -39,37 +39,38 @@ public class StringView {
     String contents,
     BitFlagArray removeIndices,
     boolean lowercase,
-    @Nullable StringPosition startInclusive,
-    @Nullable StringPosition endExclusive
+    int startInclusive,
+    int endExclusive
   ) {
     this.contents = contents;
     this.removeIndices = removeIndices;
     this.lowercase = lowercase;
 
-    if (startInclusive == null)
-      startInclusive = new StringPosition(0);
+    if (startInclusive == -1)
+      startInclusive = 0;
 
-    if (endExclusive == null)
-      endExclusive = new StringPosition(contents.length());
+    if (endExclusive == -1)
+      endExclusive = contents.length();
 
     this.startInclusive = startInclusive;
     this.endExclusive = endExclusive;
 
-    if (startInclusive.charIndex < 0)
+    if (startInclusive < 0)
       throw new IllegalStateException("Start-inclusive cannot be less than zero");
 
     // Allow for empty views
-    if (startInclusive.charIndex != 0 && startInclusive.charIndex >= contents.length())
+    if (startInclusive != 0 && startInclusive >= contents.length())
       throw new IllegalStateException("Start-inclusive cannot be greater than or equal to " + contents.length());
 
-    if (endExclusive.charIndex > contents.length())
+    if (endExclusive > contents.length())
       throw new IllegalStateException("Start-inclusive cannot be greater than " + contents.length());
 
-    if (endExclusive.charIndex < startInclusive.charIndex)
+    if (endExclusive < startInclusive)
       throw new IllegalStateException("The end-exclusive-index cannot lie before or at the start-inclusive-index");
 
-    charIndex = startInclusive.charIndex - 1;
+    charIndex = startInclusive - 1;
     priorNextChar = 0;
+    subViewStart = -1;
   }
 
   public void setLowercase() {
@@ -87,18 +88,18 @@ public class StringView {
   }
 
   public static StringView of(String contents) {
-    return new StringView(contents, new BitFlagArray(contents.length()), false, null, null);
+    return new StringView(contents, new BitFlagArray(contents.length()), false, -1, -1);
   }
 
   public StringView buildSubViewAbsolute(int start) {
-    return buildSubViewAbsolute(start, endExclusive.charIndex);
+    return buildSubViewAbsolute(start, endExclusive);
   }
 
   public StringView buildSubViewRelative(int start) {
     if (start < 0)
       throw new IllegalStateException("Start " + start + " cannot be negative when in relative-mode");
 
-    return buildSubViewAbsolute(startInclusive.charIndex + start, endExclusive.charIndex);
+    return buildSubViewAbsolute(startInclusive + start, endExclusive);
   }
 
   public StringView buildSubViewRelative(int startInclusive, int endInclusive) {
@@ -106,8 +107,8 @@ public class StringView {
       throw new IllegalStateException("Start " + startInclusive + " cannot be negative when in relative-mode");
 
     return buildSubViewAbsolute(
-      this.startInclusive.charIndex + startInclusive,
-      endInclusive + (endInclusive < 0 ? this.endExclusive.charIndex : this.startInclusive.charIndex + 1)
+      this.startInclusive + startInclusive,
+      endInclusive + (endInclusive < 0 ? this.endExclusive : this.startInclusive + 1)
     );
   }
 
@@ -115,34 +116,34 @@ public class StringView {
     if (buildFlags != null && !buildFlags.isEmpty())
       throw new IllegalStateException("Do not create sub-views while special flags are active");
 
-    if (startInclusive < this.startInclusive.charIndex || startInclusive >= this.endExclusive.charIndex)
-      throw new IllegalStateException("Start-inclusive " + startInclusive + " out of this view's range: [" + this.startInclusive.charIndex + ";" + this.endExclusive.charIndex + ")");
+    if (startInclusive < this.startInclusive || startInclusive >= this.endExclusive)
+      throw new IllegalStateException("Start-inclusive " + startInclusive + " out of this view's range: [" + this.startInclusive + ";" + this.endExclusive + ")");
 
-    if (endExclusive < this.startInclusive.charIndex || endExclusive > this.endExclusive.charIndex)
-      throw new IllegalStateException("End-exclusive " + endExclusive + " out of this view's range: [" + this.startInclusive.charIndex + ";" + this.endExclusive.charIndex + "]");
+    if (endExclusive < this.startInclusive || endExclusive > this.endExclusive)
+      throw new IllegalStateException("End-exclusive " + endExclusive + " out of this view's range: [" + this.startInclusive + ";" + this.endExclusive + "]");
 
     if (endExclusive < startInclusive)
       throw new IllegalStateException("End " + endExclusive + " lies before start " + startInclusive);
 
-    if (startInclusive == this.startInclusive.charIndex && endExclusive == this.endExclusive.charIndex)
+    if (startInclusive == this.startInclusive && endExclusive == this.endExclusive)
       return this;
 
-    return new StringView(contents, removeIndices, lowercase, new StringPosition(startInclusive), new StringPosition(endExclusive));
+    return new StringView(contents, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
-  public StringView buildSubViewInclusive(StringPosition position) {
+  public StringView buildSubViewInclusive(int position) {
     if (buildFlags != null && !buildFlags.isEmpty())
       throw new IllegalStateException("Do not create sub-views while special flags are active");
 
-    if (subViewStart == null)
+    if (subViewStart == -1)
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 
     StringView subView = new StringView(
       contents, removeIndices, lowercase, subViewStart,
-      new StringPosition(position.charIndex + 1)
+      position + 1
     );
 
-    subViewStart = null;
+    subViewStart = -1;
 
     return subView;
   }
@@ -156,8 +157,8 @@ public class StringView {
   }
 
   public void addIndexToBeRemoved(int index) {
-    if (index < startInclusive.charIndex || index >= endExclusive.charIndex)
-      throw new IllegalStateException("Index " + index + " out of this view's range: [" + startInclusive.charIndex + ";" + endExclusive.charIndex + ")");
+    if (index < startInclusive || index >= endExclusive)
+      throw new IllegalStateException("Index " + index + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
 
     removeIndices.set(index);
   }
@@ -177,10 +178,10 @@ public class StringView {
   }
 
   private boolean hasReachedEnd() {
-    if (charIndex > endExclusive.charIndex - 1)
+    if (charIndex > endExclusive - 1)
       throw new IllegalStateException("The char-index should never exceed its length-dictated maximum");
 
-    return charIndex == endExclusive.charIndex - 1;
+    return charIndex == endExclusive - 1;
   }
 
   public char peekChar() {
@@ -191,26 +192,23 @@ public class StringView {
   }
 
   public void clearSubViewStart() {
-    if (subViewStart == null)
+    if (subViewStart == -1)
       throw new IllegalStateException("A sub-view's start-position was not set");
 
-    subViewStart = null;
+    subViewStart = -1;
   }
 
-  public void setSubViewStart(StringPosition position) {
-    if (position == null)
-      throw new IllegalStateException("provided non-null sub-view start-position");
-
-    if (subViewStart != null)
+  public void setSubViewStart(int position) {
+    if (subViewStart != -1)
       throw new IllegalStateException("A sub-view's start-position was already set");
 
-    if (position.charIndex < startInclusive.charIndex || position.charIndex >= endExclusive.charIndex)
-      throw new IllegalStateException("Index " + position.charIndex + " out of this view's range: [" + startInclusive.charIndex + ";" + endExclusive.charIndex + ")");
+    if (position < startInclusive || position >= endExclusive)
+      throw new IllegalStateException("Index " + position + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
 
     subViewStart = position;
   }
 
-  public @Nullable StringPosition getSubViewStart() {
+  public int getSubViewStart() {
     return subViewStart;
   }
 
@@ -224,7 +222,7 @@ public class StringView {
 
     boolean doIgnoreWhitespace = false;
 
-    for (int inputIndex = startInclusive.charIndex; inputIndex < endExclusive.charIndex; ++inputIndex) {
+    for (int inputIndex = startInclusive; inputIndex < endExclusive; ++inputIndex) {
       if (removeIndices.get(inputIndex))
         continue;
 
@@ -277,14 +275,14 @@ public class StringView {
     return encounteredNewline;
   }
 
-  public void restorePosition(StringPosition position) {
-    if (position.charIndex < -1 || position.charIndex >= endExclusive.charIndex)
-      throw new IllegalStateException("Position at " + position.charIndex + " out of this view's range: [" + -1 + ";" + endExclusive.charIndex + ")");
+  public void restorePosition(int position) {
+    if (position < -1 || position >= endExclusive)
+      throw new IllegalStateException("Position at " + position + " out of this view's range: [" + -1 + ";" + endExclusive + ")");
 
-    if (position.charIndex != endExclusive.charIndex - 1)
-      removeIndices.clearRange(position.charIndex + 1, endExclusive.charIndex - 1);
+    if (position != endExclusive - 1)
+      removeIndices.clearRange(position + 1, endExclusive - 1);
 
-    charIndex = position.charIndex;
+    charIndex = position;
 
     if (charIndex < 0) {
       priorNextChar = 0;
@@ -295,15 +293,15 @@ public class StringView {
     }
   }
 
-  public StringPosition getPosition(PositionMode mode) {
+  public int getPosition(PositionMode mode) {
     if (mode == PositionMode.CURRENT)
-      return new StringPosition(charIndex);
+      return charIndex;
 
     if (mode == PositionMode.PRIOR) {
       if (charIndex < 0)
         throw new IllegalStateException("No prior char available");
 
-      return new StringPosition(charIndex - 1);
+      return charIndex - 1;
     }
 
     if (mode != PositionMode.NEXT)
@@ -312,10 +310,10 @@ public class StringView {
     if (hasReachedEnd())
       throw new IllegalStateException("No next char available");
 
-    return new StringPosition(charIndex + 1);
+    return charIndex + 1;
   }
 
-  public StringPosition getPosition() {
+  public int getPosition() {
     return getPosition(PositionMode.CURRENT);
   }
 
@@ -339,9 +337,9 @@ public class StringView {
     int valueIndex = 0;
 
     if (length() < value.length())
-      return endExclusive.charIndex;
+      return endExclusive;
 
-    for (int index = startInclusive.charIndex; index < endExclusive.charIndex; ++index) {
+    for (int index = startInclusive; index < endExclusive; ++index) {
       if (removeIndices.get(index))
         continue;
 
@@ -365,24 +363,24 @@ public class StringView {
   }
 
   public char lastChar() {
-    int targetIndex = endExclusive.charIndex - 1;
+    int targetIndex = endExclusive - 1;
 
-    while (targetIndex >= startInclusive.charIndex && removeIndices.get(targetIndex))
+    while (targetIndex >= startInclusive && removeIndices.get(targetIndex))
       --targetIndex;
 
-    if (targetIndex < startInclusive.charIndex)
+    if (targetIndex < startInclusive)
       return 0;
 
     return contents.charAt(targetIndex);
   }
 
   public char nthChar(int index) {
-    int targetIndex = startInclusive.charIndex + index;
+    int targetIndex = startInclusive + index;
 
-    while (targetIndex < endExclusive.charIndex - 1 && removeIndices.get(targetIndex))
+    while (targetIndex < endExclusive - 1 && removeIndices.get(targetIndex))
       ++targetIndex;
 
-    if (targetIndex >= endExclusive.charIndex)
+    if (targetIndex >= endExclusive)
       return 0;
 
     return contents.charAt(targetIndex);
@@ -403,7 +401,7 @@ public class StringView {
   }
 
   public int length() {
-    return endExclusive.charIndex - startInclusive.charIndex;
+    return endExclusive - startInclusive;
   }
 
   @Override
@@ -420,7 +418,7 @@ public class StringView {
   public int hashCode() {
     int hash = 7;
 
-    for (int inputIndex = startInclusive.charIndex; inputIndex < endExclusive.charIndex; ++inputIndex) {
+    for (int inputIndex = startInclusive; inputIndex < endExclusive; ++inputIndex) {
       if (!removeIndices.get(inputIndex)) {
         char currentChar = contents.charAt(inputIndex);
 

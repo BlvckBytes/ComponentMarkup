@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +29,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   public ColorizeNode(
     StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    StringPosition position,
+    int position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {

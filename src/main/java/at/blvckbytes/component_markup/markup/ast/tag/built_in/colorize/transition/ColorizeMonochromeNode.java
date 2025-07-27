@@ -7,7 +7,6 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +19,7 @@ public class ColorizeMonochromeNode extends ColorizeNode {
   public ColorizeMonochromeNode(
     StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    StringPosition position,
+    int position,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {

@@ -60,8 +60,8 @@ public class ExpressionTokenizer {
   }
 
   private Token parseIdentifierOrLiteralToken() {
-    StringPosition begin = input.getPosition(PositionMode.NEXT);
-    StringPosition end = begin;
+    int begin = input.getPosition(PositionMode.NEXT);
+    int end = begin;
 
     boolean isFirst = true;
     char upcomingChar;
@@ -136,7 +136,7 @@ public class ExpressionTokenizer {
     if (!collectSubsequentDigits())
       throw new IllegalStateException("Expected to only be called if nextChar() is a digit");
 
-    StringPosition savePoint = input.getPosition();
+    int savePoint = input.getPosition();
 
     if (input.peekChar() == '.') {
       input.nextChar();
@@ -163,12 +163,12 @@ public class ExpressionTokenizer {
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
-    StringPosition savePoint = input.getPosition();
+    int savePoint = input.getPosition();
 
     if (input.nextChar() != '.')
       throw new IllegalStateException("Expected to only be called if nextChar() = '.'");
 
-    StringPosition beginPosition = input.getPosition();
+    int beginPosition = input.getPosition();
 
     if (!collectSubsequentDigits()) {
       input.restorePosition(savePoint);
@@ -182,7 +182,7 @@ public class ExpressionTokenizer {
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationToken() {
-    StringPosition savePoint = input.getPosition();
+    int savePoint = input.getPosition();
 
     char firstChar = input.nextChar();
 

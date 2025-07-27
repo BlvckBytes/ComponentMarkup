@@ -4,8 +4,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.util.Jsonifier;
-import at.blvckbytes.component_markup.util.StringPosition;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND,
-        text.anchor(0).prior()
+        text.anchor(0) - 1
       );
     }
   }
@@ -112,7 +111,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     text = new TextWithAnchors(
@@ -122,7 +121,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -150,7 +149,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -178,7 +177,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -220,7 +219,7 @@ public class ExpressionParserErrorTests {
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_PREFIX_OPERAND,
-        text.anchor(0).prior()
+        text.anchor(0) - 1
       );
     }
   }
@@ -257,7 +256,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     text = new TextWithAnchors(
@@ -267,7 +266,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -308,7 +307,7 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-      text.anchor(0).prior()
+      text.anchor(0) - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -344,7 +343,7 @@ public class ExpressionParserErrorTests {
     }
   }
 
-  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, StringPosition position) {
+  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int position) {
     ExpressionParseException thrownException = null;
 
     try {
