@@ -21,13 +21,13 @@ public class BranchingNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return condition.getBegin();
+  public StringPosition getStartInclusive() {
+    return condition.getStartInclusive();
   }
 
   @Override
-  public StringPosition getEnd() {
-    return branchFalse.getEnd();
+  public StringPosition getEndExclusive() {
+    return branchFalse.getEndExclusive();
   }
 
   @Override

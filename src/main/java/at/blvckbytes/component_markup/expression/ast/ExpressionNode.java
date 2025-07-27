@@ -10,10 +10,10 @@ public abstract class ExpressionNode {
   protected ExpressionNode() {}
 
   @JsonifyGetter
-  public abstract StringPosition getBegin();
+  public abstract StringPosition getStartInclusive();
 
   @JsonifyGetter
-  public abstract StringPosition getEnd();
+  public abstract StringPosition getEndExclusive();
 
   public abstract String toExpression();
 

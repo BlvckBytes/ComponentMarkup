@@ -53,7 +53,7 @@ public class MarkupList {
       }
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(expression);
-      StringPosition beginPosition = expression.getBegin();
+      StringPosition beginPosition = expression.getStartInclusive();
 
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;

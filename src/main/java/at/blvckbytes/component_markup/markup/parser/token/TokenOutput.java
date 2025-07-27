@@ -86,7 +86,7 @@ public class TokenOutput {
   }
 
   public void emitToken(TokenType type, StringView value) {
-    int tokenIndex = value.viewStart.charIndex;
+    int tokenIndex = value.startInclusive.charIndex;
 
     validateTokenIndex(type, tokenIndex);
 

@@ -43,10 +43,10 @@ public class ExpressionList {
 
       Object evaluatedValue = interpreter.evaluateAsPlainObject(attribute.value);
 
-      StringPosition attributeBegin = attribute.value.getBegin();
+      StringPosition attributeBegin = attribute.value.getStartInclusive();
       StringView valueView = attributeBegin.rootView.buildSubViewAbsolute(
         attributeBegin.charIndex,
-        attribute.value.getEnd().charIndex
+        attribute.value.getEndExclusive().charIndex
       );
 
       if (evaluatedValue instanceof Collection) {

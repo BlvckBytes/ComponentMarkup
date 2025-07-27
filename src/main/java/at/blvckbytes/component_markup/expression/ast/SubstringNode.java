@@ -31,13 +31,13 @@ public class SubstringNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return operand.getBegin();
+  public StringPosition getStartInclusive() {
+    return operand.getStartInclusive();
   }
 
   @Override
-  public StringPosition getEnd() {
-    return closingBracket.raw.viewEnd;
+  public StringPosition getEndExclusive() {
+    return closingBracket.raw.endExclusive;
   }
 
   @Override

@@ -30,7 +30,7 @@ public class InsertTag extends TagDefinition {
   ) {
     return new InsertNode(
       attributes.getMandatoryExpressionNode("value"),
-      tagName.viewStart, children, letBindings
+      tagName.startInclusive, children, letBindings
     );
   }
 }

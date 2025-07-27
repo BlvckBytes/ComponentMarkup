@@ -7,7 +7,7 @@ public class ExpressionDrivenNode extends MarkupNode {
   public final ExpressionNode expression;
 
   public ExpressionDrivenNode(ExpressionNode expression) {
-    super(expression.getBegin(), null, null);
+    super(expression.getStartInclusive(), null, null);
 
     this.expression = expression;
   }

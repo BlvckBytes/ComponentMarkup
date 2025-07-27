@@ -31,6 +31,6 @@ public class DummyTag extends TagDefinition {
     @Nullable List<MarkupNode> children
   ) {
     ((InternalAttributeMap) attributes).markAllUsed();
-    return new ContainerNode(tagName.viewStart, children, letBindings);
+    return new ContainerNode(tagName.startInclusive, children, letBindings);
   }
 }

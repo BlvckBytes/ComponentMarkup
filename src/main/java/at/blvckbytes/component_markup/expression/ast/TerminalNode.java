@@ -34,13 +34,13 @@ public class TerminalNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return token.raw.viewStart;
+  public StringPosition getStartInclusive() {
+    return token.raw.startInclusive;
   }
 
   @Override
-  public StringPosition getEnd() {
-    return token.raw.viewEnd;
+  public StringPosition getEndExclusive() {
+    return token.raw.endExclusive;
   }
 
   @Override

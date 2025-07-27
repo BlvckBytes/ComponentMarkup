@@ -31,7 +31,7 @@ public class ScoreTag extends TagDefinition {
       attributes.getMandatoryExpressionNode("name"),
       attributes.getMandatoryExpressionNode("objective"),
       attributes.getOptionalExpressionNode("value"),
-      tagName.viewStart, letBindings
+      tagName.startInclusive, letBindings
     );
   }
 }

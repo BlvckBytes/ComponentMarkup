@@ -25,7 +25,7 @@ public class HoverTextTag extends HoverTag {
   ) {
     return new TextHoverNode(
       attributes.getMandatoryMarkupNode("value"),
-      tagName.viewStart, children, letBindings
+      tagName.startInclusive, children, letBindings
     );
   }
 }

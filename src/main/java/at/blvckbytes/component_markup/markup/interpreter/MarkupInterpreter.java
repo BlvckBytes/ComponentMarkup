@@ -272,7 +272,7 @@ public class MarkupInterpreter implements Interpreter {
 
         if (expressionBinding.capture) {
           if (!(value instanceof MarkupNode))
-            value = new TextNode(String.valueOf(value), letBinding.name.viewStart);
+            value = new TextNode(String.valueOf(value), letBinding.name.startInclusive);
 
           value = createVariableCapture((MarkupNode) value, letBinding);
         }

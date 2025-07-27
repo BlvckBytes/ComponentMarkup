@@ -47,7 +47,7 @@ public class TransitionTag extends ColorizeTag {
           interpreter
         )
       ),
-      tagName.viewStart, children, letBindings
+      tagName.startInclusive, children, letBindings
     );
   }
 }

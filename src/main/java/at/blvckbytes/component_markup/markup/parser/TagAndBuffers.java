@@ -85,7 +85,7 @@ public class TagAndBuffers implements ParserChildItem {
   private @Nullable List<MarkupNode> getProcessedChildren() {
     if (this.children == null) {
       if (whenInput != null)
-        throw new MarkupParseException(tagName.viewStart, MarkupParseError.WHEN_MATCHING_NO_CASES);
+        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
 
       return null;
     }
@@ -125,20 +125,20 @@ public class TagAndBuffers implements ParserChildItem {
         if (whenInput != null) {
           if (childTag.isWhenOther) {
             if (whenOther != null)
-              throw new MarkupParseException(childTag.tagName.viewStart, MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK);
+              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK);
 
             whenOther = currentNode;
           }
 
           else {
             if (childTag.whenIsValue == null)
-              throw new MarkupParseException(childTag.tagName.viewEnd, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+              throw new MarkupParseException(childTag.tagName.endExclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
             if (whenCases == null)
               whenCases = new HashMap<>();
 
             if (whenCases.put(childTag.whenIsValue.toLowerCase(), currentNode) != null)
-              throw new MarkupParseException(childTag.tagName.viewEnd, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, whenIsValue);
+              throw new MarkupParseException(childTag.tagName.endExclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, whenIsValue);
           }
 
           continue;
@@ -255,11 +255,11 @@ public class TagAndBuffers implements ParserChildItem {
     }
 
     if (whenInput != null && (whenCases == null || whenCases.isEmpty()))
-      throw new MarkupParseException(tagName.viewStart, MarkupParseError.WHEN_MATCHING_NO_CASES);
+      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
 
     if (whenCases != null) {
       assert whenInput != null;
-      result.add(new WhenMatchingNode(tagName.viewStart, whenInput, whenCases, whenOther));
+      result.add(new WhenMatchingNode(tagName.startInclusive, whenInput, whenCases, whenOther));
     }
 
     if (conditions != null) {
@@ -291,7 +291,7 @@ public class TagAndBuffers implements ParserChildItem {
 
       LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagName.buildString() + "> via " + tag.getClass() + "#createNode", thrownError);
 
-      result = new TextNode("<error>", tagName.viewStart);
+      result = new TextNode("<error>", tagName.startInclusive);
     }
 
     attributeMap.validateNoUnusedAttributes();

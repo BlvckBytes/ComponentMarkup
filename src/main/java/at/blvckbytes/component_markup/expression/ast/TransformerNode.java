@@ -13,13 +13,13 @@ public class TransformerNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return wrapped.getBegin();
+  public StringPosition getStartInclusive() {
+    return wrapped.getStartInclusive();
   }
 
   @Override
-  public StringPosition getEnd() {
-    return wrapped.getEnd();
+  public StringPosition getEndExclusive() {
+    return wrapped.getEndExclusive();
   }
 
   @Override

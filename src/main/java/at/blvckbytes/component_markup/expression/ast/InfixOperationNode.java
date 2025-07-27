@@ -25,16 +25,16 @@ public class InfixOperationNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return lhs.getBegin();
+  public StringPosition getStartInclusive() {
+    return lhs.getStartInclusive();
   }
 
   @Override
-  public StringPosition getEnd() {
+  public StringPosition getEndExclusive() {
     if (terminator == null)
-      return rhs.getEnd();
+      return rhs.getEndExclusive();
 
-    return terminator.raw.viewEnd;
+    return terminator.raw.endExclusive;
   }
 
   @Override

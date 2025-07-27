@@ -14,11 +14,11 @@ import java.util.Stack;
 public class TextWithAnchors {
 
   private static class ViewIndices {
-    final int startCharIndex;
-    int endCharIndex;
+    final int startInclusive;
+    int endInclusive;
 
-    private ViewIndices(int startCharIndex) {
-      this.startCharIndex = startCharIndex;
+    private ViewIndices(int startInclusive) {
+      this.startInclusive = startInclusive;
     }
   }
 
@@ -64,7 +64,7 @@ public class TextWithAnchors {
                 throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex);
 
               ViewIndices indices = indicesStack.pop();
-              indices.endCharIndex = charIndex - 1;
+              indices.endInclusive = charIndex - 1;
             }
 
             continue;
@@ -104,10 +104,10 @@ public class TextWithAnchors {
     this.rootView = StringView.of(text);
 
     for (ViewIndices indices : indicesInOrder) {
-      StringPosition start = new StringPosition(rootView, indices.startCharIndex);
+      StringPosition start = new StringPosition(rootView, indices.startInclusive);
       rootView.setSubViewStart(start);
-      StringPosition end = new StringPosition(rootView, indices.endCharIndex);
-      this.subViews.add(rootView.buildSubViewUntilPosition(end));
+      StringPosition end = new StringPosition(rootView, indices.endInclusive);
+      this.subViews.add(rootView.buildSubViewInclusive(end));
     }
   }
 

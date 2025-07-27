@@ -9,7 +9,7 @@ public class InterpolationNode extends StyledNode implements ParserChildItem {
   public final ExpressionNode contents;
 
   public InterpolationNode(ExpressionNode contents) {
-    super(contents.getBegin(), null, null);
+    super(contents.getStartInclusive(), null, null);
 
     this.contents = contents;
   }

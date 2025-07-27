@@ -35,7 +35,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (List<Attribute> attributeBucket : attributeMap.values()) {
       for (Attribute attribute : attributeBucket) {
         if (!attribute.hasBeenUsed)
-          throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.name.buildString());
+          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.name.buildString());
       }
     }
   }
@@ -56,7 +56,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionNode result = getOptionalExpressionNode(name);
 
     if (result == null)
-      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -69,12 +69,12 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof ExpressionAttribute))
-      throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
+      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
     if (expressionAttribute.flags.contains(ExpressionFlag.SPREAD_MODE))
-      throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
+      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
 
     return expressionAttribute.value;
   }
@@ -84,7 +84,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupNode result = getOptionalMarkupNode(name);
 
     if (result == null)
-      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -97,7 +97,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof MarkupAttribute))
-      throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
+      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
 
     return ((MarkupAttribute) attribute).value;
   }
@@ -114,7 +114,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (attributesCount > 1)
-      throw new MarkupParseException(attributes.get(1).name.viewStart, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
+      throw new MarkupParseException(attributes.get(1).name.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
 
     Attribute result = attributes.get(0);
 
@@ -132,7 +132,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionList result = unwrapExpressionAttributes(selectMultiAttributeOrNull(name, true));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -147,7 +147,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupList result = unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagName.viewStart, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
+      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), name);
 
     return result;
   }
@@ -166,7 +166,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (Attribute attribute : attributes) {
       if (expression) {
         if (!(attribute instanceof ExpressionAttribute))
-          throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
+          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
 
         attribute.hasBeenUsed = true;
         continue;
@@ -176,7 +176,7 @@ public class InternalAttributeMap implements AttributeMap {
         // Immediate values are obviously nonsensical and were probably a mistake of the user
         // An expression-value will instantiate an expression-driven node later on
         if ((attribute instanceof ExpressionAttribute) && ((ExpressionAttribute) attribute).flags.contains(ExpressionFlag.IMMEDIATE_VALUE))
-          throw new MarkupParseException(attribute.name.viewStart, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
+          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
       }
 
       attribute.hasBeenUsed = true;

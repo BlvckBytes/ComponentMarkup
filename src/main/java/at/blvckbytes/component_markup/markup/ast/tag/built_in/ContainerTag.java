@@ -28,6 +28,6 @@ public class ContainerTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    return new ContainerNode(tagName.viewStart, children, letBindings);
+    return new ContainerNode(tagName.startInclusive, children, letBindings);
   }
 }

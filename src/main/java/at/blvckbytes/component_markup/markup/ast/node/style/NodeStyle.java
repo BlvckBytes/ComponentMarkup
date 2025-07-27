@@ -78,11 +78,11 @@ public class NodeStyle {
   }
 
   private static TerminalNode nullValueFromCondition(ExpressionNode condition) {
-    StringPosition begin = condition.getBegin();
+    StringPosition begin = condition.getStartInclusive();
 
     StringView sourceView = begin.rootView.buildSubViewAbsolute(
       begin.charIndex,
-      condition.getEnd().charIndex
+      condition.getEndExclusive().charIndex
     );
 
     return ImmediateExpression.ofNull(sourceView);

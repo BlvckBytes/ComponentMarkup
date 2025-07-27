@@ -30,7 +30,7 @@ public class SelectorTag extends TagDefinition {
     return new SelectorNode(
       attributes.getMandatoryExpressionNode("selector"),
       attributes.getOptionalMarkupNode("separator"),
-      tagName.viewStart, letBindings
+      tagName.startInclusive, letBindings
     );
   }
 }

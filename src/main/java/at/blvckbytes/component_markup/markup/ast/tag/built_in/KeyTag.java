@@ -30,7 +30,7 @@ public class KeyTag extends TagDefinition {
   ) {
     return new KeyNode(
       attributes.getMandatoryExpressionNode("key"),
-      tagName.viewStart, letBindings
+      tagName.startInclusive, letBindings
     );
   }
 }

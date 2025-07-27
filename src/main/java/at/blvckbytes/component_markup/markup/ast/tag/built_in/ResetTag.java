@@ -29,7 +29,7 @@ public class ResetTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ContainerNode result = new ContainerNode(tagName.viewStart, children, letBindings);
+    ContainerNode result = new ContainerNode(tagName.startInclusive, children, letBindings);
     result.getOrInstantiateStyle().reset = ImmediateExpression.ofBoolean(tagName, true);
     return result;
   }

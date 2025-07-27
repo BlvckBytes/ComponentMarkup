@@ -23,13 +23,13 @@ public class ArrayNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return openingBracket.raw.viewStart;
+  public StringPosition getStartInclusive() {
+    return openingBracket.raw.startInclusive;
   }
 
   @Override
-  public StringPosition getEnd() {
-    return closingBracket.raw.viewEnd;
+  public StringPosition getEndExclusive() {
+    return closingBracket.raw.endExclusive;
   }
 
   @Override

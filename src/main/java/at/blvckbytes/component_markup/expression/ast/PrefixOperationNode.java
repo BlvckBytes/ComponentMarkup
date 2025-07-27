@@ -14,13 +14,13 @@ public class PrefixOperationNode extends ExpressionNode {
   }
 
   @Override
-  public StringPosition getBegin() {
-    return operatorToken.raw.viewStart;
+  public StringPosition getStartInclusive() {
+    return operatorToken.raw.startInclusive;
   }
 
   @Override
-  public StringPosition getEnd() {
-    return operand.getEnd();
+  public StringPosition getEndExclusive() {
+    return operand.getEndExclusive();
   }
 
   @Override
