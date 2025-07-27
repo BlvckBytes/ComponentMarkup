@@ -185,6 +185,10 @@ public class ExpressionTokenizer {
     StringPosition savePoint = input.getPosition();
 
     char firstChar = input.nextChar();
+
+    if (firstChar == 0)
+      return null;
+
     input.setSubViewStart(input.getPosition());
 
     switch (firstChar) {

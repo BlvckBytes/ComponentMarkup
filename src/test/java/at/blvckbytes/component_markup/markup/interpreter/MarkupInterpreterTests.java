@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringView;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -603,7 +604,10 @@ public class MarkupInterpreterTests {
       "<red>before</> {markup_value} <blue>after</> {scalar_value}"
     );
 
-    MarkupNode node = MarkupParser.parse("<bold><gold>I am a markup-value!", BuiltInTagRegistry.INSTANCE);
+    MarkupNode node = MarkupParser.parse(
+      StringView.of("<bold><gold>I am a markup-value!"),
+      BuiltInTagRegistry.INSTANCE
+    );
 
     makeCase(
       text,
@@ -644,7 +648,10 @@ public class MarkupInterpreterTests {
       "<translate key=\"my.key\" [with]=\"first_node\"/>"
     );
 
-    MarkupNode firstNode = MarkupParser.parse("<bold><gold>I am the first!", BuiltInTagRegistry.INSTANCE);
+    MarkupNode firstNode = MarkupParser.parse(
+      StringView.of("<bold><gold>I am the first!"),
+      BuiltInTagRegistry.INSTANCE
+    );
 
     JsonObjectBuilder firstNodeJson = new JsonObjectBuilder()
       .string("text", "I am the first!")
@@ -663,7 +670,10 @@ public class MarkupInterpreterTests {
         ))
     );
 
-    MarkupNode secondNode = MarkupParser.parse("<italic><red>I am the second!", BuiltInTagRegistry.INSTANCE);
+    MarkupNode secondNode = MarkupParser.parse(
+      StringView.of("<italic><red>I am the second!"),
+      BuiltInTagRegistry.INSTANCE
+    );
 
     JsonObjectBuilder secondNodeJson = new JsonObjectBuilder()
       .string("text", "I am the second!")
@@ -1087,7 +1097,7 @@ public class MarkupInterpreterTests {
     MarkupNode actualNode;
 
     try {
-      actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
+      actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (MarkupParseException e) {
       System.out.println(String.join("\n", e.makeErrorScreen()));
       Assertions.fail("Threw an error:", e);
@@ -1206,7 +1216,7 @@ public class MarkupInterpreterTests {
     MarkupNode actualNode;
 
     try {
-      actualNode = MarkupParser.parse(input.text, BuiltInTagRegistry.INSTANCE);
+      actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (MarkupParseException e) {
       System.out.println(String.join("\n", e.makeErrorScreen()));
       Assertions.fail("Threw an error:", e);

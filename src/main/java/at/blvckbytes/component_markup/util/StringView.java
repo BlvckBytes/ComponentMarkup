@@ -22,7 +22,6 @@ public class StringView {
   public final StringPosition startInclusive;
   public final StringPosition endExclusive;
 
-  private final int maxCharIndex;
   private int charIndex;
 
   @JsonifyIgnore
@@ -66,13 +65,15 @@ public class StringView {
     if (startInclusive.charIndex < 0)
       throw new IllegalStateException("Start-inclusive cannot be less than zero");
 
+    if (startInclusive.charIndex >= contents.length())
+      throw new IllegalStateException("Start-inclusive cannot be greater than or equal to " + contents.length());
+
     if (endExclusive.charIndex > contents.length())
       throw new IllegalStateException("Start-inclusive cannot be greater than " + contents.length());
 
     if (endExclusive.charIndex <= startInclusive.charIndex)
       throw new IllegalStateException("The end-exclusive-index cannot lie before or at the start-inclusive-index");
 
-    maxCharIndex = length() - 1;
     charIndex = startInclusive.charIndex - 1;
     priorNextChar = 0;
   }
@@ -187,10 +188,10 @@ public class StringView {
   }
 
   private boolean hasReachedEnd() {
-    if (charIndex > maxCharIndex)
+    if (charIndex > endExclusive.charIndex - 1)
       throw new IllegalStateException("The char-index should never exceed its length-dictated maximum");
 
-    return charIndex == maxCharIndex;
+    return charIndex == endExclusive.charIndex - 1;
   }
 
   public char peekChar() {
@@ -288,8 +289,8 @@ public class StringView {
   }
 
   public void restorePosition(StringPosition position) {
-    if (position.charIndex < -1 || position.charIndex > maxCharIndex)
-      throw new IllegalStateException("Position at " + position.charIndex + " out of this view's range: [" + -1 + ";" + maxCharIndex + "]");
+    if (position.charIndex < -1 || position.charIndex >= endExclusive.charIndex)
+      throw new IllegalStateException("Position at " + position.charIndex + " out of this view's range: [" + -1 + ";" + endExclusive.charIndex + ")");
 
     if (position.charIndex != endExclusive.charIndex - 1)
       removeIndices.clearRange(position.charIndex + 1, endExclusive.charIndex - 1);
@@ -354,6 +355,9 @@ public class StringView {
     for (int index = startInclusive.charIndex; index < endExclusive.charIndex; ++index) {
       if (removeIndices.get(index))
         continue;
+
+      if (valueIndex == value.length())
+        return -1;
 
       char valueChar = value.charAt(valueIndex++);
       char contentsChar = contents.charAt(index);

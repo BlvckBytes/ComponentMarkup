@@ -265,10 +265,12 @@ public class MarkupInterpreter implements Interpreter {
 
     for (LetBinding letBinding : node.letBindings) {
       Object value;
+      String name;
 
       if (letBinding instanceof ExpressionLetBinding) {
         ExpressionLetBinding expressionBinding = (ExpressionLetBinding) letBinding;
         value = ExpressionInterpreter.interpret(((ExpressionLetBinding) letBinding).expression, environment);
+        name = expressionBinding.bindingName;
 
         if (expressionBinding.capture) {
           if (!(value instanceof MarkupNode))
@@ -280,19 +282,22 @@ public class MarkupInterpreter implements Interpreter {
       else if (letBinding instanceof MarkupLetBinding) {
         MarkupLetBinding markupBinding = (MarkupLetBinding) letBinding;
         value = markupBinding.markup;
+        name = markupBinding.bindingName;
 
         if (markupBinding.capture)
           value = createVariableCapture((MarkupNode) value, letBinding);
       }
-      else if (letBinding instanceof CaptureLetBinding)
-        value = ((CaptureLetBinding) letBinding).capturedValue;
-      else {
+      else if (letBinding instanceof CaptureLetBinding) {
+        CaptureLetBinding captureBinding = (CaptureLetBinding) letBinding;
+        value = captureBinding.capturedValue;
+        name = captureBinding.capturedName;
+      } else {
         LoggerProvider.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
         continue;
       }
 
-      environment.pushVariable(letBinding.plainName, value);
-      introducedNames.add(letBinding.plainName);
+      environment.pushVariable(name, value);
+      introducedNames.add(name);
     }
 
     return introducedNames;
@@ -331,6 +336,9 @@ public class MarkupInterpreter implements Interpreter {
     Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
+    LoopVariable loopVariable = new LoopVariable(items.size());
+    environment.pushVariable("loop", loopVariable);
+
     T passthroughValue = afterEnvironmentSetup.get();
 
     int size = items.size();
@@ -347,14 +355,13 @@ public class MarkupInterpreter implements Interpreter {
         }
       }
 
+      environment.popVariable("loop");
+
       return passthroughValue;
     }
 
     if (node.iterationVariable != null)
       environment.pushVariable(node.iterationVariable, null);
-
-    LoopVariable loopVariable = new LoopVariable(items.size());
-    environment.pushVariable("loop", loopVariable);
 
     boolean reversed;
 

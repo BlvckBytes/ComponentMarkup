@@ -9,7 +9,9 @@ import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringPosition;
 import at.blvckbytes.component_markup.util.StringView;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -17,14 +19,15 @@ import java.util.logging.Level;
 
 public class TagAndBuffers implements ParserChildItem {
 
-  public final TagDefinition tag;
-  public final StringView tagName;
+  public final @Nullable TagDefinition tag;
+  public final @Nullable StringView tagName;
   public final @Nullable TagAndBuffers parent;
+  public final @Nullable StringPosition initialPosition;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
   private @Nullable Set<StringView> bindingNames;
 
-  public final InternalAttributeMap attributeMap;
+  public final @Nullable InternalAttributeMap attributeMap;
 
   private @Nullable List<ParserChildItem> children;
 
@@ -42,11 +45,20 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable String whenIsValue;
   public boolean isWhenOther;
 
-  public TagAndBuffers(TagDefinition tag, StringView tagName, @Nullable TagAndBuffers parent) {
+  public TagAndBuffers(@NotNull StringPosition initialPosition) {
+    this.tag = null;
+    this.tagName = null;
+    this.parent = null;
+    this.attributeMap = null;
+    this.initialPosition = initialPosition;
+  }
+
+  public TagAndBuffers(@NotNull TagDefinition tag, @NotNull StringView tagName, @Nullable TagAndBuffers parent) {
     this.tag = tag;
     this.tagName = tagName;
     this.parent = parent;
     this.attributeMap = new InternalAttributeMap(tagName);
+    this.initialPosition = null;
   }
 
   public boolean hasLetBinding(StringView name) {
@@ -84,8 +96,10 @@ public class TagAndBuffers implements ParserChildItem {
 
   private @Nullable List<MarkupNode> getProcessedChildren() {
     if (this.children == null) {
-      if (whenInput != null)
+      if (whenInput != null) {
+        assert tagName != null;
         throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
+      }
 
       return null;
     }
@@ -104,6 +118,8 @@ public class TagAndBuffers implements ParserChildItem {
 
       if (child instanceof TagAndBuffers) {
         TagAndBuffers childTag = (TagAndBuffers) child;
+
+        assert childTag.tagName != null;
 
         currentNode = childTag.createNode();
         currentConditionType = childTag.ifConditionType;
@@ -254,11 +270,14 @@ public class TagAndBuffers implements ParserChildItem {
       priorConditionType = currentConditionType;
     }
 
-    if (whenInput != null && (whenCases == null || whenCases.isEmpty()))
+    if (whenInput != null && (whenCases == null || whenCases.isEmpty())) {
+      assert tagName != null;
       throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
+    }
 
     if (whenCases != null) {
       assert whenInput != null;
+      assert tagName != null;
       result.add(new WhenMatchingNode(tagName.startInclusive, whenInput, whenCases, whenOther));
     }
 
@@ -281,6 +300,9 @@ public class TagAndBuffers implements ParserChildItem {
   }
 
   public MarkupNode createNode() {
+    if (tagName == null || tag == null || attributeMap == null)
+      return new ContainerNode(initialPosition, getProcessedChildren(), null);
+
     MarkupNode result;
 
     try {
