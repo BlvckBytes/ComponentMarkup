@@ -266,6 +266,14 @@ public class ExpressionTokenizer {
         return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.EXPLODE);
 
       case ':':
+        if (input.peekChar() == ':') {
+          input.nextChar();
+          if (input.peekChar() == ':') {
+            input.nextChar();
+            return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.MATCHES_REGEX);
+          }
+          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.CONTAINS);
+        }
         return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.COLON);
 
       case '>':

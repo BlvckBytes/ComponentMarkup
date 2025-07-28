@@ -10,6 +10,8 @@ public enum InfixOperator {
   CONJUNCTION          ("&&",  3, false),
   EQUAL_TO             ("==",  4, false),
   NOT_EQUAL_TO         ("!=",  4, false),
+  CONTAINS             ("::",  4, false),
+  MATCHES_REGEX        (":::", 4, false),
   GREATER_THAN         (">",   5, false),
   GREATER_THAN_OR_EQUAL(">=",  5, false),
   LESS_THAN            ("<",   5, false),

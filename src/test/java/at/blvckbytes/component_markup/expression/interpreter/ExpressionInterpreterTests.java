@@ -208,6 +208,51 @@ public class ExpressionInterpreterTests {
     makeCase("'hello' ** 5", new InterpretationEnvironment(), "hellohellohellohellohello");
   }
 
+  @Test
+  public void shouldCheckIfStringContains() {
+    makeCase("'abc' :: 'abcde'", false);
+    makeCase("'abcde' :: 'abc'", true);
+    makeCase("'ABCDE' :: 'abc'", false);
+    makeCase("~_'ABCDE' :: 'abc'", true);
+    makeCase("null :: 'abc'", false);
+    makeCase("'abc' :: null", false);
+    makeCase("null :: null", true);
+    makeCase("'' :: 'abc'", false);
+    makeCase("'a' :: ''", true);
+    makeCase("'' :: ''", true);
+    makeCase("'abc' :: 123", false);
+    makeCase("123 :: '123'", true);
+  }
+
+  @Test
+  public void shouldCheckIfRegexMatches() {
+    makeCase("'ABCDEF' ::: '[A-Z]{4,}'", true);
+    makeCase("'ABC' ::: '[A-Z]{4,}'", false);
+    makeCase("'foobar123' ::: '\\d+'", true);
+    makeCase("'foobar' ::: '\\d+'", false);
+    makeCase("'hello world' ::: 'world'", true);
+    makeCase("'start middle end' ::: '^start'", true);
+    makeCase("'start middle end' ::: 'end$'", true);
+    makeCase("'start middle end' ::: '^middle'", false);
+    makeCase("'start middle end' ::: 'middle$'", false);
+    makeCase("'Hello' ::: 'hello'", false);
+    makeCase("~_'Hello' ::: 'hello'", true);
+    makeCase("'Hello' ::: '(?i)hello'", true);
+    makeCase("'cat' ::: 'cat|dog'", true);
+    makeCase("'dog' ::: 'cat|dog'", true);
+    makeCase("'cow' ::: 'cat|dog'", false);
+    makeCase("'foobar' ::: '(foo)(bar)'", true);
+    makeCase("'aaaab' ::: 'a{3,5}b'", true);
+    makeCase("'aaab' ::: 'a{4,5}b'", false);
+    makeCase("'price: $12.50' ::: '\\$\\d+\\.\\d{2}'", true);
+    makeCase("'just text' ::: '\\$\\d+'", false);
+    makeCase("12345 ::: '\\d+'", true);
+  }
+
+  private void makeCase(String expression, Object expectedResult) {
+    makeCase(expression, new InterpretationEnvironment(), expectedResult);
+  }
+
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
     ExpressionNode node = ExpressionParser.parse(StringView.of(expression), null);
     Assertions.assertEquals(expectedResult, ExpressionInterpreter.interpret(node, environment));

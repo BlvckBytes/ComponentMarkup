@@ -134,12 +134,20 @@ public class ExpressionInterpreter {
           String input = valueInterpreter.asString(lhsValue);
           String delimiter = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
 
-          return Arrays.asList(
-            Pattern.compile(
+          Pattern pattern;
+
+          try {
+            pattern = Pattern.compile(
               delimiter,
               infixOperator == InfixOperator.EXPLODE ? Pattern.LITERAL : 0
-            ).split(input)
-          );
+            );
+          } catch (Throwable e) {
+            // TODO: Provide better message
+            LoggerProvider.log(Level.WARNING, "Encountered malformed pattern " + delimiter + " on operator " + infixOperator.representation);
+            return Collections.emptyList();
+          }
+
+          return Arrays.asList(pattern.split(input));
         }
 
         case REPEAT: {
@@ -208,6 +216,26 @@ public class ExpressionInterpreter {
 
         case SUBSCRIPTING:
           return performSubscripting(lhsValue, rhsValue, environment);
+
+        case CONTAINS:
+          return checkContains(lhsValue, rhsValue, valueInterpreter);
+
+        case MATCHES_REGEX: {
+          String input = valueInterpreter.asString(lhsValue);
+          String patternString = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
+
+          Pattern pattern;
+
+          try {
+            pattern = Pattern.compile(patternString);
+          } catch (Throwable e) {
+            // TODO: Provide better message
+            LoggerProvider.log(Level.WARNING, "Encountered malformed pattern " + patternString + " on operator " + infixOperator.representation);
+            return false;
+          }
+
+          return pattern.matcher(input).find();
+        }
 
         default:
           LoggerProvider.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
@@ -383,6 +411,16 @@ public class ExpressionInterpreter {
 
   private static long clampZeroAndMax(long value, long max) {
     return Math.max(0, Math.min(max, value));
+  }
+
+  private static boolean checkContains(@Nullable Object lhsValue, @Nullable Object rhsValue, ValueInterpreter valueInterpreter) {
+    if (lhsValue == null && rhsValue == null)
+      return true;
+
+    if (lhsValue == null || rhsValue == null)
+      return false;
+
+    return valueInterpreter.asString(lhsValue).contains(valueInterpreter.asString(rhsValue));
   }
 
   private static boolean checkEquality(@Nullable Object lhsValue, @Nullable Object rhsValue, ValueInterpreter valueInterpreter) {

@@ -72,7 +72,7 @@ public class ExpressionParserErrorTests {
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
-      if (punctuation == Punctuation.CLOSING_BRACKET)
+      if (punctuation == Punctuation.CLOSING_BRACKET || punctuation == Punctuation.COLON)
         continue;
 
       text = new TextWithAnchors(
@@ -87,7 +87,7 @@ public class ExpressionParserErrorTests {
     }
 
     for (InfixOperator operator : InfixOperator.values()) {
-      if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION)
+      if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION || operator == InfixOperator.CONTAINS || operator == InfixOperator.MATCHES_REGEX)
         continue;
 
       text = new TextWithAnchors(
