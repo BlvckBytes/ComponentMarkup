@@ -105,7 +105,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       "<`red´",
       "  *for-`member´=\"`members´\"",
       "  *for-separator={ <`aqua´>`separator ´}",
-      "  *for-reversed=`true´",
+      "  *`for-reversed´",
       "  *for-empty={<`red´>`No entries!´}",
       ">`Hello, world´"
     );
@@ -119,7 +119,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .color(text.subView(0).setLowercase()),
         text(text.subView(4).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(3).setLowercase()),
-        bool(text.subView(5), true),
+        bool(text.subView(5).setLowercase(), true),
         text(text.subView(7).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(6).setLowercase())
       )

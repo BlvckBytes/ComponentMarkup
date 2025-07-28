@@ -13,8 +13,6 @@ public interface XmlEventConsumer {
 
   void onDoubleAttribute(StringView name, StringView raw, double value);
 
-  void onBooleanAttribute(StringView name, StringView raw, boolean value);
-
   void onTagAttributeBegin(StringView name, int valueBeginPosition);
 
   void onTagAttributeEnd(StringView name);

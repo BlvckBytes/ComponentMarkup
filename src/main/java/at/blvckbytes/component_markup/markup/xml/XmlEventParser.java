@@ -9,9 +9,6 @@ import java.util.EnumSet;
 
 public class XmlEventParser {
 
-  private static final char[] TRUE_LITERAL_CHARS  = { 't', 'r', 'u', 'e' };
-  private static final char[] FALSE_LITERAL_CHARS = { 'f', 'a', 'l', 's', 'e' };
-
   private final XmlEventConsumer consumer;
   private final TokenOutput tokenOutput;
   private final StringView input;
@@ -376,16 +373,6 @@ public class XmlEventParser {
         consumer.onTagAttributeEnd(attributeName);
         return true;
 
-      case 'T':
-      case 't':
-        consumer.onBooleanAttribute(attributeName, parseLiteral(attributeName, TRUE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_TRUE), true);
-        return true;
-
-      case 'F':
-      case 'f':
-        consumer.onBooleanAttribute(attributeName, parseLiteral(attributeName, FALSE_LITERAL_CHARS, XmlParseError.MALFORMED_LITERAL_FALSE), false);
-        return true;
-
       case '0':
       case '1':
       case '2':
@@ -404,29 +391,6 @@ public class XmlEventParser {
       default:
         throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, input.getPosition());
     }
-  }
-
-  private StringView parseLiteral(StringView attributeName, char[] chars, XmlParseError error) {
-    int begin = -1;
-
-    for (char c : chars) {
-      if (Character.toLowerCase(input.nextChar()) != c)
-        throw new XmlParseException(error, attributeName.startInclusive);
-
-      if (begin == -1)
-        begin = input.getPosition();
-    }
-
-    if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
-      throw new XmlParseException(error, begin);
-
-    input.setSubViewStart(begin);
-    StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
-
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__LITERAL__ANY, value);
-
-    return value;
   }
 
   private @Nullable StringView tryConsumeCommentTag(StringView tagName) {

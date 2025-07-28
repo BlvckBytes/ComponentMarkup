@@ -47,7 +47,7 @@ public class MarkupList {
       ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
       ExpressionNode expression = expressionAttribute.value;
 
-      if (!expressionAttribute.name.has(AttributeFlag.SPREAD_MODE)) {
+      if (!expressionAttribute.attributeName.has(AttributeFlag.SPREAD_MODE)) {
         result.add(new ExpressionDrivenNode(expression));
         continue;
       }

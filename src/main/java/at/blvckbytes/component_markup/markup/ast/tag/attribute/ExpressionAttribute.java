@@ -5,16 +5,11 @@ import at.blvckbytes.component_markup.markup.parser.AttributeName;
 
 public class ExpressionAttribute extends Attribute {
 
-  public final AttributeName name;
   public final ExpressionNode value;
 
-  public ExpressionAttribute(
-    AttributeName name,
-    ExpressionNode value
-  ) {
-    super(name.finalName);
+  public ExpressionAttribute(AttributeName attributeName, ExpressionNode value) {
+    super(attributeName);
 
     this.value = value;
-    this.name = name;
   }
 }

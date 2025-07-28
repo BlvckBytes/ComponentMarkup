@@ -33,19 +33,19 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseAttributesOpeningWithContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "  <`red´ `attr-1´=\"` string´\" `attr-2´=`true´ `attr-3´=`false´ `attr-4´=`.3´ `attr-5´=`-3´>` my content´"
+      "  <`red´ `attr-1´=\"` string´\" `attr-2´ `!attr-3´ `attr-4´=`.3´ `attr-5´=`-3´>` my content´"
     );
 
     makeCase(
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new StringAttributeEvent(text.subView(1), text.subView(2), "attr-1", " string"),
-      new BooleanAttributeEvent(text.subView(3), text.subView(4), true, "attr-2", "true"),
-      new BooleanAttributeEvent(text.subView(5), text.subView(6), false, "attr-3", "false"),
-      new DoubleAttributeEvent(text.subView(7), text.subView(8), .3, "attr-4", ".3"),
-      new LongAttributeEvent(text.subView(9), text.subView(10), -3, "attr-5", "-3"),
+      new FlagAttributeEvent(text.subView(3), "attr-2"),
+      new FlagAttributeEvent(text.subView(4), "!attr-3"),
+      new DoubleAttributeEvent(text.subView(5), text.subView(6), .3, "attr-4", ".3"),
+      new LongAttributeEvent(text.subView(7), text.subView(8), -3, "attr-5", "-3"),
       new TagOpenEndEvent(text.subView(0), false),
-      new TextEvent(text.subView(11).setBuildFlags(SubstringFlag.LAST_TEXT), " my content"),
+      new TextEvent(text.subView(9).setBuildFlags(SubstringFlag.LAST_TEXT), " my content"),
       new InputEndEvent()
     );
   }
@@ -676,19 +676,6 @@ public class XmlEventParserTests {
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".5.5");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "- 5.5");
     makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "5AB");
-  }
-
-  @Test
-  public void shouldThrowOnMalformedLiterals() {
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "t");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "tr");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "tru");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_TRUE, "truea");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "f");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fa");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fal");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "fals");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_LITERAL_FALSE, "falsea");
   }
 
   @Test

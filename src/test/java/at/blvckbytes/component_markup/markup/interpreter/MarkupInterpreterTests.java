@@ -198,7 +198,7 @@ public class MarkupInterpreterTests {
       "<red",
       "  *for-char=\"my_chars\"",
       "  *for-separator={ <aqua>separator }",
-      "  *for-reversed=" + reversed,
+      "  *" + (reversed ? "" : "!") + "for-reversed",
       "  *let-index=\"loop.index\"",
       ">",
       "  {char} at index {index}"
@@ -810,11 +810,9 @@ public class MarkupInterpreterTests {
     TextWithAnchors text = new TextWithAnchors(
       "<container",
       "  +let-a=5",
-      "  +let-b=true",
-      "  +let-c=false",
-      "  +let-d=\"hello\"",
-      "  +let-e=-.23",
-      ">{a} {b} {c} {d} {e}"
+      "  +let-b=\"hello\"",
+      "  +let-c=-.23",
+      ">{a} {b} {c}"
     );
 
     makeCase(
@@ -822,7 +820,7 @@ public class MarkupInterpreterTests {
       new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
-        .string("text", "5 true false hello -.23")
+        .string("text", "5 hello -.23")
     );
   }
 

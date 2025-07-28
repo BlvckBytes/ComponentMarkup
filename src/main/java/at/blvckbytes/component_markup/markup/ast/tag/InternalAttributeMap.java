@@ -27,7 +27,7 @@ public class InternalAttributeMap implements AttributeMap {
 
   public void add(Attribute attribute) {
     this.attributeMap
-      .computeIfAbsent(attribute.name.buildString(), k -> new ArrayList<>())
+      .computeIfAbsent(attribute.attributeName.finalName.buildString(), k -> new ArrayList<>())
       .add(attribute);
   }
 
@@ -35,7 +35,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (List<Attribute> attributeBucket : attributeMap.values()) {
       for (Attribute attribute : attributeBucket) {
         if (!attribute.hasBeenUsed)
-          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.name.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.attributeName.finalName.buildString());
       }
     }
   }
@@ -69,12 +69,12 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof ExpressionAttribute))
-      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
+      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
-    if (expressionAttribute.name.has(AttributeFlag.SPREAD_MODE))
-      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
+    if (expressionAttribute.attributeName.has(AttributeFlag.SPREAD_MODE))
+      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
 
     return expressionAttribute.value;
   }
@@ -97,7 +97,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof MarkupAttribute))
-      throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
+      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
 
     return ((MarkupAttribute) attribute).value;
   }
@@ -114,7 +114,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (attributesCount > 1)
-      throw new MarkupParseException(attributes.get(1).name.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
+      throw new MarkupParseException(attributes.get(1).attributeName.fullName.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
 
     Attribute result = attributes.get(0);
 
@@ -166,7 +166,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (Attribute attribute : attributes) {
       if (expression) {
         if (!(attribute instanceof ExpressionAttribute))
-          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, name, tagName.buildString());
 
         attribute.hasBeenUsed = true;
         continue;
@@ -175,8 +175,8 @@ public class InternalAttributeMap implements AttributeMap {
       if (!(attribute instanceof MarkupAttribute)) {
         // Immediate values are obviously nonsensical and were probably a mistake of the user
         // An expression-value will instantiate an expression-driven node later on
-        if ((attribute instanceof ExpressionAttribute) && !((ExpressionAttribute) attribute).name.has(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
+        if ((attribute instanceof ExpressionAttribute) && !attribute.attributeName.has(AttributeFlag.BINDING_MODE))
+          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
       }
 
       attribute.hasBeenUsed = true;

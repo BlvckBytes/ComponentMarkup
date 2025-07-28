@@ -152,30 +152,6 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
-    if (subtreeParser != null) {
-      subtreeParser.onBooleanAttribute(name, raw, value);
-      return;
-    }
-
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
-
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
-      handleIntrinsicAttribute(attributeName, raw, value);
-      return;
-    }
-
-    ExpressionNode immediateExpression = ImmediateExpression.ofBoolean(raw, value);
-
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attributeName, immediateExpression, value);
-      return;
-    }
-
-    handleUserAttribute(attributeName, immediateExpression, raw);
-  }
-
-  @Override
   public void onTagAttributeBegin(StringView name, int valueBeginPosition) {
     if (subtreeParser != null) {
       subtreeParser.onTagAttributeBegin(name, valueBeginPosition);
@@ -726,7 +702,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     else if (value instanceof MarkupNode) {
-      currentLayer.attributeMap.add(new MarkupAttribute(attributeName.finalName, (MarkupNode) value));
+      currentLayer.attributeMap.add(new MarkupAttribute(attributeName, (MarkupNode) value));
       return;
     }
 

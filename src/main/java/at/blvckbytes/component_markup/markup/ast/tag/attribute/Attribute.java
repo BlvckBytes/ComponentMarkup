@@ -1,14 +1,14 @@
 package at.blvckbytes.component_markup.markup.ast.tag.attribute;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.markup.parser.AttributeName;
 
 public abstract class Attribute {
 
-  public final StringView name;
+  public final AttributeName attributeName;
 
   public boolean hasBeenUsed;
 
-  protected Attribute(StringView name) {
-    this.name = name;
+  protected Attribute(AttributeName attributeName) {
+    this.attributeName = attributeName;
   }
 }

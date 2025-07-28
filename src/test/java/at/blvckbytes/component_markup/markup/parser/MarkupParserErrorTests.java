@@ -38,11 +38,6 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.UNSUPPORTED_ATTRIBUTE,
-      "<hover-text value={} @unknown=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.UNSUPPORTED_ATTRIBUTE,
       "<hover-text value={} @unknown={}>"
     );
   }
@@ -302,16 +297,6 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMarkupOrExpressionCaptureLetBinding() {
     makeErrorCase(
       MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container @*let-(my_var)=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container @*let-(my_var)=false>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
       "<container @*let-(my_var)=-24>"
     );
 
@@ -437,16 +422,6 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + "=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + "=false>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container @*" + attribute + "={}>"
     );
 
@@ -470,16 +445,6 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
-      "<container [@attr]=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
-      "<container [@attr]=false>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
       "<container [@attr]={}>"
     );
   }
@@ -499,16 +464,6 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<hover-text @value=5.5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text @value=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text @value=false>"
     );
   }
 
@@ -545,11 +500,6 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
-      "<red @*else=true>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
       "<red @*else=-2.3>"
     );
   }
@@ -564,11 +514,6 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
       "<red *for-member=\"members\" @*for-separator=5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @*for-separator=true>"
     );
 
     makeErrorCase(
@@ -594,7 +539,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed=true @*for-reversed=false>"
+      "<red *for-member=\"members\" *for-reversed @*!for-reversed>"
     );
 
     makeErrorCase(
@@ -634,7 +579,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt coordinates=\"a\" path=\"b\" interpret=true @interpret=false>"
+      "<block-nbt coordinates=\"a\" path=\"b\" interpret @!interpret>"
     );
   }
 
@@ -749,14 +694,14 @@ public class MarkupParserErrorTests {
     makeErrorScreenCase(
       new TextWithAnchors(
         "<red",
-        "  my-attr=trruee",
+        "  !!my-attr",
         "/>"
       ),
       new TextWithAnchors(
         "1: <red",
-        "2:   my-attr=trruee",
-        "-----^",
-        "   Error: This true-literal is malformed",
+        "2:   !!my-attr",
+        "------^",
+        "   Error: The exclamation-mark used to mark flag-attributes as negated may only be used once!",
         "3: />"
       )
     );
@@ -791,11 +736,6 @@ public class MarkupParserErrorTests {
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
       "<gradient @...color=5>"
     );
-
-    makeErrorCase(
-      MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient @...color=true>"
-    );
   }
 
   @Test
@@ -816,7 +756,7 @@ public class MarkupParserErrorTests {
 
   @Test
   public void shouldThrowOnWrongValuedWhenAttributes() {
-    String[] values = { "=true", "=false", "=5", "=5.5", "" };
+    String[] values = { "=5", "=5.5", "" };
 
     for (String value : values) {
       // is-labels support literals, for convenience

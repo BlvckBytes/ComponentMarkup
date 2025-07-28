@@ -44,7 +44,7 @@ public enum MarkupParseError {
   NON_LITERAL_INTRINSIC_ATTRIBUTE(args -> "The intrinsic attribute " + args[0] + " only works with literal values"),
   NON_STRING_EXPRESSION_ATTRIBUTE(args -> "Attributes bound to expressions may only be strings, containing expressions"),
   EXPECTED_MARKUP_ATTRIBUTE_VALUE(args -> "The attribute " + args[0] + " expected a markup-value: { ... }"),
-  EXPECTED_EXPRESSION_ATTRIBUTE_VALUE(args -> "The attribute " + args[0] + " of tag " + args[1] + " expected a literal (string, boolean or number) or a bound expression"),
+  EXPECTED_EXPRESSION_ATTRIBUTE_VALUE(args -> "The attribute " + args[0] + " of tag " + args[1] + " expected a literal (string or number) or a bound expression"),
   EXPECTED_SELF_CLOSING_TAG(args -> "This tag is self-closing, <" + args[0] + " />, and does not support a separate closing-tag"),
   EXPECTED_OPEN_CLOSE_TAG(args -> "This tag requires a separate closing-tag </" + args[0] + ">, as it expects content and does not support self-closing <" + args[0] + " />"),
   EXPECTED_INTRINSIC_ATTRIBUTE_FLAG(args -> "The intrinsic attribute " + args[0] + " must not be assigned to a value, as it's just a flag: " + args[0] + " -> " + args[0]),

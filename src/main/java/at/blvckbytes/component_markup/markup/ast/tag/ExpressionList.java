@@ -35,7 +35,7 @@ public class ExpressionList {
     List<ExpressionNode> result = new ArrayList<>(attributes.size());
 
     for (ExpressionAttribute attribute : attributes) {
-      if (!attribute.name.has(AttributeFlag.SPREAD_MODE)) {
+      if (!attribute.attributeName.has(AttributeFlag.SPREAD_MODE)) {
         result.add(attribute.value);
         continue;
       }
