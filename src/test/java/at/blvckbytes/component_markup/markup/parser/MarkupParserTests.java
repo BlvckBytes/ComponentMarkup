@@ -456,7 +456,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseFlagAttributes() {
     TextWithAnchors text = new TextWithAnchors(
-      "<`style´ `italic´ !`bold´>`hello, world´"
+      "<`style´ `i´ !`b´>`hello, world´"
     );
 
     makeCase(

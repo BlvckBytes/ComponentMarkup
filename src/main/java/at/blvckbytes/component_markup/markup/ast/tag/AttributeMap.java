@@ -7,20 +7,20 @@ import org.jetbrains.annotations.Nullable;
 
 public interface AttributeMap {
 
-  @NotNull ExpressionNode getMandatoryExpressionNode(String name);
+  @NotNull ExpressionNode getMandatoryExpressionNode(String name, String... aliases);
 
-  @Nullable ExpressionNode getOptionalExpressionNode(String name);
+  @Nullable ExpressionNode getOptionalExpressionNode(String name, String... aliases);
 
-  @NotNull ExpressionList getMandatoryExpressionList(String name);
+  @NotNull ExpressionList getMandatoryExpressionList(String name, String... aliases);
 
-  @NotNull ExpressionList getOptionalExpressionList(String name);
+  @NotNull ExpressionList getOptionalExpressionList(String name, String... aliases);
 
-  @NotNull MarkupNode getMandatoryMarkupNode(String name);
+  @NotNull MarkupNode getMandatoryMarkupNode(String name, String... aliases);
 
-  @Nullable MarkupNode getOptionalMarkupNode(String name);
+  @Nullable MarkupNode getOptionalMarkupNode(String name, String... aliases);
 
-  @NotNull MarkupList getMandatoryMarkupList(String name);
+  @NotNull MarkupList getMandatoryMarkupList(String name, String... aliases);
 
-  @NotNull MarkupList getOptionalMarkupList(String name);
+  @NotNull MarkupList getOptionalMarkupList(String name, String... aliases);
 
 }

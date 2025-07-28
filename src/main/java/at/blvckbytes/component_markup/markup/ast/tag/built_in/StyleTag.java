@@ -36,19 +36,19 @@ public class StyleTag extends TagDefinition {
 
     ExpressionNode expression;
 
-    if ((expression = attributes.getOptionalExpressionNode("obfuscated")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("obfuscated", "obf")) != null)
       style.setFormat(Format.OBFUSCATED, expression);
 
-    if ((expression = attributes.getOptionalExpressionNode("bold")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("bold", "b")) != null)
       style.setFormat(Format.BOLD, expression);
 
-    if ((expression = attributes.getOptionalExpressionNode("strikethrough")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("strikethrough", "st")) != null)
       style.setFormat(Format.STRIKETHROUGH, expression);
 
-    if ((expression = attributes.getOptionalExpressionNode("underlined")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("underlined", "u")) != null)
       style.setFormat(Format.UNDERLINED, expression);
 
-    if ((expression = attributes.getOptionalExpressionNode("italic")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("italic", "i")) != null)
       style.setFormat(Format.ITALIC, expression);
 
     if ((expression = attributes.getOptionalExpressionNode("font")) != null)
@@ -63,7 +63,7 @@ public class StyleTag extends TagDefinition {
     if ((expression = attributes.getOptionalExpressionNode("shadow-opacity")) != null)
       style.shadowColorOpacity = expression;
 
-    if ((expression = attributes.getOptionalExpressionNode("reset")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("reset", "r")) != null)
       style.reset = expression;
 
     return wrapper;
