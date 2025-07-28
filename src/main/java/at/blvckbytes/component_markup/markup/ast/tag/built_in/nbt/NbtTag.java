@@ -16,7 +16,7 @@ public abstract class NbtTag extends TagDefinition {
   private final String sourceAttributeName;
 
   protected NbtTag(NbtSource source, String tagName, String sourceAttributeName) {
-    super(TagClosing.OPEN_CLOSE, TagPriority.NORMAL);
+    super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
 
     this.source = source;
     this.tagName = tagName;

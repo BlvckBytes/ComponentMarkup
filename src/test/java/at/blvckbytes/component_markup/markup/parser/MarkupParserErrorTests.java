@@ -579,7 +579,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt coordinates=\"a\" path=\"b\" interpret @!interpret>"
+      "<block-nbt coordinates=\"a\" path=\"b\" interpret @!interpret/>"
     );
   }
 
