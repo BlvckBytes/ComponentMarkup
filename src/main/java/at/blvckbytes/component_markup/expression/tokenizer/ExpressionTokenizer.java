@@ -146,7 +146,7 @@ public class ExpressionTokenizer {
 
         StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
 
-        return new LongToken(value, value.parseLong());
+        return new LongToken(value, Long.parseLong(value.buildString()));
       }
 
       if (!collectSubsequentDigits())
@@ -154,12 +154,12 @@ public class ExpressionTokenizer {
 
       StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
 
-      return new DoubleToken(value, value.parseDouble());
+      return new DoubleToken(value, Double.parseDouble(value.buildString()));
     }
 
     StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
 
-    return new LongToken(value, value.parseLong());
+    return new LongToken(value, Long.parseLong(value.buildString()));
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
@@ -178,7 +178,7 @@ public class ExpressionTokenizer {
     input.setSubViewStart(beginPosition);
     StringView rawValue = input.buildSubViewInclusive(PositionMode.CURRENT);
 
-    return new DoubleToken(rawValue, rawValue.parseDouble());
+    return new DoubleToken(rawValue, Double.parseDouble(rawValue.buildString()));
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationToken() {

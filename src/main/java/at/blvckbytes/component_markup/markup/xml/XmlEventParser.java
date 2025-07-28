@@ -294,7 +294,7 @@ public class XmlEventParser {
 
     if (encounteredDecimalPoint) {
       try {
-        consumer.onDoubleAttribute(attributeName, value, value.parseDouble());
+        consumer.onDoubleAttribute(attributeName, value, Double.parseDouble(value.buildString()));
       } catch (NumberFormatException e) {
         throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
       }
@@ -302,7 +302,7 @@ public class XmlEventParser {
     }
 
     try {
-      consumer.onLongAttribute(attributeName, value, value.parseLong());
+      consumer.onLongAttribute(attributeName, value, Long.parseLong(value.buildString()));
     } catch (NumberFormatException e) {
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, start);
     }

@@ -379,16 +379,6 @@ public class StringView {
     return contents.charAt(targetIndex);
   }
 
-  public double parseDouble() throws NumberFormatException {
-    // TODO: I'm kinda itching to write my own parser here, which doesn't allocate the intermediate char[]
-    return Double.parseDouble(buildString());
-  }
-
-  public long parseLong() throws NumberFormatException {
-    // TODO: I'm kinda itching to write my own parser here, which doesn't allocate the intermediate char[]
-    return Long.parseLong(buildString());
-  }
-
   public boolean isEmpty() {
     return length() == 0;
   }
