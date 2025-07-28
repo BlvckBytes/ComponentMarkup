@@ -97,6 +97,69 @@ public class MarkupParserErrorTests {
   }
 
   @Test
+  public void shouldThrowOnMultipleIntrinsicMarkers() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
+      "<container *@*if=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
+      "<container *@+if=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
+      "<container +@*if=\"\">"
+    );
+
+
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
+      "<container +@+if=\"\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnLateBindingBrackets() {
+    makeErrorCase(
+      MarkupParseError.LATE_ATTRIBUTE_BRACKETS,
+      "<container *@[if]=\"\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.LATE_ATTRIBUTE_BRACKETS,
+      "<container +@[if]=\"\">"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleNegations() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS,
+      "<container !@!test>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnDisallowedNegation() {
+    makeErrorCase(
+      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
+      "<container @!my-attr=5>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
+      "<container *@!my-attr=\"hello\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
+      "<container @!my-attr={}>"
+    );
+  }
+
+  @Test
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
@@ -116,17 +179,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnBindingInUse() {
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *let-a=\"one\" @*let-a=\"two\">"
+      "<container *let-a=\"one\" *let-@a=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *for-a=\"one\" @*let-a=\"two\">"
+      "<container *for-a=\"one\" *let-@a=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *let-a=\"one\" @*for-a=\"two\">"
+      "<container *let-a=\"one\" *for-@a=\"two\">"
     );
   }
 
@@ -134,27 +197,27 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMalformedIdentifier() {
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @*let-a-b=\"one\">"
+      "<container *let-@a-b=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @*let-_a-b=\"one\">"
+      "<container *let-@_a-b=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @*let-0abc=\"one\">"
+      "<container *let-@0abc=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @*for-a-b=\"one\">"
+      "<container *for-@a-b=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container @*for-0abc=\"one\">"
+      "<container *for-@0abc=\"one\">"
     );
   }
 
@@ -208,22 +271,22 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnbalancedCaptureParentheses() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container @*let-(my_var={}>"
+      "<container *let-@(my_var={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container @*let-my_var)={}>"
+      "<container *let-my_var@)={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container @*let-((my_var)={}>"
+      "<container *let-(@(my_var)={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container @*let-(my_var))={}>"
+      "<container *let-(my_var@))={}>"
     );
   }
 
@@ -231,7 +294,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleCaptureParentheses() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES,
-      "<container @*let-((hello))={}>"
+      "<container *let-(@(hello))={}>"
     );
   }
 
@@ -270,12 +333,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnEmptyAttributeNames() {
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container [@]=\"world\">"
+      "<container @[]=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container [@...]=\"world\">"
+      "<container @[...]=\"world\">"
     );
   }
 
@@ -715,23 +778,23 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnNonExpressionSpreadOperator() {
     makeErrorCase(
-      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
-      "<gradient ...@color=\"red\">"
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
+      "<gradient @...color=\"red\">"
     );
 
     makeErrorCase(
-      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
-      "<gradient ...@color=5.5>"
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
+      "<gradient @...color=5.5>"
     );
 
     makeErrorCase(
-      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
-      "<gradient ...@color=5>"
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
+      "<gradient @...color=5>"
     );
 
     makeErrorCase(
-      MarkupParseError.SPREAD_DISALLOWED_ON_NON_EXPRESSION,
-      "<gradient ...@color=true>"
+      MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
+      "<gradient @...color=true>"
     );
   }
 

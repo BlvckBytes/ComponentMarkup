@@ -6,9 +6,9 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public class MarkupList {
       ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
       ExpressionNode expression = expressionAttribute.value;
 
-      if (!expressionAttribute.flags.contains(ExpressionFlag.SPREAD_MODE)) {
+      if (!expressionAttribute.name.has(AttributeFlag.SPREAD_MODE)) {
         result.add(new ExpressionDrivenNode(expression));
         continue;
       }

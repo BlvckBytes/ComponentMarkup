@@ -4,8 +4,8 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +35,7 @@ public class ExpressionList {
     List<ExpressionNode> result = new ArrayList<>(attributes.size());
 
     for (ExpressionAttribute attribute : attributes) {
-      if (!attribute.flags.contains(ExpressionFlag.SPREAD_MODE)) {
+      if (!attribute.name.has(AttributeFlag.SPREAD_MODE)) {
         result.add(attribute.value);
         continue;
       }

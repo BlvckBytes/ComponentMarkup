@@ -4,8 +4,8 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
+import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.util.StringView;
@@ -73,7 +73,7 @@ public class InternalAttributeMap implements AttributeMap {
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
-    if (expressionAttribute.flags.contains(ExpressionFlag.SPREAD_MODE))
+    if (expressionAttribute.name.has(AttributeFlag.SPREAD_MODE))
       throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, name, tagName.buildString());
 
     return expressionAttribute.value;
@@ -175,7 +175,7 @@ public class InternalAttributeMap implements AttributeMap {
       if (!(attribute instanceof MarkupAttribute)) {
         // Immediate values are obviously nonsensical and were probably a mistake of the user
         // An expression-value will instantiate an expression-driven node later on
-        if ((attribute instanceof ExpressionAttribute) && ((ExpressionAttribute) attribute).flags.contains(ExpressionFlag.IMMEDIATE_VALUE))
+        if ((attribute instanceof ExpressionAttribute) && !((ExpressionAttribute) attribute).name.has(AttributeFlag.BINDING_MODE))
           throw new MarkupParseException(attribute.name.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name, tagName.buildString());
       }
 

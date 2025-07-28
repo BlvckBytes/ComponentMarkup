@@ -370,6 +370,8 @@ public class StringView {
   public char nthChar(int index) {
     int targetIndex = startInclusive + index;
 
+    // TODO: Is nthChar ever colliding with removeIndices anywhere?
+    //       Maybe, by convention, nthChar should be able to access them, as to save on complexity.
     while (targetIndex < endExclusive - 1 && removeIndices.get(targetIndex))
       ++targetIndex;
 

@@ -452,4 +452,18 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       )
     );
   }
+
+  @Test
+  public void shouldParseFlagAttributes() {
+    TextWithAnchors text = new TextWithAnchors(
+      "<`style´ `italic´ !`bold´>`hello, world´"
+    );
+
+    makeCase(
+      text,
+      text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
+        .format(Format.ITALIC, bool(text.subView(1).setLowercase(), true))
+        .format(Format.BOLD, bool(text.subView(2).setLowercase(), false))
+    );
+  }
 }

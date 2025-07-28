@@ -61,7 +61,7 @@ public class TokenOutputTests {
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(19))) // "<"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(20).setLowercase())) // "red"
         .with(list -> addWhitespace(rootView, text.subView(20), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21))) // "*"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(22).setLowercase())) // "for"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(23).setLowercase())) // "-"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(24).setLowercase())) // "player_name"
@@ -71,7 +71,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(28))) // "player_names"
         )
         .with(list -> addWhitespace(rootView, text.subView(26), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(30).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(30))) // "*"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(31).setLowercase())) // "if"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(32))) // "="
         .add(
@@ -83,7 +83,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         )
         .with(list -> addWhitespace(rootView, text.subView(33), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(41).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(41))) // "*"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(42).setLowercase())) // "let"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(43).setLowercase())) // "-"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(44).setLowercase())) // "position_number"
@@ -100,7 +100,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__NUMBER, text.subView(55))) // "1"
         )
         .with(list -> addWhitespace(rootView, text.subView(46), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(57).setLowercase())) // "*"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(57))) // "*"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(58).setLowercase())) // "for-separator"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(59))) // "="
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(60))) // "{"
@@ -118,9 +118,9 @@ public class TokenOutputTests {
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(69))) // "<"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(70).setLowercase())) // "run-command"
         .with(list -> addWhitespace(rootView, text.subView(70), list))
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71).setLowercase())) // "["
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71))) // "["
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72).setLowercase())) // "value"
-        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73).setLowercase())) // "]"
+        .add(new HierarchicalToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73))) // "]"
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(74))) // "="
         .add(
           new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(75)) // "\"'/tp ' + player_name\""
@@ -184,7 +184,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(19))) // "<"
         .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(20).setLowercase())) // "red"
         .with(list -> addWhitespace(rootView, text.subView(20), list))
-        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21).setLowercase())) // "*"
+        .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(21))) // "*"
         .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(22).setLowercase())) // "for"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(23).setLowercase())) // "-"
         .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(24).setLowercase())) // "player_name"
@@ -194,7 +194,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(29))) // "\""
         .with(list -> addWhitespace(rootView, text.subView(29), list))
         .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(30))) // "*"
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(31))) // "if"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(31).setLowercase())) // "if"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(32))) // "="
         .add(new Token(TokenType.MARKUP__STRING, text.subView(34))) // "\""
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
@@ -205,9 +205,9 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(40))) // "\""
         .with(list -> addWhitespace(rootView, text.subView(40), list))
         .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(41))) // "*"
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(42))) // "let"
-        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(43))) // "-"
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(44))) // "position_number"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(42).setLowercase())) // "let"
+        .add(new Token(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, text.subView(43).setLowercase())) // "-"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(44).setLowercase())) // "position_number"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(45))) // "="
         .add(new Token(TokenType.MARKUP__STRING, text.subView(47))) // "\""
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(48))) // " "
@@ -221,7 +221,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(56))) // "\""
         .with(list -> addWhitespace(rootView, text.subView(56), list))
         .add(new Token(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, text.subView(57))) // "*"
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(58))) // "for-separator"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, text.subView(58).setLowercase())) // "for-separator"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(59))) // "="
         .add(new Token(TokenType.MARKUP__PUNCTUATION__SUBTREE, text.subView(60))) // "{"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(61))) // "<"
@@ -237,7 +237,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(70))) // "run-command"
         .with(list -> addWhitespace(rootView, text.subView(70), list))
         .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(71))) // "["
-        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72))) // "value"
+        .add(new Token(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(72).setLowercase())) // "value"
         .add(new Token(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, text.subView(73))) // "]"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(74))) // "="
         .add(new Token(TokenType.MARKUP__STRING, text.subView(76))) // "\""
