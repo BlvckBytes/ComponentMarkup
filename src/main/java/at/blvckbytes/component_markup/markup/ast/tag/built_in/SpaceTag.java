@@ -28,6 +28,6 @@ public class SpaceTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    return new TextNode(" ", tagName.startInclusive);
+    return new TextNode(tagName, " ");
   }
 }

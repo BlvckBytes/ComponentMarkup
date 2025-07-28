@@ -90,10 +90,18 @@ public class TextWithAnchors {
       ++charIndex;
     }
 
-    if (!indicesStack.isEmpty())
-      throw new IllegalStateException("Unbalanced subview-stack");
-
     this.text = result.toString();
+
+    if (!indicesStack.isEmpty()) {
+      int index = indicesStack.pop().startInclusive;
+      throw new IllegalStateException(
+        "Unbalanced subview-stack: "
+          + (index == 0 ? "" : this.text.charAt(index - 1))
+          + this.text.charAt(index)
+          + (index == this.text.length() - 1 ? "" : this.text.charAt(index + 1))
+      );
+    }
+
     this.rootView = StringView.of(text);
 
     for (ViewIndices indices : indicesInOrder) {
@@ -121,7 +129,7 @@ public class TextWithAnchors {
       throw new IllegalStateException("Cannot request negative indices");
 
     if (index >= anchors.size())
-      throw new IllegalStateException("Requested index " + index + "; only got " + subViews.size() + " anchors");
+      throw new IllegalStateException("Requested index " + index + "; only got " + anchors.size() + " anchors");
 
     return anchors.get(index);
   }

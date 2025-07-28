@@ -53,7 +53,7 @@ public class ImmediateColorTag extends TagDefinition {
 
     if (nameLength == 2 && firstChar == '&') {
       if ((color = AnsiStyleColor.fromCharOrNull(tagName.nthChar(1))) != null)
-        return ImmediateExpression.ofString(color.name);
+        return ImmediateExpression.ofString(tagName, color.name);
     }
 
     if (nameLength == 7 && firstChar == '#') {
@@ -62,11 +62,11 @@ public class ImmediateColorTag extends TagDefinition {
           return null;
       }
 
-      return ImmediateExpression.ofString(tagName);
+      return ImmediateExpression.ofString(tagName, tagName.buildString());
     }
 
     if ((color = AnsiStyleColor.fromNameLowerOrNull(tagName.buildString())) != null)
-      return ImmediateExpression.ofString(color.name);
+      return ImmediateExpression.ofString(tagName, color.name);
 
     return null;
   }

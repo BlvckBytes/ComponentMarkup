@@ -1,11 +1,8 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.WhenMatchingNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.ForLoopNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.IfElseIfElseNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.LoggerProvider;
@@ -41,7 +38,7 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable StringView forIterationVariable;
 
   public @Nullable ExpressionNode whenInput;
-  public @Nullable String whenIsValue;
+  public @Nullable StringView whenIsValue;
   public boolean isWhenOther;
 
   public TagAndBuffers(int initialPosition) {
@@ -107,7 +104,7 @@ public class TagAndBuffers implements ParserChildItem {
 
     ConditionType priorConditionType = ConditionType.NONE;
     List<MarkupNode> conditions = null;
-    Map<String, MarkupNode> whenCases = null;
+    WhenMatchingMap whenCases = null;
     MarkupNode whenOther = null;
 
     for (ParserChildItem child : children) {
@@ -150,10 +147,10 @@ public class TagAndBuffers implements ParserChildItem {
               throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
             if (whenCases == null)
-              whenCases = new HashMap<>();
+              whenCases = new WhenMatchingMap();
 
-            if (whenCases.put(childTag.whenIsValue.toLowerCase(), currentNode) != null)
-              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, whenIsValue);
+            if (whenCases.put(childTag.whenIsValue, currentNode) != null)
+              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, childTag.whenIsValue.buildString());
           }
 
           continue;
@@ -299,8 +296,14 @@ public class TagAndBuffers implements ParserChildItem {
   }
 
   public MarkupNode createNode() {
-    if (tagName == null || tag == null || attributeMap == null)
-      return new ContainerNode(initialPosition, getProcessedChildren(), null);
+    if (tagName == null || tag == null || attributeMap == null) {
+      List<MarkupNode> processedChildren = getProcessedChildren();
+
+      if (processedChildren != null && processedChildren.size() == 1)
+        return processedChildren.get(0);
+
+      return new ContainerNode(initialPosition, processedChildren, null);
+    }
 
     MarkupNode result;
 
@@ -312,7 +315,7 @@ public class TagAndBuffers implements ParserChildItem {
 
       LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagName.buildString() + "> via " + tag.getClass() + "#createNode", thrownError);
 
-      result = new TextNode("<error>", tagName.startInclusive);
+      result = new TextNode(tagName, "<error>");
     }
 
     attributeMap.validateNoUnusedAttributes();

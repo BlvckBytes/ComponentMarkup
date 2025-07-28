@@ -4,24 +4,22 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-
 public class WhenMatchingNode extends MarkupNode {
 
   public final ExpressionNode input;
-  public final Map<String, MarkupNode> casesLower;
+  public final WhenMatchingMap matchingMap;
   public final @Nullable MarkupNode other;
 
   public WhenMatchingNode(
     int position,
     ExpressionNode input,
-    Map<String, MarkupNode> casesLower,
+    WhenMatchingMap matchingMap,
     @Nullable MarkupNode other
   ) {
     super(position, null, null);
 
     this.input = input;
-    this.casesLower = casesLower;
+    this.matchingMap = matchingMap;
     this.other = other;
   }
 }

@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionFlag;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -61,14 +62,14 @@ public class ExpressionList {
       return ImmediateExpression.ofNull();
 
     if (value instanceof Double || value instanceof Float)
-      return ImmediateExpression.ofDouble(((Number) value).doubleValue());
+      return ImmediateExpression.ofDouble(StringView.EMPTY, ((Number) value).doubleValue());
 
     if (value instanceof Number)
-      return ImmediateExpression.ofLong(((Number) value).longValue());
+      return ImmediateExpression.ofLong(StringView.EMPTY, ((Number) value).longValue());
 
     if (value instanceof Boolean)
-      return ImmediateExpression.ofBoolean((boolean) value);
+      return ImmediateExpression.ofBoolean(StringView.EMPTY, (boolean) value);
 
-    return ImmediateExpression.ofString(String.valueOf(value));
+    return ImmediateExpression.ofString(StringView.EMPTY, String.valueOf(value));
   }
 }

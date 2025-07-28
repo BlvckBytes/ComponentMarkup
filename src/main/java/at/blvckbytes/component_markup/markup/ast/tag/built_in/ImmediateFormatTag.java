@@ -100,7 +100,7 @@ public class ImmediateFormatTag extends TagDefinition {
     }
 
     if (style != null)
-      style.setFormat(format, ImmediateExpression.ofBoolean(!isNegative));
+      style.setFormat(format, ImmediateExpression.ofBoolean(tagName, !isNegative));
 
     return true;
   }

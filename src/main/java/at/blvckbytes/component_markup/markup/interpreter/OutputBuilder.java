@@ -1,9 +1,9 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -36,9 +36,9 @@ public class OutputBuilder {
     this.result = new ArrayList<>();
   }
 
-  public void onBreak(BreakNode node) {
+  public void onBreak() {
     if (breakString != null) {
-      onText(new TextNode(breakString, node.position), null, false);
+      onText(new TextNode(StringView.EMPTY, breakString), null, false);
       return;
     }
 

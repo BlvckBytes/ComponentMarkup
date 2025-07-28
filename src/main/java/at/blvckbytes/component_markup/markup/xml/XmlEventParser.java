@@ -120,7 +120,7 @@ public class XmlEventParser {
 
         else if (wasPriorTagOrInterpolation && firstSpacePosition != -1 && !encounteredNewline) {
           input.setSubViewStart(firstSpacePosition);
-          emitText(input.buildSubViewInclusive(PositionMode.CURRENT), null);
+          emitText(input.buildSubViewInclusive(PositionMode.CURRENT), SubstringFlag.INNER_TEXT);
         }
 
         parseOpeningOrClosingTag();

@@ -154,7 +154,7 @@ public class ComponentSequence {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
-      Object result = componentConstructor.createTextComponent(node.text);
+      Object result = componentConstructor.createTextComponent(node.textValue);
 
       addMember(result, nodeStyle);
 
@@ -164,7 +164,7 @@ public class ComponentSequence {
       return;
     }
 
-    addBufferedText(node.text, nodeStyle, creationHandler);
+    addBufferedText(node.textValue, nodeStyle, creationHandler);
   }
 
   private Object setChildren(Object component, List<Object> children) {

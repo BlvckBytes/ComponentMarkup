@@ -128,9 +128,6 @@ public class StringView {
   }
 
   public StringView buildSubViewInclusive(int position) {
-    if (buildFlags != null && !buildFlags.isEmpty())
-      throw new IllegalStateException("Do not create sub-views while special flags are active");
-
     if (subViewStart == -1)
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 

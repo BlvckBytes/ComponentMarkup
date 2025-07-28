@@ -36,7 +36,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     StringBuilder whitespaceAccumulator = skipWhitespace ? new StringBuilder() : null;
 
     for (int charIndex = 0; charIndex < node.text.length(); ++charIndex) {
-      char currentChar = node.text.charAt(charIndex);
+      char currentChar = node.textValue.charAt(charIndex);
 
       if (Character.isWhitespace(currentChar)) {
         if (skipWhitespace) {
@@ -48,7 +48,7 @@ public class ColorizeCharsNode extends ColorizeNode {
       if (skipWhitespace)
         emitWhitespace(node, builder, whitespaceAccumulator);
 
-      TextNode charNode = new TextNode(String.valueOf(currentChar), node.position);
+      TextNode charNode = new TextNode(StringView.EMPTY, String.valueOf(currentChar));
 
       if (nodeStyle != null)
         charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
@@ -73,7 +73,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     if (accumulator.length() == 0)
       return;
 
-    TextNode whitespaceNode = new TextNode(accumulator.toString(), styleHolder.position);
+    TextNode whitespaceNode = new TextNode(StringView.EMPTY, accumulator.toString());
     NodeStyle nodeStyle = styleHolder.getStyle();
 
     if (nodeStyle != null)

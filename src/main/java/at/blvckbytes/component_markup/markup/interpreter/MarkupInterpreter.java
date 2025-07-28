@@ -16,6 +16,7 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringView;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -196,14 +197,14 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretWhenMatching(WhenMatchingNode node, TemporaryMemberEnvironment environment) {
-    if (node.casesLower.isEmpty())
+    if (node.matchingMap.isEmpty())
       LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     Object result = ExpressionInterpreter.interpret(node.input, environment);
 
     if (result != null) {
       String inputLower = environment.getValueInterpreter().asString(result).toLowerCase();
-      MarkupNode caseNode = node.casesLower.get(inputLower);
+      MarkupNode caseNode = node.matchingMap.get(inputLower);
 
       if (caseNode != null) {
         _interpret(caseNode);
@@ -274,7 +275,7 @@ public class MarkupInterpreter implements Interpreter {
 
         if (expressionBinding.capture) {
           if (!(value instanceof MarkupNode))
-            value = new TextNode(String.valueOf(value), letBinding.name.startInclusive);
+            value = new TextNode(letBinding.name, String.valueOf(value));
 
           value = createVariableCapture((MarkupNode) value, letBinding);
         }
@@ -304,7 +305,6 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretObjectAsNode(
-    ExpressionDrivenNode container,
     @Nullable Object value,
     boolean withinCollection
   ) {
@@ -312,7 +312,7 @@ public class MarkupInterpreter implements Interpreter {
       return;
 
     if (!(value instanceof MarkupNode)) {
-      _interpret(new TextNode(String.valueOf(value), container.position));
+      _interpret(new TextNode(StringView.EMPTY, String.valueOf(value)));
       return;
     }
 
@@ -324,12 +324,12 @@ public class MarkupInterpreter implements Interpreter {
 
     if (value instanceof Collection) {
       for (Object item : (Collection<?>) value)
-        interpretObjectAsNode(node, item, true);
+        interpretObjectAsNode(item, true);
 
       return;
     }
 
-    interpretObjectAsNode(node, value, false);
+    interpretObjectAsNode(value, false);
   }
 
   private <T> T interpretForLoop(ForLoopNode node, Supplier<T> afterEnvironmentSetup) {
@@ -467,7 +467,7 @@ public class MarkupInterpreter implements Interpreter {
     OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
-      builder.onBreak((BreakNode) node);
+      builder.onBreak();
       return introducedBindings;
     }
 
@@ -480,7 +480,7 @@ public class MarkupInterpreter implements Interpreter {
       if (interpolationValue instanceof MarkupNode)
         interpolatedNode = (MarkupNode) interpolationValue;
       else
-        interpolatedNode = new TextNode(environment.getValueInterpreter().asString(interpolationValue), node.position);
+        interpolatedNode = new TextNode(StringView.EMPTY, environment.getValueInterpreter().asString(interpolationValue));
 
       NodeStyle nodeStyle = ((InterpolationNode) node).getStyle();
 

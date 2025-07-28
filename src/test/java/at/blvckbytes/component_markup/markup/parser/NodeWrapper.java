@@ -6,8 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.xml.CursorPosition;
-import org.jetbrains.annotations.Nullable;
+import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -28,11 +27,11 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> let(String name, ExpressionNode expression, CursorPosition position) {
+  public NodeWrapper<T> let(StringView name, ExpressionNode expression) {
     if(node.letBindings == null)
       node.letBindings = new LinkedHashSet<>();
 
-    node.letBindings.add(new ExpressionLetBinding(expression, false, name, position));
+    node.letBindings.add(new ExpressionLetBinding(expression, false, name));
     return this;
   }
 
@@ -46,8 +45,8 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> color(String color) {
-    return color(ImmediateExpression.of(color));
+  public NodeWrapper<T> color(StringView color) {
+    return color(ImmediateExpression.ofString(color, color.buildString()));
   }
 
   public NodeWrapper<T> color(ExpressionNode color) {
@@ -58,8 +57,8 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> font(String font) {
-    return font(ImmediateExpression.of(font));
+  public NodeWrapper<T> font(StringView font) {
+    return font(ImmediateExpression.ofString(font, font.buildString()));
   }
 
   public NodeWrapper<T> font(ExpressionNode font) {
@@ -78,23 +77,7 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> format(Format format, @Nullable Boolean value) {
-    if (!(node instanceof StyledNode))
-      throw new IllegalStateException("The node " + node.getClass() + " cannot hold any styles");
-
-    ExpressionNode expressionValue;
-
-    if (value == null)
-      expressionValue = null;
-    else
-      expressionValue = ImmediateExpression.of(value);
-
-    ((StyledNode) node).getOrInstantiateStyle().setFormat(format, expressionValue);
-    return this;
-  }
-
   public T get() {
     return node;
   }
-
 }

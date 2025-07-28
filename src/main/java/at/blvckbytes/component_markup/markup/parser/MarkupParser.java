@@ -51,7 +51,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.isSubParser = isSubParser;
-    this.result = new TextNode("", initialPosition);
+    this.result = new TextNode(StringView.EMPTY, "");
 
     this.tagStack.push(new TagAndBuffers(initialPosition));
   }
@@ -118,7 +118,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofLong(value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofLong(raw, value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -142,7 +142,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofDouble(value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofDouble(raw, value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -166,7 +166,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    ExpressionNode immediateExpression = ImmediateExpression.ofBoolean(value);
+    ExpressionNode immediateExpression = ImmediateExpression.ofBoolean(raw, value);
 
     if (name.nthChar(0) == '*') {
       handleIntrinsicAttribute(name, immediateExpression, value, false);
@@ -235,7 +235,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(name, ImmediateExpression.ofBoolean(true), null);
+    handleUserAttribute(name, ImmediateExpression.ofBoolean(name, true), null);
   }
 
   @Override
@@ -273,7 +273,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    tagStack.peek().addChild(new TextNode(text.buildString(), text.startInclusive));
+    tagStack.peek().addChild(new TextNode(text, text.buildString()));
   }
 
   @Override
@@ -307,6 +307,8 @@ public class MarkupParser implements XmlEventConsumer {
       tagStack.peek().addChild(openedTag);
       return;
     }
+
+    tagName.setLowercase();
 
     if (tagName.contentEquals("*", true)) {
       if (tagStack.size() <= 1) {
@@ -522,7 +524,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       if (value instanceof StringView) {
         StringView stringView = (StringView) value;
-        value = ImmediateExpression.ofString(stringView.buildString());
+        value = ImmediateExpression.ofString(stringView, stringView.buildString());
       }
 
       LetBinding binding;
@@ -639,12 +641,10 @@ public class MarkupParser implements XmlEventConsumer {
       }
 
       case "is": {
-        String isValue;
+        StringView isValue;
 
         if (value instanceof StringView)
-          isValue = ((StringView) value).buildString();
-        else if (immediateValue != null)
-          isValue = String.valueOf(immediateValue);
+          isValue = ((StringView) value);
         else
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE, fullName.buildString());
 
@@ -664,7 +664,7 @@ public class MarkupParser implements XmlEventConsumer {
             throw new MarkupParseException(fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, fullName.buildString());
 
           // Let's allow a flag-style declaration, for convenience
-          value = ImmediateExpression.ofBoolean(true);
+          value = ImmediateExpression.ofBoolean(fullName, true);
         }
 
         if (currentLayer.forIterable == null)
@@ -803,7 +803,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (rawValue == null)
           throw new IllegalStateException("Require a raw-value to instantiate a proper immediate-expression on");
 
-        expression = ImmediateExpression.ofString(rawValue.buildString());
+        expression = ImmediateExpression.ofString(rawValue, rawValue.buildString());
       }
     }
 
