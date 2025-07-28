@@ -402,10 +402,6 @@ public class XmlEventParser {
         return true;
 
       default:
-        if (input.nextChar() == 0) {
-          // TODO: Throw missing value exception
-        }
-
         throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, input.getPosition());
     }
   }
