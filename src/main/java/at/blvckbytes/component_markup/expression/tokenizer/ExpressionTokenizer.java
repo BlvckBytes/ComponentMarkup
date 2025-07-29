@@ -31,7 +31,7 @@ public class ExpressionTokenizer {
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
       throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
 
-    input.setSubViewStart(input.getPosition());
+    int startInclusive = input.getPosition();
 
     char upcomingChar;
     boolean isTerminated = false;
@@ -46,22 +46,24 @@ public class ExpressionTokenizer {
           break;
         }
 
-        input.addIndexToBeRemoved(input.getCharIndex() - 1);
+        input.addIndexToBeRemoved(input.getPosition() - 1);
       }
     }
 
     if (!isTerminated)
-      throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.UNTERMINATED_STRING);
+      throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.UNTERMINATED_STRING);
 
-    StringView rawContents = input.buildSubViewInclusive(PositionMode.CURRENT);
-    StringView stringContents = rawContents.buildSubViewRelative(1, -1);
+    int endInclusive = input.getPosition();
+
+    StringView rawContents = input.buildSubViewAbsolute(startInclusive, endInclusive + 1);
+    StringView stringContents = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
 
     return new StringToken(rawContents, stringContents);
   }
 
   private Token parseIdentifierOrLiteralToken() {
-    int begin = input.getPosition(PositionMode.NEXT);
-    int end = begin;
+    int beginInclusive = -1;
+    int endInclusive = -1;
 
     boolean isFirst = true;
     char upcomingChar;
@@ -75,33 +77,40 @@ public class ExpressionTokenizer {
       // The current token is most definitely an operand, so don't interpret as a prefix-operator
       dashIsPrefix = false;
 
-      if ((upcomingOperatorOrPunctuation = tryParseOperatorOrPunctuationToken()) != null) {
+      if ((upcomingOperatorOrPunctuation = tryParseOperatorOrPunctuationOrDotDoubleToken()) != null) {
         pendingStack.push(upcomingOperatorOrPunctuation);
         break;
       }
 
+      char priorChar = input.priorNextChar();
+
+      input.nextChar();
+
       boolean isAlphabetic = upcomingChar >= 'a' && upcomingChar <= 'z';
       boolean isNumeric = upcomingChar >= '0' && upcomingChar <= '9';
 
+      if (isFirst) {
+        beginInclusive = input.getPosition();
+
+        if (upcomingChar == '_' || isNumeric)
+          throw new ExpressionTokenizeException(beginInclusive, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+
+        isFirst = false;
+      }
+
       if (!(isAlphabetic || isNumeric || upcomingChar == '_'))
-        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+        throw new ExpressionTokenizeException(beginInclusive, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      if (isFirst && (upcomingChar == '_' || isNumeric))
-        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
+      if (upcomingChar == '_' && priorChar == '_')
+        throw new ExpressionTokenizeException(beginInclusive, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      if (upcomingChar == '_' && input.priorNextChar() == '_')
-        throw new ExpressionTokenizeException(begin, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
-
-      input.nextChar();
-      isFirst = false;
-      end = input.getPosition();
+      endInclusive = input.getPosition();
     }
 
-    input.setSubViewStart(begin);
-    StringView value = input.buildSubViewInclusive(end);
-
-    if (value.isEmpty())
+    if (beginInclusive < 0)
       throw new IllegalStateException("Expected to only be called if peekChar() != 0 or ' ' or '.'");
+
+    StringView value = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
 
     switch (value.buildString()) {
       case "true":
@@ -117,23 +126,24 @@ public class ExpressionTokenizer {
     return new IdentifierToken(value, value.buildString());
   }
 
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean collectSubsequentDigits() {
+  private int collectSubsequentDigitsAndGetFirstIndex() {
     char currentChar;
-    boolean collectedDigits = false;
+    int firstIndex = -1;
 
     while ((currentChar = input.peekChar()) >= '0' && currentChar <= '9') {
-      collectedDigits = true;
       input.nextChar();
+
+      if (firstIndex < 0)
+        firstIndex = input.getPosition();
     }
 
-    return collectedDigits;
+    return firstIndex;
   }
 
   private Token parseLongOrDoubleToken() {
-    input.setSubViewStart(input.getPosition(PositionMode.NEXT));
+    int startInclusive;
 
-    if (!collectSubsequentDigits())
+    if ((startInclusive = collectSubsequentDigitsAndGetFirstIndex()) < 0)
       throw new IllegalStateException("Expected to only be called if nextChar() is a digit");
 
     int savePoint = input.getPosition();
@@ -144,20 +154,20 @@ public class ExpressionTokenizer {
       if (input.peekChar() == '.') {
         input.restorePosition(savePoint);
 
-        StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
+        StringView value = input.buildSubViewAbsolute(startInclusive, savePoint + 1);
 
         return new LongToken(value, Long.parseLong(value.buildString()));
       }
 
-      if (!collectSubsequentDigits())
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
+      if (collectSubsequentDigitsAndGetFirstIndex() < 0)
+        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
 
-      StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
+      StringView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
       return new DoubleToken(value, Double.parseDouble(value.buildString()));
     }
 
-    StringView value = input.buildSubViewInclusive(PositionMode.CURRENT);
+    StringView value = input.buildSubViewAbsolute(startInclusive, savePoint + 1);
 
     return new LongToken(value, Long.parseLong(value.buildString()));
   }
@@ -168,20 +178,19 @@ public class ExpressionTokenizer {
     if (input.nextChar() != '.')
       throw new IllegalStateException("Expected to only be called if nextChar() = '.'");
 
-    int beginPosition = input.getPosition();
+    int startInclusive = input.getPosition();
 
-    if (!collectSubsequentDigits()) {
+    if (collectSubsequentDigitsAndGetFirstIndex() < 0) {
       input.restorePosition(savePoint);
       return null;
     }
 
-    input.setSubViewStart(beginPosition);
-    StringView rawValue = input.buildSubViewInclusive(PositionMode.CURRENT);
+    StringView rawValue = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
     return new DoubleToken(rawValue, Double.parseDouble(rawValue.buildString()));
   }
 
-  private @Nullable Token tryParseOperatorOrPunctuationToken() {
+  private @Nullable Token tryParseOperatorOrPunctuationOrDotDoubleToken() {
     int savePoint = input.getPosition();
 
     char firstChar = input.nextChar();
@@ -405,9 +414,7 @@ public class ExpressionTokenizer {
         return null;
     }
 
-    input.setSubViewStart(startInclusive);
-
-    return enumToken.create(input.buildSubViewInclusive(PositionMode.CURRENT));
+    return enumToken.create(input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1));
   }
 
   public <T extends Token> @Nullable T peekToken(Class<T> requiredType) {
@@ -453,7 +460,7 @@ public class ExpressionTokenizer {
         result = parseLongOrDoubleToken();
 
       else {
-        if ((upcomingChar != '.' || (result = tryParseDotDoubleToken()) == null) && (result = tryParseOperatorOrPunctuationToken()) == null)
+        if ((upcomingChar != '.' || (result = tryParseDotDoubleToken()) == null) && (result = tryParseOperatorOrPunctuationOrDotDoubleToken()) == null)
           result = parseIdentifierOrLiteralToken();
       }
     }

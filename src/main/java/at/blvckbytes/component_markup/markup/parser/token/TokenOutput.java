@@ -99,7 +99,7 @@ public class TokenOutput {
     if (value.endExclusive < 0 || value.endExclusive > tokenByCharIndex.length)
       throw new IllegalStateException("Encountered out-of-range token \"" + type + "\" at end-exclusive " + value.endExclusive);
 
-    if (value.isEmpty())
+    if (value.length() == 0)
       throw new IllegalStateException("Encountered empty token \"" + type + "\" at start-inclusive " + value.startInclusive);
   }
 }

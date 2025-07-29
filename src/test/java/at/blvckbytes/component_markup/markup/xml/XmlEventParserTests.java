@@ -566,12 +566,13 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedOpeningTag() {
     TextWithAnchors text = new TextWithAnchors(
-      "<`red´"
+      "@<`red´"
     );
 
     makeCase(
       text,
       XmlParseError.UNTERMINATED_TAG,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red")
     );
   }
@@ -579,12 +580,13 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedClosingTag() {
     TextWithAnchors text = new TextWithAnchors(
-      "</red"
+      "@</red"
     );
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_TAG
+      XmlParseError.UNTERMINATED_TAG,
+      text.anchor(0)
     );
   }
 
@@ -602,6 +604,7 @@ public class XmlEventParserTests {
     makeCase(
       text,
       XmlParseError.UNTERMINATED_MARKUP_VALUE,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "my-attr"),
       new TagOpenBeginEvent(text.subView(2), "green"),
@@ -618,45 +621,49 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithAnchors text = new TextWithAnchors(
-      "<`red´>{user.name + \"}\" + '}'"
+      "<`red´>@{user.name + \"}\" + '}'"
     );
 
     makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "<`red´>{user.name\n}"
+      "<`red´>@{user.name\n}"
     );
 
     makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "<`red´>{user.name{"
+      "<`red´>@{user.name{"
     );
 
     makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
 
     text = new TextWithAnchors(
-      "<`red´>{{"
+      "<`red´>@{{"
     );
 
     makeCase(
       text,
       XmlParseError.UNTERMINATED_INTERPOLATION,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
@@ -688,8 +695,8 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMissingTagName() {
-    TextWithAnchors text = new TextWithAnchors("<>");
-    makeCase(text, XmlParseError.MISSING_TAG_NAME);
+    TextWithAnchors text = new TextWithAnchors("@<>");
+    makeCase(text, XmlParseError.MISSING_TAG_NAME, text.anchor(0));
   }
 
   @Test
@@ -705,29 +712,22 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedAttributeKeys() {
-    TextWithAnchors text = new TextWithAnchors("<`red´ `my-attr´ true>");
+    TextWithAnchors text = new TextWithAnchors("<`red´ `my-attr´ @5var>");
 
     makeCase(
       text,
       XmlParseError.EXPECTED_ATTRIBUTE_KEY,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new FlagAttributeEvent(text.subView(1), "my-attr")
     );
 
-    text = new TextWithAnchors("<`red´ `my-attr´ 5var>");
+    text = new TextWithAnchors("<`red´ `my-attr´ @\"my-string\">");
 
     makeCase(
       text,
       XmlParseError.EXPECTED_ATTRIBUTE_KEY,
-      new TagOpenBeginEvent(text.subView(0), "red"),
-      new FlagAttributeEvent(text.subView(1), "my-attr")
-    );
-
-    text = new TextWithAnchors("<`red´ `my-attr´ \"my-string\">");
-
-    makeCase(
-      text,
-      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red"),
       new FlagAttributeEvent(text.subView(1), "my-attr")
     );
@@ -735,27 +735,30 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnescapedCurlyBrackets() {
+    TextWithAnchors text = new TextWithAnchors("hello @} world");
     makeCase(
-      new TextWithAnchors("hello } world"),
-      XmlParseError.UNESCAPED_CURLY
+      text,
+      XmlParseError.UNESCAPED_CURLY,
+      text.anchor(0)
     );
   }
 
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
-    TextWithAnchors text = new TextWithAnchors("<`red´ a=" + valueExpression);
+    TextWithAnchors text = new TextWithAnchors("<`red´ a=@" + valueExpression);
 
     makeCase(
       text,
       expectedError,
+      text.anchor(0),
       new TagOpenBeginEvent(text.subView(0), "red")
     );
   }
 
   private static void makeCase(TextWithAnchors input, XmlEvent... expectedEvents) {
-    makeCase(input, null, expectedEvents);
+    makeCase(input, null, -1, expectedEvents);
   }
 
-  private static void makeCase(TextWithAnchors input, @Nullable XmlParseError expectedError, XmlEvent... expectedEvents) {
+  private static void makeCase(TextWithAnchors input, @Nullable XmlParseError expectedError, int expectedPosition, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
 
     XmlParseException thrownException = null;
@@ -772,8 +775,10 @@ public class XmlEventParserTests {
     if (expectedError != null && thrownException == null)
       throw new IllegalStateException("Expected there to be an error of " + expectedError + ", but encountered none");
 
-    if (expectedError != null)
+    if (expectedError != null) {
       assertEquals(expectedError, thrownException.error, "Encountered mismatch on thrown error-types");
+      assertEquals(expectedPosition, thrownException.position, "Encountered mismatch on thrown error-types");
+    }
 
     StringBuilder expectedEventsString = new StringBuilder();
 

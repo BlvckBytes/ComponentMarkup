@@ -316,7 +316,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (current.tagName == null)
           continue;
 
-        if (tagName.contentEquals(current.tagName, true)) {
+        if (tagName.contentEquals(current.tagName.buildString(), true)) {
           didAnyMatch = true;
           break;
         }
@@ -335,7 +335,7 @@ public class MarkupParser implements XmlEventConsumer {
         throw new MarkupParseException(tagName.startInclusive, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName.buildString());
 
       tagStack.peek().addChild(openedTag);
-    } while (openedTag.tagName == null || !tagName.contentEquals(openedTag.tagName, true));
+    } while (openedTag.tagName == null || !tagName.contentEquals(openedTag.tagName.buildString(), true));
   }
 
   @Override
@@ -455,7 +455,7 @@ public class MarkupParser implements XmlEventConsumer {
 
       while ((nameLength = bindingName.length()) > 0) {
         boolean hasOpening = bindingName.nthChar(0) == '(';
-        boolean hasClosing = nameLength != 1 && bindingName.lastChar() == ')';
+        boolean hasClosing = nameLength != 1 && bindingName.nthChar(bindingName.length() - 1) == ')';
 
         if (!hasOpening && !hasClosing)
           break;
@@ -479,7 +479,7 @@ public class MarkupParser implements XmlEventConsumer {
         bindingName = bindingName.buildSubViewRelative(1, -1);
       }
 
-      if (bindingName.isEmpty())
+      if (nameLength == 0)
         throw new MarkupParseException(attributeName.finalName.startInclusive, MarkupParseError.EMPTY_BINDING_NAME);
 
       if (isInvalidIdentifier(bindingName, true))
@@ -488,7 +488,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__BINDING, bindingName);
 
-      if (currentLayer.forIterationVariable != null && bindingName.contentEquals(currentLayer.forIterationVariable, true))
+      if (currentLayer.forIterationVariable != null && bindingName.contentEquals(currentLayer.forIterationVariable.buildString(), true))
         throw new MarkupParseException(bindingName.startInclusive, MarkupParseError.BINDING_IN_USE, bindingName.buildString());
 
       if (value instanceof StringView) {

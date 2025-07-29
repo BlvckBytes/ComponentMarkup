@@ -27,10 +27,10 @@ public class AttributeName {
     StringView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
-    char firstChar;
+    int nameLength;
 
-    while ((firstChar = attributeName.nthChar(0)) != 0) {
-      int currentLength = attributeName.length();
+    while ((nameLength = attributeName.length()) > 0) {
+      char firstChar = attributeName.nthChar(0);
 
       if (firstChar == '*' || firstChar == '+') {
         if (flags.contains(AttributeFlag.BINDING_MODE))
@@ -51,7 +51,7 @@ public class AttributeName {
             tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL, attributeName.buildSubViewRelative(0, 1));
         }
 
-        if (currentLength == 1)
+        if (nameLength == 1)
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(flag);
@@ -60,7 +60,7 @@ public class AttributeName {
       }
 
       boolean hasOpeningBracket = firstChar == '[';
-      boolean hasClosingBracket = attributeName.length() > 1 && attributeName.lastChar() == ']';
+      boolean hasClosingBracket = nameLength > 1 && attributeName.nthChar(nameLength - 1) == ']';
 
       if (hasOpeningBracket || hasClosingBracket) {
         if (!hasOpeningBracket || !hasClosingBracket)
@@ -77,7 +77,7 @@ public class AttributeName {
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(-1));
         }
 
-        if (currentLength == 2)
+        if (nameLength == 2)
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.BINDING_MODE);
@@ -98,10 +98,7 @@ public class AttributeName {
         if (tokenOutput != null)
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 3));
 
-        if (attributeName.isEmpty())
-          throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
-
-        if (currentLength == 3)
+        if (nameLength == 3)
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.SPREAD_MODE);
@@ -119,7 +116,7 @@ public class AttributeName {
         if (tokenOutput != null)
           tokenOutput.emitCharToken(attributeName.startInclusive, TokenType.MARKUP__OPERATOR__NEGATE);
 
-        if (currentLength == 1)
+        if (nameLength == 1)
           throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.FLAG_NEGATION);
@@ -130,7 +127,7 @@ public class AttributeName {
       break;
     }
 
-    if (attributeName.isEmpty())
+    if (nameLength == 0)
       throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
     attributeName.setLowercase();

@@ -37,14 +37,16 @@ public class ImmediateFormatTag extends TagDefinition {
   }
 
   private boolean applyFormat(StringView tagName, @Nullable NodeStyle style) {
-    if (tagName.isEmpty())
+    int tagNameLength = tagName.length();
+
+    if (tagNameLength == 0)
       return false;
 
     char firstChar = tagName.nthChar(0);
 
     boolean isNegative = (
       firstChar == '!'
-        || (firstChar == '&' && tagName.length() > 1 && tagName.nthChar(1) == '!')
+        || (firstChar == '&' && tagNameLength > 1 && tagName.nthChar(1) == '!')
     );
 
     Format format;

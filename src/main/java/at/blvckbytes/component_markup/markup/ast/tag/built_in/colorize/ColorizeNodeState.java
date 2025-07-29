@@ -42,7 +42,7 @@ public abstract class ColorizeNodeState {
   protected abstract long getPackedColor(double progressionPercentage);
 
   public boolean doesTargetNode(ColorizeNode node) {
-    return node.tagName.contentEquals(this.tagName, true);
+    return node.tagName.contentEquals(this.tagName.buildString(), true);
   }
 
   public void begin() {

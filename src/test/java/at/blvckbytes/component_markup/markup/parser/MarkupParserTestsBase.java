@@ -13,6 +13,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.test_utils.Tuple;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -40,8 +41,8 @@ public abstract class MarkupParserTestsBase {
     ));
   }
 
-  protected static Map<StringView, NodeWrapper<? extends MarkupNode>> whenMap(Object... items) {
-    Map<StringView, NodeWrapper<? extends MarkupNode>> result = new HashMap<>();
+  protected static List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> whenMap(Object... items) {
+    List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> result = new ArrayList<>();
 
     if (items.length % 2 != 0)
       throw new IllegalStateException("Expected an even number of items");
@@ -49,7 +50,7 @@ public abstract class MarkupParserTestsBase {
     for (int i = 0; i < items.length; i += 2) {
       StringView key = (StringView) items[i];
       NodeWrapper<?> value = (NodeWrapper<?>) items[i + 1];
-      result.put(key, value);
+      result.add(new Tuple<>(key, value));
     }
 
     return result;
@@ -59,12 +60,12 @@ public abstract class MarkupParserTestsBase {
     int position,
     ExpressionNode input,
     @Nullable NodeWrapper<?> wrappedFallback,
-    Map<StringView, NodeWrapper<? extends MarkupNode>> wrappedCases
+    List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> wrappedCases
   ) {
     WhenMatchingMap cases = new WhenMatchingMap();
 
-    for (Map.Entry<StringView, NodeWrapper<? extends MarkupNode>> entry : wrappedCases.entrySet())
-      cases.put(entry.getKey(), entry.getValue().get());
+    for (Tuple<StringView, NodeWrapper<? extends MarkupNode>> entry : wrappedCases)
+      cases.put(entry.first, entry.second.get());
 
     return new NodeWrapper<>(new WhenMatchingNode(position, input, cases, wrappedFallback == null ? null : wrappedFallback.get()));
   }

@@ -11,7 +11,7 @@ public class TextWithAnchors {
 
   private static class ViewIndices {
     final int startInclusive;
-    int endInclusive;
+    int endExclusive;
 
     ViewIndices(int startInclusive) {
       this.startInclusive = startInclusive;
@@ -59,7 +59,7 @@ public class TextWithAnchors {
               if (indicesStack.isEmpty())
                 throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex + "(line " + (linesIndex + 1) + ")");
 
-              indicesStack.pop().endInclusive = charIndex - 1;
+              indicesStack.pop().endExclusive = charIndex;
             }
 
             continue;
@@ -104,10 +104,8 @@ public class TextWithAnchors {
 
     this.rootView = StringView.of(text);
 
-    for (ViewIndices indices : indicesInOrder) {
-      rootView.setSubViewStart(indices.startInclusive);
-      this.subViews.add(rootView.buildSubViewInclusive(indices.endInclusive));
-    }
+    for (ViewIndices indices : indicesInOrder)
+      this.subViews.add(rootView.buildSubViewAbsolute(indices.startInclusive, indices.endExclusive));
   }
 
   public void addViewIndexToBeRemoved(int position) {

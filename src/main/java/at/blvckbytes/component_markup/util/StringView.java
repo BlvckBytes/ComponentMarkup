@@ -93,10 +93,6 @@ public class StringView {
     return new StringView(contents, new BitFlagArray(contents.length()), false, -1, -1);
   }
 
-  public StringView buildSubViewAbsolute(int start) {
-    return buildSubViewAbsolute(start, endExclusive);
-  }
-
   public StringView buildSubViewRelative(int startInclusive) {
     return buildSubViewAbsolute(
       startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),
@@ -121,32 +117,18 @@ public class StringView {
     if (endExclusive < startInclusive)
       throw new IllegalStateException("End " + endExclusive + " lies before start " + startInclusive);
 
-    if (startInclusive == this.startInclusive && endExclusive == this.endExclusive)
-      return this;
-
     return new StringView(contents, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
-  public StringView buildSubViewInclusive(int position) {
+  public StringView buildSubViewUntilNowInclusive() {
     if (subViewStart == -1)
       throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
 
-    StringView subView = new StringView(
-      contents, removeIndices, lowercase, subViewStart,
-      position + 1
-    );
+    StringView subView = new StringView(contents, removeIndices, lowercase, subViewStart, charIndex + 1);
 
     subViewStart = -1;
 
     return subView;
-  }
-
-  public StringView buildSubViewInclusive(PositionMode mode) {
-    return buildSubViewInclusive(getPosition(mode));
-  }
-
-  public int getCharIndex() {
-    return Math.max(this.charIndex, 0);
   }
 
   public void addIndexToBeRemoved(int index) {
@@ -182,13 +164,6 @@ public class StringView {
       return 0;
 
     return contents.charAt(charIndex + 1);
-  }
-
-  public void clearSubViewStart() {
-    if (subViewStart == -1)
-      throw new IllegalStateException("A sub-view's start-position was not set");
-
-    subViewStart = -1;
   }
 
   public void setSubViewStart(int position) {
@@ -286,37 +261,12 @@ public class StringView {
     }
   }
 
-  public int getPosition(PositionMode mode) {
-    if (mode == PositionMode.CURRENT)
-      return charIndex;
-
-    if (mode == PositionMode.PRIOR) {
-      if (charIndex < 0)
-        throw new IllegalStateException("No prior char available");
-
-      return charIndex - 1;
-    }
-
-    if (mode != PositionMode.NEXT)
-      throw new IllegalStateException("Unaccounted-for position-mode: " + mode);
-
-    if (hasReachedEnd())
-      throw new IllegalStateException("No next char available");
-
-    return charIndex + 1;
-  }
-
   public int getPosition() {
-    return getPosition(PositionMode.CURRENT);
+    return charIndex;
   }
 
   public boolean startsWith(@NotNull String value, boolean ignoreCase) {
     return _getFirstMismatchIndex(value, ignoreCase) < 0;
-  }
-
-  public boolean contentEquals(@NotNull StringView value, boolean ignoreCase) {
-    // TODO: Building the other view is really not that optimal...
-    return contentEquals(value.buildString(), ignoreCase);
   }
 
   public boolean contentEquals(@NotNull String value, boolean ignoreCase) {
@@ -326,7 +276,7 @@ public class StringView {
     return _getFirstMismatchIndex(value, ignoreCase) < 0;
   }
 
-  public int _getFirstMismatchIndex(@NotNull String value, boolean ignoreCase) {
+  private int _getFirstMismatchIndex(@NotNull String value, boolean ignoreCase) {
     int valueIndex = 0;
 
     if (length() < value.length())
@@ -355,25 +305,8 @@ public class StringView {
     return -1;
   }
 
-  public char lastChar() {
-    int targetIndex = endExclusive - 1;
-
-    while (targetIndex >= startInclusive && removeIndices.get(targetIndex))
-      --targetIndex;
-
-    if (targetIndex < startInclusive)
-      return 0;
-
-    return contents.charAt(targetIndex);
-  }
-
   public char nthChar(int index) {
     int targetIndex = startInclusive + index;
-
-    // TODO: Is nthChar ever colliding with removeIndices anywhere?
-    //       Maybe, by convention, nthChar should be able to access them, as to save on complexity.
-    while (targetIndex < endExclusive - 1 && removeIndices.get(targetIndex))
-      ++targetIndex;
 
     if (targetIndex >= endExclusive)
       return 0;
@@ -381,39 +314,7 @@ public class StringView {
     return contents.charAt(targetIndex);
   }
 
-  public boolean isEmpty() {
-    return length() == 0;
-  }
-
   public int length() {
     return endExclusive - startInclusive;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof StringView))
-      return false;
-
-    StringView that = (StringView) o;
-
-    return contentEquals(that.contents, false);
-  }
-
-  @Override
-  public int hashCode() {
-    int hash = 7;
-
-    for (int inputIndex = startInclusive; inputIndex < endExclusive; ++inputIndex) {
-      if (!removeIndices.get(inputIndex)) {
-        char currentChar = contents.charAt(inputIndex);
-
-        if (lowercase)
-          currentChar = Character.toLowerCase(currentChar);
-
-        hash = hash * 31 + currentChar;
-      }
-    }
-
-    return hash;
   }
 }
