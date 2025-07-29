@@ -1,6 +1,10 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-public enum Punctuation {
+import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
+import at.blvckbytes.component_markup.util.StringView;
+
+public enum Punctuation implements EnumToken {
   OPENING_PARENTHESIS('('),
   CLOSING_PARENTHESIS(')'),
   CLOSING_BRACKET(']'),
@@ -17,5 +21,10 @@ public enum Punctuation {
   @Override
   public String toString() {
     return String.valueOf(representation);
+  }
+
+  @Override
+  public Token create(StringView raw) {
+    return new PunctuationToken(raw, this);
   }
 }

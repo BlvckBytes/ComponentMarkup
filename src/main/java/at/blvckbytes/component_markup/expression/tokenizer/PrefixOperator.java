@@ -1,9 +1,13 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import at.blvckbytes.component_markup.expression.tokenizer.token.PrefixOperatorToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
+import at.blvckbytes.component_markup.util.StringView;
+
 import java.util.Arrays;
 import java.util.List;
 
-public enum PrefixOperator {
+public enum PrefixOperator implements EnumToken {
   NEGATION   ("!"),
   FLIP_SIGN  ("-"),
   UPPER_CASE ("~^"),
@@ -31,5 +35,10 @@ public enum PrefixOperator {
   @Override
   public String toString() {
     return representation;
+  }
+
+  @Override
+  public Token create(StringView raw) {
+    return new PrefixOperatorToken(raw, this);
   }
 }

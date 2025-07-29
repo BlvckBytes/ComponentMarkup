@@ -185,194 +185,229 @@ public class ExpressionTokenizer {
     int savePoint = input.getPosition();
 
     char firstChar = input.nextChar();
+    int startInclusive = input.getPosition();
 
-    if (firstChar == 0)
-      return null;
-
-    input.setSubViewStart(input.getPosition());
+    EnumToken enumToken;
 
     switch (firstChar) {
       case '(':
-        return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.OPENING_PARENTHESIS);
+        enumToken = Punctuation.OPENING_PARENTHESIS;
+        break;
 
       case ')':
-        return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.CLOSING_PARENTHESIS);
+        enumToken = Punctuation.CLOSING_PARENTHESIS;
+        break;
 
       case '[':
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.SUBSCRIPTING);
+        enumToken = InfixOperator.SUBSCRIPTING;
+        break;
 
       case ']':
-        return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.CLOSING_BRACKET);
+        enumToken = Punctuation.CLOSING_BRACKET;
+        break;
 
       case ',':
-        return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.COMMA);
+        enumToken = Punctuation.COMMA;
+        break;
 
       case '+':
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.ADDITION);
+        enumToken = InfixOperator.ADDITION;
+        break;
 
       case '-':
-        if (dashIsPrefix)
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.FLIP_SIGN);
-
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.SUBTRACTION);
+        enumToken = dashIsPrefix ? PrefixOperator.FLIP_SIGN : InfixOperator.SUBTRACTION;
+        break;
 
       case '*':
         if (input.peekChar() == '*') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.REPEAT);
+          enumToken = InfixOperator.REPEAT;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.MULTIPLICATION);
+        enumToken = InfixOperator.MULTIPLICATION;
+        break;
 
       case '/':
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.DIVISION);
+        enumToken = InfixOperator.DIVISION;
+        break;
 
       case '%':
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.MODULO);
+        enumToken = InfixOperator.MODULO;
+        break;
 
       case '^':
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.EXPONENTIATION);
+        enumToken = InfixOperator.EXPONENTIATION;
+        break;
 
       case '&':
         if (input.peekChar() == '&') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.CONJUNCTION);
+          enumToken = InfixOperator.CONJUNCTION;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.CONCATENATION);
+        enumToken = InfixOperator.CONCATENATION;
+        break;
 
       case '|':
         if (input.peekChar() == '|') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.DISJUNCTION);
+          enumToken = InfixOperator.DISJUNCTION;
+          break;
         }
 
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_PIPE);
+        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_PIPE);
 
       case '?':
         if (input.peekChar() == '?') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.FALLBACK);
+          enumToken = InfixOperator.FALLBACK;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.BRANCHING);
+        enumToken = InfixOperator.BRANCHING;
+        break;
 
       case '@':
         if (input.peekChar() == '@') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.EXPLODE_REGEX);
+          enumToken = InfixOperator.EXPLODE_REGEX;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.EXPLODE);
+        enumToken = InfixOperator.EXPLODE;
+        break;
 
       case ':':
         if (input.peekChar() == ':') {
           input.nextChar();
           if (input.peekChar() == ':') {
             input.nextChar();
-            return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.MATCHES_REGEX);
+            enumToken = InfixOperator.MATCHES_REGEX;
+            break;
           }
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.CONTAINS);
+          enumToken = InfixOperator.CONTAINS;
+          break;
         }
-        return new PunctuationToken(input.buildSubViewInclusive(PositionMode.CURRENT), Punctuation.COLON);
+        enumToken = Punctuation.COLON;
+        break;
 
       case '>':
         if (input.peekChar() == '=') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.GREATER_THAN_OR_EQUAL);
+          enumToken = InfixOperator.GREATER_THAN_OR_EQUAL;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.GREATER_THAN);
+        enumToken = InfixOperator.GREATER_THAN;
+        break;
 
       case '<':
         if (input.peekChar() == '=') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.LESS_THAN_OR_EQUAL);
+          enumToken = InfixOperator.LESS_THAN_OR_EQUAL;
+          break;
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.LESS_THAN);
+        enumToken = InfixOperator.LESS_THAN;
+        break;
 
       case '=':
         if (input.peekChar() == '=') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.EQUAL_TO);
+          enumToken = InfixOperator.EQUAL_TO;
+          break;
         }
 
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_EQUALS);
+        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_EQUALS);
 
       case '!':
         if (input.peekChar() == '=') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.NOT_EQUAL_TO);
+          enumToken = InfixOperator.NOT_EQUAL_TO;
+          break;
         }
 
-        return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.NEGATION);
+        enumToken = PrefixOperator.NEGATION;
+        break;
 
       case '~':
         if (input.peekChar() == '^') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.UPPER_CASE);
+          enumToken = PrefixOperator.UPPER_CASE;
+          break;
         }
 
         if (input.peekChar() == '_') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.LOWER_CASE);
+          enumToken = PrefixOperator.LOWER_CASE;
+          break;
         }
 
         if (input.peekChar() == '#') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.TITLE_CASE);
+          enumToken = PrefixOperator.TITLE_CASE;
+          break;
         }
 
         if (input.peekChar() == '!') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.TOGGLE_CASE);
+          enumToken = PrefixOperator.TOGGLE_CASE;
+          break;
         }
 
         if (input.peekChar() == '-') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.SLUGIFY);
+          enumToken = PrefixOperator.SLUGIFY;
+          break;
         }
 
         if (input.peekChar() == '?') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.ASCIIFY);
+          enumToken = PrefixOperator.ASCIIFY;
+          break;
         }
 
         if (input.peekChar() == '|') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.TRIM);
+          enumToken = PrefixOperator.TRIM;
+          break;
         }
 
         if (input.peekChar() == '<') {
           input.nextChar();
-          return new PrefixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), PrefixOperator.REVERSE);
+          enumToken = PrefixOperator.REVERSE;
+          break;
         }
 
-        throw new ExpressionTokenizeException(input.getSubViewStart(), ExpressionTokenizeError.SINGLE_TILDE);
+        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_TILDE);
 
       case '.':
         char upcomingChar = input.peekChar();
 
         if (upcomingChar == '.') {
           input.nextChar();
-          return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.RANGE);
+          enumToken = InfixOperator.RANGE;
+          break;
         }
 
         if (upcomingChar >= '0' && upcomingChar <= '9') {
           input.restorePosition(savePoint);
-          input.clearSubViewStart();
-
           return tryParseDotDoubleToken();
         }
 
-        return new InfixOperatorToken(input.buildSubViewInclusive(PositionMode.CURRENT), InfixOperator.MEMBER);
+        enumToken = InfixOperator.MEMBER;
+        break;
+
+      default:
+        input.restorePosition(savePoint);
+        return null;
     }
 
-    input.restorePosition(savePoint);
-    input.clearSubViewStart();
+    input.setSubViewStart(startInclusive);
 
-    return null;
+    return enumToken.create(input.buildSubViewInclusive(PositionMode.CURRENT));
   }
 
   public <T extends Token> @Nullable T peekToken(Class<T> requiredType) {

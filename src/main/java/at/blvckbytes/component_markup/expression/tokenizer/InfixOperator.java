@@ -1,10 +1,14 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
+import at.blvckbytes.component_markup.util.StringView;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public enum InfixOperator {
+public enum InfixOperator implements EnumToken {
   BRANCHING            ("?",   1, false),
   DISJUNCTION          ("||",  2, false),
   CONJUNCTION          ("&&",  3, false),
@@ -61,5 +65,10 @@ public enum InfixOperator {
   @Override
   public String toString() {
     return representation;
+  }
+
+  @Override
+  public Token create(StringView raw) {
+    return new InfixOperatorToken(raw, this);
   }
 }
