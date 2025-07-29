@@ -31,6 +31,7 @@ public class XmlEventParser {
 
   private void parseInput(boolean isWithinCurlyBrackets) {
     boolean wasPriorTagOrInterpolation = false;
+    int textStartInclusive = -1;
 
     while (input.peekChar() != 0) {
       if (input.peekChar() == '}' && input.priorNextChar() != '\\') {
@@ -45,13 +46,14 @@ public class XmlEventParser {
       int preConsumePosition = input.getPosition();
 
       if (input.peekChar() == '{' && input.priorNextChar() != '\\') {
-        if (input.getSubViewStart() != -1) {
+        if (textStartInclusive != -1) {
           emitText(
-            input.buildSubViewUntilNowInclusive(),
+            input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
             wasPriorTagOrInterpolation
               ? SubstringFlag.INNER_TEXT
               : SubstringFlag.FIRST_TEXT
           );
+          textStartInclusive = -1;
         }
 
         input.nextChar();
@@ -106,13 +108,14 @@ public class XmlEventParser {
       boolean encounteredNewline = input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
       if (input.peekChar() == '<') {
-        if (input.getSubViewStart() != -1) {
+        if (textStartInclusive != -1) {
           emitText(
-            input.buildSubViewUntilNowInclusive(),
+            input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
             wasPriorTagOrInterpolation
               ? SubstringFlag.INNER_TEXT
               : SubstringFlag.FIRST_TEXT
           );
+          textStartInclusive = -1;
         }
 
         else if (wasPriorTagOrInterpolation && firstSpacePosition != -1 && !encounteredNewline)
@@ -127,13 +130,13 @@ public class XmlEventParser {
 
       char currentChar = input.nextChar();
 
-      if (input.getSubViewStart() == -1) {
+      if (textStartInclusive == -1) {
         if (currentChar == '\n') {
           input.consumeWhitespaceAndGetIfNewline(tokenOutput);
           continue;
         }
 
-        input.setSubViewStart(input.getPosition());
+        textStartInclusive = input.getPosition();
       }
 
       if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{')) {
@@ -144,21 +147,17 @@ public class XmlEventParser {
       input.consumeWhitespaceAndGetIfNewline(tokenOutput);
     }
 
-    if (input.getSubViewStart() != -1) {
+    if (textStartInclusive != -1) {
       emitText(
-        input.buildSubViewUntilNowInclusive(),
+        input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
         wasPriorTagOrInterpolation
           ? SubstringFlag.LAST_TEXT
           : SubstringFlag.ONLY_TEXT
       );
     }
 
-    if (!isWithinCurlyBrackets) {
-      if (input.getSubViewStart() != -1)
-        throw new IllegalStateException("There was still a sub-view set after encountering the input's end");
-
+    if (!isWithinCurlyBrackets)
       consumer.onInputEnd();
-    }
   }
 
   private void emitText(StringView text, @Nullable EnumSet<SubstringFlag> flags) {
@@ -179,33 +178,33 @@ public class XmlEventParser {
       return null;
 
     input.nextChar();
-    input.setSubViewStart(input.getPosition());
+
+    int startInclusive = input.getPosition();
 
     while (isIdentifierChar(input.peekChar()))
       input.nextChar();
 
-    return input.buildSubViewUntilNowInclusive();
+    return input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
   }
 
   private void parseAndEmitStringAttributeValue(StringView attributeName) {
     if (input.nextChar() != '"')
       throw new IllegalStateException("Expected opening double-quotes");
 
-    input.setSubViewStart(input.getPosition());
-
-    StringView value = null;
+    int startInclusive = input.getPosition();
+    int endInclusive = -1;
 
     char currentChar;
 
     while ((currentChar = input.nextChar()) != 0) {
       if (currentChar == '\r' || currentChar == '\n')
-        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, input.getSubViewStart());
+        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
 
       if (currentChar == '"') {
         if (input.priorNextChar() == '\\') {
           input.addIndexToBeRemoved(input.getPosition() - 1);
         } else {
-          value = input.buildSubViewUntilNowInclusive();
+          endInclusive = input.getPosition();
           break;
         }
       }
@@ -214,13 +213,15 @@ public class XmlEventParser {
         tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
     }
 
-    if (value == null)
-      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, input.getSubViewStart());
+    if (endInclusive < 0)
+      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
+
+    StringView stringValue = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__STRING, value);
+      tokenOutput.emitToken(TokenType.MARKUP__STRING, input.buildSubViewAbsolute(startInclusive, endInclusive + 1));
 
-    consumer.onStringAttribute(attributeName, value.buildSubViewRelative(1, -1));
+    consumer.onStringAttribute(attributeName, stringValue);
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

@@ -27,9 +27,6 @@ public class StringView {
   private char priorNextChar;
   private char currentChar;
 
-  @JsonifyIgnore
-  private int subViewStart;
-
   private @Nullable EnumSet<SubstringFlag> buildFlags;
 
   @JsonifyIgnore
@@ -70,7 +67,6 @@ public class StringView {
 
     charIndex = startInclusive - 1;
     priorNextChar = 0;
-    subViewStart = -1;
   }
 
   public StringView setLowercase() {
@@ -120,17 +116,6 @@ public class StringView {
     return new StringView(contents, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
-  public StringView buildSubViewUntilNowInclusive() {
-    if (subViewStart == -1)
-      throw new IllegalStateException("Cannot build a sub-StringView without a determined start");
-
-    StringView subView = new StringView(contents, removeIndices, lowercase, subViewStart, charIndex + 1);
-
-    subViewStart = -1;
-
-    return subView;
-  }
-
   public void addIndexToBeRemoved(int index) {
     if (index < startInclusive || index >= endExclusive)
       throw new IllegalStateException("Index " + index + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
@@ -164,20 +149,6 @@ public class StringView {
       return 0;
 
     return contents.charAt(charIndex + 1);
-  }
-
-  public void setSubViewStart(int position) {
-    if (subViewStart != -1)
-      throw new IllegalStateException("A sub-view's start-position was already set");
-
-    if (position < startInclusive || position >= endExclusive)
-      throw new IllegalStateException("Index " + position + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
-
-    subViewStart = position;
-  }
-
-  public int getSubViewStart() {
-    return subViewStart;
   }
 
   @JsonifyGetter
