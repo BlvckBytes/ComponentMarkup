@@ -33,8 +33,10 @@ public class XmlEventParser {
     boolean wasPriorTagOrInterpolation = false;
     int textStartInclusive = -1;
 
-    while (input.peekChar(0) != 0) {
-      if (input.peekChar(0) == '}' && input.priorNextChar() != '\\') {
+    char upcomingChar;
+
+    while ((upcomingChar = input.peekChar(0)) != 0) {
+      if (upcomingChar == '}' && input.priorNextChar() != '\\') {
         if (isWithinCurlyBrackets)
           break;
 
@@ -43,7 +45,7 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNESCAPED_CURLY, input.getPosition());
       }
 
-      if (input.peekChar(0) == '{' && input.priorNextChar() != '\\') {
+      if (upcomingChar == '{' && input.priorNextChar() != '\\') {
         if (textStartInclusive != -1) {
           emitText(
             input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
@@ -93,22 +95,7 @@ public class XmlEventParser {
         continue;
       }
 
-      int preConsumePosition = input.getPosition();
-      int firstSpacePosition = -1;
-
-      // Manually consume the first space of the possibly upcoming
-      // whitespace-sequence as to get a hold of its index
-      if (input.peekChar(0) == ' ') {
-        input.nextChar();
-        firstSpacePosition = input.getPosition();
-
-        if (tokenOutput != null)
-          tokenOutput.emitCharToken(firstSpacePosition, TokenType.ANY__WHITESPACE);
-      }
-
-      input.consumeWhitespace(tokenOutput);
-
-      if (input.peekChar(0) == '<') {
+      if (upcomingChar == '<') {
         if (textStartInclusive != -1) {
           emitText(
             input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
@@ -119,22 +106,15 @@ public class XmlEventParser {
           textStartInclusive = -1;
         }
 
-        // There was no text started yet, but the char prior to the manually collected space
-        // was the end of a tag or an interpolation, and we're about to parse a new tag. The
-        // space wedged in-between would be skipped over, although it is valid INNER_TEXT.
-        // It does not matter whether the first space was on the same line, because REMOVE_NEWLINES_INDENT
-        // trims around newlines, taking care of this special case, since empty views text is not emitted.
-        else if (wasPriorTagOrInterpolation && firstSpacePosition != -1)
-          emitText(input.buildSubViewAbsolute(firstSpacePosition, input.getPosition() + 1), SubstringFlag.INNER_TEXT);
-
         parseOpeningOrClosingTag();
         wasPriorTagOrInterpolation = true;
         continue;
       }
 
-      input.restorePosition(preConsumePosition);
-
       char currentChar = input.nextChar();
+
+      if (Character.isWhitespace(currentChar) && tokenOutput != null)
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
 
       if (textStartInclusive == -1) {
         if (currentChar == '\n') {
@@ -144,8 +124,6 @@ public class XmlEventParser {
 
         textStartInclusive = input.getPosition();
       }
-
-      char upcomingChar;
 
       if (currentChar == '\\' && ((upcomingChar = input.peekChar(0)) == '<' || upcomingChar == '}' || upcomingChar == '{')) {
         input.addIndexToBeRemoved(input.getPosition());
@@ -172,6 +150,8 @@ public class XmlEventParser {
     if (flags != null)
       text.setBuildFlags(flags);
 
+    // This check is taking care of various special cases, where if the parser-loop would have
+    // to detect that we shouldn't emit certain whitespace, needless complexity would be added.
     if (text.buildString().isEmpty())
       return;
 

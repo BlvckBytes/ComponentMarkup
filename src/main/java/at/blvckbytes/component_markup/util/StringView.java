@@ -201,27 +201,7 @@ public class StringView {
       nextChar();
 
       if (tokenOutput != null)
-        tokenOutput.emitCharToken(getPosition(), TokenType.ANY__WHITESPACE);
-    }
-  }
-
-  public void restorePosition(int position) {
-    if (position < -1 || position >= endExclusive)
-      throw new IllegalStateException("Position at " + position + " out of this view's range: [" + -1 + ";" + endExclusive + ")");
-
-    if (position != endExclusive - 1)
-      removeIndices.clearRange(position + 1, endExclusive - 1);
-
-    charIndex = position;
-
-    if (charIndex < 0) {
-      priorNextChar = 0;
-      currentChar = 0;
-    } else {
-      // TODO: Something about this seems to be off, because it was unknowingly compensated for
-      //       in ExpressionTokenizer#parseIdentifierOrLiteralToken, where priorChar was called too early
-      priorNextChar = contents.charAt(charIndex);
-      currentChar = contents.charAt(charIndex + 1);
+        tokenOutput.emitCharToken(charIndex, TokenType.ANY__WHITESPACE);
     }
   }
 
