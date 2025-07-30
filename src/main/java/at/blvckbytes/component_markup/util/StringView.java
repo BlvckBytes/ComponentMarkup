@@ -9,7 +9,7 @@ import java.util.EnumSet;
 
 public class StringView {
 
-  public static final StringView EMPTY = new StringView("", null, false, -1, -1);
+  public static final StringView EMPTY = new StringView("", new BitFlagArray(1), false, 0, 0);
 
   @JsonifyIgnore
   public final String contents;
@@ -43,12 +43,6 @@ public class StringView {
     this.removeIndices = removeIndices;
     this.lowercase = lowercase;
 
-    if (startInclusive == -1)
-      startInclusive = 0;
-
-    if (endExclusive == -1)
-      endExclusive = contents.length();
-
     this.startInclusive = startInclusive;
     this.endExclusive = endExclusive;
 
@@ -60,7 +54,7 @@ public class StringView {
       throw new IllegalStateException("Start-inclusive cannot be greater than or equal to " + contents.length());
 
     if (endExclusive > contents.length())
-      throw new IllegalStateException("Start-inclusive cannot be greater than " + contents.length());
+      throw new IllegalStateException("End-exclusive cannot be greater than " + contents.length());
 
     if (endExclusive < startInclusive)
       throw new IllegalStateException("The end-exclusive-index cannot lie before or at the start-inclusive-index");
@@ -86,7 +80,7 @@ public class StringView {
   }
 
   public static StringView of(String contents) {
-    return new StringView(contents, new BitFlagArray(contents.length()), false, -1, -1);
+    return new StringView(contents, new BitFlagArray(contents.length()), false, 0, contents.length());
   }
 
   public StringView buildSubViewRelative(int startInclusive) {
