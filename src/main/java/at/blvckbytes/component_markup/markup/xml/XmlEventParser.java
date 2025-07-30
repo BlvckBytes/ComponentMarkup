@@ -36,7 +36,7 @@ public class XmlEventParser {
     char upcomingChar;
 
     while ((upcomingChar = input.peekChar(0)) != 0) {
-      if (upcomingChar == '}' && input.priorNextChar() != '\\') {
+      if (upcomingChar == '}' && input.priorChar(0) != '\\') {
         if (isWithinCurlyBrackets)
           break;
 
@@ -45,7 +45,7 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNESCAPED_CURLY, input.getPosition());
       }
 
-      if (upcomingChar == '{' && input.priorNextChar() != '\\') {
+      if (upcomingChar == '{' && input.priorChar(0) != '\\') {
         if (textStartInclusive != -1) {
           emitText(
             input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
@@ -189,7 +189,7 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
 
       if (currentChar == '"') {
-        if (input.priorNextChar() == '\\') {
+        if (input.priorChar(1) == '\\') {
           input.addIndexToBeRemoved(input.getPosition() - 1);
         } else {
           endInclusive = input.getPosition();

@@ -33,15 +33,15 @@ public class ExpressionTokenizer {
 
     int startInclusive = input.getPosition();
 
-    char upcomingChar;
+    char currentChar;
     boolean isTerminated = false;
 
-    while ((upcomingChar = input.nextChar()) != 0) {
-      if (upcomingChar == '\n')
+    while ((currentChar = input.nextChar()) != 0) {
+      if (currentChar == '\n')
         break;
 
-      if (upcomingChar == quoteChar) {
-        if (input.priorNextChar() != '\\') {
+      if (currentChar == quoteChar) {
+        if (input.priorChar(1) != '\\') {
           isTerminated = true;
           break;
         }
@@ -84,8 +84,6 @@ public class ExpressionTokenizer {
 
       input.nextChar();
 
-      char priorChar = input.priorNextChar();
-
       boolean isAlphabetic = upcomingChar >= 'a' && upcomingChar <= 'z';
       boolean isNumeric = upcomingChar >= '0' && upcomingChar <= '9';
 
@@ -101,7 +99,7 @@ public class ExpressionTokenizer {
       if (!(isAlphabetic || isNumeric || upcomingChar == '_'))
         throw new ExpressionTokenizeException(beginInclusive, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
-      if (upcomingChar == '_' && priorChar == '_')
+      if (upcomingChar == '_' && input.priorChar(1) == '_')
         throw new ExpressionTokenizeException(beginInclusive, ExpressionTokenizeError.MALFORMED_IDENTIFIER);
 
       endInclusive = input.getPosition();

@@ -23,10 +23,6 @@ public class StringView {
 
   private int charIndex;
 
-  @JsonifyIgnore
-  private char priorNextChar;
-  private char currentChar;
-
   private @Nullable EnumSet<SubstringFlag> buildFlags;
 
   @JsonifyIgnore
@@ -60,7 +56,6 @@ public class StringView {
       throw new IllegalStateException("The end-exclusive-index cannot lie before or at the start-inclusive-index");
 
     charIndex = startInclusive - 1;
-    priorNextChar = 0;
   }
 
   public StringView setLowercase() {
@@ -117,21 +112,27 @@ public class StringView {
     removeIndices.set(index);
   }
 
-  public char priorNextChar() {
-    return priorNextChar;
-  }
-
   public char nextChar() {
     if (charIndex >= endExclusive - 1)
       return 0;
 
-    priorNextChar = currentChar;
-    currentChar = contents.charAt(++charIndex);
+    return contents.charAt(++charIndex);
+  }
 
-    return currentChar;
+  public char priorChar(int offset) {
+    if (offset < 0)
+      throw new IllegalStateException("Do not provide negative offsets on priorChar()");
+
+    if (charIndex < offset)
+      return 0;
+
+    return contents.charAt(charIndex - offset);
   }
 
   public char peekChar(int offset) {
+    if (offset < 0)
+      throw new IllegalStateException("Do not provide negative offsets on peekChar()");
+
     int targetIndex = charIndex + 1 + offset;
 
     if (targetIndex > endExclusive - 1)
