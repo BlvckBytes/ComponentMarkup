@@ -96,6 +96,8 @@ public class XmlEventParser {
       int preConsumePosition = input.getPosition();
       int firstSpacePosition = -1;
 
+      // Manually consume the first space of the possibly upcoming
+      // whitespace-sequence as to get a hold of its index
       if (input.peekChar(0) == ' ') {
         input.nextChar();
         firstSpacePosition = input.getPosition();
@@ -104,7 +106,7 @@ public class XmlEventParser {
           tokenOutput.emitCharToken(firstSpacePosition, TokenType.ANY__WHITESPACE);
       }
 
-      boolean encounteredNewline = input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+      input.consumeWhitespace(tokenOutput);
 
       if (input.peekChar(0) == '<') {
         if (textStartInclusive != -1) {
@@ -117,7 +119,12 @@ public class XmlEventParser {
           textStartInclusive = -1;
         }
 
-        else if (wasPriorTagOrInterpolation && firstSpacePosition != -1 && !encounteredNewline)
+        // There was no text started yet, but the char prior to the manually collected space
+        // was the end of a tag or an interpolation, and we're about to parse a new tag. The
+        // space wedged in-between would be skipped over, although it is valid INNER_TEXT.
+        // It does not matter whether the first space was on the same line, because REMOVE_NEWLINES_INDENT
+        // trims around newlines, taking care of this special case, since empty views text is not emitted.
+        else if (wasPriorTagOrInterpolation && firstSpacePosition != -1)
           emitText(input.buildSubViewAbsolute(firstSpacePosition, input.getPosition() + 1), SubstringFlag.INNER_TEXT);
 
         parseOpeningOrClosingTag();
@@ -131,7 +138,7 @@ public class XmlEventParser {
 
       if (textStartInclusive == -1) {
         if (currentChar == '\n') {
-          input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+          input.consumeWhitespace(tokenOutput);
           continue;
         }
 
@@ -145,7 +152,7 @@ public class XmlEventParser {
         input.nextChar();
       }
 
-      input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+      input.consumeWhitespace(tokenOutput);
     }
 
     if (textStartInclusive != -1) {
@@ -302,7 +309,7 @@ public class XmlEventParser {
   }
 
   private boolean tryParseAttribute() {
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
     StringView attributeName = tryParseIdentifier();
@@ -321,7 +328,7 @@ public class XmlEventParser {
     if (Character.isDigit(attributeName.nthChar(0)))
       throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, attributeName.startInclusive);
 
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     if (input.peekChar(0) != '=') {
       consumer.onFlagAttribute(attributeName);
@@ -333,7 +340,7 @@ public class XmlEventParser {
     if (tokenOutput != null)
       tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__EQUALS);
 
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     switch (input.peekChar(0)) {
       case '"':
@@ -408,7 +415,7 @@ public class XmlEventParser {
     if (tokenOutput != null)
       tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     boolean wasClosingTag = false;
 
@@ -421,7 +428,7 @@ public class XmlEventParser {
       wasClosingTag = true;
     }
 
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     StringView tagName = tryParseIdentifier();
 
@@ -472,7 +479,7 @@ public class XmlEventParser {
         tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
     }
 
-    input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+    input.consumeWhitespace(tokenOutput);
 
     if (input.nextChar() != '>')
       throw new XmlParseException(XmlParseError.UNTERMINATED_TAG, openingPosition);

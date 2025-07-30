@@ -356,68 +356,79 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldPreserveWhitespaceInBetweenTagsAndOrInterpolation() {
-    TextWithAnchors text = new TextWithAnchors(
-      "<`red´>`hello´</red>` ´{`test´}"
-    );
+    TextWithAnchors text;
 
-    makeCase(
-      text,
-      container(0)
-        .child(
-          text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
-            .color(text.subView(0).setLowercase())
-        )
-        .child(
-          text(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT))
-        )
-        .child(
-          interpolation(text.subView(3))
-        )
-    );
+    String[] spaceCases = { " ", "  ", "   " };
 
-    text = new TextWithAnchors(
-      "<@`gray´>`#´{`loop.index + 1´}` ´<`red´>{`word´}"
-    );
+    for (String spaceCase : spaceCases) {
+      text = new TextWithAnchors("<@`red´>`" + spaceCase + "´{`test´}");
 
-    makeCase(
-      text,
-      container(text.anchor(0))
-        .color(text.subView(0).setLowercase())
-        .child(
-          text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
-        )
-        .child(
-          interpolation(text.subView(2))
-        )
-        .child(
-          text(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT))
-        )
-        .child(
-          interpolation(text.subView(5))
-            .color(text.subView(4).setLowercase())
-        )
-    );
+      makeCase(
+        text,
+        container(text.anchor(0))
+          .color(text.subView(0).setLowercase())
+          .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(interpolation(text.subView(2)))
+      );
 
-    text = new TextWithAnchors(
-      "<@`gray´>`#´{`loop.index + 1´} ",
-      " <`red´>{`word´}"
-    );
+      text = new TextWithAnchors("{`test´}`" + spaceCase + "´<`red´>`after´");
 
-    makeCase(
-      text,
-      container(text.anchor(0))
-        .color(text.subView(0).setLowercase())
-        .child(
-          text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
-        )
-        .child(
-          interpolation(text.subView(2))
-        )
-        .child(
-          interpolation(text.subView(4))
-            .color(text.subView(3).setLowercase())
-        )
-    );
+      makeCase(
+        text,
+        container(0)
+          .child(interpolation(text.subView(0)))
+          .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(
+            text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
+              .color(text.subView(2).setLowercase())
+          )
+      );
+
+      text = new TextWithAnchors("<@`red´>`" + spaceCase + "´<`aqua´>`after´");
+
+      makeCase(
+        text,
+        container(text.anchor(0))
+          .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(
+            text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
+              .color(text.subView(2).setLowercase())
+          )
+          .color(text.subView(0).setLowercase())
+      );
+
+      text = new TextWithAnchors("{`test´}`" + spaceCase + "´{`test´}");
+
+      makeCase(
+        text,
+        container(0)
+          .child(interpolation(text.subView(0)))
+          .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(interpolation(text.subView(2)))
+      );
+
+      // Should not preserve whitespace if there was a linebreak
+      text = new TextWithAnchors(
+        "<@`gray´>`#´{`loop.index + 1´}" + spaceCase,
+        spaceCase + "<`red´>{`word´}"
+      );
+
+      makeCase(
+        text,
+        container(text.anchor(0))
+          .color(text.subView(0).setLowercase())
+          .child(
+            text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
+          )
+          .child(
+            interpolation(text.subView(2))
+          )
+          .child(
+            interpolation(text.subView(4))
+              .color(text.subView(3).setLowercase())
+          )
+      );
+    }
   }
 
   @Test

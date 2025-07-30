@@ -424,7 +424,7 @@ public class ExpressionTokenizer {
     }
 
     else {
-      input.consumeWhitespaceAndGetIfNewline(tokenOutput);
+      input.consumeWhitespace(tokenOutput);
 
       char upcomingChar = input.peekChar(0);
 

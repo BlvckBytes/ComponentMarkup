@@ -196,17 +196,13 @@ public class StringView {
     return buildStringCache = new String(result, 0, nextResultIndex);
   }
 
-  public boolean consumeWhitespaceAndGetIfNewline(@Nullable TokenOutput tokenOutput) {
-    boolean encounteredNewline = false;
-
+  public void consumeWhitespace(@Nullable TokenOutput tokenOutput) {
     while (Character.isWhitespace(peekChar(0))) {
-      encounteredNewline |= nextChar() == '\n';
+      nextChar();
 
       if (tokenOutput != null)
         tokenOutput.emitCharToken(getPosition(), TokenType.ANY__WHITESPACE);
     }
-
-    return encounteredNewline;
   }
 
   public void restorePosition(int position) {
