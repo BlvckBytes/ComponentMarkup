@@ -7,4 +7,6 @@ public interface EnumToken {
 
   Token create(StringView raw);
 
+  int getLength();
+
 }

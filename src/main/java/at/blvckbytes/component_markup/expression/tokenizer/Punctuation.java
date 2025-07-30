@@ -27,4 +27,9 @@ public enum Punctuation implements EnumToken {
   public Token create(StringView raw) {
     return new PunctuationToken(raw, this);
   }
+
+  @Override
+  public int getLength() {
+    return 1;
+  }
 }

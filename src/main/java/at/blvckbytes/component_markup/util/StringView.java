@@ -128,7 +128,7 @@ public class StringView {
   }
 
   public char nextChar() {
-    if (hasReachedEnd())
+    if (charIndex >= endExclusive - 1)
       return 0;
 
     priorNextChar = currentChar;
@@ -137,18 +137,13 @@ public class StringView {
     return currentChar;
   }
 
-  private boolean hasReachedEnd() {
-    if (charIndex > endExclusive - 1)
-      throw new IllegalStateException("The char-index should never exceed its length-dictated maximum");
+  public char peekChar(int offset) {
+    int targetIndex = charIndex + 1 + offset;
 
-    return charIndex == endExclusive - 1;
-  }
-
-  public char peekChar() {
-    if (hasReachedEnd())
+    if (targetIndex > endExclusive - 1)
       return 0;
 
-    return contents.charAt(charIndex + 1);
+    return contents.charAt(targetIndex);
   }
 
   @JsonifyGetter
@@ -204,7 +199,7 @@ public class StringView {
   public boolean consumeWhitespaceAndGetIfNewline(@Nullable TokenOutput tokenOutput) {
     boolean encounteredNewline = false;
 
-    while (Character.isWhitespace(peekChar())) {
+    while (Character.isWhitespace(peekChar(0))) {
       encounteredNewline |= nextChar() == '\n';
 
       if (tokenOutput != null)
@@ -227,6 +222,8 @@ public class StringView {
       priorNextChar = 0;
       currentChar = 0;
     } else {
+      // TODO: Something about this seems to be off, because it was unknowingly compensated for
+      //       in ExpressionTokenizer#parseIdentifierOrLiteralToken, where priorChar was called too early
       priorNextChar = contents.charAt(charIndex);
       currentChar = contents.charAt(charIndex + 1);
     }

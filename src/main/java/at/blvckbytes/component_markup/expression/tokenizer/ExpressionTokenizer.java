@@ -68,7 +68,7 @@ public class ExpressionTokenizer {
     boolean isFirst = true;
     char upcomingChar;
 
-    while ((upcomingChar = input.peekChar()) != 0) {
+    while ((upcomingChar = input.peekChar(0)) != 0) {
       if (Character.isWhitespace(upcomingChar))
         break;
 
@@ -82,9 +82,9 @@ public class ExpressionTokenizer {
         break;
       }
 
-      char priorChar = input.priorNextChar();
-
       input.nextChar();
+
+      char priorChar = input.priorNextChar();
 
       boolean isAlphabetic = upcomingChar >= 'a' && upcomingChar <= 'z';
       boolean isNumeric = upcomingChar >= '0' && upcomingChar <= '9';
@@ -108,7 +108,7 @@ public class ExpressionTokenizer {
     }
 
     if (beginInclusive < 0)
-      throw new IllegalStateException("Expected to only be called if peekChar() != 0 or ' ' or '.'");
+      throw new IllegalStateException("Expected to only be called if peekChar(0) != 0 or ' ' or '.'");
 
     StringView value = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
 
@@ -130,7 +130,7 @@ public class ExpressionTokenizer {
     char currentChar;
     int firstIndex = -1;
 
-    while ((currentChar = input.peekChar()) >= '0' && currentChar <= '9') {
+    while ((currentChar = input.peekChar(0)) >= '0' && currentChar <= '9') {
       input.nextChar();
 
       if (firstIndex < 0)
@@ -146,18 +146,16 @@ public class ExpressionTokenizer {
     if ((startInclusive = collectSubsequentDigitsAndGetFirstIndex()) < 0)
       throw new IllegalStateException("Expected to only be called if nextChar() is a digit");
 
-    int savePoint = input.getPosition();
+    int lastDigitIndex = input.getPosition();
 
-    if (input.peekChar() == '.') {
-      input.nextChar();
-
-      if (input.peekChar() == '.') {
-        input.restorePosition(savePoint);
-
-        StringView value = input.buildSubViewAbsolute(startInclusive, savePoint + 1);
-
+    if (input.peekChar(0) == '.') {
+      // Range-operator encountered
+      if (input.peekChar(1) == '.') {
+        StringView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
         return new LongToken(value, Long.parseLong(value.buildString()));
       }
+
+      input.nextChar();
 
       if (collectSubsequentDigitsAndGetFirstIndex() < 0)
         throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
@@ -167,23 +165,26 @@ public class ExpressionTokenizer {
       return new DoubleToken(value, Double.parseDouble(value.buildString()));
     }
 
-    StringView value = input.buildSubViewAbsolute(startInclusive, savePoint + 1);
+    StringView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
 
     return new LongToken(value, Long.parseLong(value.buildString()));
   }
 
   private @Nullable Token tryParseDotDoubleToken() {
-    int savePoint = input.getPosition();
+    if (input.peekChar(0) != '.')
+      throw new IllegalStateException("Expected to only be called if peekChar(0) = '.'");
 
-    if (input.nextChar() != '.')
-      throw new IllegalStateException("Expected to only be called if nextChar() = '.'");
+    char charAfterDot = input.peekChar(1);
+
+    if (!(charAfterDot >= '0' && charAfterDot <= '9'))
+      return null;
+
+    input.nextChar(); // .
 
     int startInclusive = input.getPosition();
 
-    if (collectSubsequentDigitsAndGetFirstIndex() < 0) {
-      input.restorePosition(savePoint);
-      return null;
-    }
+    if (collectSubsequentDigitsAndGetFirstIndex() < 0)
+      throw new IllegalStateException("Unreachable: checked for a digit's presence ahead of time");
 
     StringView rawValue = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
@@ -191,14 +192,9 @@ public class ExpressionTokenizer {
   }
 
   private @Nullable Token tryParseOperatorOrPunctuationOrDotDoubleToken() {
-    int savePoint = input.getPosition();
-
-    char firstChar = input.nextChar();
-    int startInclusive = input.getPosition();
-
     EnumToken enumToken;
 
-    switch (firstChar) {
+    switch (input.peekChar(0)) {
       case '(':
         enumToken = Punctuation.OPENING_PARENTHESIS;
         break;
@@ -228,8 +224,7 @@ public class ExpressionTokenizer {
         break;
 
       case '*':
-        if (input.peekChar() == '*') {
-          input.nextChar();
+        if (input.peekChar(1) == '*') {
           enumToken = InfixOperator.REPEAT;
           break;
         }
@@ -250,8 +245,7 @@ public class ExpressionTokenizer {
         break;
 
       case '&':
-        if (input.peekChar() == '&') {
-          input.nextChar();
+        if (input.peekChar(1) == '&') {
           enumToken = InfixOperator.CONJUNCTION;
           break;
         }
@@ -260,17 +254,15 @@ public class ExpressionTokenizer {
         break;
 
       case '|':
-        if (input.peekChar() == '|') {
-          input.nextChar();
+        if (input.peekChar(1) == '|') {
           enumToken = InfixOperator.DISJUNCTION;
           break;
         }
 
-        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_PIPE);
+        throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_PIPE);
 
       case '?':
-        if (input.peekChar() == '?') {
-          input.nextChar();
+        if (input.peekChar(1) == '?') {
           enumToken = InfixOperator.FALLBACK;
           break;
         }
@@ -279,8 +271,7 @@ public class ExpressionTokenizer {
         break;
 
       case '@':
-        if (input.peekChar() == '@') {
-          input.nextChar();
+        if (input.peekChar(1) == '@') {
           enumToken = InfixOperator.EXPLODE_REGEX;
           break;
         }
@@ -289,22 +280,21 @@ public class ExpressionTokenizer {
         break;
 
       case ':':
-        if (input.peekChar() == ':') {
-          input.nextChar();
-          if (input.peekChar() == ':') {
-            input.nextChar();
+        if (input.peekChar(1) == ':') {
+          if (input.peekChar(2) == ':') {
             enumToken = InfixOperator.MATCHES_REGEX;
             break;
           }
+
           enumToken = InfixOperator.CONTAINS;
           break;
         }
+
         enumToken = Punctuation.COLON;
         break;
 
       case '>':
-        if (input.peekChar() == '=') {
-          input.nextChar();
+        if (input.peekChar(1) == '=') {
           enumToken = InfixOperator.GREATER_THAN_OR_EQUAL;
           break;
         }
@@ -313,8 +303,7 @@ public class ExpressionTokenizer {
         break;
 
       case '<':
-        if (input.peekChar() == '=') {
-          input.nextChar();
+        if (input.peekChar(1) == '=') {
           enumToken = InfixOperator.LESS_THAN_OR_EQUAL;
           break;
         }
@@ -323,17 +312,15 @@ public class ExpressionTokenizer {
         break;
 
       case '=':
-        if (input.peekChar() == '=') {
-          input.nextChar();
+        if (input.peekChar(1) == '=') {
           enumToken = InfixOperator.EQUAL_TO;
           break;
         }
 
-        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_EQUALS);
+        throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_EQUALS);
 
       case '!':
-        if (input.peekChar() == '=') {
-          input.nextChar();
+        if (input.peekChar(1) == '=') {
           enumToken = InfixOperator.NOT_EQUAL_TO;
           break;
         }
@@ -342,77 +329,68 @@ public class ExpressionTokenizer {
         break;
 
       case '~':
-        if (input.peekChar() == '^') {
-          input.nextChar();
-          enumToken = PrefixOperator.UPPER_CASE;
-          break;
-        }
+        switch (input.peekChar(1)) {
+          case '^':
+            enumToken = PrefixOperator.UPPER_CASE;
+            break;
 
-        if (input.peekChar() == '_') {
-          input.nextChar();
-          enumToken = PrefixOperator.LOWER_CASE;
-          break;
-        }
+          case '_':
+            enumToken = PrefixOperator.LOWER_CASE;
+            break;
 
-        if (input.peekChar() == '#') {
-          input.nextChar();
-          enumToken = PrefixOperator.TITLE_CASE;
-          break;
-        }
+          case '#':
+            enumToken = PrefixOperator.TITLE_CASE;
+            break;
 
-        if (input.peekChar() == '!') {
-          input.nextChar();
-          enumToken = PrefixOperator.TOGGLE_CASE;
-          break;
-        }
+          case '!':
+            enumToken = PrefixOperator.TOGGLE_CASE;
+            break;
 
-        if (input.peekChar() == '-') {
-          input.nextChar();
-          enumToken = PrefixOperator.SLUGIFY;
-          break;
-        }
+          case '-':
+            enumToken = PrefixOperator.SLUGIFY;
+            break;
 
-        if (input.peekChar() == '?') {
-          input.nextChar();
-          enumToken = PrefixOperator.ASCIIFY;
-          break;
-        }
+          case '?':
+            enumToken = PrefixOperator.ASCIIFY;
+            break;
 
-        if (input.peekChar() == '|') {
-          input.nextChar();
-          enumToken = PrefixOperator.TRIM;
-          break;
-        }
+          case '|':
+            enumToken = PrefixOperator.TRIM;
+            break;
 
-        if (input.peekChar() == '<') {
-          input.nextChar();
-          enumToken = PrefixOperator.REVERSE;
-          break;
-        }
+          case '<':
+            enumToken = PrefixOperator.REVERSE;
+            break;
 
-        throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.SINGLE_TILDE);
+          default:
+            throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_TILDE);
+        }
+        break;
 
       case '.':
-        char upcomingChar = input.peekChar();
+        char upcomingChar = input.peekChar(1);
 
         if (upcomingChar == '.') {
-          input.nextChar();
           enumToken = InfixOperator.RANGE;
           break;
         }
 
-        if (upcomingChar >= '0' && upcomingChar <= '9') {
-          input.restorePosition(savePoint);
+        if (upcomingChar >= '0' && upcomingChar <= '9')
           return tryParseDotDoubleToken();
-        }
 
         enumToken = InfixOperator.MEMBER;
         break;
 
       default:
-        input.restorePosition(savePoint);
         return null;
     }
+
+    input.nextChar();
+
+    int startInclusive = input.getPosition();
+
+    for (int i = 1; i < enumToken.getLength(); ++i)
+      input.nextChar();
 
     return enumToken.create(input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1));
   }
@@ -448,7 +426,7 @@ public class ExpressionTokenizer {
     else {
       input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
-      char upcomingChar = input.peekChar();
+      char upcomingChar = input.peekChar(0);
 
       if (upcomingChar == 0)
         return null;

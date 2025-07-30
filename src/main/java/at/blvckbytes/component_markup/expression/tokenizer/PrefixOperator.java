@@ -25,11 +25,9 @@ public enum PrefixOperator implements EnumToken {
   );
 
   public final String representation;
-  public final int length;
 
   PrefixOperator(String representation) {
     this.representation = representation;
-    this.length = representation.length();
   }
 
   @Override
@@ -40,5 +38,10 @@ public enum PrefixOperator implements EnumToken {
   @Override
   public Token create(StringView raw) {
     return new PrefixOperatorToken(raw, this);
+  }
+
+  @Override
+  public int getLength() {
+    return representation.length();
   }
 }

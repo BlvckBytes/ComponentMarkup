@@ -45,7 +45,6 @@ public enum InfixOperator implements EnumToken {
   );
 
   public final String representation;
-  public final int length;
 
   // Higher precedence means is evaluated *earlier*.
   // Assuming the following input: "5 + 3 >= 2 + 1", the
@@ -57,7 +56,6 @@ public enum InfixOperator implements EnumToken {
 
   InfixOperator(String representation, int precedence, boolean rightAssociative) {
     this.representation = representation;
-    this.length = representation.length();
     this.precedence = precedence;
     this.rightAssociative = rightAssociative;
   }
@@ -70,5 +68,10 @@ public enum InfixOperator implements EnumToken {
   @Override
   public Token create(StringView raw) {
     return new InfixOperatorToken(raw, this);
+  }
+
+  @Override
+  public int getLength() {
+    return representation.length();
   }
 }

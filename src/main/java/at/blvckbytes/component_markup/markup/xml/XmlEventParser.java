@@ -33,8 +33,8 @@ public class XmlEventParser {
     boolean wasPriorTagOrInterpolation = false;
     int textStartInclusive = -1;
 
-    while (input.peekChar() != 0) {
-      if (input.peekChar() == '}' && input.priorNextChar() != '\\') {
+    while (input.peekChar(0) != 0) {
+      if (input.peekChar(0) == '}' && input.priorNextChar() != '\\') {
         if (isWithinCurlyBrackets)
           break;
 
@@ -43,9 +43,7 @@ public class XmlEventParser {
         throw new XmlParseException(XmlParseError.UNESCAPED_CURLY, input.getPosition());
       }
 
-      int preConsumePosition = input.getPosition();
-
-      if (input.peekChar() == '{' && input.priorNextChar() != '\\') {
+      if (input.peekChar(0) == '{' && input.priorNextChar() != '\\') {
         if (textStartInclusive != -1) {
           emitText(
             input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
@@ -61,7 +59,7 @@ public class XmlEventParser {
         int startInclusive = input.getPosition();
         int endInclusive = -1;
 
-        while (input.peekChar() != 0) {
+        while (input.peekChar(0) != 0) {
           char currentChar = input.nextChar();
 
           if (currentChar == '\n' || currentChar == '{')
@@ -95,9 +93,10 @@ public class XmlEventParser {
         continue;
       }
 
+      int preConsumePosition = input.getPosition();
       int firstSpacePosition = -1;
 
-      if (input.peekChar() == ' ') {
+      if (input.peekChar(0) == ' ') {
         input.nextChar();
         firstSpacePosition = input.getPosition();
 
@@ -107,7 +106,7 @@ public class XmlEventParser {
 
       boolean encounteredNewline = input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
-      if (input.peekChar() == '<') {
+      if (input.peekChar(0) == '<') {
         if (textStartInclusive != -1) {
           emitText(
             input.buildSubViewAbsolute(textStartInclusive, input.getPosition() + 1),
@@ -139,7 +138,9 @@ public class XmlEventParser {
         textStartInclusive = input.getPosition();
       }
 
-      if (currentChar == '\\' && (input.peekChar() == '<' || input.peekChar() == '}' || input.peekChar() == '{')) {
+      char upcomingChar;
+
+      if (currentChar == '\\' && ((upcomingChar = input.peekChar(0)) == '<' || upcomingChar == '}' || upcomingChar == '{')) {
         input.addIndexToBeRemoved(input.getPosition());
         input.nextChar();
       }
@@ -174,14 +175,14 @@ public class XmlEventParser {
   }
 
   private @Nullable StringView tryParseIdentifier() {
-    if (!isIdentifierChar(input.peekChar()))
+    if (!isIdentifierChar(input.peekChar(0)))
       return null;
 
     input.nextChar();
 
     int startInclusive = input.getPosition();
 
-    while (isIdentifierChar(input.peekChar()))
+    while (isIdentifierChar(input.peekChar(0)))
       input.nextChar();
 
     return input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
@@ -226,10 +227,10 @@ public class XmlEventParser {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
-    if (input.peekChar() == 0)
+    if (input.peekChar(0) == 0)
       return true;
 
-    char peekedChar = input.peekChar();
+    char peekedChar = input.peekChar(0);
 
     if (Character.isWhitespace(peekedChar))
       return true;
@@ -240,7 +241,7 @@ public class XmlEventParser {
   private void parseNumericAttributeValue(StringView attributeName) {
     int startInclusive = -1;
 
-    if (input.peekChar() == '-') {
+    if (input.peekChar(0) == '-') {
       input.nextChar();
       startInclusive = input.getPosition();
     }
@@ -250,7 +251,7 @@ public class XmlEventParser {
 
     char peekedChar;
 
-    while ((peekedChar = input.peekChar()) != 0) {
+    while ((peekedChar = input.peekChar(0)) != 0) {
       if (peekedChar >= '0' && peekedChar <= '9')
         encounteredDigit = true;
 
@@ -271,7 +272,7 @@ public class XmlEventParser {
     }
 
     if (startInclusive < 0)
-      throw new IllegalStateException("Expected to be called only if peekChar() in [0-9\\-.]");
+      throw new IllegalStateException("Expected to be called only if peekChar(0) in [0-9\\-.]");
 
     if (!encounteredDigit)
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, startInclusive);
@@ -307,7 +308,7 @@ public class XmlEventParser {
     StringView attributeName = tryParseIdentifier();
 
     if (attributeName == null) {
-      if (input.peekChar() == '"') {
+      if (input.peekChar(0) == '"') {
         input.nextChar();
         throw new XmlParseException(XmlParseError.EXPECTED_ATTRIBUTE_KEY, input.getPosition());
       }
@@ -322,7 +323,7 @@ public class XmlEventParser {
 
     input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
-    if (input.peekChar() != '=') {
+    if (input.peekChar(0) != '=') {
       consumer.onFlagAttribute(attributeName);
       return true;
     }
@@ -334,7 +335,7 @@ public class XmlEventParser {
 
     input.consumeWhitespaceAndGetIfNewline(tokenOutput);
 
-    switch (input.peekChar()) {
+    switch (input.peekChar(0)) {
       case '"':
         parseAndEmitStringAttributeValue(attributeName);
         return true;
@@ -411,7 +412,7 @@ public class XmlEventParser {
 
     boolean wasClosingTag = false;
 
-    if (input.peekChar() == '/') {
+    if (input.peekChar(0) == '/') {
       input.nextChar();
 
       if (tokenOutput != null)
@@ -456,14 +457,14 @@ public class XmlEventParser {
 
     consumer.onTagOpenBegin(tagName);
 
-    while (input.peekChar() != 0) {
+    while (input.peekChar(0) != 0) {
       if (!tryParseAttribute())
         break;
     }
 
     boolean wasSelfClosing = false;
 
-    if (input.peekChar() == '/') {
+    if (input.peekChar(0) == '/') {
       input.nextChar();
       wasSelfClosing = true;
 
