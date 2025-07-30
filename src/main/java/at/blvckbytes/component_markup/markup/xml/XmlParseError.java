@@ -9,8 +9,7 @@ public enum XmlParseError implements ErrorMessage {
   UNTERMINATED_TAG("This tag misses its closing-bracket: >"),
   UNESCAPED_CURLY("Literal curly-brackets need to be escaped: \\{ or \\}"),
   MALFORMED_NUMBER("This number is malformed"),
-  MALFORMED_LITERAL_TRUE("This true-literal is malformed"),
-  MALFORMED_LITERAL_FALSE("This false-literal is malformed"),
+  MALFORMED_COMMENT("This comment is malformed, use: <!-- ... -->"),
   UNSUPPORTED_ATTRIBUTE_VALUE("This value is not one of: string, number, markup"),
   MISSING_TAG_NAME("This tag is missing its name"),
   EXPECTED_ATTRIBUTE_KEY("Expected an attribute-key but found a value");

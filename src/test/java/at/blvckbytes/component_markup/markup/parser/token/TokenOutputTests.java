@@ -18,6 +18,51 @@ import java.util.List;
 public class TokenOutputTests {
 
   @Test
+  public void shouldTokenizeComments() {
+    makeCommentCase("<!-- Hello, world! :) -->");
+    makeCommentCase("<!-- Hello, - world! :) -->");
+    makeCommentCase("<!-- Hello, -- world! :) -->");
+    makeCommentCase("<!-- Hello, -- > world! :) -->");
+
+    makeCommentCase(
+      "<!-- This is",
+      "a multiline",
+      "comment :) --",
+      "> :') -->"
+    );
+  }
+
+  private void makeCommentCase(String... lines) {
+    String[] finalLines = new String[lines.length];
+
+    for (int i = 0; i < finalLines.length; ++i) {
+      String lineValue = lines[i];
+
+      if (i == 0)
+        lineValue = "`<´`red´`>´`" + lineValue;
+
+      if (i == finalLines.length - 1)
+        lineValue += "´`<´`aqua´`>´";
+
+      finalLines[i] = lineValue;
+    }
+
+    TextWithAnchors text = new TextWithAnchors(finalLines);
+
+    makeHierarchicalCase(
+      StringView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase())) // "red"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(2))) // ">"
+        .add(new HierarchicalToken(TokenType.MARKUP__COMMENT, text.subView(3)))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(4))) // "<"
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(5).setLowercase())) // "aqua"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(6))) // ">"
+    );
+  }
+
+  @Test
   public void shouldTokenizeComplexInputHierarchicallyAndSequentially() {
     TextWithAnchors text = new TextWithAnchors(
       //  v- First subview-index within this line
@@ -38,7 +83,7 @@ public class TokenOutputTests {
 
     StringView rootView = StringView.of(text.text);
 
-    makeCase(
+    makeSequenceCase(
       rootView,
       new ListBuilder<>(HierarchicalToken.class)
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
@@ -305,11 +350,23 @@ public class TokenOutputTests {
     }
   }
 
-  private void makeCase(
+  private void makeSequenceCase(
     StringView rootView,
     ListBuilder<HierarchicalToken> expectedHierarchicalTokens,
     ListBuilder<Token> expectedSequenceTokens
   ) {
+    List<HierarchicalToken> actualHierarchicalTokens = makeHierarchicalCase(rootView, expectedHierarchicalTokens);
+
+    List<Token> actualSequenceTokens = new ArrayList<>();
+
+    HierarchicalToken.toSequence(actualHierarchicalTokens, (type, value) -> {
+      actualSequenceTokens.add(new Token(type, value));
+    });
+
+    Assertions.assertEquals(Jsonifier.jsonify(expectedSequenceTokens.getResult()), Jsonifier.jsonify(actualSequenceTokens));
+  }
+
+  private List<HierarchicalToken> makeHierarchicalCase(StringView rootView, ListBuilder<HierarchicalToken> expectedHierarchicalTokens) {
     TokenOutput tokenOutput = new TokenOutput(EnumSet.noneOf(OutputFlag.class));
 
     try {
@@ -325,12 +382,6 @@ public class TokenOutputTests {
 
     Assertions.assertEquals(Jsonifier.jsonify(expectedHierarchicalTokens.getResult()), Jsonifier.jsonify(actualHierarchicalTokens));
 
-    List<Token> actualSequenceTokens = new ArrayList<>();
-
-    HierarchicalToken.toSequence(actualHierarchicalTokens, (type, value) -> {
-      actualSequenceTokens.add(new Token(type, value));
-    });
-
-    Assertions.assertEquals(Jsonifier.jsonify(expectedSequenceTokens.getResult()), Jsonifier.jsonify(actualSequenceTokens));
+    return actualHierarchicalTokens;
   }
 }

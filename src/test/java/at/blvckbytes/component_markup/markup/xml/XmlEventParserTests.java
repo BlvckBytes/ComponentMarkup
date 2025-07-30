@@ -736,11 +736,27 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnescapedCurlyBrackets() {
     TextWithAnchors text = new TextWithAnchors("hello @} world");
+
     makeCase(
       text,
       XmlParseError.UNESCAPED_CURLY,
       text.anchor(0)
     );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedComments() {
+    TextWithAnchors text = new TextWithAnchors("<@!-- Hello, world");
+    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
+
+    text = new TextWithAnchors("<@!-- Hello, world -");
+    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
+
+    text = new TextWithAnchors("<@!-- Hello, world ->");
+    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
+
+    text = new TextWithAnchors("<@!-- Hello, world --");
+    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
   }
 
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {

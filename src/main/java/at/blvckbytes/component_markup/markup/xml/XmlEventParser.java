@@ -384,26 +384,18 @@ public class XmlEventParser {
     }
   }
 
-  private @Nullable StringView tryConsumeCommentTag(StringView tagName) {
+  private @Nullable StringView tryConsumeCommentTag(int openingPosition, StringView tagName) {
     if (!tagName.contentEquals("!--", true))
       return null;
 
-    int savedPosition = input.getPosition();
+    char currentChar;
 
-    while (input.peekChar() != '-')
-      input.nextChar();
-
-    if (input.nextChar() != '-' || input.nextChar() != '-') {
-      input.restorePosition(savedPosition);
-      return null;
+    while ((currentChar = input.nextChar()) != 0) {
+      if (currentChar == '-' && input.nextChar() == '-' && input.nextChar() == '>')
+        return input.buildSubViewAbsolute(openingPosition, input.getPosition() + 1);
     }
 
-    if (input.nextChar() != '>') {
-      input.restorePosition(savedPosition);
-      return null;
-    }
-
-    return input.buildSubViewAbsolute(tagName.startInclusive, input.getPosition() + 1);
+    throw new XmlParseException(XmlParseError.MALFORMED_COMMENT, tagName.startInclusive);
   }
 
   private void parseOpeningOrClosingTag() {
@@ -452,7 +444,7 @@ public class XmlEventParser {
 
     StringView comment;
 
-    if ((comment = tryConsumeCommentTag(tagName)) != null) {
+    if ((comment = tryConsumeCommentTag(openingPosition, tagName)) != null) {
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__COMMENT, comment);
 
