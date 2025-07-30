@@ -746,16 +746,16 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedComments() {
-    TextWithAnchors text = new TextWithAnchors("<@!-- Hello, world");
+    TextWithAnchors text = new TextWithAnchors("@<!-- Hello, world");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
 
-    text = new TextWithAnchors("<@!-- Hello, world -");
+    text = new TextWithAnchors("@<!-- Hello, world -");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
 
-    text = new TextWithAnchors("<@!-- Hello, world ->");
+    text = new TextWithAnchors("@<!-- Hello, world ->");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
 
-    text = new TextWithAnchors("<@!-- Hello, world --");
+    text = new TextWithAnchors("@<!-- Hello, world --");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.anchor(0));
   }
 

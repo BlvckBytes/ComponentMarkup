@@ -32,6 +32,29 @@ public class TokenOutputTests {
     );
   }
 
+  @Test
+  public void shouldTokenizeNestedComments() {
+    TextWithAnchors text = new TextWithAnchors(
+      "``<!-- Hello, world!",
+      "this is a ´`<!-- nested comment",
+      "case! -->´` which is",
+      "very convenient -->´´"
+    );
+
+    makeSequenceCase(
+      StringView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__COMMENT, text.subView(0))
+            .addChild(new HierarchicalToken(TokenType.MARKUP__COMMENT, text.subView(2)))
+        ),
+      new ListBuilder<>(Token.class)
+        .add(new Token(TokenType.MARKUP__COMMENT, text.subView(1)))
+        .add(new Token(TokenType.MARKUP__COMMENT, text.subView(2)))
+        .add(new Token(TokenType.MARKUP__COMMENT, text.subView(3)))
+    );
+  }
+
   private void makeCommentCase(String... lines) {
     String[] finalLines = new String[lines.length];
 

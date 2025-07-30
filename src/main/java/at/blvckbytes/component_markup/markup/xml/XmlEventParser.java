@@ -372,18 +372,29 @@ public class XmlEventParser {
     }
   }
 
-  private @Nullable StringView tryConsumeCommentTag(int openingPosition, StringView tagName) {
-    if (!tagName.contentEquals("!--", true))
-      return null;
+  private boolean tryConsumeAndEmitCommentTag(int openingPosition) {
+    if (input.peekChar(0) != '!' || input.peekChar(1) != '-' || input.peekChar(2) != '-')
+      return false;
 
     char currentChar;
 
     while ((currentChar = input.nextChar()) != 0) {
-      if (currentChar == '-' && input.nextChar() == '-' && input.nextChar() == '>')
-        return input.buildSubViewAbsolute(openingPosition, input.getPosition() + 1);
+      if (currentChar == '<' && tryConsumeAndEmitCommentTag(input.getPosition()))
+        continue;
+
+      if (currentChar == '-' && input.nextChar() == '-' && input.nextChar() == '>') {
+        if (tokenOutput != null) {
+          tokenOutput.emitToken(
+            TokenType.MARKUP__COMMENT,
+            input.buildSubViewAbsolute(openingPosition, input.getPosition() + 1)
+          );
+        }
+
+        return true;
+      }
     }
 
-    throw new XmlParseException(XmlParseError.MALFORMED_COMMENT, tagName.startInclusive);
+    throw new XmlParseException(XmlParseError.MALFORMED_COMMENT, openingPosition);
   }
 
   private void parseOpeningOrClosingTag() {
@@ -391,6 +402,9 @@ public class XmlEventParser {
       throw new IllegalStateException("Expected an opening pointy-bracket!");
 
     int openingPosition = input.getPosition();
+
+    if (tryConsumeAndEmitCommentTag(openingPosition))
+      return;
 
     if (tokenOutput != null)
       tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
@@ -429,15 +443,6 @@ public class XmlEventParser {
 
     if (tagName == null)
       throw new XmlParseException(XmlParseError.MISSING_TAG_NAME, openingPosition);
-
-    StringView comment;
-
-    if ((comment = tryConsumeCommentTag(openingPosition, tagName)) != null) {
-      if (tokenOutput != null)
-        tokenOutput.emitToken(TokenType.MARKUP__COMMENT, comment);
-
-      return;
-    }
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
