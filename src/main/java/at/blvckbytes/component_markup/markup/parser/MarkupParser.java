@@ -352,7 +352,18 @@ public class MarkupParser implements XmlEventConsumer {
       TagAndBuffers currentLayer = tagStack.pop();
 
       if (tagStack.isEmpty()) {
-        this.result = currentLayer.createNode();
+        try {
+          this.result = currentLayer.createNode();
+        } catch (MarkupParseException parseError) {
+          if (
+            tokenOutput != null
+              && parseError.error == MarkupParseError.MISSING_MANDATORY_ATTRIBUTE
+              && tokenOutput.outputFlags.contains(OutputFlag.ALLOW_MISSING_ATTRIBUTES)
+          )
+            result = new TextNode(StringView.EMPTY, "<error>");
+          else
+            throw parseError;
+        }
         break;
       }
 
