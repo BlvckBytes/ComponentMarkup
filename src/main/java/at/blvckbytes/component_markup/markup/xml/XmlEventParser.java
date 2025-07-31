@@ -214,15 +214,15 @@ public class XmlEventParser {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesEndOrHasTrailingWhiteSpaceOrTagTermination() {
-    if (input.peekChar(0) == 0)
-      return true;
-
     char peekedChar = input.peekChar(0);
+
+    if (peekedChar == 0)
+      return true;
 
     if (Character.isWhitespace(peekedChar))
       return true;
 
-    return peekedChar == '>';
+    return peekedChar == '>' || (peekedChar == '/' && input.peekChar(1) == '>');
   }
 
   private void parseNumericAttributeValue(StringView attributeName) {

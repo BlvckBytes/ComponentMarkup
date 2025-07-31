@@ -614,6 +614,67 @@ public class XmlEventParserTests {
   }
 
   @Test
+  public void shouldParseAllAttributeTypesWedgedWithTheTagEnd() {
+    TextWithAnchors text;
+
+    for (String tagEnd : new String[]{ "/>", ">" }) {
+      text = new TextWithAnchors("<`my-tag´ `my-attr´" + tagEnd);
+
+      makeCase(
+        text,
+        new TagOpenBeginEvent(text.subView(0), "my-tag"),
+        new FlagAttributeEvent(text.subView(1), "my-attr"),
+        new TagOpenEndEvent(text.subView(0), tagEnd.charAt(0) == '/'),
+        new InputEndEvent()
+      );
+
+      text = new TextWithAnchors("<`my-tag´ `my-attr´=\"`my-string´\"" + tagEnd);
+
+      makeCase(
+        text,
+        new TagOpenBeginEvent(text.subView(0), "my-tag"),
+        new StringAttributeEvent(text.subView(1), text.subView(2), "my-attr", "my-string"),
+        new TagOpenEndEvent(text.subView(0), tagEnd.charAt(0) == '/'),
+        new InputEndEvent()
+      );
+
+      text = new TextWithAnchors("<`my-tag´ `my-attr´=`512´" + tagEnd);
+
+      makeCase(
+        text,
+        new TagOpenBeginEvent(text.subView(0), "my-tag"),
+        new LongAttributeEvent(text.subView(1), text.subView(2), 512, "my-attr", "512"),
+        new TagOpenEndEvent(text.subView(0), tagEnd.charAt(0) == '/'),
+        new InputEndEvent()
+      );
+
+      text = new TextWithAnchors("<`my-tag´ `my-attr´=`.512´" + tagEnd);
+
+      makeCase(
+        text,
+        new TagOpenBeginEvent(text.subView(0), "my-tag"),
+        new DoubleAttributeEvent(text.subView(1), text.subView(2), 0.512, "my-attr", ".512"),
+        new TagOpenEndEvent(text.subView(0), tagEnd.charAt(0) == '/'),
+        new InputEndEvent()
+      );
+
+      text = new TextWithAnchors("<`my-tag´ `my-attr´=@{<`red´>`Hello´}" + tagEnd);
+
+      makeCase(
+        text,
+        new TagOpenBeginEvent(text.subView(0), "my-tag"),
+        new TagAttributeBeginEvent(text.subView(1), text.anchor(0), "my-attr"),
+        new TagOpenBeginEvent(text.subView(2), "red"),
+        new TagOpenEndEvent(text.subView(2), false),
+        new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "Hello"),
+        new TagAttributeEndEvent(text.subView(1)),
+        new TagOpenEndEvent(text.subView(0), tagEnd.charAt(0) == '/'),
+        new InputEndEvent()
+      );
+    }
+  }
+
+  @Test
   public void shouldThrowOnUnterminatedString() {
     makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello world");
   }
