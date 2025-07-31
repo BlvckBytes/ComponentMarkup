@@ -30,6 +30,9 @@ public class DefaultValueInterpreter implements ValueInterpreter {
       return ((Number) value).longValue();
     }
 
+    if (value instanceof Boolean)
+      return ((Boolean) value) ? 1 : 0;
+
     String stringValue = asString(value);
 
     try {

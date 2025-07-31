@@ -137,6 +137,7 @@ public class ExpressionInterpreter {
           Pattern pattern;
 
           try {
+            // TODO: Consider caching this compilation
             pattern = Pattern.compile(
               delimiter,
               infixOperator == InfixOperator.EXPLODE ? Pattern.LITERAL : 0
@@ -227,6 +228,7 @@ public class ExpressionInterpreter {
           Pattern pattern;
 
           try {
+            // TODO: Consider caching this compilation
             pattern = Pattern.compile(patternString);
           } catch (Throwable e) {
             // TODO: Provide better message
