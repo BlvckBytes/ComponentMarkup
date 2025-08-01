@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
@@ -32,14 +33,15 @@ public class TerminalNode extends ExpressionNode {
     return token.getPlainValue();
   }
 
+
   @Override
-  public int getStartInclusive() {
-    return token.raw.startInclusive;
+  public StringView getFirstMemberPositionProvider() {
+    return token.raw;
   }
 
   @Override
-  public int getEndExclusive() {
-    return token.raw.endExclusive;
+  public StringView getLastMemberPositionProvider() {
+    return token.raw;
   }
 
   @Override

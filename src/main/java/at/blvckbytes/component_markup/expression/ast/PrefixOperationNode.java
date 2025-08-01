@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.PrefixOperatorToken;
+import at.blvckbytes.component_markup.util.StringView;
 
 public class PrefixOperationNode extends ExpressionNode {
 
@@ -13,13 +14,13 @@ public class PrefixOperationNode extends ExpressionNode {
   }
 
   @Override
-  public int getStartInclusive() {
-    return operatorToken.raw.startInclusive;
+  public StringView getFirstMemberPositionProvider() {
+    return operatorToken.raw;
   }
 
   @Override
-  public int getEndExclusive() {
-    return operand.getEndExclusive();
+  public StringView getLastMemberPositionProvider() {
+    return operand.getLastMemberPositionProvider();
   }
 
   @Override

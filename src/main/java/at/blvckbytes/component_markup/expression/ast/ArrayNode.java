@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.List;
 
@@ -22,13 +23,13 @@ public class ArrayNode extends ExpressionNode {
   }
 
   @Override
-  public int getStartInclusive() {
-    return openingBracket.raw.startInclusive;
+  public StringView getFirstMemberPositionProvider() {
+    return openingBracket.raw;
   }
 
   @Override
-  public int getEndExclusive() {
-    return closingBracket.raw.endExclusive;
+  public StringView getLastMemberPositionProvider() {
+    return closingBracket.raw;
   }
 
   @Override

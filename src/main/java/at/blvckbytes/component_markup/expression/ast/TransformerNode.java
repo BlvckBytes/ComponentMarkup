@@ -1,5 +1,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.util.StringView;
+
 public class TransformerNode extends ExpressionNode {
 
   public final ExpressionNode wrapped;
@@ -11,13 +13,13 @@ public class TransformerNode extends ExpressionNode {
   }
 
   @Override
-  public int getStartInclusive() {
-    return wrapped.getStartInclusive();
+  public StringView getFirstMemberPositionProvider() {
+    return wrapped.getFirstMemberPositionProvider();
   }
 
   @Override
-  public int getEndExclusive() {
-    return wrapped.getEndExclusive();
+  public StringView getLastMemberPositionProvider() {
+    return wrapped.getLastMemberPositionProvider();
   }
 
   @Override

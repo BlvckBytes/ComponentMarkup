@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public class BranchingNode extends ExpressionNode {
@@ -29,13 +30,13 @@ public class BranchingNode extends ExpressionNode {
   }
 
   @Override
-  public int getStartInclusive() {
-    return condition.getStartInclusive();
+  public StringView getFirstMemberPositionProvider() {
+    return condition.getFirstMemberPositionProvider();
   }
 
   @Override
-  public int getEndExclusive() {
-    return branchFalse.getEndExclusive();
+  public StringView getLastMemberPositionProvider() {
+    return branchFalse.getLastMemberPositionProvider();
   }
 
   @Override
