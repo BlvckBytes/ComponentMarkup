@@ -101,8 +101,8 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new ContainerNode(positionProvider, new ArrayList<>(), new LinkedHashSet<>()));
   }
 
-  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(StringView positionProvider, StringView expression) {
-    return new NodeWrapper<>(new ExpressionDrivenNode(positionProvider, expr(expression)));
+  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(StringView expression) {
+    return new NodeWrapper<>(new ExpressionDrivenNode(expr(expression)));
   }
 
   protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, StringView positionProvider, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {

@@ -439,7 +439,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldAllowToBindExpressionsToMarkupAttributes() {
     TextWithAnchors text = new TextWithAnchors(
-      "<`translate´ key=\"`my.key´\" `[with]´=\"`a´\"/>"
+      "<`translate´ key=\"`my.key´\" [with]=\"`a´\"/>"
     );
 
     makeCase(
@@ -448,12 +448,12 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         string(text.subView(1)),
         text.subView(0).setLowercase(),
         null,
-        exprDriven(text.subView(2), text.subView(3))
+        exprDriven(text.subView(2))
       )
     );
 
     text = new TextWithAnchors(
-      "<`translate´ key=\"`my.key´\" `[with]´=\"`a´\" `[with]´=\"`b´\"/>"
+      "<`translate´ key=\"`my.key´\" [with]=\"`a´\" [with]=\"`b´\"/>"
     );
 
     makeCase(
@@ -462,8 +462,8 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         string(text.subView(1)),
         text.subView(0).setLowercase(),
         null,
-        exprDriven(text.subView(2), text.subView(3)),
-        exprDriven(text.subView(4), text.subView(5))
+        exprDriven(text.subView(2)),
+        exprDriven(text.subView(3))
       )
     );
   }
