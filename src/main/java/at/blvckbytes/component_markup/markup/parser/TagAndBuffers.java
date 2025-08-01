@@ -36,7 +36,6 @@ public class TagAndBuffers implements ParserChildItem {
   public ConditionType ifConditionType = ConditionType.NONE;
   public @Nullable ExpressionNode useCondition;
 
-  public @Nullable StringView forAttributeName;
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
   public @Nullable MarkupNode forEmpty;
@@ -127,10 +126,7 @@ public class TagAndBuffers implements ParserChildItem {
         currentConditionType = childTag.ifConditionType;
 
         if (childTag.forIterable != null) {
-          assert childTag.forAttributeName != null;
-
           currentNode = new ForLoopNode(
-            childTag.forAttributeName,
             childTag.forIterable,
             childTag.forIterationVariable,
             currentNode,

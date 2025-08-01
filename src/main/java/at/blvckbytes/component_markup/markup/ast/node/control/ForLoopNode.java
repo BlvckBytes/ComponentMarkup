@@ -23,7 +23,6 @@ public class ForLoopNode extends MarkupNode {
   public final @Nullable ExpressionNode reversed;
 
   public ForLoopNode(
-    StringView positionProvider,
     ExpressionNode iterable,
     @Nullable StringView iterationVariable,
     MarkupNode body,
@@ -32,7 +31,7 @@ public class ForLoopNode extends MarkupNode {
     @Nullable ExpressionNode reversed,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(positionProvider, null, letBindings);
+    super(iterable.getFirstMemberPositionProvider(), null, letBindings);
 
     this.iterable = iterable;
     this.iterationVariable = iterationVariable == null ? null : iterationVariable.buildString();
