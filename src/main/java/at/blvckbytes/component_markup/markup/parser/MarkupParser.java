@@ -264,7 +264,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    tagStack.peek().addChild(new InterpolationNode(expression, parseExpression(expression)));
+    tagStack.peek().addChild(new InterpolationNode(parseExpression(expression)));
   }
 
   @Override

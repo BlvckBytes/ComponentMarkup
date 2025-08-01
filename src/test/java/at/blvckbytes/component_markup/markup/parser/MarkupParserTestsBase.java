@@ -124,7 +124,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<InterpolationNode> interpolation(StringView expression) {
-    return new NodeWrapper<>(new InterpolationNode(expression, expr(expression)));
+    return new NodeWrapper<>(new InterpolationNode(expr(expression)));
   }
 
   protected static NodeWrapper<TextNode> text(StringView value) {
