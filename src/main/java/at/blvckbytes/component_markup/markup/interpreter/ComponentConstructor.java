@@ -6,7 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +45,7 @@ public interface ComponentConstructor {
 
   void setClickOpenFileAction(Object component, String value);
 
-  void setClickOpenUrlAction(Object component, URI value);
+  void setClickOpenUrlAction(Object component, URL value);
 
   void setClickRunCommandAction(Object component, String value);
 

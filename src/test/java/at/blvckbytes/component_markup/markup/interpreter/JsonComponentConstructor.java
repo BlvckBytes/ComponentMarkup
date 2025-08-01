@@ -10,7 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -109,7 +109,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setClickOpenUrlAction(Object component, URI value) {
+  public void setClickOpenUrlAction(Object component, URL value) {
     setClickAction(component, "open_url", value.toString());
   }
 

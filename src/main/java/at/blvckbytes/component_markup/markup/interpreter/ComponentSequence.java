@@ -8,11 +8,13 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
+import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -435,8 +437,13 @@ public class ComponentSequence {
           String urlValue = interpreter.evaluateAsString(clickNode.value);
 
           try {
-            URI uri = URI.create(urlValue);
-            return (result, addressTree) -> componentConstructor.setClickOpenUrlAction(result, uri);
+            URL url = URI.create(urlValue).toURL();
+            String protocol = url.getProtocol();
+
+            if (!(protocol.equals("http") || protocol.equals("https")))
+              throw new IllegalStateException("Non-web protocol: \"" + protocol + "\"; use \"http\" or \"https\"");
+
+            return (result, addressTree) -> componentConstructor.setClickOpenUrlAction(result, url);
           } catch (Throwable e) {
             // TODO: Provide better message
             LoggerProvider.log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
