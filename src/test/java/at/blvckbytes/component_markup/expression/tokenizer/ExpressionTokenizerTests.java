@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.util.StringView;
@@ -21,7 +21,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeAllTypes() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `&&´ `2.7182´ `>=´ `*´ `||´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `==´ `^´ `my_variable´ `!=´ `&´ `)´ `..´ `.5´",
       "`~^´ `~_´ `~#´ `~!´ `~-´ `~?´ `~|´ `~<´ `@´ `@@´ `**´ `::´ `:::´ `:::´`::´"
@@ -96,7 +96,7 @@ public class ExpressionTokenizerTests {
     };
 
     for (String identifier : identifiers) {
-      TextWithAnchors text = new TextWithAnchors("`" + identifier + "´");
+      TextWithSubViews text = new TextWithSubViews("`" + identifier + "´");
 
       makeCase(
         text,
@@ -107,7 +107,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeIdentifiersWedgedWithDoubles() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`.3´`a´`.5´`b´`.4´"
     );
 
@@ -123,7 +123,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeRangeWedgedWithDoubles() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`.5´`..´`.3´"
     );
 
@@ -143,7 +143,7 @@ public class ExpressionTokenizerTests {
     items.addAll(Arrays.asList(Punctuation.values()));
 
     for (Object item : items) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "`before´ `a´`" + item + "´`b´ `after´"
       );
 
@@ -160,7 +160,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeDashesCorrectly() {
-    TextWithAnchors text = new TextWithAnchors("`-´`identifier´");
+    TextWithSubViews text = new TextWithSubViews("`-´`identifier´");
 
     makeCase(
       text,
@@ -168,7 +168,7 @@ public class ExpressionTokenizerTests {
       "identifier", text.subView(1)
     );
 
-    text = new TextWithAnchors("`-´`5.0´");
+    text = new TextWithSubViews("`-´`5.0´");
 
     makeCase(
       text,
@@ -176,7 +176,7 @@ public class ExpressionTokenizerTests {
       5.0, text.subView(1)
     );
 
-    text = new TextWithAnchors("`-´`.5´");
+    text = new TextWithSubViews("`-´`.5´");
 
     makeCase(
       text,
@@ -184,7 +184,7 @@ public class ExpressionTokenizerTests {
       DotDouble.of(.5), text.subView(1)
     );
 
-    text = new TextWithAnchors("`5´ `-´ `-´ `3´");
+    text = new TextWithSubViews("`5´ `-´ `-´ `3´");
 
     makeCase(
       text,
@@ -194,7 +194,7 @@ public class ExpressionTokenizerTests {
       3, text.subView(3)
     );
 
-    text = new TextWithAnchors("`5´ `-´`-´ `-´ `3´ `-´ `[´");
+    text = new TextWithSubViews("`5´ `-´`-´ `-´ `3´ `-´ `[´");
 
     makeCase(
       text,
@@ -210,7 +210,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeRangeOperator() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`0´`..´`100´"
     );
 
@@ -221,7 +221,7 @@ public class ExpressionTokenizerTests {
       100, text.subView(2)
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`a´`..´`b´"
     );
 
@@ -235,7 +235,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeValidStrings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`'hello, \" world `\\´' \\\"'´ `\"double ' quotes \\' `\\´\"\"´"
     );
 
@@ -261,7 +261,7 @@ public class ExpressionTokenizerTests {
     };
 
     for (String malformedIdentifier : malformedIdentifiers) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "`" + malformedIdentifier + "´"
       );
 
@@ -275,7 +275,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldThrowOnUnterminatedString() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`'´my string value"
     );
 
@@ -285,7 +285,7 @@ public class ExpressionTokenizerTests {
       text.subView(0).startInclusive
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`'´my string \n value'"
     );
 
@@ -298,7 +298,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldThrowOnMalformedDecimal() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`12.´"
     );
 
@@ -311,7 +311,7 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldThrowOnMalformedKnownOperators() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`|´"
     );
 
@@ -321,7 +321,7 @@ public class ExpressionTokenizerTests {
       text.subView(0).startInclusive
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`=´"
     );
 
@@ -331,7 +331,7 @@ public class ExpressionTokenizerTests {
       text.subView(0).startInclusive
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`~´"
     );
 
@@ -342,7 +342,7 @@ public class ExpressionTokenizerTests {
     );
   }
 
-  private static void makeErrorCase(TextWithAnchors input, ExpressionTokenizeError expectedError, int expectedPosition) {
+  private static void makeErrorCase(TextWithSubViews input, ExpressionTokenizeError expectedError, int expectedPosition) {
     ExpressionTokenizeException thrownException = null;
 
     try {
@@ -410,7 +410,7 @@ public class ExpressionTokenizerTests {
     return token;
   }
 
-  private static void makeCase(TextWithAnchors input, Object... expectedValuesAndViews) {
+  private static void makeCase(TextWithSubViews input, Object... expectedValuesAndViews) {
     List<Token> actualTokens = new ArrayList<>();
     ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
 

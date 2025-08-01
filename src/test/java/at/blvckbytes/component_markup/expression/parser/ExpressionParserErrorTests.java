@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.expression.parser;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +24,7 @@ public class ExpressionParserErrorTests {
     Object[] trailingTokens = { "c", Punctuation.OPENING_PARENTHESIS, 5, true };
 
     for (Object trailingToken : trailingTokens) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "a + b `" + trailingToken + "´"
       );
 
@@ -38,7 +38,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnArrayAfterSubscripting() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a[0][1`,´ 2]"
     );
 
@@ -52,7 +52,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingInfixRightOperand() {
     for (InfixOperator operator : InfixOperator.values()) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "a `" + operator + "´"
       );
 
@@ -66,7 +66,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnExpectingSubstringUpperBound() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a[`:´"
     );
 
@@ -80,7 +80,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_BRACKET || punctuation == Punctuation.COLON)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "a[:`" + punctuation + "´"
       );
 
@@ -95,7 +95,7 @@ public class ExpressionParserErrorTests {
       if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION || operator == InfixOperator.CONTAINS || operator == InfixOperator.MATCHES_REGEX)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "a[`:´" + operator
       );
 
@@ -109,7 +109,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnExpectingSubstringClosingBracket() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a[:`test´"
     );
 
@@ -119,7 +119,7 @@ public class ExpressionParserErrorTests {
       text.subView(0).endExclusive - 1
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "a[:`test´ null"
     );
 
@@ -133,7 +133,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_BRACKET)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "a[:test`" + punctuation + "´"
       );
 
@@ -147,7 +147,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnExpectingSubscriptClosingBracket() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a[`test´"
     );
 
@@ -161,7 +161,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_BRACKET || punctuation == Punctuation.COLON)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "a[test`" + punctuation + "´"
       );
 
@@ -175,7 +175,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingBranchingDelimiter() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a ? `test´"
     );
 
@@ -189,7 +189,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.COLON)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "a ? test`" + punctuation + "´"
       );
 
@@ -203,7 +203,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingBranchingFalseBranch() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "a ? test `:´"
     );
 
@@ -217,7 +217,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "`" + operator + "´"
       );
 
@@ -231,7 +231,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingArrayItem() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "[0`,´"
     );
 
@@ -244,7 +244,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingArrayClosingBracket() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`[´"
     );
 
@@ -254,7 +254,7 @@ public class ExpressionParserErrorTests {
       text.subView(0).startInclusive
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "[`true´"
     );
 
@@ -264,7 +264,7 @@ public class ExpressionParserErrorTests {
       text.subView(0).endExclusive - 1
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "[true, `false´"
     );
 
@@ -278,7 +278,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.COMMA || punctuation == Punctuation.CLOSING_BRACKET)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "[true`" + punctuation + "´"
       );
 
@@ -292,7 +292,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingParenthesesContent() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`(´"
     );
 
@@ -305,7 +305,7 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnMissingParenthesesTermination() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "(`true´"
     );
 
@@ -319,7 +319,7 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_PARENTHESIS)
         continue;
 
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "(true`" + punctuation + "´"
       );
 
@@ -336,7 +336,7 @@ public class ExpressionParserErrorTests {
     String[] nonIdentifiers = { "-d", "'hey'", "true", "false", "null", "[]" };
 
     for (String nonIdentifier : nonIdentifiers) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         "a + a.b.`" + nonIdentifier + "´"
       );
 
@@ -348,7 +348,7 @@ public class ExpressionParserErrorTests {
     }
   }
 
-  private void makeErrorCase(TextWithAnchors input, ExpressionParserError error, int position) {
+  private void makeErrorCase(TextWithSubViews input, ExpressionParserError error, int position) {
     ExpressionParseException thrownException = null;
 
     try {

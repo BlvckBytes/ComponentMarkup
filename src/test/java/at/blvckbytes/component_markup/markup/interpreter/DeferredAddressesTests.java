@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.MembersSlot;
 import at.blvckbytes.component_markup.platform.SlotContext;
@@ -31,7 +31,7 @@ public class DeferredAddressesTests {
   @Test
   public void shouldNotInitializeTreeIfNoDeferredComponentsPresent() {
     makeCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<red>",
         "  Hello, world! :)",
         "  <bold>test!</>",
@@ -45,7 +45,7 @@ public class DeferredAddressesTests {
   @Test
   public void shouldGenerateTreeForRatherSimpleCase() {
     makeCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "outer 0",
         "<br/>",
         "outer 1",
@@ -67,7 +67,7 @@ public class DeferredAddressesTests {
     );
   }
 
-  private void makeCase(TextWithAnchors input, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
+  private void makeCase(TextWithSubViews input, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
     MarkupNode ast = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
 
     ComponentOutput output = MarkupInterpreter.interpret(

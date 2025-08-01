@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.expression.parser;
 
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizerTests;
@@ -24,7 +24,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseEmptyInputAsNull() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       ""
     );
 
@@ -36,7 +36,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseEqualPrecedences() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // (((a + 5) - c) + d)
       "`a´ `+´ `5´ `-´ `c´ `+´ `d´"
     );
@@ -61,7 +61,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseClimbingPrecedences() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // (a + ((b * 3) * d))
       "`a´ `+´ `b´ `*´ `3´ `*´ `d´"
     );
@@ -86,7 +86,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseFallingPrecedences() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // (((a ^ 2) * c) + d)
       "`a´ `^´ `2´ `*´ `c´ `+´ `d´"
     );
@@ -111,7 +111,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseAlternatingPrecedences() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // ((a + (5 * c)) - ((d / 2) % x))
       "`a´ `+´ `5´ `*´ `c´ `-´ `d´ `/´ `2´ `%´ `x´"
     );
@@ -144,7 +144,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseExponentiationWithRightAssociativity() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // (a ^ (b ^ (c ^ d)))
       "`a´ `^´ `b´ `^´ `c´ `^´ `d´"
     );
@@ -169,7 +169,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldRespectParentheses() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // ((a + b) * (c - d))
       "(`a´ `+´ `b´) `*´ (`c´ `-´ `d´)"
     );
@@ -198,7 +198,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParsePrefixOperations() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`25´ `*´ `-´`3´"
     );
 
@@ -214,7 +214,7 @@ public class ExpressionParserTests {
       )
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`-´`3´"
     );
 
@@ -226,7 +226,7 @@ public class ExpressionParserTests {
       )
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`a´ `&&´ `!´`b´"
     );
 
@@ -242,7 +242,7 @@ public class ExpressionParserTests {
       )
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`!´`b´"
     );
 
@@ -267,7 +267,7 @@ public class ExpressionParserTests {
     String lowerExpression = lowerBound == null ? "" : String.valueOf(lowerBound);
     String upperExpression = upperBound == null ? "" : String.valueOf(upperBound);
 
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`a´`[´`" + lowerExpression + "´`:´`" + upperExpression + "´`]´"
     );
 
@@ -286,7 +286,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseSubscriptingOperator() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`a´`[´`b´`]´"
     );
 
@@ -303,7 +303,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseBranchingOperator() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`a´ `?´ `b´ `:´ `c´"
     );
 
@@ -321,7 +321,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseArraySyntax() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`[´`5´, `3´, `'hello'´, `true´, `false´, `c´`]´"
     );
 
@@ -339,7 +339,7 @@ public class ExpressionParserTests {
       )
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`[´`]´"
     );
 
@@ -354,7 +354,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldSubscriptIntoImmediateArray() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`[´`0´, `1´, `2´`]´`[´`0´`]´"
     );
 
@@ -377,7 +377,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldParseNestedArrays() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`[´`[´`0´, `1´`]´, `[´`2´, `3´`]´, `[´`4´, `5´`]´`]´`[´`0´`]´`[´`1´`]´"
     );
 
@@ -420,7 +420,7 @@ public class ExpressionParserTests {
 
   @Test
   public void shouldSubscriptIntoSingleItemArray() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`[´`0´`]´`[´`0´`]´"
     );
 
@@ -449,7 +449,7 @@ public class ExpressionParserTests {
   @Test
   public void shouldParsePrefixWithMemberAccess() {
     for (PrefixOperator[] prefixCase : prefixCases) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         joinAtPrependedPrefixes(prefixCase) + "`a´`.´`m_b´`.´`m_c´"
       );
 
@@ -467,7 +467,7 @@ public class ExpressionParserTests {
   @Test
   public void shouldParsePrefixWithSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         joinAtPrependedPrefixes(prefixCase) + "`a´`[´`s_b´`]´`[´`s_c´`]´"
       );
 
@@ -485,7 +485,7 @@ public class ExpressionParserTests {
   @Test
   public void shouldParsePrefixWithMemberAccessAndSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         joinAtPrependedPrefixes(prefixCase) + "`a´`[´`s_b´`]´`.´`m_c´`[´`s_d´`]´`.´`m_e´`[´`s_f´`]´"
       );
 
@@ -501,7 +501,7 @@ public class ExpressionParserTests {
   }
 
   private ExpressionNode makePrefixMemberSubscriptExpression(
-    TextWithAnchors text,
+    TextWithSubViews text,
     PrefixOperator[] prefixes,
     String[] identifiers
   ) {
@@ -529,7 +529,7 @@ public class ExpressionParserTests {
   @Test
   public void shouldParsePrefixWithInfixOpRightBeforeSubscripting() {
     for (PrefixOperator[] prefixCase : prefixCases) {
-      TextWithAnchors text = new TextWithAnchors(
+      TextWithSubViews text = new TextWithSubViews(
         joinAtPrependedPrefixes(prefixCase) + "`a´ `??´ `b´"
       );
 
@@ -637,7 +637,7 @@ public class ExpressionParserTests {
     return new InfixOperationNode(lhs, (InfixOperatorToken) operatorToken, rhs, (PunctuationToken) terminator);
   }
 
-  private void makeCase(TextWithAnchors input, @Nullable ExpressionNode expectedNode) {
+  private void makeCase(TextWithSubViews input, @Nullable ExpressionNode expectedNode) {
     ExpressionNode actualNode = ExpressionParser.parse(StringView.of(input.text), null);
 
     if (expectedNode == null) {

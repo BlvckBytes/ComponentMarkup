@@ -10,8 +10,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +19,12 @@ import static at.blvckbytes.component_markup.expression.parser.ExpressionParserT
 
 public class MemberAndSubscriptChainGenerator {
 
-  private final TextWithAnchors text;
+  private final TextWithSubViews text;
   private final List<String> identifiers;
   private int anchorIndexOffset;
 
   private MemberAndSubscriptChainGenerator(
-    TextWithAnchors text,
+    TextWithSubViews text,
     int anchorIndexOffset,
     List<String> identifiers
   ) {
@@ -74,7 +73,7 @@ public class MemberAndSubscriptChainGenerator {
   }
 
   public static ExpressionNode generate(
-    TextWithAnchors text,
+    TextWithSubViews text,
     int anchorIndexOffset,
     List<String> identifiers
   ) {

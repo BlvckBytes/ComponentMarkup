@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
@@ -641,7 +641,7 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldCreateProperErrorScreens() {
     makeErrorScreenCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<translate",
         "  let-a=\"b\"",
         "  [key]=\"my.expr[222 c.d.e\"",
@@ -652,7 +652,7 @@ public class MarkupParserErrorTests {
       ),
       // The escaped double-quote adds an extra char to line 3, thus it only looks like
       // the pointer is off by one in code, not when printed later on.
-      new TextWithAnchors(
+      new TextWithSubViews(
         "1: <translate",
         "2:   let-a=\"b\"",
         "3:   [key]=\"my.expr[222 c.d.e\"",
@@ -666,12 +666,12 @@ public class MarkupParserErrorTests {
     );
 
     makeErrorScreenCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<red",
         "  let-a=\"b\"",
         ">{ user.'name' }"
       ),
-      new TextWithAnchors(
+      new TextWithSubViews(
         "1: <red",
         "2:   let-a=\"b\"",
         "3: >{ user.'name' }",
@@ -681,12 +681,12 @@ public class MarkupParserErrorTests {
     );
 
     makeErrorScreenCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<red",
         "  let-a=\"b\"",
         "/>"
       ),
-      new TextWithAnchors(
+      new TextWithSubViews(
         "1: <red",
         "----^",
         "Error: This tag requires a separate closing-tag </red>, as it expects content and does not support self-closing <red />",
@@ -696,12 +696,12 @@ public class MarkupParserErrorTests {
     );
 
     makeErrorScreenCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<red",
         "  !!my-attr",
         "/>"
       ),
-      new TextWithAnchors(
+      new TextWithSubViews(
         "1: <red",
         "2:   !!my-attr",
         "------^",
@@ -918,7 +918,7 @@ public class MarkupParserErrorTests {
     );
   }
 
-  private void makeErrorScreenCase(TextWithAnchors input, TextWithAnchors screen) {
+  private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
       () -> MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE)
@@ -929,7 +929,7 @@ public class MarkupParserErrorTests {
   }
 
   private void makeErrorCase(MarkupParseError error, String... lines) {
-    TextWithAnchors input = new TextWithAnchors(lines);
+    TextWithSubViews input = new TextWithSubViews(lines);
     Throwable thrownError = null;
 
     try {

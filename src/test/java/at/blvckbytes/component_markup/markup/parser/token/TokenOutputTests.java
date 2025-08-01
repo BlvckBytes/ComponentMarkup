@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.parser.token;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.ListBuilder;
 import at.blvckbytes.component_markup.util.StringView;
@@ -39,7 +39,7 @@ public class TokenOutputTests {
 
   @Test
   public void shouldTokenizeNestedComments() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "``<!-- Hello, world!",
       "this is a ´`<!-- nested comment",
       "case! -->´` which is",
@@ -75,7 +75,7 @@ public class TokenOutputTests {
       finalLines[i] = lineValue;
     }
 
-    TextWithAnchors text = new TextWithAnchors(finalLines);
+    TextWithSubViews text = new TextWithSubViews(finalLines);
 
     makeHierarchicalCase(
       StringView.of(text.text),
@@ -92,7 +92,7 @@ public class TokenOutputTests {
 
   @Test
   public void shouldTokenizeComplexInputHierarchicallyAndSequentially() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       //  v- First subview-index within this line
       /*   0 */ "`<´`gray´`>´",
       /*   3 */ "  ``Currently,´` ´`the´` ´`following´` ´`players´` ´`are´` ´`online:´´`<´`space´`/´`>´",

@@ -22,7 +22,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseNoAttributesOpeningWithContent() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello, world! :)´"
     );
 
@@ -37,7 +37,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseAttributesOpeningWithContent() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "  <`red´ `attr-1´=\"` string´\" `attr-2´ `!attr-3´ `attr-4´=`.3´ `attr-5´=`-3´>` my content´"
     );
 
@@ -57,7 +57,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseMultilineAttributesOpeningWithContent() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´",
       "  `attr-1´=\"`value 1´\"",
       "  `attr-2´=\"`value 2´\"",
@@ -78,7 +78,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseSelfClosingTag() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<  `br´ />"
     );
 
@@ -89,7 +89,7 @@ public class XmlEventParserTests {
       new InputEndEvent()
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`br´/>"
     );
 
@@ -103,7 +103,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseOpeningAndClosingTagWithText() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello´`<´/`red´>"
     );
 
@@ -119,7 +119,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseIndentedTags() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>",
       "  <`bold´>`hi´"
     );
@@ -137,7 +137,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldRemoveTrailingWhitespace() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello ",
       "world ",
       "test´<`bold´>",
@@ -158,7 +158,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseMarkupAttribute() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`tag-outer´",
       "  `attr-1´=`{´",
       "    <`red´>`Hello curly `\\´} bracket´`<´/`red´>",
@@ -184,7 +184,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseInterpolationExpressions() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello, ´{`user.name´}`!´"
     );
 
@@ -201,7 +201,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseFairlyComplexExpression() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`show-item´",
       "  `name´=`{´<`red´>`My item!´`<´/`red´>}",
       "  `lore´=`{´<`blue´>`First line´<`br´/>",
@@ -275,7 +275,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseInterpolationWithCurlyBracketsInStrings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello, ´{`user.name + \"}\" + '}'´}`!´"
     );
 
@@ -292,7 +292,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldHandleAllTypesOfTextLocations() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`  abcde ´<`red´>` hello ´<`blue´>` world!  ´"
     );
 
@@ -308,7 +308,7 @@ public class XmlEventParserTests {
       new InputEndEvent()
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "`  abcde ´"
     );
 
@@ -321,7 +321,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldStripTrailingSpaces() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`Online players:   ",
       "´<`red´>`test´"
     );
@@ -338,7 +338,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldRemoveNewlineTrailingSpaces() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`  hello",
       "    world",
       "   test´"
@@ -353,7 +353,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldPreserveSurroundingContentSpaces() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`bold´>",
       "  <`red´>`  surrounding spaces  ´`<´/`red´>"
     );
@@ -372,7 +372,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldPreserveSurroundingInterpolationSpaces() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`Hello ´{`user.name´}` world!´"
     );
 
@@ -389,7 +389,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldEscapeCharactersInAttributeValues() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´ `a´=\"`hello `\\´\" quote´\">"
     );
 
@@ -403,7 +403,7 @@ public class XmlEventParserTests {
       new InputEndEvent()
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`red´ `a´=\"`these > should < not require escaping´\">"
     );
 
@@ -415,7 +415,7 @@ public class XmlEventParserTests {
       new InputEndEvent()
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`red´ `a´=`{´",
       "  <`green´ `b´=\"`neither } should { these´\">",
       "}>"
@@ -436,7 +436,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldEscapeLeadingCharacterInText() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "``\\´<hello, world!´"
     );
 
@@ -451,7 +451,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldEscapeCharactersInText() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`' escaping \" closing \\> opening `\\´<; closing `\\´} opening `\\´{ \" and '´`<´/`red´>"
     );
 
@@ -480,7 +480,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldPreserveNonEscapingBackslashes() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´ `a´=\"`a \\ backslash´\">`another \\ backslash´"
     );
 
@@ -500,7 +500,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseFlagAttributes() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´ `a´ `b´>"
     );
 
@@ -516,7 +516,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldConsumeComments() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<!-- My comment! :) -->"
     );
 
@@ -525,7 +525,7 @@ public class XmlEventParserTests {
       new InputEndEvent()
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<!-- A shiny new container! -->",
       "<`container´>",
       "  <!-- An indented comment, :) -->",
@@ -547,7 +547,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldNotEmitEmptyStrings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`container´ `*let-test´=`{´ {`a´}` and ´{`b´} }>"
     );
 
@@ -570,7 +570,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnterminatedOpeningTag() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`<´`red´"
     );
 
@@ -584,7 +584,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnterminatedClosingTag() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`<´/red"
     );
 
@@ -597,7 +597,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnterminatedMarkupValue() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´",
       "  `my-attr´=`{´",
       "    <`green´>`Hello, `\\´} world!",
@@ -620,10 +620,10 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldParseAllAttributeTypesWedgedWithTheTagEnd() {
-    TextWithAnchors text;
+    TextWithSubViews text;
 
     for (String tagEnd : new String[]{ "/>", ">" }) {
-      text = new TextWithAnchors("<`my-tag´ `my-attr´" + tagEnd);
+      text = new TextWithSubViews("<`my-tag´ `my-attr´" + tagEnd);
 
       makeCase(
         text,
@@ -633,7 +633,7 @@ public class XmlEventParserTests {
         new InputEndEvent()
       );
 
-      text = new TextWithAnchors("<`my-tag´ `my-attr´=\"`my-string´\"" + tagEnd);
+      text = new TextWithSubViews("<`my-tag´ `my-attr´=\"`my-string´\"" + tagEnd);
 
       makeCase(
         text,
@@ -643,7 +643,7 @@ public class XmlEventParserTests {
         new InputEndEvent()
       );
 
-      text = new TextWithAnchors("<`my-tag´ `my-attr´=`512´" + tagEnd);
+      text = new TextWithSubViews("<`my-tag´ `my-attr´=`512´" + tagEnd);
 
       makeCase(
         text,
@@ -653,7 +653,7 @@ public class XmlEventParserTests {
         new InputEndEvent()
       );
 
-      text = new TextWithAnchors("<`my-tag´ `my-attr´=`.512´" + tagEnd);
+      text = new TextWithSubViews("<`my-tag´ `my-attr´=`.512´" + tagEnd);
 
       makeCase(
         text,
@@ -663,7 +663,7 @@ public class XmlEventParserTests {
         new InputEndEvent()
       );
 
-      text = new TextWithAnchors("<`my-tag´ `my-attr´=`{´<`red´>`Hello´}" + tagEnd);
+      text = new TextWithSubViews("<`my-tag´ `my-attr´=`{´<`red´>`Hello´}" + tagEnd);
 
       makeCase(
         text,
@@ -686,7 +686,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnterminatedInterpolation() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´>`{´user.name + \"}\" + '}'"
     );
 
@@ -698,7 +698,7 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false)
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`red´>`{´user.name\n}"
     );
 
@@ -710,7 +710,7 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false)
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`red´>`{´user.name{"
     );
 
@@ -722,7 +722,7 @@ public class XmlEventParserTests {
       new TagOpenEndEvent(text.subView(0), false)
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`red´>`{´{"
     );
 
@@ -760,13 +760,13 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMissingTagName() {
-    TextWithAnchors text = new TextWithAnchors("`<´>");
+    TextWithSubViews text = new TextWithSubViews("`<´>");
     makeCase(text, XmlParseError.MISSING_TAG_NAME, text.subView(0).startInclusive);
   }
 
   @Test
   public void shouldAllowNullNamedClosingTag() {
-    TextWithAnchors text = new TextWithAnchors("`<´/>");
+    TextWithSubViews text = new TextWithSubViews("`<´/>");
 
     makeCase(
       text,
@@ -777,7 +777,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedAttributeKeys() {
-    TextWithAnchors text = new TextWithAnchors("<`red´ `my-attr´ `5var´>");
+    TextWithSubViews text = new TextWithSubViews("<`red´ `my-attr´ `5var´>");
 
     makeCase(
       text,
@@ -787,7 +787,7 @@ public class XmlEventParserTests {
       new FlagAttributeEvent(text.subView(1), "my-attr")
     );
 
-    text = new TextWithAnchors("<`red´ `my-attr´ `\"my-string\"´>");
+    text = new TextWithSubViews("<`red´ `my-attr´ `\"my-string\"´>");
 
     makeCase(
       text,
@@ -800,7 +800,7 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnUnescapedCurlyBrackets() {
-    TextWithAnchors text = new TextWithAnchors("hello `}´ world");
+    TextWithSubViews text = new TextWithSubViews("hello `}´ world");
 
     makeCase(
       text,
@@ -811,21 +811,21 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedComments() {
-    TextWithAnchors text = new TextWithAnchors("`<!-- Hello, world´");
+    TextWithSubViews text = new TextWithSubViews("`<!-- Hello, world´");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
-    text = new TextWithAnchors("`<!-- Hello, world -´");
+    text = new TextWithSubViews("`<!-- Hello, world -´");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
-    text = new TextWithAnchors("`<!-- Hello, world ->´");
+    text = new TextWithSubViews("`<!-- Hello, world ->´");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
-    text = new TextWithAnchors("`<!-- Hello, world --´");
+    text = new TextWithSubViews("`<!-- Hello, world --´");
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
   }
 
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
-    TextWithAnchors text = new TextWithAnchors("<`red´ a=`" + valueExpression + "´");
+    TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 
     makeCase(
       text,
@@ -835,11 +835,11 @@ public class XmlEventParserTests {
     );
   }
 
-  private static void makeCase(TextWithAnchors input, XmlEvent... expectedEvents) {
+  private static void makeCase(TextWithSubViews input, XmlEvent... expectedEvents) {
     makeCase(input, null, -1, expectedEvents);
   }
 
-  private static void makeCase(TextWithAnchors input, @Nullable XmlParseError expectedError, int expectedPosition, XmlEvent... expectedEvents) {
+  private static void makeCase(TextWithSubViews input, @Nullable XmlParseError expectedError, int expectedPosition, XmlEvent... expectedEvents) {
     XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
 
     XmlParseException thrownException = null;

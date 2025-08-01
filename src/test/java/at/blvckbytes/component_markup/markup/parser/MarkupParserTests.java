@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseSimpleCase() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`translate´",
       "  *let-`a´=\"`b´\"",
       "  [key]=\"`my.expr´\"",
@@ -37,7 +37,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseIf() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`before",
       "´<container *if=\"`a´\">`if contents´</container>",
       "`after´"
@@ -57,7 +57,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseForLoop() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`container´ *for-`member´=\"`members´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
@@ -81,7 +81,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseForLoopWithConditional() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`container´ *for-`member´=\"`members´\" *if=\"`member != null´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
@@ -106,7 +106,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseForLoopWithSeparatorAndReversedAndEmpty() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´",
       "  *for-`member´=\"`members´\"",
       "  *for-separator={ <`aqua´>`separator ´}",
@@ -133,7 +133,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseIfElseIfElse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`before",
       "´<container *if=\"`a´\">`if contents´</container>",
       "<container *else-if=\"`b´\">`else-if b contents´</container>",
@@ -163,7 +163,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseNestedIfElseIfElse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`before",
       "´<container *if=\"`a´\">",
       "  <container *if=\"`b´\">`if a and b´</container>",
@@ -204,7 +204,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseWhenMatching() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "`before",
       "´<`container´ *when=\"`my.expression´\">",
       "  <`red´ +is=\"`A´\">`Case A´</>",
@@ -262,7 +262,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldCollapseStyleContainers() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´><`bold´><`italic´>`Hello, world!´"
     );
 
@@ -277,7 +277,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldUnpackButInheritAll() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´ *if=\"`a´\" *use=\"`b´\" *let-`c´=\"`d´\">{`'test'´}"
     );
 
@@ -300,7 +300,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldAllowForLoopWithoutIterationVariable() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`red´ *for=\"`members´\">`Hello, world!´"
     );
 
@@ -320,7 +320,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldHandleClosingTagShorthand() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`aqua´>`hello´</aqua>",
       "<`red´><`bold´>`world´</></>",
       "<`green´><`italic´>`test´"
@@ -348,7 +348,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldCloseVaryingCasingTags() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`aQua´>`hello´</aQUA>"
     );
 
@@ -361,12 +361,12 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldPreserveWhitespaceInBetweenTagsAndOrInterpolation() {
-    TextWithAnchors text;
+    TextWithSubViews text;
 
     String[] spaceCases = { " ", "  ", "   " };
 
     for (String spaceCase : spaceCases) {
-      text = new TextWithAnchors("<`red´>`" + spaceCase + "´{`test´}");
+      text = new TextWithSubViews("<`red´>`" + spaceCase + "´{`test´}");
 
       makeCase(
         text,
@@ -376,7 +376,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .child(interpolation(text.subView(2)))
       );
 
-      text = new TextWithAnchors("{`test´}`" + spaceCase + "´<`red´>`after´");
+      text = new TextWithSubViews("{`test´}`" + spaceCase + "´<`red´>`after´");
 
       makeCase(
         text,
@@ -389,7 +389,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           )
       );
 
-      text = new TextWithAnchors("<`red´>`" + spaceCase + "´<`aqua´>`after´");
+      text = new TextWithSubViews("<`red´>`" + spaceCase + "´<`aqua´>`after´");
 
       makeCase(
         text,
@@ -402,7 +402,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           .color(text.subView(0).setLowercase())
       );
 
-      text = new TextWithAnchors("{`test´}`" + spaceCase + "´{`test´}");
+      text = new TextWithSubViews("{`test´}`" + spaceCase + "´{`test´}");
 
       makeCase(
         text,
@@ -413,7 +413,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       );
 
       // Should not preserve whitespace if there was a linebreak
-      text = new TextWithAnchors(
+      text = new TextWithSubViews(
         "<`gray´>`#´{`loop.index + 1´}" + spaceCase,
         spaceCase + "<`red´>{`word´}"
       );
@@ -438,7 +438,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldAllowToBindExpressionsToMarkupAttributes() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`translate´ key=\"`my.key´\" [with]=\"`a´\"/>"
     );
 
@@ -452,7 +452,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
       )
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<`translate´ key=\"`my.key´\" [with]=\"`a´\" [with]=\"`b´\"/>"
     );
 
@@ -470,7 +470,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
   @Test
   public void shouldParseFlagAttributes() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<`style´ `i´ !`b´>`hello, world´"
     );
 

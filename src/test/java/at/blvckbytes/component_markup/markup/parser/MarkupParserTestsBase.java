@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
@@ -131,7 +131,7 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new TextNode(value, value.buildString()));
   }
 
-  protected static void makeCase(TextWithAnchors input, NodeWrapper<?> wrappedExpectedNode) {
+  protected static void makeCase(TextWithSubViews input, NodeWrapper<?> wrappedExpectedNode) {
     MarkupNode actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
     Assertions.assertEquals(Jsonifier.jsonify(wrappedExpectedNode.get()), Jsonifier.jsonify(actualNode));
   }

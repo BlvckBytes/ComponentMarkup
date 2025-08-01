@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.AnsiStyleColor;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PackedColor;
@@ -44,7 +44,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderSimpleText() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red><bold>Hello, world! :)"
     );
 
@@ -61,7 +61,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderIfElse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<italic>",
       "  <red *if=\"my_flag\">My flag is true!</red>",
       "  <blue *else>My flag is false!</blue>"
@@ -92,7 +92,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderWhenMatching() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container *when=\"input\">",
       "  <red +is=\"A\">Case A</>",
       "  <green +is=\"B\">Case B</>",
@@ -179,7 +179,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderInterpolationWithBinding() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red *let-my_var=\"my_prefix & my_name & my_suffix\">Hello, {my_var}"
     );
 
@@ -203,7 +203,7 @@ public class MarkupInterpreterTests {
   }
 
   private void makeForLoopCase(boolean reversed) {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red",
       "  *for-char=\"my_chars\"",
       "  *for-separator={ <aqua>separator }",
@@ -254,7 +254,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderHoverText() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<aqua><bold><hover-text value={<red>Hello, hover!}>Hover over me!"
     );
 
@@ -280,7 +280,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldUpdateLetBindingOnLoopNode() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container *for=\"1..3\" *for-separator={<space/>} *let-number=\"loop.index + 1\">{number}"
     );
 
@@ -295,7 +295,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldGenerateAGradient() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
     );
 
@@ -309,7 +309,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldGenerateARainbow() {
     makeRecordedCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<rainbow>I am the <b>coolest rainbow</b> on earth"
       ),
       new InterpretationEnvironment(),
@@ -319,7 +319,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldDifferentiateBetweenIfAndUse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red *if=\"a\" *use=\"b\">Hello, world!"
     );
 
@@ -362,7 +362,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldSkipRainbowsOnUseIsFalse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<rainbow *use=\"a\">Hello, world!"
     );
 
@@ -385,7 +385,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldSkipStyleTagAttributesOnUseIsFalse() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<style *use=\"a\" bold italic underlined color=\"red\" font=\"my.font\">Hello, world!"
     );
 
@@ -415,7 +415,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldNotRepeatInheritedStyle() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red><bold>hello</><italic>world <red>test</>"
     );
 
@@ -444,7 +444,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldResetUnwantedInheritedStyle() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red>",
       "  <bold>",
       "    I am bold and red!",
@@ -477,7 +477,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldResetLoreStyle() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<reset>Hello, world!"
     );
 
@@ -494,7 +494,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldAlwaysUseNearestValues() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // No color/font is terminated, so they nest
       "<red><style font=\"a\">first line<br/>",
       "<green><style font=\"b\">second line<br/>",
@@ -530,7 +530,7 @@ public class MarkupInterpreterTests {
   @Test
   public void shouldNotAddUnnecessaryStyles() {
     makeCase(
-      new TextWithAnchors(
+      new TextWithSubViews(
         "<red><italic><green><italic>hello, world</green><blue><italic>test me out</blue>"
       ),
       new InterpretationEnvironment(),
@@ -556,7 +556,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldJoinSubsequentTextsOfEqualStyle() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red *for=\"1..5\">A</red>"
     );
 
@@ -572,7 +572,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldJoinSubsequentTexts() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       // Non-effective styled passages should also be interpreted as raw text
       "<red>Hello, <style [color]=\"null\">{a}</style> and {b}!"
     );
@@ -591,7 +591,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldJoinSubsequentTextsInATransition() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<transition color=\"red\" color=\"blue\">Hello {a} world {b}!"
     );
 
@@ -609,7 +609,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldInterpolateMarkupValues() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red>before</> {markup_value} <blue>after</> {scalar_value}"
     );
 
@@ -653,7 +653,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldEvaluateBoundMarkupAttributeExpressionsWithAndWithoutSpread() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<translate key=\"my.key\" [with]=\"first_node\"/>"
     );
 
@@ -689,7 +689,7 @@ public class MarkupInterpreterTests {
       .string("color", "red")
       .bool("italic", true);
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<translate key=\"my.key\" [with]=\"first_node\" [with]=\"second_node\"/>"
     );
 
@@ -708,7 +708,7 @@ public class MarkupInterpreterTests {
         ))
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<translate key=\"my.key\" [...with]=\"[first_node, second_node]\"/>"
     );
 
@@ -727,7 +727,7 @@ public class MarkupInterpreterTests {
         ))
     );
 
-    text = new TextWithAnchors(
+    text = new TextWithSubViews(
       "<translate key=\"my.key\" [with]=\"[first_node, second_node]\"/>"
     );
 
@@ -756,7 +756,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldRenderMarkupLetBindings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container",
       "  *let-spacer={ <dark_gray><st>{' ' ** 15} }",
       "  *let-line={ <red>Hello, world! }",
@@ -800,7 +800,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldAllowToUseLetBindingsOnUnpackedNode() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red *let-a=\"'a'\">{a ** 10}"
     );
 
@@ -816,7 +816,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldAllowLiteralLetBindings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container",
       "  +let-a=5",
       "  +let-b=\"hello\"",
@@ -835,7 +835,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldAllowBackwardsAccessOnLetBindings() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container",
       "  *let-a=5",
       "  *let-b=12",
@@ -856,7 +856,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldResetInMultiComponentScenario() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<reset>",
       "  <gray>",
       "    <translate key=\"a\"/> A<br/>",
@@ -940,7 +940,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldEmitEmptyComponentsOnBackToBackBreaks() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<red>First line</>",
       "<br/>",
       "<br/>",
@@ -973,7 +973,7 @@ public class MarkupInterpreterTests {
     // There was a bug where it would hoist up "gray" to the root
     // component, because it thought all text-members were gray.
 
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<gray>Hello, world!</> :)"
     );
 
@@ -1000,7 +1000,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldCaptureVariablesOnDirectMarkupLetBinding() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container",
       "  +let-a=\"first\"",
       ">",
@@ -1024,7 +1024,7 @@ public class MarkupInterpreterTests {
 
   @Test
   public void shouldCaptureVariablesOnIndirectMarkupLetBinding() {
-    TextWithAnchors text = new TextWithAnchors(
+    TextWithSubViews text = new TextWithSubViews(
       "<container",
       "  +let-a=\"first\"",
       ">",
@@ -1051,7 +1051,7 @@ public class MarkupInterpreterTests {
 
   @SuppressWarnings("SameParameterValue")
   private void makeRecordedCase(
-    TextWithAnchors input,
+    TextWithSubViews input,
     InterpretationEnvironment environment,
     SlotType slot
   ) {
@@ -1060,7 +1060,7 @@ public class MarkupInterpreterTests {
 
   @SuppressWarnings("SameParameterValue")
   private void makeRecordedCase(
-    TextWithAnchors input,
+    TextWithSubViews input,
     InterpretationEnvironment environment,
     SlotType slot,
     @Nullable String nameSuffix
@@ -1215,7 +1215,7 @@ public class MarkupInterpreterTests {
   }
 
   private void makeCase(
-    TextWithAnchors input,
+    TextWithSubViews input,
     InterpretationEnvironment baseEnvironment,
     SlotType slot,
     JsonBuilder expectedResult

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class TextWithAnchors {
+public class TextWithSubViews {
 
   private static class ViewIndices {
     final int startInclusive;
@@ -28,7 +28,7 @@ public class TextWithAnchors {
   private final StringView initialView;
   private final List<StringView> subViews;
 
-  public TextWithAnchors(String... lines) {
+  public TextWithSubViews(String... lines) {
     this.subViews = new ArrayList<>();
 
     StringBuilder result = new StringBuilder();
