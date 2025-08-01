@@ -35,7 +35,7 @@ public class ColorizeCharsNode extends ColorizeNode {
     boolean skipWhitespace = state.flags.contains(ColorizeFlag.SKIP_WHITESPACE);
     StringBuilder whitespaceAccumulator = skipWhitespace ? new StringBuilder() : null;
 
-    for (int charIndex = 0; charIndex < node.text.length(); ++charIndex) {
+    for (int charIndex = 0; charIndex < node.textValue.length(); ++charIndex) {
       char currentChar = node.textValue.charAt(charIndex);
 
       if (Character.isWhitespace(currentChar)) {

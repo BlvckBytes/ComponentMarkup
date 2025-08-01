@@ -11,12 +11,18 @@ public class LoggerProvider {
     logger.log(level, message, throwable);
   }
 
-  public static void log(Level level, String message) {
+  public static void log(Level level, String message, boolean printStackTrace) {
     logger.log(level, message);
 
-    for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace()) {
+    if (!printStackTrace)
+      return;
+
+    for (StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace())
       logger.log(level, "    at " + stackTraceElement);
-    }
+  }
+
+  public static void log(Level level, String message) {
+    log(level, message, true);
   }
 
   public static void set(Logger logger) {

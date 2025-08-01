@@ -1118,7 +1118,7 @@ public class MarkupInterpreterTests {
     String actualJson = gsonInstance.toJson(actualArray);
 
     if (componentsFile.exists()) {
-      LoggerProvider.log(Level.INFO, "Found data for case " + testCaseName);
+      LoggerProvider.log(Level.INFO, "Found data for case " + testCaseName, false);
 
       String expectedJson;
 
@@ -1146,7 +1146,7 @@ public class MarkupInterpreterTests {
       return;
     }
 
-    LoggerProvider.log(Level.INFO, "Writing initial data for case " + testCaseName);
+    LoggerProvider.log(Level.INFO, "Writing initial data for case " + testCaseName, false);
 
     try (
       FileWriter writer = new FileWriter(componentsFile)

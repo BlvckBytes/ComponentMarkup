@@ -89,28 +89,29 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   }
 
   public List<String> makeErrorScreen() {
-    List<String> result = new ArrayList<>();
-
     if (rootView == null)
       throw new IllegalStateException("Have not been provided with a reference to the root-view");
 
-    int inputLength = rootView.contents.length();
-    int targetCharIndex = getCharIndex();
+    return makeErrorScreen(rootView.contents, getCharIndex(), getErrorMessage());
+  }
 
+  public static List<String> makeErrorScreen(String contents, int position, String message) {
+    List<String> result = new ArrayList<>();
+
+    int inputLength = contents.length();
     int lineCounter = 1;
 
     for (int index = 0; index < inputLength; ++index) {
-      if (rootView.contents.charAt(index) == '\n')
+      if (contents.charAt(index) == '\n')
         ++lineCounter;
     }
 
     int maxLineNumberDigits = (lineCounter + 9) / 10;
-
     int nextLineNumber = 1;
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
-      char currentChar = rootView.contents.charAt(index);
+      char currentChar = contents.charAt(index);
 
       if (currentChar == '\r')
         continue;
@@ -118,25 +119,21 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
       boolean isLastChar = index == inputLength - 1;
 
       if (currentChar == '\n' || isLastChar) {
-        if (isLastChar)
+        if (isLastChar && currentChar != '\n')
           ++index;
 
         String lineNumber = padLeft(nextLineNumber++, maxLineNumberDigits) + ": ";
-        String lineContents = rootView.contents.substring(lineBegin, index);
+        String lineContents = contents.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
 
-        if (targetCharIndex >= lineBegin && targetCharIndex < index) {
-          int lineRelativeOffset = targetCharIndex - lineBegin;
+        if (position >= lineBegin && position < index) {
+          int lineRelativeOffset = position - lineBegin;
           int charCountUntilTargetChar = lineRelativeOffset == 0 ? 0 : lineRelativeOffset + 1;
-          int spacerLength = lineNumber.length() + charCountUntilTargetChar - 1;
+          int spacerLength = (lineNumber.length() + charCountUntilTargetChar) - 1;
 
-          String spacer = makeIndent(spacerLength, '-');
-
-          spacer += "^";
-
-          result.add(spacer);
-          result.add(makeIndent(lineNumber.length(), ' ') + "Error: " + getErrorMessage());
+          result.add(makeIndent(spacerLength, '-').append('^').toString());
+          result.add(makeIndent(lineNumber.length(), ' ').append("Error: ").append(message).toString());
         }
 
         lineBegin = index + 1;
@@ -146,19 +143,19 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     return result;
   }
 
-  private String makeIndent(int count, char c) {
+  private static StringBuilder makeIndent(int count, char c) {
     if (count <= 0)
-      return "";
+      return new StringBuilder(0);
 
     StringBuilder result = new StringBuilder(count);
 
     for (int i = 0; i < count; ++i)
       result.append(c);
 
-    return result.toString();
+    return result;
   }
 
-  private String padLeft(int number, int width) {
+  private static String padLeft(int number, int width) {
     String numberString = Integer.toString(number);
 
     int pad = width - numberString.length();
