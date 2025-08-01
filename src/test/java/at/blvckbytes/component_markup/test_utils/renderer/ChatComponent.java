@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025, BlvckBytes
+ * SPDX-License-Identifier: MIT
+ */
+
 package at.blvckbytes.component_markup.test_utils.renderer;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;

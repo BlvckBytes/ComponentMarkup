@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025, BlvckBytes
+ * SPDX-License-Identifier: MIT
+ */
+
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import java.util.function.Function;
