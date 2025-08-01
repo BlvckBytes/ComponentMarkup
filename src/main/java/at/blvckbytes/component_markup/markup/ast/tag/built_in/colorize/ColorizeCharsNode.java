@@ -20,11 +20,11 @@ public class ColorizeCharsNode extends ColorizeNode {
   public ColorizeCharsNode(
     StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    int position,
+    StringView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(tagName, stateCreator, position, children, letBindings);
+    super(tagName, stateCreator, positionProvider, children, letBindings);
   }
 
   @Override

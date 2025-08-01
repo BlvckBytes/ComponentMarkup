@@ -30,7 +30,7 @@ public class PlayerNameTag extends TagDefinition {
     return new PlayerNameNode(
       attributes.getOptionalExpressionNode("display-name"),
       attributes.getOptionalMarkupNode("representation"),
-      tagName.startInclusive, letBindings
+      tagName, letBindings
     );
   }
 }

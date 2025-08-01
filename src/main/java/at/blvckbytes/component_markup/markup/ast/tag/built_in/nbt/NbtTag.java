@@ -41,7 +41,7 @@ public abstract class NbtTag extends TagDefinition {
       attributes.getMandatoryExpressionNode("path"),
       attributes.getOptionalExpressionNode("interpret"),
       attributes.getOptionalMarkupNode("separator"),
-      tagName.startInclusive, letBindings
+      tagName, letBindings
     );
   }
 }

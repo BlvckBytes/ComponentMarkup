@@ -32,7 +32,7 @@ public class TranslateTag extends TagDefinition {
       attributes.getMandatoryExpressionNode("key"),
       attributes.getOptionalMarkupList("with"),
       attributes.getOptionalExpressionNode("fallback"),
-      tagName.startInclusive, letBindings
+      tagName, letBindings
     );
   }
 }

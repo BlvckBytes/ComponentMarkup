@@ -28,6 +28,6 @@ public class BreakTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    return new BreakNode(tagName.startInclusive);
+    return new BreakNode(tagName);
   }
 }

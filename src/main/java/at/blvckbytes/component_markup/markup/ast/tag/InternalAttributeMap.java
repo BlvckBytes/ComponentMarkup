@@ -35,7 +35,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (List<Attribute> attributeBucket : attributeMap.values()) {
       for (Attribute attribute : attributeBucket) {
         if (!attribute.hasBeenUsed)
-          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.attributeName.finalName.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.attributeName.finalName.buildString());
       }
     }
   }
@@ -56,7 +56,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionNode result = getOptionalExpressionNode(name, aliases);
 
     if (result == null)
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
+      throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
 
     return result;
   }
@@ -69,12 +69,12 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof ExpressionAttribute))
-      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+      throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
     if (expressionAttribute.attributeName.has(AttributeFlag.SPREAD_MODE))
-      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, formatNames(name, aliases), tagName.buildString());
+      throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, formatNames(name, aliases), tagName.buildString());
 
     return expressionAttribute.value;
   }
@@ -84,7 +84,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupNode result = getOptionalMarkupNode(name, aliases);
 
     if (result == null)
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
+      throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
 
     return result;
   }
@@ -97,7 +97,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (!(attribute instanceof MarkupAttribute))
-      throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+      throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
 
     return ((MarkupAttribute) attribute).value;
   }
@@ -114,7 +114,7 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     if (attributesCount > 1)
-      throw new MarkupParseException(attributes.get(1).attributeName.fullName.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, formatNames(name, aliases), tagName.buildString());
+      throw new MarkupParseException(attributes.get(1).attributeName.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, formatNames(name, aliases), tagName.buildString());
 
     Attribute result = attributes.get(0);
 
@@ -132,7 +132,7 @@ public class InternalAttributeMap implements AttributeMap {
     ExpressionList result = unwrapExpressionAttributes(selectMultiAttributeOrNull(name, true, aliases));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
+      throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
 
     return result;
   }
@@ -147,7 +147,7 @@ public class InternalAttributeMap implements AttributeMap {
     MarkupList result = unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false, aliases));
 
     if (result.isEmpty())
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
+      throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
 
     return result;
   }
@@ -166,7 +166,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (Attribute attribute : attributes) {
       if (expression) {
         if (!(attribute instanceof ExpressionAttribute))
-          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
 
         attribute.hasBeenUsed = true;
         continue;
@@ -176,7 +176,7 @@ public class InternalAttributeMap implements AttributeMap {
         // Immediate values are obviously nonsensical and were probably a mistake of the user
         // An expression-value will instantiate an expression-driven node later on
         if ((attribute instanceof ExpressionAttribute) && !attribute.attributeName.has(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attribute.attributeName.finalName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
       }
 
       attribute.hasBeenUsed = true;

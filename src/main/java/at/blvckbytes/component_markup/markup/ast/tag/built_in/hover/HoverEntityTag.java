@@ -27,7 +27,7 @@ public class HoverEntityTag extends HoverTag {
       attributes.getMandatoryExpressionNode("type"),
       attributes.getMandatoryExpressionNode("id"),
       attributes.getOptionalMarkupNode("name"),
-      tagName.startInclusive, children, letBindings
+      tagName, children, letBindings
     );
   }
 }

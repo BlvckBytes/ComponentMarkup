@@ -18,6 +18,10 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   public final MarkupParseError error;
   public final String[] messagePlaceholders;
 
+  public MarkupParseException(StringView positionProvider, MarkupParseError error, String... messagePlaceholders) {
+    this(positionProvider.startInclusive, error, messagePlaceholders);
+  }
+
   public MarkupParseException(int position, MarkupParseError error, String... messagePlaceholders) {
     this.position = position;
     this.error = error;

@@ -1,13 +1,14 @@
 package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 
-public class UnitNode extends TerminalNode {
+public abstract class UnitNode extends TerminalNode {
 
-  public UnitNode(int position, @Nullable LinkedHashSet<LetBinding> letBindings) {
-    super(position, letBindings);
+  public UnitNode(StringView positionProvider, @Nullable LinkedHashSet<LetBinding> letBindings) {
+    super(positionProvider, letBindings);
   }
 }

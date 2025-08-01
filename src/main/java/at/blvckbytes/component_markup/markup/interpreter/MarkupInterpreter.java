@@ -486,7 +486,7 @@ public class MarkupInterpreter implements Interpreter {
 
       if (nodeStyle != null) {
         if (!(interpolatedNode instanceof StyledNode))
-          interpolatedNode = new ContainerNode(interpolatedNode.position, Collections.singletonList(interpolatedNode), null);
+          interpolatedNode = new ContainerNode(interpolatedNode.positionProvider, Collections.singletonList(interpolatedNode), null);
 
         ((StyledNode) interpolatedNode).getOrInstantiateStyle().inheritFrom(nodeStyle, node.useCondition);
       }

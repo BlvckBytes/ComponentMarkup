@@ -29,11 +29,11 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   public ColorizeNode(
     StringView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    int position,
+    StringView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(positionProvider, children, letBindings);
 
     this.tagName = tagName;
     this.stateCreator = stateCreator;

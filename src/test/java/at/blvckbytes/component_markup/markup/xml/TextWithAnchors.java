@@ -20,6 +20,7 @@ public class TextWithAnchors {
 
   public final String text;
   private final StringView rootView;
+  private final StringView initialView;
   private final List<StringView> subViews;
   private final List<Integer> anchors;
 
@@ -103,6 +104,7 @@ public class TextWithAnchors {
     }
 
     this.rootView = StringView.of(text);
+    this.initialView = rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(0, 0);
 
     for (ViewIndices indices : indicesInOrder)
       this.subViews.add(rootView.buildSubViewAbsolute(indices.startInclusive, indices.endExclusive));
@@ -110,6 +112,10 @@ public class TextWithAnchors {
 
   public void addViewIndexToBeRemoved(int position) {
     this.rootView.addIndexToBeRemoved(position);
+  }
+
+  public StringView initialView() {
+    return initialView;
   }
 
   public @NotNull StringView subView(int index) {

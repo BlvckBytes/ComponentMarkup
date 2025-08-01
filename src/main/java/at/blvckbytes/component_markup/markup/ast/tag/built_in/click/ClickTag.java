@@ -37,7 +37,7 @@ public abstract class ClickTag extends TagDefinition {
     return new ClickNode(
       action,
       attributes.getMandatoryExpressionNode("value"),
-      tagName.startInclusive, children, letBindings
+      tagName, children, letBindings
     );
   }
 }

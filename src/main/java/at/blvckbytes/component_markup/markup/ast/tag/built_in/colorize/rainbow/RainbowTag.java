@@ -41,7 +41,7 @@ public class RainbowTag extends ColorizeTag {
           baseAttributes.getFlags(interpreter)
         )
       ),
-      tagName.startInclusive, children, letBindings
+      tagName, children, letBindings
     );
   }
 }

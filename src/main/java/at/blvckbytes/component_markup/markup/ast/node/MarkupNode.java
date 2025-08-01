@@ -19,17 +19,17 @@ public abstract class MarkupNode {
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;
 
-  public int position;
+  public final StringView positionProvider;
 
   public @Nullable List<MarkupNode> children;
   public @Nullable LinkedHashSet<LetBinding> letBindings;
 
   public MarkupNode(
-    int position,
+    StringView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    this.position = position;
+    this.positionProvider = positionProvider;
     this.children = children;
     this.letBindings = letBindings;
   }

@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.node.terminal;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -17,10 +18,10 @@ public class TranslateNode extends UnitNode {
     ExpressionNode key,
     MarkupList with,
     @Nullable ExpressionNode fallback,
-    int position,
+    StringView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, letBindings);
+    super(positionProvider, letBindings);
 
     this.key = key;
     this.with = with;

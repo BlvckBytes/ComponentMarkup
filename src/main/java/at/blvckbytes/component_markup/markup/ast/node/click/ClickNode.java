@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.click.ClickAction;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -17,11 +18,11 @@ public class ClickNode extends MarkupNode {
   public ClickNode(
     ClickAction action,
     ExpressionNode value,
-    int position,
+    StringView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(positionProvider, children, letBindings);
 
     this.action = action;
     this.value = value;

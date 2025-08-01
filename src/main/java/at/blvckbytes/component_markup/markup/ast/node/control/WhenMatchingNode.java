@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node.control;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public class WhenMatchingNode extends MarkupNode {
@@ -11,12 +12,12 @@ public class WhenMatchingNode extends MarkupNode {
   public final @Nullable MarkupNode other;
 
   public WhenMatchingNode(
-    int position,
+    StringView positionProvider,
     ExpressionNode input,
     WhenMatchingMap matchingMap,
     @Nullable MarkupNode other
   ) {
-    super(position, null, null);
+    super(positionProvider, null, null);
 
     this.input = input;
     this.matchingMap = matchingMap;

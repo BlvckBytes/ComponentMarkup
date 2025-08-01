@@ -31,7 +31,7 @@ public class ImmediateColorTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ContainerNode wrapper = new ContainerNode(tagName.startInclusive, children, letBindings);
+    ContainerNode wrapper = new ContainerNode(tagName, children, letBindings);
 
     ExpressionNode color = tagNameToColor(tagName);
 

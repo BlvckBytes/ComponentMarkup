@@ -12,7 +12,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseSimpleCase() {
     TextWithAnchors text = new TextWithAnchors(
-      "<@translate",
+      "<`translate´",
       "  @*let-`a´=\"`b´\"",
       "  [key]=\"`my.expr´\"",
       "  @[fallback]=\"`'hello, ' & user´\"",
@@ -22,11 +22,11 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       translate(
-        expr(text.subView(2)),
-        text.anchor(0),
-        expr(text.subView(3))
+        expr(text.subView(3)),
+        text.subView(0).setLowercase(),
+        expr(text.subView(4))
       )
-      .let(text.subView(0).setLowercase(), expr(text.subView(1)))
+      .let(text.subView(1).setLowercase(), expr(text.subView(2)))
     );
   }
 
@@ -40,7 +40,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(0)
+      container(text.initialView())
         .child(text(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT)))
         .child(
           text(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT))
@@ -53,7 +53,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseForLoop() {
     TextWithAnchors text = new TextWithAnchors(
-      "<@container *for-`member´=\"`members´\">",
+      "<`container´ `*for-`member´´=\"`members´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
     );
@@ -61,12 +61,13 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(1)),
-        text.subView(0),
-        container(text.anchor(0))
-          .child(text(text.subView(2).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .child(interpolation(text.subView(3)))
-          .child(text(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT))),
+        text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2),
+        container(text.subView(0).setLowercase())
+          .child(text(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(interpolation(text.subView(5)))
+          .child(text(text.subView(6).setBuildFlags(SubstringFlag.INNER_TEXT))),
         null,
         null,
         null
@@ -77,7 +78,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseForLoopWithConditional() {
     TextWithAnchors text = new TextWithAnchors(
-      "<@container *for-`member´=\"`members´\" *if=\"`member != null´\">",
+      "<`container´ `*for-`member´´=\"`members´\" *if=\"`member != null´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
     );
@@ -85,13 +86,14 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(1)),
-        text.subView(0),
-        container(text.anchor(0))
-          .child(text(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .child(interpolation(text.subView(4)))
+        text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2),
+        container(text.subView(0).setLowercase())
           .child(text(text.subView(5).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .ifCondition(expr(text.subView(2))),
+          .child(interpolation(text.subView(6)))
+          .child(text(text.subView(7).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .ifCondition(expr(text.subView(4))),
         null,
         null,
         null
@@ -103,7 +105,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseForLoopWithSeparatorAndReversedAndEmpty() {
     TextWithAnchors text = new TextWithAnchors(
       "<`red´",
-      "  *for-`member´=\"`members´\"",
+      "  `*for-`member´´=\"`members´\"",
       "  *for-separator={ <`aqua´>`separator ´}",
       "  *`for-reversed´",
       "  *for-empty={<`red´>`No entries!´}",
@@ -113,15 +115,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(2)),
-        text.subView(1).setLowercase(),
-        text(text.subView(8).setBuildFlags(SubstringFlag.LAST_TEXT))
+        text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2).setLowercase(),
+        text(text.subView(9).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(0).setLowercase()),
-        text(text.subView(4).setBuildFlags(SubstringFlag.LAST_TEXT))
-          .color(text.subView(3).setLowercase()),
-        bool(text.subView(5).setLowercase(), true),
-        text(text.subView(7).setBuildFlags(SubstringFlag.LAST_TEXT))
-          .color(text.subView(6).setLowercase())
+        text(text.subView(5).setBuildFlags(SubstringFlag.LAST_TEXT))
+          .color(text.subView(4).setLowercase()),
+        bool(text.subView(6).setLowercase(), true),
+        text(text.subView(8).setBuildFlags(SubstringFlag.LAST_TEXT))
+          .color(text.subView(7).setLowercase())
       )
     );
   }
@@ -139,7 +142,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(0)
+      container(text.initialView())
         .child(text(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT)))
         .child(
           ifElseIfElse(
@@ -174,7 +177,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(0)
+      container(text.initialView())
         .child(text(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT)))
         .child(
           ifElseIfElse(
@@ -201,10 +204,10 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseWhenMatching() {
     TextWithAnchors text = new TextWithAnchors(
       "`before",
-      "´<@container *when=\"`my.expression´\">",
+      "´<`container´ *when=\"`my.expression´\">",
       "  <`red´ +is=\"`A´\">`Case A´</>",
       "  <`green´ +is=\"`B´\">`Case B´</>",
-      "  <@`blue´ +is=\"`C´\" *when=\"`another.expression´\">",
+      "  <`blue´ +is=\"`C´\" *when=\"`another.expression´\">",
       "    <`gold´ +is=\"`D´\">`Case D´</>",
       "    <`yellow´ +is=\"`E´\">`Case E´</>",
       "  </>",
@@ -215,43 +218,43 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(0)
+      container(text.initialView())
         .child(text(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT)))
         .child(
           when(
-            text.anchor(0),
-            expr(text.subView(1)),
-            text(text.subView(18).setBuildFlags(SubstringFlag.INNER_TEXT))
-              .color(text.subView(17).setLowercase()),
+            text.subView(1).setLowercase(),
+            expr(text.subView(2)),
+            text(text.subView(19).setBuildFlags(SubstringFlag.INNER_TEXT))
+              .color(text.subView(18).setLowercase()),
             whenMap(
-              text.subView(3),
-              text(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT))
-                .color(text.subView(2).setLowercase()),
-              text.subView(6),
-              text(text.subView(7).setBuildFlags(SubstringFlag.INNER_TEXT))
-                .color(text.subView(5).setLowercase()),
-              text.subView(9),
-              container(text.anchor(1))
-                .color(text.subView(8).setLowercase())
+              text.subView(4),
+              text(text.subView(5).setBuildFlags(SubstringFlag.INNER_TEXT))
+                .color(text.subView(3).setLowercase()),
+              text.subView(7),
+              text(text.subView(8).setBuildFlags(SubstringFlag.INNER_TEXT))
+                .color(text.subView(6).setLowercase()),
+              text.subView(10),
+              container(text.subView(9))
+                .color(text.subView(9).setLowercase())
                 .child(
                   when(
-                    text.anchor(1),
-                    expr(text.subView(10)),
+                    text.subView(9).setLowercase(),
+                    expr(text.subView(11)),
                     null,
                     whenMap(
-                      text.subView(12),
-                      text(text.subView(13).setBuildFlags(SubstringFlag.INNER_TEXT))
-                        .color(text.subView(11).setLowercase()),
-                      text.subView(15),
-                      text(text.subView(16).setBuildFlags(SubstringFlag.INNER_TEXT))
-                        .color(text.subView(14).setLowercase())
+                      text.subView(13),
+                      text(text.subView(14).setBuildFlags(SubstringFlag.INNER_TEXT))
+                        .color(text.subView(12).setLowercase()),
+                      text.subView(16),
+                      text(text.subView(17).setBuildFlags(SubstringFlag.INNER_TEXT))
+                        .color(text.subView(15).setLowercase())
                     )
                   )
                 )
             )
           )
         )
-        .child(text(text.subView(19).setBuildFlags(SubstringFlag.LAST_TEXT)))
+        .child(text(text.subView(20).setBuildFlags(SubstringFlag.LAST_TEXT)))
     );
   }
 
@@ -296,15 +299,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldAllowForLoopWithoutIterationVariable() {
     TextWithAnchors text = new TextWithAnchors(
-      "<`red´ *for=\"`members´\">`Hello, world!´"
+      "<`red´ `*for´=\"`members´\">`Hello, world!´"
     );
 
     makeCase(
       text,
       forLoop(
-        expr(text.subView(1)),
+        text.subView(1),
+        expr(text.subView(2)),
         null,
-        text(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT))
+        text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(0).setLowercase()),
         null,
         null,
@@ -323,7 +327,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
     makeCase(
       text,
-      container(0)
+      container(text.initialView())
         .child(
           text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
             .color(text.subView(0).setLowercase())
@@ -361,11 +365,11 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     String[] spaceCases = { " ", "  ", "   " };
 
     for (String spaceCase : spaceCases) {
-      text = new TextWithAnchors("<@`red´>`" + spaceCase + "´{`test´}");
+      text = new TextWithAnchors("<`red´>`" + spaceCase + "´{`test´}");
 
       makeCase(
         text,
-        container(text.anchor(0))
+        container(text.subView(0))
           .color(text.subView(0).setLowercase())
           .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
           .child(interpolation(text.subView(2)))
@@ -375,7 +379,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
       makeCase(
         text,
-        container(0)
+        container(text.initialView())
           .child(interpolation(text.subView(0)))
           .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
           .child(
@@ -384,11 +388,11 @@ public class MarkupParserTests extends MarkupParserTestsBase {
           )
       );
 
-      text = new TextWithAnchors("<@`red´>`" + spaceCase + "´<`aqua´>`after´");
+      text = new TextWithAnchors("<`red´>`" + spaceCase + "´<`aqua´>`after´");
 
       makeCase(
         text,
-        container(text.anchor(0))
+        container(text.subView(0))
           .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
           .child(
             text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
@@ -401,7 +405,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
       makeCase(
         text,
-        container(0)
+        container(text.initialView())
           .child(interpolation(text.subView(0)))
           .child(text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT)))
           .child(interpolation(text.subView(2)))
@@ -409,13 +413,13 @@ public class MarkupParserTests extends MarkupParserTestsBase {
 
       // Should not preserve whitespace if there was a linebreak
       text = new TextWithAnchors(
-        "<@`gray´>`#´{`loop.index + 1´}" + spaceCase,
+        "<`gray´>`#´{`loop.index + 1´}" + spaceCase,
         spaceCase + "<`red´>{`word´}"
       );
 
       makeCase(
         text,
-        container(text.anchor(0))
+        container(text.subView(0))
           .color(text.subView(0).setLowercase())
           .child(
             text(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT))
@@ -434,32 +438,31 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldAllowToBindExpressionsToMarkupAttributes() {
     TextWithAnchors text = new TextWithAnchors(
-      "<@translate key=\"`my.key´\" [with]=\"`a´\"/>"
+      "<`translate´ key=\"`my.key´\" `[with]´=\"`a´\"/>"
     );
 
     makeCase(
       text,
       translate(
-        string(text.subView(0)),
-        text.anchor(0),
+        string(text.subView(1)),
+        text.subView(0).setLowercase(),
         null,
-        exprDriven(expr(text.subView(1))
-        )
+        exprDriven(text.subView(2), text.subView(3))
       )
     );
 
     text = new TextWithAnchors(
-      "<@translate key=\"`my.key´\" [with]=\"`a´\" [with]=\"`b´\"/>"
+      "<`translate´ key=\"`my.key´\" `[with]´=\"`a´\" `[with]´=\"`b´\"/>"
     );
 
     makeCase(
       text,
       translate(
-        string(text.subView(0)),
-        text.anchor(0),
+        string(text.subView(1)),
+        text.subView(0).setLowercase(),
         null,
-        exprDriven(expr(text.subView(1))),
-        exprDriven(expr(text.subView(2)))
+        exprDriven(text.subView(2), text.subView(3)),
+        exprDriven(text.subView(4), text.subView(5))
       )
     );
   }

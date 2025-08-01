@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
 import at.blvckbytes.component_markup.markup.interpreter.SlotType;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -22,10 +23,10 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
   public SelectorNode(
     ExpressionNode selector,
     @Nullable MarkupNode separator,
-    int position,
+    StringView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, letBindings);
+    super(positionProvider, letBindings);
 
     this.selector = selector;
     this.separator = separator;

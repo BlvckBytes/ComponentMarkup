@@ -52,7 +52,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.isSubParser = isSubParser;
     this.result = new TextNode(StringView.EMPTY, "");
 
-    this.tagStack.push(new TagAndBuffers(initialPosition));
+    this.tagStack.push(new TagAndBuffers(rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(initialPosition, initialPosition)));
   }
 
   // ================================================================================
@@ -72,7 +72,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (tag == null) {
       if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
+        throw new MarkupParseException(tagName, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
 
       tag = DummyTag.INSTANCE;
     }
@@ -186,7 +186,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL))
-      throw new MarkupParseException(name.startInclusive, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
+      throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
 
     handleUserAttribute(attributeName, subtree, null);
   }
@@ -230,13 +230,13 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (!wasSelfClosing) {
       if (tagClosing == TagClosing.SELF_CLOSE)
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.EXPECTED_SELF_CLOSING_TAG, currentLayer.tagName.buildString());
+        throw new MarkupParseException(tagName, MarkupParseError.EXPECTED_SELF_CLOSING_TAG, currentLayer.tagName.buildString());
 
       return;
     }
 
     if (tagClosing == TagClosing.OPEN_CLOSE)
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG, currentLayer.tagName.buildString());
+      throw new MarkupParseException(tagName, MarkupParseError.EXPECTED_OPEN_CLOSE_TAG, currentLayer.tagName.buildString());
 
     tagStack.pop();
     tagStack.peek().addChild(currentLayer);
@@ -259,7 +259,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    tagStack.peek().addChild(new InterpolationNode(parseExpression(expression)));
+    tagStack.peek().addChild(new InterpolationNode(expression, parseExpression(expression)));
   }
 
   @Override
@@ -291,7 +291,7 @@ public class MarkupParser implements XmlEventConsumer {
         if (noOpUnmatched)
           return;
 
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK, tagName.buildString());
+        throw new MarkupParseException(tagName, MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK, tagName.buildString());
       }
 
       while (tagStack.size() > 1) {
@@ -306,7 +306,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (closedTag == null) {
       if (tokenOutput == null || !tokenOutput.outputFlags.contains(OutputFlag.ENABLE_DUMMY_TAG))
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
+        throw new MarkupParseException(tagName, MarkupParseError.UNKNOWN_TAG, tagName.buildString());
     }
 
     if (noOpUnmatched) {
@@ -332,7 +332,7 @@ public class MarkupParser implements XmlEventConsumer {
       openedTag = tagStack.pop();
 
       if (tagStack.isEmpty())
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName.buildString());
+        throw new MarkupParseException(tagName, MarkupParseError.UNBALANCED_CLOSING_TAG, tagName.buildString());
 
       tagStack.peek().addChild(openedTag);
     } while (openedTag.tagName == null || !tagName.contentEquals(openedTag.tagName.buildString(), true));
@@ -422,7 +422,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (attributeName.finalName.contentEquals("for", true) || attributeName.finalName.startsWith("for-", true)) {
       if (!(value instanceof ExpressionNode) || immediateValue != null)
-        throw new MarkupParseException(attributeName.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
+        throw new MarkupParseException(attributeName.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
 
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, attributeName.finalName.buildSubViewRelative(0, 3));
@@ -433,7 +433,7 @@ public class MarkupParser implements XmlEventConsumer {
         iterationVariable = attributeName.finalName.buildSubViewRelative(4);
 
         if (isInvalidIdentifier(iterationVariable, true))
-          throw new MarkupParseException(iterationVariable.startInclusive, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable.buildString());
+          throw new MarkupParseException(iterationVariable, MarkupParseError.MALFORMED_IDENTIFIER, iterationVariable.buildString());
 
         if (tokenOutput != null) {
           tokenOutput.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, attributeName.finalName.buildSubViewRelative(3, 4));
@@ -441,12 +441,13 @@ public class MarkupParser implements XmlEventConsumer {
         }
 
         if (currentLayer.hasLetBinding(iterationVariable.buildString()))
-          throw new MarkupParseException(iterationVariable.startInclusive, MarkupParseError.BINDING_IN_USE, iterationVariable.buildString());
+          throw new MarkupParseException(iterationVariable, MarkupParseError.BINDING_IN_USE, iterationVariable.buildString());
       }
 
       if (currentLayer.forIterable != null)
-        throw new MarkupParseException(attributeName.fullName.startInclusive, MarkupParseError.MULTIPLE_LOOPS);
+        throw new MarkupParseException(attributeName.fullName, MarkupParseError.MULTIPLE_LOOPS);
 
+      currentLayer.forAttributeName = attributeName.fullName;
       currentLayer.forIterable = (ExpressionNode) value;
       currentLayer.forIterationVariable = iterationVariable;
       return;
@@ -479,7 +480,7 @@ public class MarkupParser implements XmlEventConsumer {
         }
 
         if (isCaptureMode)
-          throw new MarkupParseException(bindingName.startInclusive, MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES);
+          throw new MarkupParseException(bindingName, MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES);
 
         if (tokenOutput != null) {
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__CAPTURE, bindingName.buildSubViewRelative(0, 1));
@@ -491,16 +492,16 @@ public class MarkupParser implements XmlEventConsumer {
       }
 
       if (nameLength == 0)
-        throw new MarkupParseException(attributeName.finalName.startInclusive, MarkupParseError.EMPTY_BINDING_NAME);
+        throw new MarkupParseException(attributeName.finalName, MarkupParseError.EMPTY_BINDING_NAME);
 
       if (isInvalidIdentifier(bindingName, true))
-        throw new MarkupParseException(bindingName.startInclusive, MarkupParseError.MALFORMED_IDENTIFIER, bindingName.buildString());
+        throw new MarkupParseException(bindingName, MarkupParseError.MALFORMED_IDENTIFIER, bindingName.buildString());
 
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__BINDING, bindingName);
 
       if (currentLayer.forIterationVariable != null && bindingName.contentEquals(currentLayer.forIterationVariable.buildString(), true))
-        throw new MarkupParseException(bindingName.startInclusive, MarkupParseError.BINDING_IN_USE, bindingName.buildString());
+        throw new MarkupParseException(bindingName, MarkupParseError.BINDING_IN_USE, bindingName.buildString());
 
       if (value instanceof StringView) {
         StringView stringView = (StringView) value;
@@ -513,21 +514,21 @@ public class MarkupParser implements XmlEventConsumer {
         binding = new MarkupLetBinding((MarkupNode) value, bindingName, isCaptureMode);
       else {
         if (isCaptureMode && immediateValue != null)
-          throw new MarkupParseException(attributeName.fullName.startInclusive, MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE, bindingName.buildString());
+          throw new MarkupParseException(attributeName.fullName, MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE, bindingName.buildString());
 
         if (value instanceof ExpressionNode)
           binding = new ExpressionLetBinding((ExpressionNode) value, isCaptureMode, bindingName);
         else
-          throw new MarkupParseException(attributeName.fullName.startInclusive, MarkupParseError.VALUELESS_BINDING, bindingName.buildString());
+          throw new MarkupParseException(attributeName.fullName, MarkupParseError.VALUELESS_BINDING, bindingName.buildString());
       }
 
       if (!currentLayer.addLetBinding(binding))
-        throw new MarkupParseException(bindingName.startInclusive, MarkupParseError.BINDING_IN_USE, bindingName.buildString());
+        throw new MarkupParseException(bindingName, MarkupParseError.BINDING_IN_USE, bindingName.buildString());
 
       return;
     }
 
-    throw new MarkupParseException(attributeName.fullName.startInclusive, MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
+    throw new MarkupParseException(attributeName.fullName, MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
   }
 
   private boolean handleStaticallyNamedIntrinsicAttribute(
@@ -542,13 +543,13 @@ public class MarkupParser implements XmlEventConsumer {
     switch (name.finalName.buildString()) {
       case "if": {
         if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+          throw new MarkupParseException(name.fullName, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
         if (!(value instanceof ExpressionNode) || immediateValue != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
         currentLayer.ifCondition = (ExpressionNode) value;
         currentLayer.ifConditionType = ConditionType.IF;
@@ -557,13 +558,13 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "else-if": {
         if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+          throw new MarkupParseException(name.fullName, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
         if (!(value instanceof ExpressionNode) || immediateValue != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
         currentLayer.ifCondition = (ExpressionNode) value;
         currentLayer.ifConditionType = ConditionType.ELSE_IF;
@@ -572,10 +573,10 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "use": {
         if (!(value instanceof ExpressionNode) || immediateValue != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.useCondition != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_USE_CONDITIONS);
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_USE_CONDITIONS);
 
         currentLayer.useCondition = (ExpressionNode) value;
         return true;
@@ -583,13 +584,13 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "other": {
         if (value != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT);
+          throw new MarkupParseException(name.fullName, MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT);
 
         if (currentLayer.isWhenOther || currentLayer.whenIsValue != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+          throw new MarkupParseException(name.fullName, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
 
         currentLayer.isWhenOther = true;
         return true;
@@ -597,10 +598,10 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "else": {
         if (value != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS);
 
         currentLayer.ifConditionType = ConditionType.ELSE;
         return true;
@@ -608,10 +609,10 @@ public class MarkupParser implements XmlEventConsumer {
 
       case "when": {
         if (!(value instanceof ExpressionNode) || immediateValue != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.whenInput != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT);
+          throw new MarkupParseException(name.fullName, MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT);
 
         currentLayer.whenInput = (ExpressionNode) value;
         return true;
@@ -623,13 +624,13 @@ public class MarkupParser implements XmlEventConsumer {
         if (value instanceof StringView)
           isValue = ((StringView) value);
         else
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT);
+          throw new MarkupParseException(name.fullName, MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT);
 
         if (currentLayer.whenIsValue != null || currentLayer.isWhenOther)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
+          throw new MarkupParseException(name.fullName, MarkupParseError.WHEN_MATCHING_COLLIDING_CASES);
 
         currentLayer.whenIsValue = isValue;
         return true;
@@ -638,7 +639,7 @@ public class MarkupParser implements XmlEventConsumer {
       case "for-reversed":
         if (!(value instanceof ExpressionNode)) {
           if (value != null)
-            throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+            throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
           if (immediateValue == null)
             throw new IllegalStateException("Expected an immediate value to have been provided on null-value (flag)");
@@ -647,46 +648,46 @@ public class MarkupParser implements XmlEventConsumer {
         }
 
         if (currentLayer.forIterable == null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.forReversed != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
 
         currentLayer.forReversed = (ExpressionNode) value;
         return true;
 
       case "for-empty":
         if (!(value instanceof MarkupNode))
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
 
         if (currentLayer.forIterable == null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.forEmpty != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
 
         currentLayer.forEmpty = (MarkupNode) value;
         return true;
 
       case "for-separator":
         if (!(value instanceof MarkupNode))
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
 
         if (currentLayer.forIterable == null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.forSeparator != null)
-          throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
+          throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
 
         currentLayer.forSeparator = (MarkupNode) value;
         return true;
 
       case "for-":
-        throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.UNNAMED_FOR_LOOP);
+        throw new MarkupParseException(name.fullName, MarkupParseError.UNNAMED_FOR_LOOP);
 
       case "let":
       case "let-":
-        throw new MarkupParseException(name.fullName.startInclusive, MarkupParseError.UNNAMED_LET_BINDING);
+        throw new MarkupParseException(name.fullName, MarkupParseError.UNNAMED_LET_BINDING);
     }
 
     return false;
@@ -694,7 +695,7 @@ public class MarkupParser implements XmlEventConsumer {
 
   private void handleUserAttribute(AttributeName attributeName, @NotNull Object value, @Nullable StringView rawValue) {
     if (isInvalidIdentifier(attributeName.finalName, false))
-      throw new MarkupParseException(attributeName.finalName.startInclusive, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
+      throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, attributeName.finalName);
@@ -707,7 +708,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (attributeName.has(AttributeFlag.BINDING_MODE)) {
       if (!(value instanceof StringView))
-        throw new MarkupParseException(attributeName.finalName.startInclusive, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+        throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
       expression = parseExpression((StringView) value);
     }
@@ -761,7 +762,7 @@ public class MarkupParser implements XmlEventConsumer {
       ExpressionNode expression = ExpressionParser.parse(value, tokenOutput);
 
       if (expression == null)
-        throw new MarkupParseException(value.startInclusive, MarkupParseError.EMPTY_EXPRESSION);
+        throw new MarkupParseException(value, MarkupParseError.EMPTY_EXPRESSION);
 
       return expression;
     } catch (ExpressionTokenizeException expressionTokenizeException) {

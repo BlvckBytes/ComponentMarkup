@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
 import at.blvckbytes.component_markup.markup.interpreter.SlotType;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -28,10 +29,10 @@ public class NbtNode extends DeferredNode<NbtParameter> {
     ExpressionNode path,
     @Nullable ExpressionNode interpret,
     @Nullable MarkupNode separator,
-    int position,
+    StringView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, letBindings);
+    super(positionProvider, letBindings);
 
     this.source = source;
     this.identifier = identifier;

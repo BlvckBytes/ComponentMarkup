@@ -9,6 +9,6 @@ import java.util.LinkedHashSet;
 public class CaptureNode extends MarkupNode {
 
   public CaptureNode(MarkupNode node, LinkedHashSet<LetBinding> bindings) {
-    super(node.position, Collections.singletonList(node), bindings);
+    super(node.positionProvider, Collections.singletonList(node), bindings);
   }
 }

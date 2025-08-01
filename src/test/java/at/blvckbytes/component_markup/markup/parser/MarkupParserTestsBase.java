@@ -23,6 +23,7 @@ import java.util.*;
 public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ForLoopNode> forLoop(
+    StringView forAttributeName,
     ExpressionNode iterable,
     @Nullable StringView iterationVariable,
     NodeWrapper<?> wrappedBody,
@@ -31,6 +32,7 @@ public abstract class MarkupParserTestsBase {
     @Nullable NodeWrapper<?> wrappedEmpty
   ) {
     return new NodeWrapper<>(new ForLoopNode(
+      forAttributeName,
       iterable,
       iterationVariable,
       wrappedBody.get(),
@@ -57,7 +59,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<WhenMatchingNode> when(
-    int position,
+    StringView positionProvider,
     ExpressionNode input,
     @Nullable NodeWrapper<?> wrappedFallback,
     List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> wrappedCases
@@ -67,7 +69,7 @@ public abstract class MarkupParserTestsBase {
     for (Tuple<StringView, NodeWrapper<? extends MarkupNode>> entry : wrappedCases)
       cases.put(entry.first, entry.second.get());
 
-    return new NodeWrapper<>(new WhenMatchingNode(position, input, cases, wrappedFallback == null ? null : wrappedFallback.get()));
+    return new NodeWrapper<>(new WhenMatchingNode(positionProvider, input, cases, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
   @SafeVarargs
@@ -92,21 +94,21 @@ public abstract class MarkupParserTestsBase {
     return ExpressionParser.parse(expression, null);
   }
 
-  protected static NodeWrapper<ContainerNode> container(int position) {
-    return new NodeWrapper<>(new ContainerNode(position, new ArrayList<>(), new LinkedHashSet<>()));
+  protected static NodeWrapper<ContainerNode> container(StringView positionProvider) {
+    return new NodeWrapper<>(new ContainerNode(positionProvider, new ArrayList<>(), new LinkedHashSet<>()));
   }
 
-  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(ExpressionNode expression) {
-    return new NodeWrapper<>(new ExpressionDrivenNode(expression));
+  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(StringView positionProvider, StringView expression) {
+    return new NodeWrapper<>(new ExpressionDrivenNode(positionProvider, expr(expression)));
   }
 
-  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, int position, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
+  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, StringView positionProvider, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
     List<MarkupNode> withs = new ArrayList<>();
 
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
       withs.add(wrappedWith.get());
 
-    return new NodeWrapper<>(new TranslateNode(key, toMarkupList(withs), fallback, position, new LinkedHashSet<>()));
+    return new NodeWrapper<>(new TranslateNode(key, toMarkupList(withs), fallback, positionProvider, new LinkedHashSet<>()));
   }
 
   private static MarkupList toMarkupList(List<MarkupNode> markupNodes) {
@@ -119,7 +121,7 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<InterpolationNode> interpolation(StringView expression) {
-    return new NodeWrapper<>(new InterpolationNode(expr(expression)));
+    return new NodeWrapper<>(new InterpolationNode(expression, expr(expression)));
   }
 
   protected static NodeWrapper<TextNode> text(StringView value) {

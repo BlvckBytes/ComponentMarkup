@@ -29,7 +29,7 @@ public class HoverItemTag extends HoverTag {
       attributes.getOptionalMarkupNode("name"),
       attributes.getOptionalMarkupNode("lore"),
       attributes.getOptionalExpressionNode("hide-properties"),
-      tagName.startInclusive, children, letBindings
+      tagName, children, letBindings
     );
   }
 }

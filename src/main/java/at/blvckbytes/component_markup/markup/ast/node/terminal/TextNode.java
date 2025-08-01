@@ -10,7 +10,7 @@ public class TextNode extends TerminalNode {
   public final String textValue;
 
   public TextNode(StringView text, String textValue) {
-    super(text.startInclusive, null);
+    super(text, null);
 
     this.text = text;
     this.textValue = textValue;

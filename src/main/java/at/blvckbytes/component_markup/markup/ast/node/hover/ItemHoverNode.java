@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.markup.ast.node.hover;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -22,11 +23,11 @@ public class ItemHoverNode extends HoverNode {
     @Nullable MarkupNode name,
     @Nullable MarkupNode lore,
     @Nullable ExpressionNode hideProperties,
-    int position,
+    StringView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, children, letBindings);
+    super(positionProvider, children, letBindings);
 
     this.material = material;
     this.amount = amount;

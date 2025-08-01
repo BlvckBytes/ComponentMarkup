@@ -48,7 +48,7 @@ public class GradientTag extends ColorizeTag {
           interpreter
         )
       ),
-      tagName.startInclusive, children, letBindings
+      tagName, children, letBindings
     );
   }
 }

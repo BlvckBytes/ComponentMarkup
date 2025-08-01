@@ -14,7 +14,7 @@ public class IfElseIfElseNode extends MarkupNode {
     List<MarkupNode> conditions,
     @Nullable MarkupNode fallback
   ) {
-    super(conditions.get(0).position, null, null);
+    super(conditions.get(0).positionProvider, null, null);
 
     this.conditions = conditions;
     this.fallback = fallback;

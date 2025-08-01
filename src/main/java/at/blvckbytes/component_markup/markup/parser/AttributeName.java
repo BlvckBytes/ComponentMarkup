@@ -34,10 +34,10 @@ public class AttributeName {
 
       if (firstChar == '*' || firstChar == '+') {
         if (flags.contains(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
+          throw new MarkupParseException(attributeName, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
 
         if (flags.contains(AttributeFlag.INTRINSIC_LITERAL) ||flags.contains(AttributeFlag.INTRINSIC_EXPRESSION))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS);
+          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS);
 
         if (!flags.isEmpty())
           throw new IllegalStateException("Due to the grammar of attribute-operators, this case should be unreachable");
@@ -52,7 +52,7 @@ public class AttributeName {
         }
 
         if (nameLength == 1)
-          throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(flag);
         attributeName = attributeName.buildSubViewRelative(1);
@@ -64,13 +64,13 @@ public class AttributeName {
 
       if (hasOpeningBracket || hasClosingBracket) {
         if (!hasOpeningBracket || !hasClosingBracket)
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
+          throw new MarkupParseException(attributeName, MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS);
 
         if (flags.contains(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
+          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS);
 
         if (!flags.isEmpty())
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.LATE_ATTRIBUTE_BRACKETS);
+          throw new MarkupParseException(attributeName, MarkupParseError.LATE_ATTRIBUTE_BRACKETS);
 
         if (tokenOutput != null) {
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(0, 1));
@@ -78,7 +78,7 @@ public class AttributeName {
         }
 
         if (nameLength == 2)
-          throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.BINDING_MODE);
         attributeName = attributeName.buildSubViewRelative(1, -1);
@@ -87,19 +87,19 @@ public class AttributeName {
 
       if (firstChar == '.') {
         if (attributeName.length() < 3 || attributeName.nthChar(1) != '.' || attributeName.nthChar(2) != '.')
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.MALFORMED_SPREAD_OPERATOR);
+          throw new MarkupParseException(attributeName, MarkupParseError.MALFORMED_SPREAD_OPERATOR);
 
         if (flags.contains(AttributeFlag.SPREAD_MODE))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS);
+          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS);
 
         if (!flags.contains(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING, attributeName.buildString());
+          throw new MarkupParseException(attributeName, MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING, attributeName.buildString());
 
         if (tokenOutput != null)
           tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 3));
 
         if (nameLength == 3)
-          throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.SPREAD_MODE);
         attributeName = attributeName.buildSubViewRelative(3);
@@ -108,16 +108,16 @@ public class AttributeName {
 
       if (firstChar == '!') {
         if (flags.contains(AttributeFlag.FLAG_NEGATION))
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS);
+          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS);
 
         if (!allowsNegation)
-          throw new MarkupParseException(attributeName.startInclusive, MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION);
+          throw new MarkupParseException(attributeName, MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION);
 
         if (tokenOutput != null)
           tokenOutput.emitCharToken(attributeName.startInclusive, TokenType.MARKUP__OPERATOR__NEGATE);
 
         if (nameLength == 1)
-          throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.FLAG_NEGATION);
         attributeName = attributeName.buildSubViewRelative(1);
@@ -128,7 +128,7 @@ public class AttributeName {
     }
 
     if (nameLength == 0)
-      throw new MarkupParseException(fullName.startInclusive, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+      throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
     attributeName.setLowercase();
 

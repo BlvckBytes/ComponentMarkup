@@ -3,13 +3,14 @@ package at.blvckbytes.component_markup.markup.ast.node.terminal;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.parser.ParserChildItem;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 
 public abstract class TerminalNode extends StyledNode implements ParserChildItem {
 
-  public TerminalNode(int position, @Nullable LinkedHashSet<LetBinding> letBindings) {
-    super(position, null, letBindings);
+  public TerminalNode(StringView positionProvider, @Nullable LinkedHashSet<LetBinding> letBindings) {
+    super(positionProvider, null, letBindings);
   }
 }

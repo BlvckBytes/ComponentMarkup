@@ -2,6 +2,7 @@ package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -12,10 +13,10 @@ public class KeyNode extends UnitNode {
 
   public KeyNode(
     ExpressionNode key,
-    int position,
+    StringView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
-    super(position, letBindings);
+    super(positionProvider, letBindings);
 
     this.key = key;
   }

@@ -18,7 +18,7 @@ public class TagAndBuffers implements ParserChildItem {
   public final @Nullable TagDefinition tag;
   public final @Nullable StringView tagName;
   public final @Nullable TagAndBuffers parent;
-  public final int initialPosition;
+  public final @Nullable StringView positionProvider;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
@@ -31,6 +31,7 @@ public class TagAndBuffers implements ParserChildItem {
   public ConditionType ifConditionType = ConditionType.NONE;
   public @Nullable ExpressionNode useCondition;
 
+  public @Nullable StringView forAttributeName;
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
   public @Nullable MarkupNode forEmpty;
@@ -41,12 +42,12 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable StringView whenIsValue;
   public boolean isWhenOther;
 
-  public TagAndBuffers(int initialPosition) {
+  public TagAndBuffers(@NotNull StringView positionProvider) {
     this.tag = null;
     this.tagName = null;
     this.parent = null;
     this.attributeMap = null;
-    this.initialPosition = initialPosition;
+    this.positionProvider = positionProvider;
   }
 
   public TagAndBuffers(@NotNull TagDefinition tag, @NotNull StringView tagName, @Nullable TagAndBuffers parent) {
@@ -54,7 +55,7 @@ public class TagAndBuffers implements ParserChildItem {
     this.tagName = tagName;
     this.parent = parent;
     this.attributeMap = new InternalAttributeMap(tagName);
-    this.initialPosition = 0;
+    this.positionProvider = null;
   }
 
   public boolean hasLetBinding(String name) {
@@ -94,7 +95,7 @@ public class TagAndBuffers implements ParserChildItem {
     if (this.children == null) {
       if (whenInput != null) {
         assert tagName != null;
-        throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
+        throw new MarkupParseException(tagName, MarkupParseError.WHEN_MATCHING_NO_CASES);
       }
 
       return null;
@@ -121,7 +122,10 @@ public class TagAndBuffers implements ParserChildItem {
         currentConditionType = childTag.ifConditionType;
 
         if (childTag.forIterable != null) {
+          assert childTag.forAttributeName != null;
+
           currentNode = new ForLoopNode(
+            childTag.forAttributeName,
             childTag.forIterable,
             childTag.forIterationVariable,
             currentNode,
@@ -137,20 +141,20 @@ public class TagAndBuffers implements ParserChildItem {
         if (whenInput != null) {
           if (childTag.isWhenOther) {
             if (whenOther != null)
-              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK);
+              throw new MarkupParseException(childTag.tagName, MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK);
 
             whenOther = currentNode;
           }
 
           else {
             if (childTag.whenIsValue == null)
-              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+              throw new MarkupParseException(childTag.tagName, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
             if (whenCases == null)
               whenCases = new WhenMatchingMap();
 
             if (whenCases.put(childTag.whenIsValue, currentNode) != null)
-              throw new MarkupParseException(childTag.tagName.startInclusive, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, childTag.whenIsValue.buildString());
+              throw new MarkupParseException(childTag.tagName, MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE, childTag.whenIsValue.buildString());
           }
 
           continue;
@@ -160,8 +164,10 @@ public class TagAndBuffers implements ParserChildItem {
       else if (child instanceof MarkupNode) {
         MarkupNode node = (MarkupNode) child;
 
-        if (whenInput != null)
-          throw new MarkupParseException(node.position, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+        if (whenInput != null) {
+          assert node.positionProvider != null;
+          throw new MarkupParseException(node.positionProvider, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+        }
 
         currentNode = node;
       } else
@@ -181,7 +187,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE_IF:
             case ELSE:
-              throw new MarkupParseException(currentNode.position, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
+              throw new MarkupParseException(currentNode.positionProvider, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }
@@ -257,7 +263,7 @@ public class TagAndBuffers implements ParserChildItem {
 
             case ELSE:
             case ELSE_IF:
-              throw new MarkupParseException(currentNode.position, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
+              throw new MarkupParseException(currentNode.positionProvider, MarkupParseError.MISSING_PRECEDING_IF_SIBLING);
           }
           break;
         }
@@ -268,18 +274,18 @@ public class TagAndBuffers implements ParserChildItem {
 
     if (whenInput != null && (whenCases == null || whenCases.isEmpty())) {
       assert tagName != null;
-      throw new MarkupParseException(tagName.startInclusive, MarkupParseError.WHEN_MATCHING_NO_CASES);
+      throw new MarkupParseException(tagName, MarkupParseError.WHEN_MATCHING_NO_CASES);
     }
 
     if (whenCases != null) {
       assert whenInput != null;
       assert tagName != null;
-      result.add(new WhenMatchingNode(tagName.startInclusive, whenInput, whenCases, whenOther));
+      result.add(new WhenMatchingNode(tagName, whenInput, whenCases, whenOther));
     }
 
     if (conditions != null) {
       if (whenInput != null)
-        throw new MarkupParseException(conditions.get(0).position, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
+        throw new MarkupParseException(conditions.get(0).positionProvider, MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER);
 
       if (priorConditionType == ConditionType.IF) {
         assert conditions.size() == 1;
@@ -302,7 +308,7 @@ public class TagAndBuffers implements ParserChildItem {
       if (processedChildren != null && processedChildren.size() == 1)
         return processedChildren.get(0);
 
-      return new ContainerNode(initialPosition, processedChildren, null);
+      return new ContainerNode(positionProvider, processedChildren, null);
     }
 
     MarkupNode result;
