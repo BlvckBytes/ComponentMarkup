@@ -653,7 +653,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3:   [key]=\"my.expr[222 c.d.e\"",
         "----------------------^",
-        "   Error: Expected a closing-bracket after the indexing-invocation: ]",
+        "Error: Expected a closing-bracket after the indexing-invocation: ]",
         "4:   fallback={",
         "5:     hello, {user}",
         "6:   }",
@@ -672,7 +672,7 @@ public class MarkupParserErrorTests {
         "2:   let-a=\"b\"",
         "3: >{ user.'name' }",
         "-----------^",
-        "   Error: The right-hand-side of a member-access operation may only be an identifier: user.<identifier>"
+        "Error: The right-hand-side of a member-access operation may only be an identifier: user.<identifier>"
       )
     );
 
@@ -685,7 +685,7 @@ public class MarkupParserErrorTests {
       new TextWithAnchors(
         "1: <red",
         "----^",
-        "   Error: This tag requires a separate closing-tag </red>, as it expects content and does not support self-closing <red />",
+        "Error: This tag requires a separate closing-tag </red>, as it expects content and does not support self-closing <red />",
         "2:   let-a=\"b\"",
         "3: />"
       )
@@ -701,7 +701,7 @@ public class MarkupParserErrorTests {
         "1: <red",
         "2:   !!my-attr",
         "------^",
-        "   Error: The exclamation-mark used to mark flag-attributes as negated may only be used once!",
+        "Error: The exclamation-mark used to mark flag-attributes as negated may only be used once!",
         "3: />"
       )
     );

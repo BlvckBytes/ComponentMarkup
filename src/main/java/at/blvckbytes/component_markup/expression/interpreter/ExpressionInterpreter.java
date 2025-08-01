@@ -4,8 +4,10 @@ import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,18 +101,21 @@ public class ExpressionInterpreter {
 
       if (infixOperator == InfixOperator.MEMBER) {
         Object rhsValue = null;
+        boolean isRhsIdentifier = false;
 
         if (node.rhs instanceof TerminalNode) {
           TerminalToken terminalToken = ((TerminalNode) node.rhs).token;
 
-          if (terminalToken instanceof IdentifierToken)
+          if (terminalToken instanceof IdentifierToken) {
             rhsValue = ((IdentifierToken) terminalToken).identifier;
+            isRhsIdentifier = true;
+          }
         }
 
         if (rhsValue == null)
           rhsValue = interpret(node.rhs, environment);
 
-        return performSubscripting(lhsValue, rhsValue, environment);
+        return performSubscripting(node.operatorToken, lhsValue, rhsValue, isRhsIdentifier, environment);
       }
 
       Object rhsValue = interpret(node.rhs, environment);
@@ -143,8 +148,9 @@ public class ExpressionInterpreter {
               infixOperator == InfixOperator.EXPLODE ? Pattern.LITERAL : 0
             );
           } catch (Throwable e) {
-            // TODO: Provide better message
-            LoggerProvider.log(Level.WARNING, "Encountered malformed pattern " + delimiter + " on operator " + infixOperator.representation);
+            for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\""))
+              LoggerProvider.log(Level.WARNING, line, false);
+
             return Collections.emptyList();
           }
 
@@ -216,7 +222,7 @@ public class ExpressionInterpreter {
           return lhsValue != null ? lhsValue : rhsValue;
 
         case SUBSCRIPTING:
-          return performSubscripting(lhsValue, rhsValue, environment);
+          return performSubscripting(node.operatorToken, lhsValue, rhsValue, false, environment);
 
         case CONTAINS:
           return checkContains(lhsValue, rhsValue, valueInterpreter);
@@ -231,8 +237,9 @@ public class ExpressionInterpreter {
             // TODO: Consider caching this compilation
             pattern = Pattern.compile(patternString);
           } catch (Throwable e) {
-            // TODO: Provide better message
-            LoggerProvider.log(Level.WARNING, "Encountered malformed pattern " + patternString + " on operator " + infixOperator.representation);
+            for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + patternString + "\""))
+              LoggerProvider.log(Level.WARNING, line, false);
+
             return false;
           }
 
@@ -278,15 +285,35 @@ public class ExpressionInterpreter {
     return null;
   }
 
-  private static @Nullable Object performSubscripting(@Nullable Object source, @Nullable Object key, InterpretationEnvironment environment) {
+  private static @Nullable Object performSubscripting(
+    InfixOperatorToken operatorToken,
+    @Nullable Object source,
+    @Nullable Object key,
+    boolean isKeyIdentifierName,
+    InterpretationEnvironment environment
+  ) {
     if (source == null)
       return null;
 
-    if (source instanceof Map<?, ?>)
-      return ((Map<?, ?>) source).get(key);
+    if (source instanceof Map<?, ?>) {
+      if (isKeyIdentifierName) {
+        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
 
+        return null;
+      }
+
+      return ((Map<?, ?>) source).get(key);
+    }
 
     if (source instanceof List<?>) {
+      if (isKeyIdentifierName) {
+        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
+
+        return null;
+      }
+
       List<?> list = (List<?>) source;
       int index = (int) environment.getValueInterpreter().asLong(key);
       int listSize = list.size();
@@ -305,6 +332,13 @@ public class ExpressionInterpreter {
     }
 
     if (source.getClass().isArray()) {
+      if (isKeyIdentifierName) {
+        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
+
+        return null;
+      }
+
       int length = Array.getLength(source);
       int index = (int) environment.getValueInterpreter().asLong(key);
 
@@ -315,6 +349,13 @@ public class ExpressionInterpreter {
     }
 
     if (source instanceof String) {
+      if (isKeyIdentifierName) {
+        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
+
+        return null;
+      }
+
       String string = (String) source;
       int index = (int) environment.getValueInterpreter().asLong(key);
 
@@ -331,15 +372,18 @@ public class ExpressionInterpreter {
     Field field = publicFieldsByClass.computeIfAbsent(source.getClass(), PublicFieldMap::new).locateField(stringKey);
 
     if (field == null) {
-      // TODO: Provide better message
-      LoggerProvider.log(Level.WARNING, "Could not locate field " + stringKey);
+      for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + stringKey + "\""))
+        LoggerProvider.log(Level.WARNING, line, false);
+
       return null;
     }
 
     try {
       return field.get(source);
     } catch (Exception e) {
-      LoggerProvider.log(Level.WARNING, "Could not access field " + field, e);
+      for (String line : ErrorScreen.make(operatorToken.raw, "Could not access field \"" + field + "\": " + e.getMessage()))
+        LoggerProvider.log(Level.WARNING, line, false);
+
       return null;
     }
   }

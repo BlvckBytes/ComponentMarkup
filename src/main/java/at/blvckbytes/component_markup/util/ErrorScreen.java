@@ -46,8 +46,8 @@ public class ErrorScreen {
           int charCountUntilTargetChar = lineRelativeOffset == 0 ? 0 : lineRelativeOffset + 1;
           int spacerLength = (lineNumber.length() + charCountUntilTargetChar) - 1;
 
-          result.add(makeIndent(spacerLength, '-').append('^').toString());
-          result.add(makeIndent(lineNumber.length(), ' ').append("Error: ").append(message).toString());
+          result.add(makeLine(spacerLength).append('^').toString());
+          result.add("Error: " + message);
         }
 
         lineBegin = index + 1;
@@ -57,14 +57,14 @@ public class ErrorScreen {
     return result;
   }
 
-  private static StringBuilder makeIndent(int count, char c) {
+  private static StringBuilder makeLine(int count) {
     if (count <= 0)
       return new StringBuilder(0);
 
     StringBuilder result = new StringBuilder(count);
 
     for (int i = 0; i < count; ++i)
-      result.append(c);
+      result.append('-');
 
     return result;
   }

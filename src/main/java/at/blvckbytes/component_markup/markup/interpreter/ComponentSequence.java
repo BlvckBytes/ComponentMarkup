@@ -445,8 +445,9 @@ public class ComponentSequence {
 
             return (result, addressTree) -> componentConstructor.setClickOpenUrlAction(result, url);
           } catch (Throwable e) {
-            // TODO: Provide better message
-            LoggerProvider.log(Level.WARNING, "Encountered invalid open-url value: " + urlValue);
+            for (String line : ErrorScreen.make(clickNode.value.getFirstMemberPositionProvider(), "Encountered malformed URL \"" + urlValue + "\": " + e.getMessage()))
+              LoggerProvider.log(Level.WARNING, line, false);
+
           }
 
           return null;
@@ -486,8 +487,9 @@ public class ComponentSequence {
       try {
         uuid = UUID.fromString(id);
       } catch (Throwable e) {
-        // TODO: Provide better message
-        LoggerProvider.log(Level.WARNING, "Encountered invalid hover-entity uuid: " + id);
+        for (String line : ErrorScreen.make(entityHoverNode.id.getFirstMemberPositionProvider(), "Encountered malformed UUID: \"" + id + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
+
         return null;
       }
 

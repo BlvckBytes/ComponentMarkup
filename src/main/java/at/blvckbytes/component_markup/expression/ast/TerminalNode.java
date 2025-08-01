@@ -3,6 +3,7 @@ package at.blvckbytes.component_markup.expression.ast;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +23,9 @@ public class TerminalNode extends ExpressionNode {
       String variableName = (String) token.getPlainValue();
 
       if (!environment.doesVariableExist(variableName)) {
-        // TODO: Provide better message
-        LoggerProvider.log(Level.WARNING, "Could not locate variable " + variableName);
+        for (String line : ErrorScreen.make(token.raw, "Could not locate variable \"" + variableName + "\""))
+          LoggerProvider.log(Level.WARNING, line, false);
+
         return null;
       }
 
