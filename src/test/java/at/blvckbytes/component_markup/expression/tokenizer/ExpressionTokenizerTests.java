@@ -21,61 +21,63 @@ public class ExpressionTokenizerTests {
 
   @Test
   public void shouldTokenizeAllTypes() {
-    TextWithAnchors input = new TextWithAnchors(
+    TextWithAnchors text = new TextWithAnchors(
       "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `&&´ `2.7182´ `>=´ `*´ `||´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `==´ `^´ `my_variable´ `!=´ `&´ `)´ `..´ `.5´",
-      "`~^´ `~_´ `~#´ `~!´ `~-´ `~?´ `~|´ `~<´ `\\@´ `\\@\\@´ `**´ `::´ `:::´ `:::´`::´"
+      "`~^´ `~_´ `~#´ `~!´ `~-´ `~?´ `~|´ `~<´ `@´ `@@´ `**´ `::´ `:::´ `:::´`::´"
     );
 
+    int index = 0;
+
     makeCase(
-      input,
-      InfixOperator.BRANCHING,
-      Punctuation.OPENING_PARENTHESIS,
-      PrefixOperator.NEGATION,
-      "'hello, world'",
-      InfixOperator.ADDITION,
-      Punctuation.COLON,
-      InfixOperator.SUBSCRIPTING,
-      8192,
-      InfixOperator.GREATER_THAN,
-      PrefixOperator.FLIP_SIGN,
-      InfixOperator.CONJUNCTION,
-      2.7182,
-      InfixOperator.GREATER_THAN_OR_EQUAL,
-      InfixOperator.MULTIPLICATION,
-      InfixOperator.DISJUNCTION,
-      true,
-      InfixOperator.LESS_THAN,
-      InfixOperator.DIVISION,
-      InfixOperator.FALLBACK,
-      Punctuation.CLOSING_BRACKET,
-      false,
-      InfixOperator.LESS_THAN_OR_EQUAL,
-      InfixOperator.MODULO,
-      null,
-      InfixOperator.EQUAL_TO,
-      InfixOperator.EXPONENTIATION,
-      "my_variable",
-      InfixOperator.NOT_EQUAL_TO,
-      InfixOperator.CONCATENATION,
-      Punctuation.CLOSING_PARENTHESIS,
-      InfixOperator.RANGE,
-      DotDouble.of(.5),
-      PrefixOperator.UPPER_CASE,
-      PrefixOperator.LOWER_CASE,
-      PrefixOperator.TITLE_CASE,
-      PrefixOperator.TOGGLE_CASE,
-      PrefixOperator.SLUGIFY,
-      PrefixOperator.ASCIIFY,
-      PrefixOperator.TRIM,
-      PrefixOperator.REVERSE,
-      InfixOperator.EXPLODE,
-      InfixOperator.EXPLODE_REGEX,
-      InfixOperator.REPEAT,
-      InfixOperator.CONTAINS,
-      InfixOperator.MATCHES_REGEX,
-      InfixOperator.MATCHES_REGEX,
-      InfixOperator.CONTAINS
+      text,
+      InfixOperator.BRANCHING, text.subView(index++),
+      Punctuation.OPENING_PARENTHESIS, text.subView(index++),
+      PrefixOperator.NEGATION, text.subView(index++),
+      "'hello, world'", text.subView(index++),
+      InfixOperator.ADDITION, text.subView(index++),
+      Punctuation.COLON, text.subView(index++),
+      InfixOperator.SUBSCRIPTING, text.subView(index++),
+      8192, text.subView(index++),
+      InfixOperator.GREATER_THAN, text.subView(index++),
+      PrefixOperator.FLIP_SIGN, text.subView(index++),
+      InfixOperator.CONJUNCTION, text.subView(index++),
+      2.7182, text.subView(index++),
+      InfixOperator.GREATER_THAN_OR_EQUAL, text.subView(index++),
+      InfixOperator.MULTIPLICATION, text.subView(index++),
+      InfixOperator.DISJUNCTION, text.subView(index++),
+      true, text.subView(index++),
+      InfixOperator.LESS_THAN, text.subView(index++),
+      InfixOperator.DIVISION, text.subView(index++),
+      InfixOperator.FALLBACK, text.subView(index++),
+      Punctuation.CLOSING_BRACKET, text.subView(index++),
+      false, text.subView(index++),
+      InfixOperator.LESS_THAN_OR_EQUAL, text.subView(index++),
+      InfixOperator.MODULO, text.subView(index++),
+      null, text.subView(index++),
+      InfixOperator.EQUAL_TO, text.subView(index++),
+      InfixOperator.EXPONENTIATION, text.subView(index++),
+      "my_variable", text.subView(index++),
+      InfixOperator.NOT_EQUAL_TO, text.subView(index++),
+      InfixOperator.CONCATENATION, text.subView(index++),
+      Punctuation.CLOSING_PARENTHESIS, text.subView(index++),
+      InfixOperator.RANGE, text.subView(index++),
+      DotDouble.of(.5), text.subView(index++),
+      PrefixOperator.UPPER_CASE, text.subView(index++),
+      PrefixOperator.LOWER_CASE, text.subView(index++),
+      PrefixOperator.TITLE_CASE, text.subView(index++),
+      PrefixOperator.TOGGLE_CASE, text.subView(index++),
+      PrefixOperator.SLUGIFY, text.subView(index++),
+      PrefixOperator.ASCIIFY, text.subView(index++),
+      PrefixOperator.TRIM, text.subView(index++),
+      PrefixOperator.REVERSE, text.subView(index++),
+      InfixOperator.EXPLODE, text.subView(index++),
+      InfixOperator.EXPLODE_REGEX, text.subView(index++),
+      InfixOperator.REPEAT, text.subView(index++),
+      InfixOperator.CONTAINS, text.subView(index++),
+      InfixOperator.MATCHES_REGEX, text.subView(index++),
+      InfixOperator.MATCHES_REGEX, text.subView(index++),
+      InfixOperator.CONTAINS, text.subView(index)
     );
   }
 
@@ -95,7 +97,11 @@ public class ExpressionTokenizerTests {
 
     for (String identifier : identifiers) {
       TextWithAnchors text = new TextWithAnchors("`" + identifier + "´");
-      makeCase(text, identifier);
+
+      makeCase(
+        text,
+        identifier, text.subView(0)
+      );
     }
   }
 
@@ -107,7 +113,11 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      DotDouble.of(.3), "a", DotDouble.of(.5), "b", DotDouble.of(.4)
+      DotDouble.of(.3), text.subView(0),
+      "a", text.subView(1),
+      DotDouble.of(.5), text.subView(2),
+      "b", text.subView(3),
+      DotDouble.of(.4), text.subView(4)
     );
   }
 
@@ -119,7 +129,9 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      DotDouble.of(.5), InfixOperator.RANGE, DotDouble.of(.3)
+      DotDouble.of(.5), text.subView(0),
+      InfixOperator.RANGE, text.subView(1),
+      DotDouble.of(.3), text.subView(2)
     );
   }
 
@@ -132,12 +144,16 @@ public class ExpressionTokenizerTests {
 
     for (Object item : items) {
       TextWithAnchors text = new TextWithAnchors(
-        "`before´ `a´`" + TextWithAnchors.escape(item) + "´`b´ `after´"
+        "`before´ `a´`" + item + "´`b´ `after´"
       );
 
       makeCase(
         text,
-        "before", "a", item, "b", "after"
+        "before", text.subView(0),
+        "a", text.subView(1),
+        item, text.subView(2),
+        "b", text.subView(3),
+        "after", text.subView(4)
       );
     }
   }
@@ -145,28 +161,50 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeDashesCorrectly() {
     TextWithAnchors text = new TextWithAnchors("`-´`identifier´");
-    makeCase(text, PrefixOperator.FLIP_SIGN, "identifier");
+
+    makeCase(
+      text,
+      PrefixOperator.FLIP_SIGN, text.subView(0),
+      "identifier", text.subView(1)
+    );
 
     text = new TextWithAnchors("`-´`5.0´");
-    makeCase(text, PrefixOperator.FLIP_SIGN, 5.0);
+
+    makeCase(
+      text,
+      PrefixOperator.FLIP_SIGN, text.subView(0),
+      5.0, text.subView(1)
+    );
 
     text = new TextWithAnchors("`-´`.5´");
-    makeCase(text, PrefixOperator.FLIP_SIGN, DotDouble.of(.5));
+
+    makeCase(
+      text,
+      PrefixOperator.FLIP_SIGN, text.subView(0),
+      DotDouble.of(.5), text.subView(1)
+    );
 
     text = new TextWithAnchors("`5´ `-´ `-´ `3´");
-    makeCase(text, 5, InfixOperator.SUBTRACTION, PrefixOperator.FLIP_SIGN, 3);
+
+    makeCase(
+      text,
+      5, text.subView(0),
+      InfixOperator.SUBTRACTION, text.subView(1),
+      PrefixOperator.FLIP_SIGN, text.subView(2),
+      3, text.subView(3)
+    );
 
     text = new TextWithAnchors("`5´ `-´`-´ `-´ `3´ `-´ `[´");
 
     makeCase(
       text,
-      5,
-      InfixOperator.SUBTRACTION,
-      PrefixOperator.FLIP_SIGN,
-      PrefixOperator.FLIP_SIGN,
-      3,
-      InfixOperator.SUBTRACTION,
-      InfixOperator.SUBSCRIPTING
+      5, text.subView(0),
+      InfixOperator.SUBTRACTION, text.subView(1),
+      PrefixOperator.FLIP_SIGN, text.subView(2),
+      PrefixOperator.FLIP_SIGN, text.subView(3),
+      3, text.subView(4),
+      InfixOperator.SUBTRACTION, text.subView(5),
+      InfixOperator.SUBSCRIPTING, text.subView(6)
     );
   }
 
@@ -178,7 +216,9 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      0, InfixOperator.RANGE, 100
+      0, text.subView(0),
+      InfixOperator.RANGE, text.subView(1),
+      100, text.subView(2)
     );
 
     text = new TextWithAnchors(
@@ -187,23 +227,25 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      "a", InfixOperator.RANGE, "b"
+      "a", text.subView(0),
+      InfixOperator.RANGE, text.subView(1),
+      "b", text.subView(2)
     );
   }
 
   @Test
   public void shouldTokenizeValidStrings() {
     TextWithAnchors text = new TextWithAnchors(
-      "`'hello, \" world @\\' \\\"'´ `\"double ' quotes \\' @\\\"\"´"
+      "`'hello, \" world `\\´' \\\"'´ `\"double ' quotes \\' `\\´\"\"´"
     );
 
-    text.addViewIndexToBeRemoved(text.anchor(0));
-    text.addViewIndexToBeRemoved(text.anchor(1));
+    text.addViewIndexToBeRemoved(text.subView(1).startInclusive);
+    text.addViewIndexToBeRemoved(text.subView(3).startInclusive);
 
     makeCase(
       text,
-      "'hello, \" world ' \\\"'",
-      "\"double ' quotes \\' \"\""
+      "'hello, \" world ' \\\"'", text.subView(0),
+      "\"double ' quotes \\' \"\"", text.subView(2)
     );
   }
 
@@ -220,12 +262,13 @@ public class ExpressionTokenizerTests {
 
     for (String malformedIdentifier : malformedIdentifiers) {
       TextWithAnchors text = new TextWithAnchors(
-        "@" + malformedIdentifier
+        "`" + malformedIdentifier + "´"
       );
 
       makeErrorCase(
         text,
-        ExpressionTokenizeError.MALFORMED_IDENTIFIER
+        ExpressionTokenizeError.MALFORMED_IDENTIFIER,
+        text.subView(0).startInclusive
       );
     }
   }
@@ -233,67 +276,73 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldThrowOnUnterminatedString() {
     TextWithAnchors text = new TextWithAnchors(
-      "@'my string value"
+      "`'´my string value"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.UNTERMINATED_STRING
+      ExpressionTokenizeError.UNTERMINATED_STRING,
+      text.subView(0).startInclusive
     );
 
     text = new TextWithAnchors(
-      "@'my string \n value'"
+      "`'´my string \n value'"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.UNTERMINATED_STRING
+      ExpressionTokenizeError.UNTERMINATED_STRING,
+      text.subView(0).startInclusive
     );
   }
 
   @Test
   public void shouldThrowOnMalformedDecimal() {
     TextWithAnchors text = new TextWithAnchors(
-      "@12."
+      "`12.´"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS
+      ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS,
+      text.subView(0).startInclusive
     );
   }
 
   @Test
   public void shouldThrowOnMalformedKnownOperators() {
     TextWithAnchors text = new TextWithAnchors(
-      "@|"
+      "`|´"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.SINGLE_PIPE
+      ExpressionTokenizeError.SINGLE_PIPE,
+      text.subView(0).startInclusive
     );
 
     text = new TextWithAnchors(
-      "@="
+      "`=´"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.SINGLE_EQUALS
+      ExpressionTokenizeError.SINGLE_EQUALS,
+      text.subView(0).startInclusive
     );
 
     text = new TextWithAnchors(
-      "@~"
+      "`~´"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.SINGLE_TILDE
+      ExpressionTokenizeError.SINGLE_TILDE,
+      text.subView(0).startInclusive
     );
   }
 
-  private static void makeErrorCase(TextWithAnchors input, ExpressionTokenizeError expectedError) {
+  private static void makeErrorCase(TextWithAnchors input, ExpressionTokenizeError expectedError, int expectedPosition) {
     ExpressionTokenizeException thrownException = null;
 
     try {
@@ -309,11 +358,7 @@ public class ExpressionTokenizerTests {
       throw new IllegalStateException("Expected there to be an error of " + expectedError + ", but encountered none");
 
     assertEquals(expectedError, thrownException.error, "Encountered mismatch on thrown error-types");
-    assertEquals(
-      Jsonifier.jsonify(input.anchor(0)),
-      Jsonifier.jsonify(thrownException.position),
-      "Encountered mismatch on thrown error beginIndex"
-    );
+    assertEquals(expectedPosition, thrownException.position, "Encountered mismatch on thrown error beginIndex");
   }
 
   public static Token makeToken(Object value, StringView subView) {
@@ -365,7 +410,7 @@ public class ExpressionTokenizerTests {
     return token;
   }
 
-  private static void makeCase(TextWithAnchors input, Object... expectedValues) {
+  private static void makeCase(TextWithAnchors input, Object... expectedValuesAndViews) {
     List<Token> actualTokens = new ArrayList<>();
     ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
 
@@ -383,13 +428,17 @@ public class ExpressionTokenizerTests {
 
     StringBuilder expectedTokensString = new StringBuilder();
 
-    for (int valueIndex = 0; valueIndex < expectedValues.length; ++valueIndex) {
-      Object expectedValue = expectedValues[valueIndex];
+    if (expectedValuesAndViews.length % 2 != 0)
+      throw new IllegalStateException("Expected there to be a multiple of two of variadic arguments - pairs of values and views");
+
+    for (int valueIndex = 0; valueIndex < expectedValuesAndViews.length; valueIndex += 2) {
+      Object expectedValue = expectedValuesAndViews[valueIndex];
+      StringView expectedView = (StringView) expectedValuesAndViews[valueIndex + 1];
 
       if (expectedTokensString.length() != 0)
         expectedTokensString.append('\n');
 
-      expectedTokensString.append(Jsonifier.jsonify(makeToken(expectedValue, input.subView(valueIndex))));
+      expectedTokensString.append(Jsonifier.jsonify(makeToken(expectedValue, expectedView)));
     }
 
     assertEquals(expectedTokensString.toString(), actualTokensString.toString());

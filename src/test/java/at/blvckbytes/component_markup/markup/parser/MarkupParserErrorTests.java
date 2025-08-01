@@ -6,7 +6,6 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
-import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +19,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnknownTag() {
     makeErrorCase(
       MarkupParseError.UNKNOWN_TAG,
-      "<@unknown-tag>"
+      "<`unknown-tag´>"
     );
   }
 
@@ -28,22 +27,22 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnknownAttribute() {
     makeErrorCase(
       MarkupParseError.UNSUPPORTED_ATTRIBUTE,
-      "<hover-text value={} @unknown=5>"
+      "<hover-text value={} `unknown´=5>"
     );
 
     makeErrorCase(
       MarkupParseError.UNSUPPORTED_ATTRIBUTE,
-      "<hover-text value={} @unknown=5.5>"
+      "<hover-text value={} `unknown´=5.5>"
     );
 
     makeErrorCase(
       MarkupParseError.UNSUPPORTED_ATTRIBUTE,
-      "<hover-text value={} @unknown=\"hello\">"
+      "<hover-text value={} `unknown´=\"hello\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNSUPPORTED_ATTRIBUTE,
-      "<hover-text value={} @unknown={}>"
+      "<hover-text value={} `unknown´={}>"
     );
   }
 
@@ -51,7 +50,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnknownIntrinsicAttribute() {
     makeErrorCase(
       MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE,
-      "<container @*unknown>"
+      "<container `*unknown´>"
     );
   }
 
@@ -59,12 +58,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnnamedLetBinding() {
     makeErrorCase(
       MarkupParseError.UNNAMED_LET_BINDING,
-      "<container @*let-=\"a\">"
+      "<container `*let-´=\"a\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNNAMED_LET_BINDING,
-      "<container @*let=\"b\">"
+      "<container `*let´=\"b\">"
     );
   }
 
@@ -72,27 +71,27 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnBracketedIntrinsicAttributes() {
     makeErrorCase(
       MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [@*if]=\"\">"
+      "<container [`*if´]=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [@+is]=\"\">"
+      "<container [`+is´]=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [@*let-]=\"\">"
+      "<container [`*let-´]=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [@*let-my_var]=\"\">"
+      "<container [`*let-my_var´]=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [@*let]=\"\">"
+      "<container [`*let´]=\"\">"
     );
   }
 
@@ -100,23 +99,23 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleIntrinsicMarkers() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
-      "<container *@*if=\"\">"
+      "<container *`*´if=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
-      "<container *@+if=\"\">"
+      "<container *`+´if=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
-      "<container +@*if=\"\">"
+      "<container +`*´if=\"\">"
     );
 
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
-      "<container +@+if=\"\">"
+      "<container +`+´if=\"\">"
     );
   }
 
@@ -124,12 +123,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnLateBindingBrackets() {
     makeErrorCase(
       MarkupParseError.LATE_ATTRIBUTE_BRACKETS,
-      "<container *@[if]=\"\">"
+      "<container *`[´if]=\"\">"
     );
 
     makeErrorCase(
       MarkupParseError.LATE_ATTRIBUTE_BRACKETS,
-      "<container +@[if]=\"\">"
+      "<container +`[´if]=\"\">"
     );
   }
 
@@ -137,7 +136,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleNegations() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS,
-      "<container !@!test>"
+      "<container !`!´test>"
     );
   }
 
@@ -145,17 +144,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnDisallowedNegation() {
     makeErrorCase(
       MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container @!my-attr=5>"
+      "<container `!´my-attr=5>"
     );
 
     makeErrorCase(
       MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container *@!my-attr=\"hello\">"
+      "<container *`!´my-attr=\"hello\">"
     );
 
     makeErrorCase(
       MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container @!my-attr={}>"
+      "<container `!´my-attr={}>"
     );
   }
 
@@ -163,7 +162,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
-      "<container @*for-=\"abc\">"
+      "<container `*for-´=\"abc\">"
     );
   }
 
@@ -171,7 +170,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnEmptyExpressions() {
     makeErrorCase(
       MarkupParseError.EMPTY_EXPRESSION,
-      "<container *for-=\"@\">"
+      "<container *for-=\"`´\">"
     );
   }
 
@@ -179,17 +178,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnBindingInUse() {
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *let-a=\"one\" *let-@a=\"two\">"
+      "<container *let-a=\"one\" *let-`a´=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *for-a=\"one\" *let-@a=\"two\">"
+      "<container *for-a=\"one\" *let-`a´=\"two\">"
     );
 
     makeErrorCase(
       MarkupParseError.BINDING_IN_USE,
-      "<container *let-a=\"one\" *for-@a=\"two\">"
+      "<container *let-a=\"one\" *for-`a´=\"two\">"
     );
   }
 
@@ -197,27 +196,27 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMalformedIdentifier() {
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container *let-@a-b=\"one\">"
+      "<container *let-`a-b´=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container *let-@_a-b=\"one\">"
+      "<container *let-`_a-b´=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container *let-@0abc=\"one\">"
+      "<container *let-`0abc´=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container *for-@a-b=\"one\">"
+      "<container *for-`a-b´=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container *for-@0abc=\"one\">"
+      "<container *for-`0abc´=\"one\">"
     );
   }
 
@@ -225,22 +224,22 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMalformedAttributeName() {
     makeErrorCase(
       MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
-      "<container @a_b=\"one\">"
+      "<container `a_b´=\"one\">"
     );
     makeErrorCase(
       MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
-      "<container @_a_b=\"one\">"
+      "<container `_a_b´=\"one\">"
     );
 
     // This will be caught by the xml-parser first; still - for completeness
     makeErrorCase(
       MarkupParseError.XML_PARSE_ERROR,
-      "<container @0abc=\"one\">"
+      "<container `0abc´=\"one\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_ATTRIBUTE_NAME,
-      "<container [@0abc]=\"one\">"
+      "<container [`0abc´]=\"one\">"
     );
   }
 
@@ -248,22 +247,22 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnbalancedAttributeBrackets() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
-      "<container @[=\"world\">"
+      "<container `[´=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
-      "<container @[hello=\"world\">"
+      "<container `[´hello=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
-      "<container @hello]=\"world\">"
+      "<container `h´ello]=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_ATTRIBUTE_BRACKETS,
-      "<container [@[hello]=\"world\">"
+      "<container [`[´hello]=\"world\">"
     );
   }
 
@@ -271,22 +270,22 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnbalancedCaptureParentheses() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container *let-@(my_var={}>"
+      "<container *let-`(´my_var={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container *let-my_var@)={}>"
+      "<container *let-my_var`)´={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container *let-(@(my_var)={}>"
+      "<container *let-(`(´my_var)={}>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CAPTURE_PARENTHESES,
-      "<container *let-(my_var@))={}>"
+      "<container *let-(my_var`)´)={}>"
     );
   }
 
@@ -294,7 +293,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleCaptureParentheses() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_CAPTURE_PARENTHESES,
-      "<container *let-(@(hello))={}>"
+      "<container *let-(`(´hello))={}>"
     );
   }
 
@@ -302,12 +301,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMarkupOrExpressionCaptureLetBinding() {
     makeErrorCase(
       MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container @*let-(my_var)=-24>"
+      "<container `*let-(my_var)´=-24>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container @*let-(my_var)=-.24>"
+      "<container `*let-(my_var)´=-.24>"
     );
   }
 
@@ -315,7 +314,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleAttributeBrackets() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS,
-      "<container [@[hello]]=\"world\">"
+      "<container [`[´hello]]=\"world\">"
     );
   }
 
@@ -323,12 +322,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnEmptyAttributeNames() {
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container @[]=\"world\">"
+      "<container `[´]=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container @[...]=\"world\">"
+      "<container `[´...]=\"world\">"
     );
   }
 
@@ -336,7 +335,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleAttributeSpreads() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS,
-      "<container [...@...hello]=\"world\">"
+      "<container [...`...´hello]=\"world\">"
     );
   }
 
@@ -344,17 +343,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMalformedSpreadOperators() {
     makeErrorCase(
       MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [@.hello]=\"world\">"
+      "<container [`.´hello]=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [@..hello]=\"world\">"
+      "<container [`..´hello]=\"world\">"
     );
 
     makeErrorCase(
       MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [...@..hello]=\"world\">"
+      "<container [...`..´hello]=\"world\">"
     );
   }
 
@@ -362,37 +361,37 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnUnbalancedClosingTag() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG,
-      "<red>hello<green>world</green></red></@red>"
+      "<red>hello<green>world</green></red></`red´>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG,
-      "<red>hello</@blue>"
+      "<red>hello</`blue´>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG,
-      "Hello</@red>"
+      "Hello</`red´>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
-      "@</>"
+      "`<´/>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
-      "</@*>"
+      "</`*´>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
-      "<red>hello</red>@</>"
+      "<red>hello</red>`<´/>"
     );
 
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG_BLANK,
-      "<red>hello</red></@*>"
+      "<red>hello</red></`*´>"
     );
   }
 
@@ -400,7 +399,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnCloseAfterCloseAll() {
     makeErrorCase(
       MarkupParseError.UNBALANCED_CLOSING_TAG,
-      "<red><bold>hello, world!</*></@red>"
+      "<red><bold>hello, world!</*></`red´>"
     );
   }
 
@@ -417,22 +416,22 @@ public class MarkupParserErrorTests {
   private void makeNonStringIntrinsicAttributeCase(String attribute) {
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + "=5>"
+      "<container `*" + attribute + "´=5>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + "=5.5>"
+      "<container `*" + attribute + "´=5.5>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + "={}>"
+      "<container `*" + attribute + "´={}>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container @*" + attribute + ">"
+      "<container `*" + attribute + "´>"
     );
   }
 
@@ -440,17 +439,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonStringExpressionAttribute() {
     makeErrorCase(
       MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
-      "<container [@attr]=5>"
+      "<container [`attr´]=5>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
-      "<container [@attr]=5.5>"
+      "<container [`attr´]=5.5>"
     );
 
     makeErrorCase(
       MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE,
-      "<container [@attr]={}>"
+      "<container [`attr´]={}>"
     );
   }
 
@@ -458,17 +457,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnExpectedMarkupValue() {
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text @value=\"hello, world\">"
+      "<hover-text `value´=\"hello, world\">"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text @value=5>"
+      "<hover-text `value´=5>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text @value=5.5>"
+      "<hover-text `value´=5.5>"
     );
   }
 
@@ -476,7 +475,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnExpectedExpressionValue() {
     makeErrorCase(
       MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
-      "<key @key={} />"
+      "<key `key´={} />"
     );
   }
 
@@ -484,7 +483,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnExpectedSelfClosingTag() {
     makeErrorCase(
       MarkupParseError.EXPECTED_SELF_CLOSING_TAG,
-      "<@key></key>"
+      "<`key´></key>"
     );
   }
 
@@ -492,7 +491,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnExpectedOpenCloseTag() {
     makeErrorCase(
       MarkupParseError.EXPECTED_OPEN_CLOSE_TAG,
-      "<@red />"
+      "<`red´ />"
     );
   }
 
@@ -500,12 +499,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnExpectedIntrinsicAttributeFlag() {
     makeErrorCase(
       MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
-      "<red @*else=\"a\">"
+      "<red `*else´=\"a\">"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
-      "<red @*else=-2.3>"
+      "<red `*else´=-2.3>"
     );
   }
 
@@ -513,17 +512,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMarkupForSeparator() {
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @*for-separator=.5>"
+      "<red *for-member=\"members\" `*for-separator´=.5>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @*for-separator=5>"
+      "<red *for-member=\"members\" `*for-separator´=5>"
     );
 
     makeErrorCase(
       MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" @*for-separator=\"hello\">"
+      "<red *for-member=\"members\" `*for-separator´=\"hello\">"
     );
   }
 
@@ -531,7 +530,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonExpressionForReversed() {
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<red *for-member=\"members\" @*for-reversed={}>"
+      "<red *for-member=\"members\" `*for-reversed´={}>"
     );
   }
 
@@ -539,52 +538,52 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleNonMultiAttributes() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-separator={} @*for-separator={}>"
+      "<red *for-member=\"members\" *for-separator={} `*for-separator´={}>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed @*!for-reversed>"
+      "<red *for-member=\"members\" *for-reversed `*!for-reversed´>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed=.5 @*for-reversed=.2>"
+      "<red *for-member=\"members\" *for-reversed=.5 `*for-reversed´=.2>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed=5 @*for-reversed=2>"
+      "<red *for-member=\"members\" *for-reversed=5 `*for-reversed´=2>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed=\"hello\" @*for-reversed=\"hello\">"
+      "<red *for-member=\"members\" *for-reversed=\"hello\" `*for-reversed´=\"hello\">"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<hover-item name={} @name={}>"
+      "<hover-item name={} `name´={}>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<hover-item name={} @name={}>"
+      "<hover-item name={} `name´={}>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<hover-item amount=1 @amount=1>"
+      "<hover-item amount=1 `amount´=1>"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<hover-item material=\"first\" @material=\"second\">"
+      "<hover-item material=\"first\" `material´=\"second\">"
     );
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt coordinates=\"a\" path=\"b\" interpret @!interpret/>"
+      "<block-nbt coordinates=\"a\" path=\"b\" interpret `!interpret´/>"
     );
   }
 
@@ -599,13 +598,13 @@ public class MarkupParserErrorTests {
 
         makeErrorCase(
           MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS,
-          "<red " + firstCondition + " @" + secondCondition + ">"
+          "<red " + firstCondition + " `" + secondCondition + "´>"
         );
       }
 
       makeErrorCase(
         MarkupParseError.MULTIPLE_IF_ELSE_CONDITIONS,
-        "<red " + firstCondition + " @" + firstCondition + ">"
+        "<red " + firstCondition + " `" + firstCondition + "´>"
       );
     }
   }
@@ -614,7 +613,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleUseConditions() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_USE_CONDITIONS,
-      "<red *use=\"a\" @*use=\"b\">"
+      "<red *use=\"a\" `*use´=\"b\">"
     );
   }
 
@@ -622,7 +621,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleLoops() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_LOOPS,
-      "<red *for-member=\"members\" @*for-user=\"users\">"
+      "<red *for-member=\"members\" `*for-user´=\"users\">"
     );
   }
 
@@ -630,12 +629,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMissingPrecedingIfSibling() {
     makeErrorCase(
       MarkupParseError.MISSING_PRECEDING_IF_SIBLING,
-      "<@red *else-if=\"true\">"
+      "<`red´ *else-if=\"true\">"
     );
 
     makeErrorCase(
       MarkupParseError.MISSING_PRECEDING_IF_SIBLING,
-      "<@red *else>"
+      "<`red´ *else>"
     );
   }
 
@@ -716,12 +715,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMissingMandatoryAttributes() {
     makeErrorCase(
       MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
-      "<@score />"
+      "<`score´ />"
     );
 
     makeErrorCase(
       MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
-      "<@score name=\"hello\"/>"
+      "<`score´ name=\"hello\"/>"
     );
   }
 
@@ -729,17 +728,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonExpressionSpreadOperator() {
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient @...color=\"red\">"
+      "<gradient `...´color=\"red\">"
     );
 
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient @...color=5.5>"
+      "<gradient `...´color=5.5>"
     );
 
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient @...color=5>"
+      "<gradient `...´color=5>"
     );
   }
 
@@ -747,7 +746,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnIsCaseOutsideOfWhenParent() {
     makeErrorCase(
       MarkupParseError.IS_CASE_OUTSIDE_OF_WHEN_PARENT,
-      "<red @+is=\"A\">Hello, world!"
+      "<red `+is´=\"A\">Hello, world!"
     );
   }
 
@@ -755,7 +754,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnOtherCaseOutsideOfWhenParent() {
     makeErrorCase(
       MarkupParseError.OTHER_CASE_OUTSIDE_OF_WHEN_PARENT,
-      "<red @*other>Hello, world!"
+      "<red `*other´>Hello, world!"
     );
   }
 
@@ -768,19 +767,19 @@ public class MarkupParserErrorTests {
       if (value.isEmpty()) {
         makeErrorCase(
           MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE,
-          "<red @+is" + value + ">"
+          "<red `+is´" + value + ">"
         );
       }
 
       makeErrorCase(
         MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-        "<red @*when" + value + ">"
+        "<red `*when´" + value + ">"
       );
 
       if (!value.isEmpty()) {
         makeErrorCase(
           MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG,
-          "<red @*other" + value + ">"
+          "<red `*other´" + value + ">"
         );
       }
     }
@@ -790,7 +789,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnDuplicateWhenInput() {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DUPLICATE_INPUT,
-      "<container *when=\"my.expr\" @*when=\"your.expr\">"
+      "<container *when=\"my.expr\" `*when´=\"your.expr\">"
     );
   }
 
@@ -798,12 +797,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNoCases() {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_NO_CASES,
-      "<@container *when=\"my.expr\">"
+      "<`container´ *when=\"my.expr\">"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_NO_CASES,
-      "<@container *when=\"my.expr\">",
+      "<`container´ *when=\"my.expr\">",
       "  <red *other>Fallback"
     );
   }
@@ -814,7 +813,7 @@ public class MarkupParserErrorTests {
       MarkupParseError.WHEN_MATCHING_DUPLICATE_FALLBACK,
       "<container *when=\"my.expr\">",
       "  <red *other>Fallback 1</>",
-      "  <@green *other>Fallback 2</>"
+      "  <`green´ *other>Fallback 2</>"
     );
   }
 
@@ -824,7 +823,7 @@ public class MarkupParserErrorTests {
       MarkupParseError.WHEN_MATCHING_DUPLICATE_CASE,
       "<container *when=\"my.expr\">",
       "  <red +is=\"ABC\">Case 1</>",
-      "  <@green +is=\"abc\">Case 2</>"
+      "  <`green´ +is=\"abc\">Case 2</>"
     );
   }
 
@@ -833,25 +832,25 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red +is=\"ABC\" @+is=\"D\">Case"
+      "  <red +is=\"ABC\" `+is´=\"D\">Case"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red +is=\"ABC\" @*other>Case"
+      "  <red +is=\"ABC\" `*other´>Case"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red *other @+is=\"ABC\">Case"
+      "  <red *other `+is´=\"ABC\">Case"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_COLLIDING_CASES,
       "<container *when=\"my.expr\">",
-      "  <red *other @*other>Case"
+      "  <red *other `*other´>Case"
     );
   }
 
@@ -860,25 +859,25 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  @Static content"
+      "  `Static content´"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  <@red>Static content"
+      "  <`red´>Static content"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  <red +is=\"A\" @*if=\"b\">Static content"
+      "  <red +is=\"A\" `*if´=\"b\">Static content"
     );
 
     makeErrorCase(
       MarkupParseError.WHEN_MATCHING_DISALLOWED_MEMBER,
       "<container *when=\"my.expr\">",
-      "  <red +is=\"A\" @*else-if=\"b\">Static content"
+      "  <red +is=\"A\" `*else-if´=\"b\">Static content"
     );
   }
 
@@ -886,7 +885,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMultiAttributeWithSpreadOperator() {
     makeErrorCase(
       MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE,
-      "<key [...@key]=\"['first', 'second']\"/>"
+      "<key [...`key´]=\"['first', 'second']\"/>"
     );
   }
 
@@ -894,7 +893,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnLiteralIntrinsicMarkupAttributes() {
     makeErrorCase(
       MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE,
-      "<red *for=\"1..5\" @+for-separator={ test }>"
+      "<red *for=\"1..5\" `+for-separator´={ test }>"
     );
   }
 
@@ -902,7 +901,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnEmptyLetBindings() {
     makeErrorCase(
       MarkupParseError.VALUELESS_BINDING,
-      "<red @*let-my_var>"
+      "<red `*let-my_var´>"
     );
   }
 
@@ -910,12 +909,12 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnForAuxiliaryAttributesWithoutPriorLoop() {
     makeErrorCase(
       MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE,
-      "<red @*for-separator={ test }>"
+      "<red `*for-separator´={ test }>"
     );
 
     makeErrorCase(
       MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE,
-      "<red @*for-reversed>"
+      "<red `*for-reversed´>"
     );
   }
 
@@ -946,9 +945,9 @@ public class MarkupParserErrorTests {
     if (!(thrownError instanceof MarkupParseException))
       throw new AssertionError("Expected an ast parse exception, but got " + finalThrownError.getClass(), finalThrownError);
 
-    int position = input.anchor(0);
+    int position = input.subView(0).startInclusive;
 
     Assertions.assertEquals(error, ((MarkupParseException) thrownError).error);
-    Assertions.assertEquals(Jsonifier.jsonify(position), Jsonifier.jsonify(((MarkupParseException) thrownError).position));
+    Assertions.assertEquals(position, ((MarkupParseException) thrownError).position);
   }
 }

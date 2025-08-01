@@ -18,9 +18,9 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseSimpleCase() {
     TextWithAnchors text = new TextWithAnchors(
       "<`translate´",
-      "  @*let-`a´=\"`b´\"",
+      "  *let-`a´=\"`b´\"",
       "  [key]=\"`my.expr´\"",
-      "  @[fallback]=\"`'hello, ' & user´\"",
+      "  [fallback]=\"`'hello, ' & user´\"",
       "/>"
     );
 

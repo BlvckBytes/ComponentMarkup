@@ -25,13 +25,13 @@ public class ExpressionParserErrorTests {
 
     for (Object trailingToken : trailingTokens) {
       TextWithAnchors text = new TextWithAnchors(
-        "a + b @" + trailingToken
+        "a + b `" + trailingToken + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_EOS,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -39,13 +39,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnArrayAfterSubscripting() {
     TextWithAnchors text = new TextWithAnchors(
-      "a[0][1@, 2]"
+      "a[0][1`,´ 2]"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
   }
 
@@ -53,13 +53,13 @@ public class ExpressionParserErrorTests {
   public void shouldThrowOnMissingInfixRightOperand() {
     for (InfixOperator operator : InfixOperator.values()) {
       TextWithAnchors text = new TextWithAnchors(
-        "a " + TextWithAnchors.escape(operator) + "@"
+        "a `" + operator + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_RIGHT_INFIX_OPERAND,
-        text.anchor(0) - 1
+        text.subView(0).endExclusive - 1
       );
     }
   }
@@ -67,13 +67,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnExpectingSubstringUpperBound() {
     TextWithAnchors text = new TextWithAnchors(
-      "a[@:"
+      "a[`:´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -81,13 +81,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[:@" + TextWithAnchors.escape(punctuation)
+        "a[:`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
 
@@ -96,13 +96,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[@:" + TextWithAnchors.escape(operator)
+        "a[`:´" + operator
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_UPPER_BOUND,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -110,23 +110,23 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnExpectingSubstringClosingBracket() {
     TextWithAnchors text = new TextWithAnchors(
-      "a[:test@"
+      "a[:`test´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     text = new TextWithAnchors(
-      "a[:test@ null"
+      "a[:`test´ null"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -134,13 +134,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[:test@" + TextWithAnchors.escape(punctuation)
+        "a[:test`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -148,13 +148,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnExpectingSubscriptClosingBracket() {
     TextWithAnchors text = new TextWithAnchors(
-      "a[test@"
+      "a[`test´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -162,13 +162,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a[test@" + TextWithAnchors.escape(punctuation)
+        "a[test`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -176,13 +176,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingBranchingDelimiter() {
     TextWithAnchors text = new TextWithAnchors(
-      "a ? test@"
+      "a ? `test´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -190,13 +190,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "a ? test@" + TextWithAnchors.escape(punctuation)
+        "a ? test`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -204,13 +204,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingBranchingFalseBranch() {
     TextWithAnchors text = new TextWithAnchors(
-      "a ? test @:"
+      "a ? test `:´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_FALSE_BRANCH,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
   }
 
@@ -218,13 +218,13 @@ public class ExpressionParserErrorTests {
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
       TextWithAnchors text = new TextWithAnchors(
-        TextWithAnchors.escape(operator) + "@"
+        "`" + operator + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_PREFIX_OPERAND,
-        text.anchor(0) - 1
+        text.subView(0).endExclusive - 1
       );
     }
   }
@@ -232,46 +232,46 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingArrayItem() {
     TextWithAnchors text = new TextWithAnchors(
-      "[0@,"
+      "[0`,´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_ITEM,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
   }
 
   @Test
   public void shouldThrowOnMissingArrayClosingBracket() {
     TextWithAnchors text = new TextWithAnchors(
-      "@["
+      "`[´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
 
     text = new TextWithAnchors(
-      "[true@"
+      "[`true´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     text = new TextWithAnchors(
-      "[true, false@"
+      "[true, `false´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -279,13 +279,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "[true@" + TextWithAnchors.escape(punctuation)
+        "[true`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -293,26 +293,26 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingParenthesesContent() {
     TextWithAnchors text = new TextWithAnchors(
-      "@("
+      "`(´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_PARENTHESES_CONTENT,
-      text.anchor(0)
+      text.subView(0).startInclusive
     );
   }
 
   @Test
   public void shouldThrowOnMissingParenthesesTermination() {
     TextWithAnchors text = new TextWithAnchors(
-      "(true@"
+      "(`true´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-      text.anchor(0) - 1
+      text.subView(0).endExclusive - 1
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -320,13 +320,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithAnchors(
-        "(true@" + TextWithAnchors.escape(punctuation)
+        "(true`" + punctuation + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }
@@ -337,13 +337,13 @@ public class ExpressionParserErrorTests {
 
     for (String nonIdentifier : nonIdentifiers) {
       TextWithAnchors text = new TextWithAnchors(
-        "a + a.b.@" + nonIdentifier
+        "a + a.b.`" + nonIdentifier + "´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_MEMBER_ACCESS_IDENTIFIER_RHS,
-        text.anchor(0)
+        text.subView(0).startInclusive
       );
     }
   }

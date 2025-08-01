@@ -27,11 +27,9 @@ public class TextWithAnchors {
   private final StringView rootView;
   private final StringView initialView;
   private final List<StringView> subViews;
-  private final List<Integer> anchors;
 
   public TextWithAnchors(String... lines) {
     this.subViews = new ArrayList<>();
-    this.anchors = new ArrayList<>();
 
     StringBuilder result = new StringBuilder();
     int charIndex = 0;
@@ -45,43 +43,22 @@ public class TextWithAnchors {
       for (int lineCharIndex = 0; lineCharIndex < line.length(); ++lineCharIndex) {
         char currentChar = line.charAt(lineCharIndex);
 
-        boolean isEscaped = lineCharIndex != 0 && line.charAt(lineCharIndex - 1) == '\\';
-
         boolean isOpening;
 
         if ((isOpening = currentChar == '`') || currentChar == '´') {
-          if (isEscaped) {
-            result.deleteCharAt(result.length() - 1);
-            --charIndex;
+          if (isOpening) {
+            ViewIndices indices = new ViewIndices(charIndex);
+            indicesStack.push(indices);
+            indicesInOrder.add(indices);
           }
-
           else {
-            if (isOpening) {
-              ViewIndices indices = new ViewIndices(charIndex);
-              indicesStack.push(indices);
-              indicesInOrder.add(indices);
-            }
-            else {
-              if (indicesStack.isEmpty())
-                throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex + "(line " + (linesIndex + 1) + ")");
+            if (indicesStack.isEmpty())
+              throw new IllegalStateException("Unbalanced closing-backtick at " + charIndex + "(line " + (linesIndex + 1) + ")");
 
-              indicesStack.pop().endExclusive = charIndex;
-            }
-
-            continue;
-          }
-        }
-
-        if (currentChar == '@') {
-          if (isEscaped) {
-            result.deleteCharAt(result.length() - 1);
-            --charIndex;
+            indicesStack.pop().endExclusive = charIndex;
           }
 
-          else {
-            anchors.add(charIndex);
-            continue;
-          }
+          continue;
         }
 
         ++charIndex;
@@ -131,22 +108,5 @@ public class TextWithAnchors {
       throw new IllegalStateException("Requested index " + index + "; only got " + subViews.size() + " sub-views");
 
     return subViews.get(index);
-  }
-
-  public int anchor(int index) {
-    if (index < 0)
-      throw new IllegalStateException("Cannot request negative indices");
-
-    if (index >= anchors.size())
-      throw new IllegalStateException("Requested index " + index + "; only got " + anchors.size() + " anchors");
-
-    return anchors.get(index);
-  }
-
-  public static String escape(Object input) {
-    return String.valueOf(input)
-      .replace("@", "\\@")
-      .replace("`", "\\`")
-      .replace("´", "\\´");
   }
 }
