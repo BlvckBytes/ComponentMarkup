@@ -11,6 +11,9 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.DeferredDataProvider;
+import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 

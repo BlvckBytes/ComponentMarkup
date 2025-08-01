@@ -10,10 +10,10 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
-import at.blvckbytes.component_markup.markup.interpreter.SlotType;
+import at.blvckbytes.component_markup.platform.SlotContext;
+import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 

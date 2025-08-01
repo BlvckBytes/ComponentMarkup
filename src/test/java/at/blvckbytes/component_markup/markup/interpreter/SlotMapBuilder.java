@@ -5,6 +5,8 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.platform.MembersSlot;
+
 import java.util.EnumMap;
 import java.util.function.Function;
 

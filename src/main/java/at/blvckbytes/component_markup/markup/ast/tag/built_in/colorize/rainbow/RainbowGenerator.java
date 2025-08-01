@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow;
 
-import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
+import at.blvckbytes.component_markup.platform.PackedColor;
 
 public class RainbowGenerator {
 

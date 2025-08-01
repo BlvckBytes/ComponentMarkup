@@ -7,11 +7,11 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public interface Interpreter {
 

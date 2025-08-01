@@ -5,6 +5,9 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.DeferredComponent;
+import at.blvckbytes.component_markup.platform.MembersSlot;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 

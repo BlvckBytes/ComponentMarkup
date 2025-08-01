@@ -6,7 +6,8 @@
 package at.blvckbytes.component_markup.test_utils.renderer;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.interpreter.*;
+import at.blvckbytes.component_markup.platform.PackedColor;
+import at.blvckbytes.component_markup.platform.SlotContext;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

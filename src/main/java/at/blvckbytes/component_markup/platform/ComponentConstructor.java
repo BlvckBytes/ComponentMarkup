@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.interpreter;
+package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;

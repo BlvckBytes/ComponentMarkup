@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.interpreter;
+package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
+import at.blvckbytes.component_markup.markup.interpreter.ComputedStyle;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
 

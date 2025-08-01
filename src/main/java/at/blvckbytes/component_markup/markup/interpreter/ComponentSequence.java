@@ -13,6 +13,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
+import at.blvckbytes.component_markup.platform.*;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.NotNull;

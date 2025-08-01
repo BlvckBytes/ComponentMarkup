@@ -11,6 +11,10 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithAnchors;
+import at.blvckbytes.component_markup.platform.AnsiStyleColor;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.PackedColor;
+import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;

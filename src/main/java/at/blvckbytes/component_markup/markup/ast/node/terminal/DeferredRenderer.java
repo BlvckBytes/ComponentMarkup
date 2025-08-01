@@ -6,8 +6,8 @@
 package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.markup.interpreter.ComponentConstructor;
-import at.blvckbytes.component_markup.markup.interpreter.SlotContext;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.SlotContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

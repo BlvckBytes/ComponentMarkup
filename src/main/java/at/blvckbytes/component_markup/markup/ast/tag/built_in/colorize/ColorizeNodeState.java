@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.markup.interpreter.PackedColor;
+import at.blvckbytes.component_markup.platform.PackedColor;
 import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.ArrayList;

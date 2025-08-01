@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.platform.MembersSlot;
 import at.blvckbytes.component_markup.util.IntList;
 import org.jetbrains.annotations.Nullable;
 
