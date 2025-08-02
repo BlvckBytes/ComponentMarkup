@@ -150,6 +150,109 @@ public class SelectorParserErrorTests {
     Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@p[team=\"hello\\\"world\"]")));
   }
 
+  @Test
+  public void shouldThrowOnDoubleRangeOperators() {
+    makeErrorCasesAtStart(
+      SelectorParseError.DOUBLE_RANGE_OPERATOR,
+      new TextWithSubViews("@e[limit=`1....5´]"),
+      new TextWithSubViews("@e[limit=`....5´]"),
+      new TextWithSubViews("@e[limit=`1....´]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnExpectedRhsOfRange() {
+    makeErrorCasesAtStart(
+      SelectorParseError.EXPECTED_RHS_OF_RANGE,
+      new TextWithSubViews("@e[limit=`..´]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnVariousValidationFailures() {
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NEGATIVE,
+      new TextWithSubViews("@e[`limit´=-5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_FRACTIONAL,
+      new TextWithSubViews("@e[`limit´=.5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NEGATED,
+      new TextWithSubViews("@e[`level´=!5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_RANGE,
+      new TextWithSubViews("@e[`x´=1..5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_RANGE_START_NEGATIVE,
+      new TextWithSubViews("@e[`dx´=-1..5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_RANGE_END_NEGATIVE,
+      new TextWithSubViews("@e[`dx´=1..-5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_RANGE_START_FRACTIONAL,
+      new TextWithSubViews("@e[`level´=.5..1]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_RANGE_END_FRACTIONAL,
+      new TextWithSubViews("@e[`level´=1..1.5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC,
+      new TextWithSubViews("@e[`x´=hello]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC_OR_RANGE,
+      new TextWithSubViews("@e[`dx´=hello]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NON_SORT_CRITERION,
+      new TextWithSubViews("@e[`sort´=gibberish]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_NEGATED,
+      new TextWithSubViews("@e[`sort´=!furthest]")
+    );
+
+    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@e[sort=furthest]")));
+  }
+
+  @Test
+  public void shouldThrowOnExpectedRangeOperator() {
+    makeErrorCasesAtStart(
+      SelectorParseError.EXPECTED_RANGE_OPERATOR,
+      new TextWithSubViews("@e[distance=`1 5´]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedNumber() {
+    makeErrorCasesAtStart(
+      SelectorParseError.MALFORMED_NUMBER,
+      new TextWithSubViews("@e[distance=`.abc´]"),
+      new TextWithSubViews("@e[distance=`.512a´]"),
+      new TextWithSubViews("@e[distance=`21C´]"),
+      new TextWithSubViews("@e[distance=`5.asd´]"),
+      new TextWithSubViews("@e[distance=`5.1sd´]")
+    );
+  }
+
   private void makeErrorCasesAtStart(SelectorParseError expectedError, TextWithSubViews... inputs) {
     for (TextWithSubViews text : inputs) {
       makeErrorCase(

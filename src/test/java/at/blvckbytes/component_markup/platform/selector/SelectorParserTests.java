@@ -34,7 +34,7 @@ public class SelectorParserTests {
           text,
           new TargetSelector(
             type,
-            text.subView(0),
+            text.subView(0).setLowercase(),
             Collections.emptyList()
           )
         );
@@ -52,11 +52,11 @@ public class SelectorParserTests {
       text,
       new TargetSelector(
         TargetType.ALL_ENTITIES,
-        text.subView(0),
+        text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.TAG, text.subView(1), new StringValue(text.subView(2), false)),
-          new ArgumentEntry(ArgumentName.TEAM, text.subView(3), new StringValue(text.subView(4), false)),
-          new ArgumentEntry(ArgumentName.NAME, text.subView(5), new StringValue(text.subView(6), false))
+          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), false)),
+          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), false)),
+          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), false))
         )
       )
     );
@@ -72,11 +72,11 @@ public class SelectorParserTests {
       text,
       new TargetSelector(
         TargetType.ALL_ENTITIES,
-        text.subView(0),
+        text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.TAG, text.subView(1), new StringValue(text.subView(2), false)),
-          new ArgumentEntry(ArgumentName.TEAM, text.subView(3), new StringValue(text.subView(4), false)),
-          new ArgumentEntry(ArgumentName.NAME, text.subView(5), new StringValue(text.subView(6), false))
+          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), false)),
+          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), false)),
+          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), false))
         )
       )
     );
@@ -94,11 +94,11 @@ public class SelectorParserTests {
       text,
       new TargetSelector(
         TargetType.ALL_ENTITIES,
-        text.subView(0),
+        text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.START_X, text.subView(1), new NumericValue(text.subView(2), 5, false, false, false)),
-          new ArgumentEntry(ArgumentName.START_Y, text.subView(3), new NumericValue(text.subView(4), 12, false, true, false)),
-          new ArgumentEntry(ArgumentName.START_Z, text.subView(5), new NumericValue(text.subView(6), 22, false, false, false))
+          new ArgumentEntry(ArgumentName.START_X, text.subView(1).setLowercase(), new NumericValue(text.subView(2), 5, false, false, false)),
+          new ArgumentEntry(ArgumentName.START_Y, text.subView(3).setLowercase(), new NumericValue(text.subView(4), 12, false, true, false)),
+          new ArgumentEntry(ArgumentName.START_Z, text.subView(5).setLowercase(), new NumericValue(text.subView(6), 22, false, false, false))
         )
       )
     );
@@ -112,11 +112,11 @@ public class SelectorParserTests {
       text,
       new TargetSelector(
         TargetType.ALL_ENTITIES,
-        text.subView(0),
+        text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.START_X, text.subView(1), new NumericValue(text.subView(2), 3.5, true, false, false)),
-          new ArgumentEntry(ArgumentName.START_Y, text.subView(3), new NumericValue(text.subView(4), 12.312, true, false, false)),
-          new ArgumentEntry(ArgumentName.START_Z, text.subView(5), new NumericValue(text.subView(6), 22.54, true, true, false))
+          new ArgumentEntry(ArgumentName.START_X, text.subView(1).setLowercase(), new NumericValue(text.subView(2), 3.5, true, false, false)),
+          new ArgumentEntry(ArgumentName.START_Y, text.subView(3).setLowercase(), new NumericValue(text.subView(4), 12.312, true, false, false)),
+          new ArgumentEntry(ArgumentName.START_Z, text.subView(5).setLowercase(), new NumericValue(text.subView(6), 22.54, true, true, false))
         )
       )
     );
@@ -127,11 +127,11 @@ public class SelectorParserTests {
       text,
       new TargetSelector(
         TargetType.ALL_ENTITIES,
-        text.subView(0),
+        text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.START_X, text.subView(1), new NumericValue(text.subView(2), .5, true, false, false)),
-          new ArgumentEntry(ArgumentName.START_Y, text.subView(3), new NumericValue(text.subView(4), .312, true, false, false)),
-          new ArgumentEntry(ArgumentName.START_Z, text.subView(5), new NumericValue(text.subView(6), .54, true, true, false))
+          new ArgumentEntry(ArgumentName.START_X, text.subView(1).setLowercase(), new NumericValue(text.subView(2), .5, true, false, false)),
+          new ArgumentEntry(ArgumentName.START_Y, text.subView(3).setLowercase(), new NumericValue(text.subView(4), .312, true, false, false)),
+          new ArgumentEntry(ArgumentName.START_Z, text.subView(5).setLowercase(), new NumericValue(text.subView(6), .54, true, true, false))
         )
       )
     );

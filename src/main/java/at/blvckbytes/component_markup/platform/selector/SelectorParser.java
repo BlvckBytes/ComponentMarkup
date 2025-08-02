@@ -21,7 +21,6 @@ import java.util.logging.Level;
 
 public class SelectorParser {
 
-  // TODO: Extensively test parsing attribute-values (and keys etc., but that has utmost importance)
   // TODO: Replace all illegal-state exceptions with proper selector-errors
 
   private static final ArgumentValue RANGE_VALUE_SENTINEL = () -> false;
@@ -46,7 +45,7 @@ public class SelectorParser {
     while ((upcomingChar = input.peekChar(0)) != 0 && upcomingChar != '[' && !Character.isWhitespace(upcomingChar))
       input.nextChar();
 
-    StringView rawTarget = input.buildSubViewAbsolute(typeBegin, input.getPosition() + 1);
+    StringView rawTarget = input.buildSubViewAbsolute(typeBegin, input.getPosition() + 1).setLowercase();
     TargetType target = TargetType.ofName(rawTarget);
 
     if (target == null)
@@ -94,8 +93,7 @@ public class SelectorParser {
       while ((peekedChar = input.peekChar(0)) >= 'a' && peekedChar <= 'z' || peekedChar >= 'A' && peekedChar <= 'Z')
         input.nextChar();
 
-      StringView rawName = input.buildSubViewAbsolute(nameBegin, input.getPosition() + 1);
-
+      StringView rawName = input.buildSubViewAbsolute(nameBegin, input.getPosition() + 1).setLowercase();
       ArgumentName name = ArgumentName.ofName(rawName);
 
       if (name == null)
@@ -109,11 +107,14 @@ public class SelectorParser {
       input.nextChar();
       input.consumeWhitespace(null);
 
-      ArgumentValue value = parseArgumentValue(input, name);
-      ValidationFailure validationFailure = name.typeErrorProvider.apply(value);
+      ArgumentValue value = parseArgumentValue(input, name, nameBegin);
 
-      if (validationFailure != null)
-        throw new IllegalStateException("Validation-Failure: " + validationFailure);
+      if (name.typeErrorProvider != null) {
+        SelectorParseError typeError = name.typeErrorProvider.apply(value);
+
+        if (typeError != null)
+          throw new SelectorParseException(input, nameBegin, typeError, name.name);
+      }
 
       for (ArgumentEntry entry : result) {
         if (entry.name != name)
@@ -154,7 +155,7 @@ public class SelectorParser {
     return result;
   }
 
-  private static ArgumentValue parseArgumentValue(StringView input, ArgumentName name) {
+  private static ArgumentValue parseArgumentValue(StringView input, ArgumentName name, int nameBegin) {
     char firstChar = input.peekChar(0);
 
     if (firstChar == '"' || firstChar == '!' && input.peekChar(1) == '"') {
@@ -174,18 +175,21 @@ public class SelectorParser {
       }
     }
 
-    if (name.supportsStrings) {
+    if (name.acceptedValue == AcceptedValue.STRING || name.acceptedValue == AcceptedValue.SORT_CRITERION) {
       boolean isNegated = false;
+      int startIndex;
 
       if (firstChar == '!') {
         isNegated = true;
         input.nextChar();
+        startIndex = input.getPosition() + 1;
       }
 
-      else
+      else {
         input.nextChar();
+        startIndex = input.getPosition();
+      }
 
-      int startIndex = input.getPosition();
       char upcomingChar;
 
       while ((upcomingChar = input.peekChar(0)) != 0) {
@@ -207,17 +211,40 @@ public class SelectorParser {
         }
       }
 
-      return new StringValue(input.buildSubViewAbsolute(startIndex, input.getPosition() + 1), isNegated);
+      StringView contents = input.buildSubViewAbsolute(startIndex, input.getPosition() + 1);
+
+      if (name.acceptedValue == AcceptedValue.SORT_CRITERION) {
+        SortCriterion sortCriterion = SortCriterion.ofName(contents);
+
+        if (sortCriterion != null) {
+          if (isNegated)
+            throw new SelectorParseException(input, nameBegin, SelectorParseError.VALIDATION_FAILED_IS_NEGATED, name.name);
+
+          return sortCriterion;
+        }
+      }
+
+      return new StringValue(contents, isNegated);
     }
+
+    int inputBegin = input.getPosition() + 1;
 
     NumericValue firstNumber;
     ArgumentValue currentValue = parseNumberOrRangeOperator(input);
 
-    if (currentValue == null)
-      throw new IllegalStateException("Expected numeric value of argument " + name.name);
+    input.consumeWhitespace(null);
+
+    if (currentValue == null) {
+      if (name.acceptedValue == AcceptedValue.RANGE)
+        throw new SelectorParseException(input, nameBegin, SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC_OR_RANGE, name.name);
+
+      throw new SelectorParseException(input, nameBegin, SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC, name.name);
+    }
 
     if (currentValue instanceof NumericValue) {
-      if (input.peekChar(0) != '.')
+      char upcomingChar = input.peekChar(0);
+
+      if (upcomingChar != '.' && upcomingChar != '-' && !(upcomingChar >= '0' && upcomingChar <= '9'))
         return currentValue;
 
       firstNumber = (NumericValue) currentValue;
@@ -228,18 +255,20 @@ public class SelectorParser {
       currentValue = parseNumberOrRangeOperator(input);
 
       if (currentValue == null)
-        throw new IllegalStateException("Expected numeric rhs of range-operator");
+        throw new SelectorParseException(input, inputBegin, SelectorParseError.EXPECTED_RHS_OF_RANGE);
 
       if (currentValue instanceof NumericValue)
         return validateRange(new NumericRangeValue(null, (NumericValue) currentValue));
 
-      throw new IllegalStateException("Two back-to-back range-operators");
+      throw new SelectorParseException(input, inputBegin, SelectorParseError.DOUBLE_RANGE_OPERATOR);
     }
 
     currentValue = parseNumberOrRangeOperator(input);
 
+    input.consumeWhitespace(null);
+
     if (currentValue != RANGE_VALUE_SENTINEL)
-      throw new IllegalStateException("Expected range-operator");
+      throw new SelectorParseException(input, inputBegin, SelectorParseError.EXPECTED_RANGE_OPERATOR);
 
     currentValue = parseNumberOrRangeOperator(input);
 
@@ -247,7 +276,7 @@ public class SelectorParser {
       return validateRange(new NumericRangeValue(firstNumber, null));
 
     if (currentValue == RANGE_VALUE_SENTINEL)
-      throw new IllegalStateException("Two back-to-back range-operators");
+      throw new SelectorParseException(input, inputBegin, SelectorParseError.DOUBLE_RANGE_OPERATOR);
 
     return validateRange(new NumericRangeValue(firstNumber, (NumericValue) currentValue));
   }
@@ -297,8 +326,8 @@ public class SelectorParser {
         }
       } catch (ExpressionTokenizeException ignored) {}
 
-      if (value == null)
-        throw new IllegalStateException("Malformed number at " + valueBeginPosition);
+      if (value == null || ((upcomingChar = input.peekChar(0)) != ' ') && upcomingChar != ',' && upcomingChar != ']' && upcomingChar != 0)
+        throw new SelectorParseException(input, valueBeginPosition, SelectorParseError.MALFORMED_NUMBER);
     }
 
     else if (upcomingChar == '.') {
@@ -324,8 +353,8 @@ public class SelectorParser {
         }
       } catch (ExpressionTokenizeException ignored) {}
 
-      if (value == null)
-        throw new IllegalStateException("Malformed number at " + valueBeginPosition);
+      if (value == null || ((upcomingChar = input.peekChar(0)) != ' ') && upcomingChar != ',' && upcomingChar != ']' && upcomingChar != 0)
+        throw new SelectorParseException(input, valueBeginPosition, SelectorParseError.MALFORMED_NUMBER);
     }
 
     else

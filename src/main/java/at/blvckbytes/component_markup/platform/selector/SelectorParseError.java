@@ -24,6 +24,21 @@ public enum SelectorParseError {
   MULTI_IF_NEGATED_ARGUMENT(args -> "The argument \"" + args[0] + "\" can only occur multiple times if negated"),
   STRING_CONTAINED_QUOTE(args -> "Strings cannot contain quotes without a prior backslash: \\\""),
   UNTERMINATED_STRING(args -> "Strings beginning with double-quotes \" need to again end in such"),
+  VALIDATION_FAILED_IS_NEGATIVE(args -> "The argument \"" + args[0] + "\" does not support negative values"),
+  VALIDATION_FAILED_IS_FRACTIONAL(args -> "The argument \"" + args[0] + "\" does not support fractional values"),
+  VALIDATION_FAILED_IS_NEGATED(args -> "The argument \"" + args[0] + "\" does not support negated values"),
+  VALIDATION_FAILED_IS_RANGE(args -> "The argument \"" + args[0] + "\" does not support ranges"),
+  VALIDATION_FAILED_IS_RANGE_START_NEGATIVE(args -> "The argument \"" + args[0] + "\" does not support ranges with negative values (start)"),
+  VALIDATION_FAILED_IS_RANGE_END_NEGATIVE(args -> "The argument \"" + args[0] + "\" does not support ranges with negative values (end)"),
+  VALIDATION_FAILED_IS_RANGE_START_FRACTIONAL(args -> "The argument \"" + args[0] + "\" does not support ranges with fractional values (start)"),
+  VALIDATION_FAILED_IS_RANGE_END_FRACTIONAL(args -> "The argument \"" + args[0] + "\" does not support ranges with fractional values (end)"),
+  VALIDATION_FAILED_IS_NON_NUMERIC(args -> "The argument \"" + args[0] + "\" requires a numeric-value"),
+  VALIDATION_FAILED_IS_NON_NUMERIC_OR_RANGE(args -> "The argument \"" + args[0] + "\" requires a numeric- or range-value"),
+  VALIDATION_FAILED_IS_NON_SORT_CRITERION(args -> "The argument \"" + args[0] + "\" must have a value of one of: " + SortCriterion.NAMES_STRING),
+  EXPECTED_RHS_OF_RANGE(args -> "A range-operator without a left-hand-side must have a right-hand-side value"),
+  EXPECTED_RANGE_OPERATOR(args -> "Two subsequent numeric values need to be joined by a range-operator: .."),
+  DOUBLE_RANGE_OPERATOR(args -> "The range-operator may only be used once per value"),
+  MALFORMED_NUMBER(args -> "This number is malformed"),
   ;
 
   public final Function<String[], String> messageBuilder;

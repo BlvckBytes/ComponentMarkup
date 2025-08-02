@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.platform.selector.argument;
 
+import at.blvckbytes.component_markup.platform.selector.SelectorParseError;
 import at.blvckbytes.component_markup.platform.selector.SortCriterion;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
@@ -25,19 +26,19 @@ public enum ArgumentName {
   START_X(
     "x",
     MultiAllowance.NEVER,
-    false,
+    null,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Y(
     "y",
     MultiAllowance.NEVER,
-    false,
+    null,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Z(
     "z",
     MultiAllowance.NEVER,
-    false,
+    null,
     makeNumericValidator( EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -52,7 +53,7 @@ public enum ArgumentName {
   DISTANCE(
     "distance",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -62,19 +63,19 @@ public enum ArgumentName {
   DELTA_X(
     "dx",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Y(
     "dy",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Z(
     "dz",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -87,7 +88,7 @@ public enum ArgumentName {
   X_ROTATION(
     "x_rotation",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
@@ -101,7 +102,7 @@ public enum ArgumentName {
   Y_ROTATION(
     "y_rotation",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.RANGE,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
@@ -111,8 +112,8 @@ public enum ArgumentName {
   TAG(
     "tag",
     MultiAllowance.MULTI_IF_EITHER,
-    true,
-    makeStringValidator()
+    AcceptedValue.STRING,
+    null
   ),
   /*
   Filter target selection based on teams. Arguments testing for equality cannot be
@@ -121,8 +122,8 @@ public enum ArgumentName {
   TEAM(
     "team",
     MultiAllowance.MULTI_IF_NEGATED,
-    true,
-    makeStringValidator()
+    AcceptedValue.STRING,
+    null
   ),
   /*
   Filter target selection by name. Values are strings, so spaces are allowed only if quotes
@@ -132,8 +133,8 @@ public enum ArgumentName {
   NAME(
     "name",
     MultiAllowance.MULTI_IF_NEGATED,
-    true,
-    makeStringValidator()
+    AcceptedValue.STRING,
+    null
   ),
   /*
   Filter target selection based on the entity's identifier. The given entity type must be a
@@ -145,8 +146,8 @@ public enum ArgumentName {
   TYPE(
     "type",
     MultiAllowance.MULTI_IF_NEGATED,
-    true,
-    makeStringValidator()
+    AcceptedValue.STRING,
+    null
   ),
   /*
   Filter target selection based on the entity's experience levels. This naturally filters out
@@ -157,8 +158,8 @@ public enum ArgumentName {
   LEVEL(
     "level",
     MultiAllowance.NEVER,
-    false,
-    makeNumericValidator(EnumSet.allOf(NumericFlag.class))
+    null,
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_FRACTIONAL, NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection by game mode. This naturally filters out all non-player targets.
@@ -168,8 +169,8 @@ public enum ArgumentName {
   GAME_MODE(
     "gamemode",
     MultiAllowance.MULTI_IF_NEGATED,
-    true,
-    makeStringValidator()
+    AcceptedValue.STRING,
+    null
   ),
   /*
   Limit the number of selectable targets for a target selector.
@@ -177,7 +178,7 @@ public enum ArgumentName {
   LIMIT(
     "limit",
     MultiAllowance.NEVER,
-    false,
+    null,
     makeNumericValidator(EnumSet.allOf(NumericFlag.class))
   ),
   /*
@@ -186,12 +187,12 @@ public enum ArgumentName {
   SORT(
     "sort",
     MultiAllowance.NEVER,
-    false,
+    AcceptedValue.SORT_CRITERION,
     t -> {
       if (t instanceof SortCriterion)
         return null;
 
-      return ValidationFailure.IS_NON_SORT_CRITERION;
+      return SelectorParseError.VALIDATION_FAILED_IS_NON_SORT_CRITERION;
     }
   ),
   ;
@@ -209,22 +210,22 @@ public enum ArgumentName {
 
   public final String name;
   public final MultiAllowance multiAllowance;
-  public final boolean supportsStrings;
-  public final Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider;
+  public final @Nullable AcceptedValue acceptedValue;
+  public final @Nullable Function<ArgumentValue, @Nullable SelectorParseError> typeErrorProvider;
 
   ArgumentName(
     String name,
     MultiAllowance multiAllowance,
-    boolean supportsStrings,
-    Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider
+    @Nullable AcceptedValue acceptedValue,
+    @Nullable Function<ArgumentValue, @Nullable SelectorParseError> typeErrorProvider
   ) {
     this.name = name;
     this.multiAllowance = multiAllowance;
-    this.supportsStrings = supportsStrings;
+    this.acceptedValue = acceptedValue;
     this.typeErrorProvider = typeErrorProvider;
   }
 
-  private static Function<ArgumentValue, @Nullable ValidationFailure> makeNumericValidator(EnumSet<NumericFlag> flags) {
+  private static Function<ArgumentValue, @Nullable SelectorParseError> makeNumericValidator(EnumSet<NumericFlag> flags) {
     boolean allowsRanges = !flags.contains(NumericFlag.NON_RANGE);
 
     return t -> {
@@ -232,51 +233,42 @@ public enum ArgumentName {
         NumericValue numericValue = (NumericValue) t;
 
         if (numericValue.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return ValidationFailure.IS_NEGATIVE;
+          return SelectorParseError.VALIDATION_FAILED_IS_NEGATIVE;
 
         if (numericValue.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return ValidationFailure.IS_FRACTIONAL;
+          return SelectorParseError.VALIDATION_FAILED_IS_FRACTIONAL;
 
         if (numericValue.isNegated && flags.contains(NumericFlag.NON_NEGATED))
-          return ValidationFailure.IS_NEGATED;
+          return SelectorParseError.VALIDATION_FAILED_IS_NEGATED;
 
         return null;
       }
 
       if (t instanceof NumericRangeValue) {
         if (!allowsRanges)
-          return ValidationFailure.IS_RANGE;
+          return SelectorParseError.VALIDATION_FAILED_IS_RANGE;
 
         NumericRangeValue rangeValue = (NumericRangeValue) t;
 
         if (rangeValue.startInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return ValidationFailure.IS_RANGE_START_NEGATIVE;
+          return SelectorParseError.VALIDATION_FAILED_IS_RANGE_START_NEGATIVE;
 
         if (rangeValue.endInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return ValidationFailure.IS_RANGE_END_NEGATIVE;
+          return SelectorParseError.VALIDATION_FAILED_IS_RANGE_END_NEGATIVE;
 
         if (rangeValue.startInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return ValidationFailure.IS_RANGE_START_FRACTIONAL;
+          return SelectorParseError.VALIDATION_FAILED_IS_RANGE_START_FRACTIONAL;
 
         if (rangeValue.endInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return ValidationFailure.IS_RANGE_END_FRACTIONAL;
+          return SelectorParseError.VALIDATION_FAILED_IS_RANGE_END_FRACTIONAL;
 
         return null;
       }
 
       if (!allowsRanges)
-        return ValidationFailure.IS_NON_NUMERIC;
+        return SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC;
 
-      return ValidationFailure.IS_NON_NUMERIC_OR_RANGE;
-    };
-  }
-
-  private static Function<ArgumentValue, @Nullable ValidationFailure> makeStringValidator() {
-    return t -> {
-      if (!(t instanceof StringValue))
-        return ValidationFailure.IS_NON_STRING;
-
-      return null;
+      return SelectorParseError.VALIDATION_FAILED_IS_NON_NUMERIC_OR_RANGE;
     };
   }
 
