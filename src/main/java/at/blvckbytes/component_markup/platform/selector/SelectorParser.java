@@ -5,17 +5,24 @@
 
 package at.blvckbytes.component_markup.platform.selector;
 
-import at.blvckbytes.component_markup.platform.selector.argument.ArgumentEntry;
-import at.blvckbytes.component_markup.platform.selector.argument.ArgumentName;
-import at.blvckbytes.component_markup.platform.selector.argument.ArgumentValue;
+import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
+import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
+import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.platform.selector.argument.*;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class SelectorParser {
+
+  // TODO: Extensively test parsing attribute-values (and keys etc., but that has utmost importance)
+  // TODO: Replace all illegal-state exceptions with proper selector-errors
+
+  private static final ArgumentValue RANGE_VALUE_SENTINEL = new ArgumentValue() {};
 
   public static @NotNull TargetSelector parse(StringView input) {
     input.consumeWhitespace(null);
@@ -97,7 +104,17 @@ public class SelectorParser {
       if (input.nextChar() != '=')
         throw new SelectorParseException(input, SelectorParseError.MISSING_EQUALS_SIGN, rawName.buildString());
 
-      result.add(new ArgumentEntry(name, rawName, parseArgumentValue(name)));
+      input.consumeWhitespace(null);
+
+      ArgumentValue value = parseArgumentValue(input, name);
+      String errorMessage = name.typeErrorProvider.apply(value);
+
+      if (errorMessage != null)
+        throw new IllegalStateException("Error-Message: " + errorMessage);
+
+      // TODO: Check ArgumentFlag in regards to multi (check against result-list)
+
+      result.add(new ArgumentEntry(name, rawName, value));
 
       input.consumeWhitespace(null);
 
@@ -111,8 +128,181 @@ public class SelectorParser {
     return result;
   }
 
-  private static ArgumentValue parseArgumentValue(ArgumentName name) {
-    // TODO: Implement me! :)
-    throw new UnsupportedOperationException();
+  private static ArgumentValue parseArgumentValue(StringView input, ArgumentName name) {
+    char firstChar = input.peekChar(0);
+    boolean isQuoted = firstChar == '"';
+
+    if (isQuoted) {
+      try {
+        ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
+        return new StringValue(expressionTokenizer.parseStringToken().raw, false); // TODO: Parse negated-flag
+      } catch (ExpressionTokenizeException e) {
+        throw new IllegalStateException("Malformed string: " + e.error);
+      }
+    }
+
+    if (name.flags.contains(ArgumentFlag.SUPPORTS_STRINGS)) {
+      input.nextChar();
+
+      int startIndex = input.getPosition();
+      char upcomingChar;
+
+      while ((upcomingChar = input.peekChar(0)) != 0) {
+        if (Character.isWhitespace(upcomingChar))
+          break;
+
+        if (upcomingChar == ',' || upcomingChar == ']')
+          break;
+
+        char priorChar = input.priorChar(0);
+
+        if (input.nextChar() == '"') {
+          if (priorChar == '\\') {
+            input.addIndexToBeRemoved(input.getPosition());
+            continue;
+          }
+
+          throw new IllegalStateException("Unquoted string contained unescaped quote");
+        }
+      }
+
+      return new StringValue(input.buildSubViewAbsolute(startIndex, input.getPosition() + 1), false); // TODO: Parse negated-flag
+    }
+
+    NumericValue firstNumber;
+    ArgumentValue currentValue = parseNumberOrRangeOperator(input);
+
+    if (currentValue == null)
+      throw new IllegalStateException("Expected numeric value of argument " + name.name);
+
+    if (currentValue instanceof NumericValue) {
+      if (input.peekChar(0) != '.')
+        return currentValue;
+
+      firstNumber = (NumericValue) currentValue;
+    }
+
+    // value is range-operator
+    else {
+      currentValue = parseNumberOrRangeOperator(input);
+
+      if (currentValue == null)
+        throw new IllegalStateException("Expected numeric rhs of range-operator");
+
+      if (currentValue instanceof NumericValue)
+        return validateRange(new NumericRangeValue(null, (NumericValue) currentValue));
+
+      throw new IllegalStateException("Two back-to-back range-operators");
+    }
+
+    currentValue = parseNumberOrRangeOperator(input);
+
+    if (currentValue != RANGE_VALUE_SENTINEL)
+      throw new IllegalStateException("Expected range-operator");
+
+    currentValue = parseNumberOrRangeOperator(input);
+
+    if (currentValue == null)
+      return validateRange(new NumericRangeValue(firstNumber, null));
+
+    if (currentValue == RANGE_VALUE_SENTINEL)
+      throw new IllegalStateException("Two back-to-back range-operators");
+
+    return validateRange(new NumericRangeValue(firstNumber, (NumericValue) currentValue));
+  }
+
+  private static @Nullable ArgumentValue parseNumberOrRangeOperator(StringView input) {
+    ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
+
+    char upcomingChar = input.peekChar(0);
+    int valueBeginPosition = -1;
+
+    boolean isNegated = false;
+
+    if (upcomingChar == '!') {
+      isNegated = true;
+      input.nextChar();
+      upcomingChar = input.peekChar(0);
+      valueBeginPosition = input.getPosition();
+    }
+
+    boolean isNegative = false;
+
+    if (upcomingChar == '-') {
+      isNegative = true;
+      input.nextChar();
+      upcomingChar = input.peekChar(0);
+
+      if (valueBeginPosition < 0)
+        valueBeginPosition = input.getPosition();
+    }
+
+    if (valueBeginPosition < 0)
+      valueBeginPosition = input.getPosition() + 1;
+
+    StringView rawValue = null;
+    Number value = null;
+
+    if (upcomingChar >= '0' && upcomingChar <= '9') {
+      try {
+        Token result = expressionTokenizer.parseLongOrDoubleToken();
+
+        if (result instanceof LongToken) {
+          value = ((LongToken) result).value;
+          rawValue = result.raw;
+        } else if (result instanceof DoubleToken) {
+          value = ((DoubleToken) result).value;
+          rawValue = result.raw;
+        }
+      } catch (ExpressionTokenizeException ignored) {}
+
+      if (value == null)
+        throw new IllegalStateException("Malformed number at " + valueBeginPosition);
+    }
+
+    else if (upcomingChar == '.') {
+      if (input.peekChar(1) == '.') {
+        input.nextChar();
+        input.nextChar();
+
+        if (isNegative)
+          throw new IllegalStateException("Dangling minus-sign");
+
+        if (isNegated)
+          throw new IllegalStateException("Dangling bang");
+
+        return RANGE_VALUE_SENTINEL;
+      }
+
+      try {
+        Token result = expressionTokenizer.tryParseDotDoubleToken();
+
+        if (result instanceof DoubleToken) {
+          value = ((DoubleToken) result).value;
+          rawValue = result.raw;
+        }
+      } catch (ExpressionTokenizeException ignored) {}
+
+      if (value == null)
+        throw new IllegalStateException("Malformed number at " + valueBeginPosition);
+    }
+
+    else
+      return null;
+
+    return new NumericValue(rawValue, value, value instanceof Double, isNegative, isNegated);
+  }
+
+  private static ArgumentValue validateRange(NumericRangeValue range) {
+    if (range.startInclusive.isNegated)
+        throw new IllegalStateException("Start negated");
+
+    if (range.endInclusive.isNegated)
+      throw new IllegalStateException("End negated");
+
+    // TODO: Check for start < end
+    //       Or do this later at execution and print, instead of failing the whole thing?
+
+    return range;
   }
 }

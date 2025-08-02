@@ -10,9 +10,8 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.EnumSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 // https://minecraft.fandom.com/wiki/Target_selectors
@@ -23,9 +22,21 @@ public enum ArgumentName {
   will not restrict the entities found, and will only affect the sorting of targets.
   Cannot duplicate any one of these three arguments.
    */
-  START_X("x", IntegerValue.class, FloatValue.class),
-  START_Y("y", IntegerValue.class, FloatValue.class),
-  START_Z("z", IntegerValue.class, FloatValue.class),
+  START_X(
+    "x",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("x", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+  ),
+  START_Y(
+    "y",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("y", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+  ),
+  START_Z(
+    "z",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("z", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+  ),
   /*
   Filter target selection based on their Euclidean distances from some point, searching
   for the target's feet (a point at the bottom of the center of their hitbox). If the
@@ -35,14 +46,30 @@ public enum ArgumentName {
 
   Float ranges are supported to select a specific region. Only unsigned values are allowed.
    */
-  DISTANCE("distance", IntegerValue.class, FloatValue.class, IntegerRangeValue.class, FloatRangeValue.class),
+  DISTANCE(
+    "distance",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("distance", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+  ),
   /*
   Filter target selection based on their x-difference, y-difference, and z-difference from
   some point (analogous to DISTANCE). Cannot duplicate any one of these three arguments.
    */
-  DELTA_X("dx", IntegerValue.class, FloatValue.class),
-  DELTA_Y("dy", IntegerValue.class, FloatValue.class),
-  DELTA_Z("dz", IntegerValue.class, FloatValue.class),
+  DELTA_X(
+    "dx",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("dx", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+  ),
+  DELTA_Y(
+    "dy",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("dy", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+  ),
+  DELTA_Z(
+    "dz",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("dz", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+  ),
   /*
   Filter target selection based on the entity's rotation along the pitch axis, measured
   in degrees. Values range from -90 (straight up) to 0 (at the horizon) to +90 (straight
@@ -50,7 +77,11 @@ public enum ArgumentName {
 
   Float Ranges are supported to select a specific range of angles.
    */
-  X_ROTATION("x_rotation", IntegerValue.class, FloatValue.class),
+  X_ROTATION(
+    "x_rotation",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("x_rotation", EnumSet.of(NumericFlag.NON_NEGATED))
+  ),
   /*
   Filter target selection based on the entity's rotation along the yaw axis, measured
   clockwise in degrees from due south (or the positive Z direction). Values vary from
@@ -59,23 +90,39 @@ public enum ArgumentName {
 
   Float Ranges are supported to select a specific range of angles.
    */
-  Y_ROTATION("y_rotation", IntegerValue.class, FloatValue.class),
+  Y_ROTATION(
+    "y_rotation",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("y_rotation", EnumSet.of(NumericFlag.NON_NEGATED))
+  ),
   /*
   Filter target selection based on the entity's scoreboard tags. Multiple tag arguments
   are allowed, and all arguments must be fulfilled for an entity to be selected.
   */
-  TAG("tag", StringValue.class),
+  TAG(
+    "tag",
+    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    makeStringValidator("tag")
+  ),
   /*
   Filter target selection based on teams. Arguments testing for equality cannot be
   duplicated, while arguments testing for inequality can.
   */
-  TEAM("team", StringValue.class),
+  TEAM(
+    "team",
+    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    makeStringValidator("team")
+  ),
   /*
   Filter target selection by name. Values are strings, so spaces are allowed only if quotes
   are applied. This cannot be a JSON text compound. Arguments testing for equality cannot
   be duplicated, while arguments testing for inequality can.
    */
-  NAME("name", StringValue.class),
+  NAME(
+    "name",
+    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    makeStringValidator("name")
+  ),
   /*
   Filter target selection based on the entity's identifier. The given entity type must be a
   valid entity ID or entity type tag used to identify different types of entities internally.
@@ -83,44 +130,131 @@ public enum ArgumentName {
   tags are case-sensitive. Arguments testing for equality cannot be duplicated, while
   arguments testing for inequality can.
    */
-  TYPE("type", StringValue.class),
+  TYPE(
+    "type",
+    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    makeStringValidator("type")
+  ),
   /*
   Filter target selection based on the entity's experience levels. This naturally filters out
   all non-player targets. Cannot duplicate these arguments.
 
   Integer ranges are supported to select a range of values.
    */
-  LEVEL("level", IntegerValue.class, FloatValue.class, IntegerRangeValue.class, FloatRangeValue.class),
+  LEVEL(
+    "level",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("level", EnumSet.allOf(NumericFlag.class))
+  ),
   /*
   Filter target selection by game mode. This naturally filters out all non-player targets.
   Arguments testing for equality cannot be duplicated, while arguments testing for
   inequality can.
    */
-  GAME_MODE("gamemode", StringValue.class),
+  GAME_MODE(
+    "gamemode",
+    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    makeStringValidator("gamemode")
+  ),
   /*
   Limit the number of selectable targets for a target selector.
   */
-  LIMIT("limit", IntegerValue.class),
+  LIMIT(
+    "limit",
+    EnumSet.noneOf(ArgumentFlag.class),
+    makeNumericValidator("limit", EnumSet.allOf(NumericFlag.class))
+  ),
   /*
   Specifies selection-priority when limiting and dictates the order of results in general.
    */
-  SORT("sort", SortCriterion.class),
+  SORT(
+    "sort",
+    EnumSet.noneOf(ArgumentFlag.class),
+      t -> {
+      if (t instanceof SortCriterion)
+        return null;
+
+      return "\"sort\" must be one of: " + SortCriterion.NAMES_STRING;
+    }
+  ),
   ;
+
+  private enum NumericFlag {
+    NON_RANGE,
+    NON_NEGATIVE,
+    NON_FRACTIONAL,
+    NON_NEGATED,
+  }
 
   public static final String NAMES_STRING = Arrays.stream(values())
     .map(x -> String.valueOf(x.name))
     .collect(Collectors.joining(", "));
 
   public final String name;
-  public final Set<Class<? extends ArgumentValue>> supportedArguments;
+  public final EnumSet<ArgumentFlag> flags;
+  public final Function<ArgumentValue, @Nullable String> typeErrorProvider;
 
-  @SafeVarargs
-  ArgumentName(String name, Class<? extends ArgumentValue>... supportedArguments) {
+  ArgumentName(
+    String name,
+    EnumSet<ArgumentFlag> flags,
+    Function<ArgumentValue, @Nullable String> typeErrorProvider
+  ) {
     this.name = name;
+    this.flags = flags;
+    this.typeErrorProvider = typeErrorProvider;
+  }
 
-    Set<Class<? extends ArgumentValue>> buffer = new HashSet<>();
-    Collections.addAll(buffer, supportedArguments);
-    this.supportedArguments = Collections.unmodifiableSet(buffer);
+  private static Function<ArgumentValue, @Nullable String> makeNumericValidator(String name, EnumSet<NumericFlag> flags) {
+    boolean allowsRanges = !flags.contains(NumericFlag.NON_RANGE);
+
+    return t -> {
+      if (t instanceof NumericValue) {
+        NumericValue numericValue = (NumericValue) t;
+
+        if (numericValue.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
+          return "\"" + name + "\" must not be negative";
+
+        if (numericValue.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
+          return "\"" + name + "\" must not be fractional";
+
+        if (numericValue.isNegated && flags.contains(NumericFlag.NON_NEGATED))
+          return "\"" + name + "\" cannot be negated";
+
+        return null;
+      }
+
+      if (t instanceof NumericRangeValue) {
+        if (!allowsRanges)
+          return "\"" + name + "\" must not be a range";
+
+        NumericRangeValue rangeValue = (NumericRangeValue) t;
+
+        if (rangeValue.startInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
+          return "\"" + name + "\" must not be negative (range-start)";
+
+        if (rangeValue.endInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
+          return "\"" + name + "\" must not be negative (range-end)";
+
+        if (rangeValue.startInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
+          return "\"" + name + "\" must not be fractional (range-start)";
+
+        if (rangeValue.endInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
+          return "\"" + name + "\" must not be fractional (range-end)";
+
+        return null;
+      }
+
+      return "\"" + name + "\" be a numeric value" + (allowsRanges ? " or a range" : "");
+    };
+  }
+
+  private static Function<ArgumentValue, @Nullable String> makeStringValidator(String name) {
+    return t -> {
+      if (!(t instanceof StringValue))
+        return "\"" + name + "\" must be a string-value";
+
+      return null;
+    };
   }
 
   public static @Nullable ArgumentName ofName(StringView name) {

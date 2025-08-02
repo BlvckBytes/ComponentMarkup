@@ -14,7 +14,7 @@ import java.util.Stack;
 
 public class ExpressionTokenizer {
 
-  private final Stack<Token> pendingStack;
+  private @Nullable Stack<Token> pendingStack;
   private boolean isNextPendingPeek;
 
   private final StringView input;
@@ -22,7 +22,6 @@ public class ExpressionTokenizer {
   private boolean dashIsPrefix;
 
   public ExpressionTokenizer(StringView input, @Nullable TokenOutput tokenOutput) {
-    this.pendingStack = new Stack<>();
     this.input = input;
     this.tokenOutput = tokenOutput;
 
@@ -30,7 +29,7 @@ public class ExpressionTokenizer {
     this.dashIsPrefix = true;
   }
 
-  private Token parseStringToken() {
+  public Token parseStringToken() {
     char quoteChar;
 
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
@@ -83,6 +82,9 @@ public class ExpressionTokenizer {
       dashIsPrefix = false;
 
       if ((upcomingOperatorOrPunctuation = tryParseOperatorOrPunctuationOrDotDoubleToken()) != null) {
+        if (pendingStack == null)
+          pendingStack = new Stack<>();
+
         pendingStack.push(upcomingOperatorOrPunctuation);
         break;
       }
@@ -143,7 +145,7 @@ public class ExpressionTokenizer {
     return firstIndex;
   }
 
-  private Token parseLongOrDoubleToken() {
+  public Token parseLongOrDoubleToken() {
     int startInclusive;
 
     if ((startInclusive = collectSubsequentDigitsAndGetFirstIndex()) < 0)
@@ -173,7 +175,7 @@ public class ExpressionTokenizer {
     return new LongToken(value, Long.parseLong(value.buildString()));
   }
 
-  private @Nullable Token tryParseDotDoubleToken() {
+  public @Nullable Token tryParseDotDoubleToken() {
     if (input.peekChar(0) != '.')
       throw new IllegalStateException("Expected to only be called if peekChar(0) = '.'");
 
@@ -418,8 +420,8 @@ public class ExpressionTokenizer {
     Token result;
     boolean wasPeek = false;
 
-    if (!this.pendingStack.isEmpty()) {
-      result = this.pendingStack.pop();
+    if (pendingStack != null && !pendingStack.isEmpty()) {
+      result = pendingStack.pop();
       if (isNextPendingPeek)
         wasPeek = true;
 
@@ -455,8 +457,11 @@ public class ExpressionTokenizer {
   }
 
   public @Nullable Token peekToken() {
-    if (this.pendingStack.isEmpty()) {
-      this.pendingStack.push(nextToken());
+    if (pendingStack == null)
+      pendingStack = new Stack<>();
+
+    if (pendingStack.isEmpty()) {
+      pendingStack.push(nextToken());
       isNextPendingPeek = true;
     }
 

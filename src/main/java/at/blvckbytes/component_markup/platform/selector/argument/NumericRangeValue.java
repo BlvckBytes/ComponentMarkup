@@ -5,12 +5,12 @@
 
 package at.blvckbytes.component_markup.platform.selector.argument;
 
-public class IntegerRangeValue implements ArgumentValue {
+public class NumericRangeValue implements ArgumentValue {
 
-  public final int startInclusive;
-  public final int endInclusive;
+  public final NumericValue startInclusive;
+  public final NumericValue endInclusive;
 
-  public IntegerRangeValue(int startInclusive, int endInclusive) {
+  public NumericRangeValue(NumericValue startInclusive, NumericValue endInclusive) {
     this.startInclusive = startInclusive;
     this.endInclusive = endInclusive;
   }
