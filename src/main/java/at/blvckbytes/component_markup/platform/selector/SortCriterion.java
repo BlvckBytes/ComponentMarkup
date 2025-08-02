@@ -26,4 +26,9 @@ public enum SortCriterion implements ArgumentValue {
   SortCriterion(String stringValue) {
     this.stringValue = stringValue;
   }
+
+  @Override
+  public boolean isNegated() {
+    return false;
+  }
 }

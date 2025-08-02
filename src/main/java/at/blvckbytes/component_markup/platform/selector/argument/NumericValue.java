@@ -29,4 +29,9 @@ public class NumericValue implements ArgumentValue {
     this.isNegative = isNegative;
     this.isNegated = isNegated;
   }
+
+  @Override
+  public boolean isNegated() {
+    return isNegated;
+  }
 }

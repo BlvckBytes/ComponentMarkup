@@ -14,4 +14,9 @@ public class NumericRangeValue implements ArgumentValue {
     this.startInclusive = startInclusive;
     this.endInclusive = endInclusive;
   }
+
+  @Override
+  public boolean isNegated() {
+    return false;
+  }
 }

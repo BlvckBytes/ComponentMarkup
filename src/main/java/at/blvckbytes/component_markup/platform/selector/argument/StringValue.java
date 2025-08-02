@@ -16,4 +16,9 @@ public class StringValue implements ArgumentValue {
     this.value = value;
     this.negated = negated;
   }
+
+  @Override
+  public boolean isNegated() {
+    return negated;
+  }
 }

@@ -5,8 +5,8 @@
 
 package at.blvckbytes.component_markup.platform.selector.argument;
 
-public interface ArgumentValue {
-
-  boolean isNegated();
-
+public enum MultiAllowance {
+  MULTI_IF_NEGATED,
+  MULTI_IF_EITHER,
+  NEVER
 }

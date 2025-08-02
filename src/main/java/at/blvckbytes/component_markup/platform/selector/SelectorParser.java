@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeExc
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.platform.selector.argument.*;
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,13 +17,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 public class SelectorParser {
 
   // TODO: Extensively test parsing attribute-values (and keys etc., but that has utmost importance)
   // TODO: Replace all illegal-state exceptions with proper selector-errors
 
-  private static final ArgumentValue RANGE_VALUE_SENTINEL = new ArgumentValue() {};
+  private static final ArgumentValue RANGE_VALUE_SENTINEL = () -> false;
 
   public static @NotNull TargetSelector parse(StringView input) {
     input.consumeWhitespace(null);
@@ -101,9 +103,10 @@ public class SelectorParser {
 
       input.consumeWhitespace(null);
 
-      if (input.nextChar() != '=')
+      if (input.peekChar(0) != '=')
         throw new SelectorParseException(input, SelectorParseError.MISSING_EQUALS_SIGN, rawName.buildString());
 
+      input.nextChar();
       input.consumeWhitespace(null);
 
       ArgumentValue value = parseArgumentValue(input, name);
@@ -112,17 +115,40 @@ public class SelectorParser {
       if (validationFailure != null)
         throw new IllegalStateException("Validation-Failure: " + validationFailure);
 
-      // TODO: Check ArgumentFlag in regards to multi (check against result-list)
+      for (ArgumentEntry entry : result) {
+        if (entry.name != name)
+          continue;
+
+        switch (name.multiAllowance) {
+          case NEVER:
+            throw new SelectorParseException(input, nameBegin, SelectorParseError.MULTI_NEVER_ARGUMENT, name.name);
+
+          case MULTI_IF_EITHER:
+            continue;
+
+          case MULTI_IF_NEGATED:
+            if (!value.isNegated())
+              throw new SelectorParseException(input, nameBegin, SelectorParseError.MULTI_IF_NEGATED_ARGUMENT, name.name);
+            break;
+
+          default:
+            LoggerProvider.log(Level.WARNING, "Unaccounted-for multi-allowance: " + name.multiAllowance);
+        }
+      }
 
       result.add(new ArgumentEntry(name, rawName, value));
 
       input.consumeWhitespace(null);
 
-      if (input.peekChar(0) == ']')
+      char upcomingChar = input.peekChar(0);
+
+      if (upcomingChar == ']')
         return result;
 
-      if (input.nextChar() != ',')
+      if (upcomingChar != ',')
         throw new SelectorParseException(input, SelectorParseError.MISSING_ARGUMENT_SEPARATOR, rawName.buildString());
+
+      input.nextChar();
     }
 
     return result;
@@ -130,19 +156,34 @@ public class SelectorParser {
 
   private static ArgumentValue parseArgumentValue(StringView input, ArgumentName name) {
     char firstChar = input.peekChar(0);
-    boolean isQuoted = firstChar == '"';
 
-    if (isQuoted) {
+    if (firstChar == '"' || firstChar == '!' && input.peekChar(1) == '"') {
       try {
+        boolean isNegated = false;
+
+        if (firstChar == '!') {
+          isNegated = true;
+          input.nextChar();
+        }
+
         ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
-        return new StringValue(expressionTokenizer.parseStringToken().raw, false); // TODO: Parse negated-flag
+        return new StringValue(expressionTokenizer.parseStringToken().raw, isNegated);
       } catch (ExpressionTokenizeException e) {
-        throw new IllegalStateException("Malformed string: " + e.error);
+        // That's the only reason as to why this tokenizer-method would throw
+        throw new SelectorParseException(input, e.position, SelectorParseError.UNTERMINATED_STRING);
       }
     }
 
-    if (name.flags.contains(ArgumentFlag.SUPPORTS_STRINGS)) {
-      input.nextChar();
+    if (name.supportsStrings) {
+      boolean isNegated = false;
+
+      if (firstChar == '!') {
+        isNegated = true;
+        input.nextChar();
+      }
+
+      else
+        input.nextChar();
 
       int startIndex = input.getPosition();
       char upcomingChar;
@@ -162,11 +203,11 @@ public class SelectorParser {
             continue;
           }
 
-          throw new IllegalStateException("Unquoted string contained unescaped quote");
+          throw new SelectorParseException(input, SelectorParseError.STRING_CONTAINED_QUOTE);
         }
       }
 
-      return new StringValue(input.buildSubViewAbsolute(startIndex, input.getPosition() + 1), false); // TODO: Parse negated-flag
+      return new StringValue(input.buildSubViewAbsolute(startIndex, input.getPosition() + 1), isNegated);
     }
 
     NumericValue firstNumber;
@@ -300,8 +341,15 @@ public class SelectorParser {
     if (range.endInclusive.isNegated)
       throw new IllegalStateException("End negated");
 
-    // TODO: Check for start < end
-    //       Or do this later at execution and print, instead of failing the whole thing?
+    if (range.startInclusive.value instanceof Double || range.endInclusive.value instanceof Double) {
+      if (Math.abs(range.endInclusive.value.doubleValue() - range.startInclusive.value.doubleValue()) < .001)
+        throw new IllegalStateException("Start > end");
+
+      return range;
+    }
+
+    if (range.startInclusive.value.longValue() > range.endInclusive.value.longValue())
+      throw new IllegalStateException("Start > end");
 
     return range;
   }

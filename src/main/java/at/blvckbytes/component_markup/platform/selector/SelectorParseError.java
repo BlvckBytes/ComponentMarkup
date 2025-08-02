@@ -20,6 +20,10 @@ public enum SelectorParseError {
   UNKNOWN_ARGUMENT_NAME(args -> "Unknown argument-name \"" + args[0] + "\"; choose one of: " + ArgumentName.NAMES_STRING),
   MISSING_EQUALS_SIGN(args -> "Expected there to be an equals-sign = after the argument-name \"" + args[0] + "\""),
   MISSING_ARGUMENT_SEPARATOR(args -> "Expected there to be an argument-separator comma , or a closing-bracket ] after the value of the argument \"" + args[0] + "\""),
+  MULTI_NEVER_ARGUMENT(args -> "The argument \"" + args[0] + "\" can only occur once"),
+  MULTI_IF_NEGATED_ARGUMENT(args -> "The argument \"" + args[0] + "\" can only occur multiple times if negated"),
+  STRING_CONTAINED_QUOTE(args -> "Strings cannot contain quotes without a prior backslash: \\\""),
+  UNTERMINATED_STRING(args -> "Strings beginning with double-quotes \" need to again end in such"),
   ;
 
   public final Function<String[], String> messageBuilder;

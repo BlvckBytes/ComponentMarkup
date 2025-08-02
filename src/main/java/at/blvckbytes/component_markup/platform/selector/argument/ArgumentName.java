@@ -24,17 +24,20 @@ public enum ArgumentName {
    */
   START_X(
     "x",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Y(
     "y",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Z(
     "z",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator( EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -48,7 +51,8 @@ public enum ArgumentName {
    */
   DISTANCE(
     "distance",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -57,17 +61,20 @@ public enum ArgumentName {
    */
   DELTA_X(
     "dx",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Y(
     "dy",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Z(
     "dz",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
@@ -79,7 +86,8 @@ public enum ArgumentName {
    */
   X_ROTATION(
     "x_rotation",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
@@ -92,7 +100,8 @@ public enum ArgumentName {
    */
   Y_ROTATION(
     "y_rotation",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
@@ -101,7 +110,8 @@ public enum ArgumentName {
   */
   TAG(
     "tag",
-    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    MultiAllowance.MULTI_IF_EITHER,
+    true,
     makeStringValidator()
   ),
   /*
@@ -110,7 +120,8 @@ public enum ArgumentName {
   */
   TEAM(
     "team",
-    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    MultiAllowance.MULTI_IF_NEGATED,
+    true,
     makeStringValidator()
   ),
   /*
@@ -120,7 +131,8 @@ public enum ArgumentName {
    */
   NAME(
     "name",
-    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    MultiAllowance.MULTI_IF_NEGATED,
+    true,
     makeStringValidator()
   ),
   /*
@@ -132,7 +144,8 @@ public enum ArgumentName {
    */
   TYPE(
     "type",
-    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    MultiAllowance.MULTI_IF_NEGATED,
+    true,
     makeStringValidator()
   ),
   /*
@@ -143,7 +156,8 @@ public enum ArgumentName {
    */
   LEVEL(
     "level",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.allOf(NumericFlag.class))
   ),
   /*
@@ -153,7 +167,8 @@ public enum ArgumentName {
    */
   GAME_MODE(
     "gamemode",
-    EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
+    MultiAllowance.MULTI_IF_NEGATED,
+    true,
     makeStringValidator()
   ),
   /*
@@ -161,7 +176,8 @@ public enum ArgumentName {
   */
   LIMIT(
     "limit",
-    EnumSet.noneOf(ArgumentFlag.class),
+    MultiAllowance.NEVER,
+    false,
     makeNumericValidator(EnumSet.allOf(NumericFlag.class))
   ),
   /*
@@ -169,8 +185,9 @@ public enum ArgumentName {
    */
   SORT(
     "sort",
-    EnumSet.noneOf(ArgumentFlag.class),
-      t -> {
+    MultiAllowance.NEVER,
+    false,
+    t -> {
       if (t instanceof SortCriterion)
         return null;
 
@@ -191,16 +208,19 @@ public enum ArgumentName {
     .collect(Collectors.joining(", "));
 
   public final String name;
-  public final EnumSet<ArgumentFlag> flags;
+  public final MultiAllowance multiAllowance;
+  public final boolean supportsStrings;
   public final Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider;
 
   ArgumentName(
     String name,
-    EnumSet<ArgumentFlag> flags,
+    MultiAllowance multiAllowance,
+    boolean supportsStrings,
     Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider
   ) {
     this.name = name;
-    this.flags = flags;
+    this.multiAllowance = multiAllowance;
+    this.supportsStrings = supportsStrings;
     this.typeErrorProvider = typeErrorProvider;
   }
 
