@@ -253,6 +253,32 @@ public class SelectorParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnNegatedRangeMembers() {
+    makeErrorCasesAtStart(
+      SelectorParseError.RANGE_START_NEGATED,
+      new TextWithSubViews("@e[distance=!`5´..10]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.RANGE_END_NEGATED,
+      new TextWithSubViews("@e[distance=5..!`10´]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnRangeStartGreaterThanEnd() {
+    makeErrorCasesAtStart(
+      SelectorParseError.RANGE_START_GREATER_THAN_END,
+      new TextWithSubViews("@e[distance=`10´..5]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.RANGE_START_GREATER_THAN_END,
+      new TextWithSubViews("@e[distance=`2.2´...5]")
+    );
+  }
+
   private void makeErrorCasesAtStart(SelectorParseError expectedError, TextWithSubViews... inputs) {
     for (TextWithSubViews text : inputs) {
       makeErrorCase(

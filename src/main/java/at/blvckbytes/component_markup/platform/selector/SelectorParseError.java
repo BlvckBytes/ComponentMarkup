@@ -39,6 +39,9 @@ public enum SelectorParseError {
   EXPECTED_RANGE_OPERATOR(args -> "Two subsequent numeric values need to be joined by a range-operator: .."),
   DOUBLE_RANGE_OPERATOR(args -> "The range-operator may only be used once per value"),
   MALFORMED_NUMBER(args -> "This number is malformed"),
+  RANGE_START_NEGATED(args -> "Ranges do not support negated values; this start-value is negated"),
+  RANGE_END_NEGATED(args -> "Ranges do not support negated values; this end-value is negated"),
+  RANGE_START_GREATER_THAN_END(args -> "The start-value of a range cannot be greater than it's end-value"),
   ;
 
   public final Function<String[], String> messageBuilder;

@@ -281,6 +281,18 @@ public class SelectorParser {
     return validateRange(new NumericRangeValue(firstNumber, (NumericValue) currentValue));
   }
 
+  private static boolean isUpcomingCharInvalidNumberTermination(StringView input) {
+    char upcomingChar = input.peekChar(0);
+
+    if (upcomingChar == 0)
+      return false;
+
+    if (upcomingChar == '.')
+      return input.peekChar(1) != '.';
+
+    return upcomingChar != ',' && upcomingChar != ']' && !Character.isWhitespace(upcomingChar);
+  }
+
   private static @Nullable ArgumentValue parseNumberOrRangeOperator(StringView input) {
     ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
 
@@ -326,7 +338,7 @@ public class SelectorParser {
         }
       } catch (ExpressionTokenizeException ignored) {}
 
-      if (value == null || ((upcomingChar = input.peekChar(0)) != ' ') && upcomingChar != ',' && upcomingChar != ']' && upcomingChar != 0)
+      if (value == null || isUpcomingCharInvalidNumberTermination (input))
         throw new SelectorParseException(input, valueBeginPosition, SelectorParseError.MALFORMED_NUMBER);
     }
 
@@ -353,7 +365,7 @@ public class SelectorParser {
         }
       } catch (ExpressionTokenizeException ignored) {}
 
-      if (value == null || ((upcomingChar = input.peekChar(0)) != ' ') && upcomingChar != ',' && upcomingChar != ']' && upcomingChar != 0)
+      if (value == null || isUpcomingCharInvalidNumberTermination(input))
         throw new SelectorParseException(input, valueBeginPosition, SelectorParseError.MALFORMED_NUMBER);
     }
 
@@ -365,20 +377,20 @@ public class SelectorParser {
 
   private static ArgumentValue validateRange(NumericRangeValue range) {
     if (range.startInclusive.isNegated)
-        throw new IllegalStateException("Start negated");
+        throw new SelectorParseException(range.startInclusive.raw, range.startInclusive.raw.startInclusive, SelectorParseError.RANGE_START_NEGATED);
 
     if (range.endInclusive.isNegated)
-      throw new IllegalStateException("End negated");
+      throw new SelectorParseException(range.endInclusive.raw, range.endInclusive.raw.startInclusive, SelectorParseError.RANGE_END_NEGATED);
 
     if (range.startInclusive.value instanceof Double || range.endInclusive.value instanceof Double) {
-      if (Math.abs(range.endInclusive.value.doubleValue() - range.startInclusive.value.doubleValue()) < .001)
-        throw new IllegalStateException("Start > end");
+      if (range.endInclusive.value.doubleValue() - range.startInclusive.value.doubleValue() < .001)
+        throw new SelectorParseException(range.startInclusive.raw, range.startInclusive.raw.startInclusive, SelectorParseError.RANGE_START_GREATER_THAN_END);
 
       return range;
     }
 
     if (range.startInclusive.value.longValue() > range.endInclusive.value.longValue())
-      throw new IllegalStateException("Start > end");
+      throw new SelectorParseException(range.startInclusive.raw, range.startInclusive.raw.startInclusive, SelectorParseError.RANGE_START_GREATER_THAN_END);
 
     return range;
   }
