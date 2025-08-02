@@ -25,17 +25,17 @@ public enum ArgumentName {
   START_X(
     "x",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("x", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Y(
     "y",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("y", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   START_Z(
     "z",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("z", EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
+    makeNumericValidator( EnumSet.of(NumericFlag.NON_RANGE, NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection based on their Euclidean distances from some point, searching
@@ -49,7 +49,7 @@ public enum ArgumentName {
   DISTANCE(
     "distance",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("distance", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection based on their x-difference, y-difference, and z-difference from
@@ -58,17 +58,17 @@ public enum ArgumentName {
   DELTA_X(
     "dx",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("dx", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Y(
     "dy",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("dy", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   DELTA_Z(
     "dz",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("dz", EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATIVE, NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection based on the entity's rotation along the pitch axis, measured
@@ -80,7 +80,7 @@ public enum ArgumentName {
   X_ROTATION(
     "x_rotation",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("x_rotation", EnumSet.of(NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection based on the entity's rotation along the yaw axis, measured
@@ -93,7 +93,7 @@ public enum ArgumentName {
   Y_ROTATION(
     "y_rotation",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("y_rotation", EnumSet.of(NumericFlag.NON_NEGATED))
+    makeNumericValidator(EnumSet.of(NumericFlag.NON_NEGATED))
   ),
   /*
   Filter target selection based on the entity's scoreboard tags. Multiple tag arguments
@@ -102,7 +102,7 @@ public enum ArgumentName {
   TAG(
     "tag",
     EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
-    makeStringValidator("tag")
+    makeStringValidator()
   ),
   /*
   Filter target selection based on teams. Arguments testing for equality cannot be
@@ -111,7 +111,7 @@ public enum ArgumentName {
   TEAM(
     "team",
     EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
-    makeStringValidator("team")
+    makeStringValidator()
   ),
   /*
   Filter target selection by name. Values are strings, so spaces are allowed only if quotes
@@ -121,7 +121,7 @@ public enum ArgumentName {
   NAME(
     "name",
     EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
-    makeStringValidator("name")
+    makeStringValidator()
   ),
   /*
   Filter target selection based on the entity's identifier. The given entity type must be a
@@ -133,7 +133,7 @@ public enum ArgumentName {
   TYPE(
     "type",
     EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
-    makeStringValidator("type")
+    makeStringValidator()
   ),
   /*
   Filter target selection based on the entity's experience levels. This naturally filters out
@@ -144,7 +144,7 @@ public enum ArgumentName {
   LEVEL(
     "level",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("level", EnumSet.allOf(NumericFlag.class))
+    makeNumericValidator(EnumSet.allOf(NumericFlag.class))
   ),
   /*
   Filter target selection by game mode. This naturally filters out all non-player targets.
@@ -154,7 +154,7 @@ public enum ArgumentName {
   GAME_MODE(
     "gamemode",
     EnumSet.of(ArgumentFlag.SUPPORTS_STRINGS),
-    makeStringValidator("gamemode")
+    makeStringValidator()
   ),
   /*
   Limit the number of selectable targets for a target selector.
@@ -162,7 +162,7 @@ public enum ArgumentName {
   LIMIT(
     "limit",
     EnumSet.noneOf(ArgumentFlag.class),
-    makeNumericValidator("limit", EnumSet.allOf(NumericFlag.class))
+    makeNumericValidator(EnumSet.allOf(NumericFlag.class))
   ),
   /*
   Specifies selection-priority when limiting and dictates the order of results in general.
@@ -174,7 +174,7 @@ public enum ArgumentName {
       if (t instanceof SortCriterion)
         return null;
 
-      return "\"sort\" must be one of: " + SortCriterion.NAMES_STRING;
+      return ValidationFailure.IS_NON_SORT_CRITERION;
     }
   ),
   ;
@@ -192,19 +192,19 @@ public enum ArgumentName {
 
   public final String name;
   public final EnumSet<ArgumentFlag> flags;
-  public final Function<ArgumentValue, @Nullable String> typeErrorProvider;
+  public final Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider;
 
   ArgumentName(
     String name,
     EnumSet<ArgumentFlag> flags,
-    Function<ArgumentValue, @Nullable String> typeErrorProvider
+    Function<ArgumentValue, @Nullable ValidationFailure> typeErrorProvider
   ) {
     this.name = name;
     this.flags = flags;
     this.typeErrorProvider = typeErrorProvider;
   }
 
-  private static Function<ArgumentValue, @Nullable String> makeNumericValidator(String name, EnumSet<NumericFlag> flags) {
+  private static Function<ArgumentValue, @Nullable ValidationFailure> makeNumericValidator(EnumSet<NumericFlag> flags) {
     boolean allowsRanges = !flags.contains(NumericFlag.NON_RANGE);
 
     return t -> {
@@ -212,46 +212,49 @@ public enum ArgumentName {
         NumericValue numericValue = (NumericValue) t;
 
         if (numericValue.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return "\"" + name + "\" must not be negative";
+          return ValidationFailure.IS_NEGATIVE;
 
         if (numericValue.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return "\"" + name + "\" must not be fractional";
+          return ValidationFailure.IS_FRACTIONAL;
 
         if (numericValue.isNegated && flags.contains(NumericFlag.NON_NEGATED))
-          return "\"" + name + "\" cannot be negated";
+          return ValidationFailure.IS_NEGATED;
 
         return null;
       }
 
       if (t instanceof NumericRangeValue) {
         if (!allowsRanges)
-          return "\"" + name + "\" must not be a range";
+          return ValidationFailure.IS_RANGE;
 
         NumericRangeValue rangeValue = (NumericRangeValue) t;
 
         if (rangeValue.startInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return "\"" + name + "\" must not be negative (range-start)";
+          return ValidationFailure.IS_RANGE_START_NEGATIVE;
 
         if (rangeValue.endInclusive.isNegative && flags.contains(NumericFlag.NON_NEGATIVE))
-          return "\"" + name + "\" must not be negative (range-end)";
+          return ValidationFailure.IS_RANGE_END_NEGATIVE;
 
         if (rangeValue.startInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return "\"" + name + "\" must not be fractional (range-start)";
+          return ValidationFailure.IS_RANGE_START_FRACTIONAL;
 
         if (rangeValue.endInclusive.isDouble && flags.contains(NumericFlag.NON_FRACTIONAL))
-          return "\"" + name + "\" must not be fractional (range-end)";
+          return ValidationFailure.IS_RANGE_END_FRACTIONAL;
 
         return null;
       }
 
-      return "\"" + name + "\" be a numeric value" + (allowsRanges ? " or a range" : "");
+      if (!allowsRanges)
+        return ValidationFailure.IS_NON_NUMERIC;
+
+      return ValidationFailure.IS_NON_NUMERIC_OR_RANGE;
     };
   }
 
-  private static Function<ArgumentValue, @Nullable String> makeStringValidator(String name) {
+  private static Function<ArgumentValue, @Nullable ValidationFailure> makeStringValidator() {
     return t -> {
       if (!(t instanceof StringValue))
-        return "\"" + name + "\" must be a string-value";
+        return ValidationFailure.IS_NON_STRING;
 
       return null;
     };

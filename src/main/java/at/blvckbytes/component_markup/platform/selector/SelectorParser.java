@@ -107,10 +107,10 @@ public class SelectorParser {
       input.consumeWhitespace(null);
 
       ArgumentValue value = parseArgumentValue(input, name);
-      String errorMessage = name.typeErrorProvider.apply(value);
+      ValidationFailure validationFailure = name.typeErrorProvider.apply(value);
 
-      if (errorMessage != null)
-        throw new IllegalStateException("Error-Message: " + errorMessage);
+      if (validationFailure != null)
+        throw new IllegalStateException("Validation-Failure: " + validationFailure);
 
       // TODO: Check ArgumentFlag in regards to multi (check against result-list)
 
