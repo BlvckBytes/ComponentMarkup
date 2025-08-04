@@ -21,8 +21,6 @@ import java.util.logging.Level;
 
 public class SelectorParser {
 
-  // TODO: Replace all illegal-state exceptions with proper selector-errors
-
   private static final ArgumentValue RANGE_VALUE_SENTINEL = () -> false;
 
   public static @NotNull TargetSelector parse(StringView input) {
@@ -198,7 +196,7 @@ public class SelectorParser {
 
         if (input.nextChar() == '"') {
           if (priorChar == '\\') {
-            input.addIndexToBeRemoved(input.getPosition());
+            input.addIndexToBeRemoved(input.getPosition() - 1);
             continue;
           }
 
@@ -295,23 +293,26 @@ public class SelectorParser {
     int valueBeginPosition = -1;
 
     boolean isNegated = false;
+    int negationPosition = -1;
 
     if (upcomingChar == '!') {
       isNegated = true;
       input.nextChar();
       upcomingChar = input.peekChar(0);
-      valueBeginPosition = input.getPosition();
+      negationPosition = valueBeginPosition = input.getPosition();
     }
 
     boolean isNegative = false;
+    int negativePosition = -1;
 
     if (upcomingChar == '-') {
       isNegative = true;
       input.nextChar();
       upcomingChar = input.peekChar(0);
+      negativePosition = input.getPosition();
 
       if (valueBeginPosition < 0)
-        valueBeginPosition = input.getPosition();
+        valueBeginPosition = negativePosition;
     }
 
     if (valueBeginPosition < 0)
@@ -343,10 +344,10 @@ public class SelectorParser {
         input.nextChar();
 
         if (isNegative)
-          throw new IllegalStateException("Dangling minus-sign");
+          throw new SelectorParseException(input, negativePosition, SelectorParseError.DANGLING_MINUS_SIGN);
 
         if (isNegated)
-          throw new IllegalStateException("Dangling bang");
+          throw new SelectorParseException(input, negationPosition, SelectorParseError.DANGLING_BANG);
 
         return RANGE_VALUE_SENTINEL;
       }

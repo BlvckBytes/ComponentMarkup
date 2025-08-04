@@ -292,6 +292,30 @@ public class SelectorParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnDanglingMinusSign() {
+    makeErrorCasesAtStart(
+      SelectorParseError.DANGLING_MINUS_SIGN,
+      new TextWithSubViews("@e[distance=`-´..5]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnDanglingBang() {
+    makeErrorCasesAtStart(
+      SelectorParseError.DANGLING_BANG,
+      new TextWithSubViews("@e[distance=`!´..5]")
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnterminatedStrings() {
+    makeErrorCasesAtStart(
+      SelectorParseError.UNTERMINATED_STRING,
+      new TextWithSubViews("@e[name=`\"hello, world´]")
+    );
+  }
+
   private void makeErrorCasesAtStart(SelectorParseError expectedError, TextWithSubViews... inputs) {
     for (TextWithSubViews text : inputs) {
       makeErrorCase(

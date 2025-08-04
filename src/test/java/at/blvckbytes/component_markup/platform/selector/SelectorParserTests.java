@@ -42,8 +42,6 @@ public class SelectorParserTests {
     }
   }
 
-  // TODO: Add case which checks escaped and unescaped quotes within unquoted strings
-
   @Test
   public void shouldParseUnquotedStringArguments() {
     TextWithSubViews text = new TextWithSubViews("@`e´[`tag´=`first´,`team´=`second´,`name´=`third´]");
@@ -62,7 +60,45 @@ public class SelectorParserTests {
     );
   }
 
-  // TODO: Add case which checks escaped and unescaped quotes within quoted strings
+  @Test
+  public void shouldSupportQuotesInUnquotedStrings() {
+    TextWithSubViews text = new TextWithSubViews("@`e´[`name´=`pre`\\´\"post´]");
+
+    StringView value = text.subView(2);
+
+    value.addIndexToBeRemoved(text.subView(3).startInclusive);
+
+    makeCase(
+      text,
+      new TargetSelector(
+        TargetType.ALL_ENTITIES,
+        text.subView(0).setLowercase(),
+        Collections.singletonList(
+          new ArgumentEntry(ArgumentName.NAME, text.subView(1).setLowercase(), new StringValue(value, "pre\"post", false))
+        )
+      )
+    );
+  }
+
+  @Test
+  public void shouldSupportQuotesInQuotedStrings() {
+    TextWithSubViews text = new TextWithSubViews("@`e´[`name´=`\"pre`\\´\"post\"´]");
+
+    StringView value = text.subView(2);
+
+    value.addIndexToBeRemoved(text.subView(3).startInclusive);
+
+    makeCase(
+      text,
+      new TargetSelector(
+        TargetType.ALL_ENTITIES,
+        text.subView(0).setLowercase(),
+        Collections.singletonList(
+          new ArgumentEntry(ArgumentName.NAME, text.subView(1).setLowercase(), new StringValue(value, "pre\"post", false))
+        )
+      )
+    );
+  }
 
   @Test
   public void shouldParseQuotedStringArguments() {
@@ -84,6 +120,40 @@ public class SelectorParserTests {
 
   @Test
   public void shouldParseIntegerRange() {
+    TextWithSubViews text = new TextWithSubViews("@`e´[`distance´=`1´..`10´]");
+
+    makeCase(
+      text,
+      new TargetSelector(
+        TargetType.ALL_ENTITIES,
+        text.subView(0).setLowercase(),
+        Collections.singletonList(
+          new ArgumentEntry(ArgumentName.DISTANCE, text.subView(1).setLowercase(), new NumericRangeValue(
+            new NumericValue(text.subView(2), 1, false, false, false),
+            new NumericValue(text.subView(3), 10, false, false, false)
+          ))
+        )
+      )
+    );
+  }
+
+  @Test
+  public void shouldParseDoubleRange() {
+    TextWithSubViews text = new TextWithSubViews("@`e´[`distance´=`.1´..`.5´]");
+
+    makeCase(
+      text,
+      new TargetSelector(
+        TargetType.ALL_ENTITIES,
+        text.subView(0).setLowercase(),
+        Collections.singletonList(
+          new ArgumentEntry(ArgumentName.DISTANCE, text.subView(1).setLowercase(), new NumericRangeValue(
+            new NumericValue(text.subView(2), .1, true, false, false),
+            new NumericValue(text.subView(3), .5, true, false, false)
+          ))
+        )
+      )
+    );
   }
 
   @Test
