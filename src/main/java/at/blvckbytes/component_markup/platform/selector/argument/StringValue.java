@@ -9,10 +9,12 @@ import at.blvckbytes.component_markup.util.StringView;
 
 public class StringValue implements ArgumentValue {
 
-  public final StringView value;
+  public final StringView raw;
+  public final String value;
   public final boolean negated;
 
-  public StringValue(StringView value, boolean negated) {
+  public StringValue(StringView raw, String value, boolean negated) {
+    this.raw = raw;
     this.value = value;
     this.negated = negated;
   }

@@ -134,7 +134,7 @@ public enum ArgumentName {
     "name",
     MultiAllowance.MULTI_IF_NEGATED,
     AcceptedValue.STRING,
-    null
+    makeNonBlankStringValidator()
   ),
   /*
   Filter target selection based on the entity's identifier. The given entity type must be a
@@ -147,7 +147,7 @@ public enum ArgumentName {
     "type",
     MultiAllowance.MULTI_IF_NEGATED,
     AcceptedValue.STRING,
-    null
+    makeNonBlankStringValidator()
   ),
   /*
   Filter target selection based on the entity's experience levels. This naturally filters out
@@ -170,7 +170,7 @@ public enum ArgumentName {
     "gamemode",
     MultiAllowance.MULTI_IF_NEGATED,
     AcceptedValue.STRING,
-    null
+    makeNonBlankStringValidator()
   ),
   /*
   Limit the number of selectable targets for a target selector.
@@ -223,6 +223,25 @@ public enum ArgumentName {
     this.multiAllowance = multiAllowance;
     this.acceptedValue = acceptedValue;
     this.typeErrorProvider = typeErrorProvider;
+  }
+
+  private static Function<ArgumentValue, @Nullable SelectorParseError> makeNonBlankStringValidator() {
+    return t -> {
+      // Unreachable if AcceptedValue#STRING is set
+      if (!(t instanceof StringValue))
+        return null;
+
+      String value = ((StringValue) t).value;
+
+      for (int charIndex = 0; charIndex < value.length(); ++charIndex) {
+        if (Character.isWhitespace(value.charAt(charIndex)))
+          continue;
+
+        return null;
+      }
+
+      return SelectorParseError.VALIDATION_FAILED_IS_BLANK_STRING;
+    };
   }
 
   private static Function<ArgumentValue, @Nullable SelectorParseError> makeNumericValidator(EnumSet<NumericFlag> flags) {

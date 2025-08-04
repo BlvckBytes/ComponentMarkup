@@ -35,6 +35,7 @@ public enum SelectorParseError {
   VALIDATION_FAILED_IS_NON_NUMERIC(args -> "The argument \"" + args[0] + "\" requires a numeric-value"),
   VALIDATION_FAILED_IS_NON_NUMERIC_OR_RANGE(args -> "The argument \"" + args[0] + "\" requires a numeric- or range-value"),
   VALIDATION_FAILED_IS_NON_SORT_CRITERION(args -> "The argument \"" + args[0] + "\" must have a value of one of: " + SortCriterion.NAMES_STRING),
+  VALIDATION_FAILED_IS_BLANK_STRING(args -> "The argument \"" + args[0] + "\" does not accept empty or blank strings"),
   EXPECTED_RHS_OF_RANGE(args -> "A range-operator without a left-hand-side must have a right-hand-side value"),
   EXPECTED_RANGE_OPERATOR(args -> "Two subsequent numeric values need to be joined by a range-operator: .."),
   DOUBLE_RANGE_OPERATOR(args -> "The range-operator may only be used once per value"),

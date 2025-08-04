@@ -167,8 +167,8 @@ public class SelectorParser {
           input.nextChar();
         }
 
-        ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
-        return new StringValue(expressionTokenizer.parseStringToken().raw, isNegated);
+        StringToken stringToken = new ExpressionTokenizer(input, null).parseStringToken();
+        return new StringValue(stringToken.raw, stringToken.value, isNegated);
       } catch (ExpressionTokenizeException e) {
         // That's the only reason as to why this tokenizer-method would throw
         throw new SelectorParseException(input, e.position, SelectorParseError.UNTERMINATED_STRING);
@@ -177,18 +177,13 @@ public class SelectorParser {
 
     if (name.acceptedValue == AcceptedValue.STRING || name.acceptedValue == AcceptedValue.SORT_CRITERION) {
       boolean isNegated = false;
-      int startIndex;
 
       if (firstChar == '!') {
         isNegated = true;
         input.nextChar();
-        startIndex = input.getPosition() + 1;
       }
 
-      else {
-        input.nextChar();
-        startIndex = input.getPosition();
-      }
+      int startIndex = input.getPosition() + 1;
 
       char upcomingChar;
 
@@ -224,7 +219,7 @@ public class SelectorParser {
         }
       }
 
-      return new StringValue(contents, isNegated);
+      return new StringValue(contents, contents.buildString(), isNegated);
     }
 
     int inputBegin = input.getPosition() + 1;

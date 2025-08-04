@@ -279,6 +279,19 @@ public class SelectorParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnEmptyOrBlankStringsIfNotSupported() {
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_BLANK_STRING,
+      new TextWithSubViews("@e[`gamemode´=]")
+    );
+
+    makeErrorCasesAtStart(
+      SelectorParseError.VALIDATION_FAILED_IS_BLANK_STRING,
+      new TextWithSubViews("@e[`gamemode´=\"\"]")
+    );
+  }
+
   private void makeErrorCasesAtStart(SelectorParseError expectedError, TextWithSubViews... inputs) {
     for (TextWithSubViews text : inputs) {
       makeErrorCase(

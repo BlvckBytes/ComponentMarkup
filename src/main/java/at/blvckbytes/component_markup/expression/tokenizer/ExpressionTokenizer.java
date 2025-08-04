@@ -29,7 +29,7 @@ public class ExpressionTokenizer {
     this.dashIsPrefix = true;
   }
 
-  public Token parseStringToken() {
+  public StringToken parseStringToken() {
     char quoteChar;
 
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')

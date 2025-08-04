@@ -54,9 +54,9 @@ public class SelectorParserTests {
         TargetType.ALL_ENTITIES,
         text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), false)),
-          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), false)),
-          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), false))
+          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), "first", false)),
+          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), "second", false)),
+          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), "third", false))
         )
       )
     );
@@ -74,9 +74,9 @@ public class SelectorParserTests {
         TargetType.ALL_ENTITIES,
         text.subView(0).setLowercase(),
         Arrays.asList(
-          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), false)),
-          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), false)),
-          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), false))
+          new ArgumentEntry(ArgumentName.TAG, text.subView(1).setLowercase(), new StringValue(text.subView(2), "first", false)),
+          new ArgumentEntry(ArgumentName.TEAM, text.subView(3).setLowercase(), new StringValue(text.subView(4), "second", false)),
+          new ArgumentEntry(ArgumentName.NAME, text.subView(5).setLowercase(), new StringValue(text.subView(6), "third", false))
         )
       )
     );
@@ -132,6 +132,31 @@ public class SelectorParserTests {
           new ArgumentEntry(ArgumentName.START_X, text.subView(1).setLowercase(), new NumericValue(text.subView(2), .5, true, false, false)),
           new ArgumentEntry(ArgumentName.START_Y, text.subView(3).setLowercase(), new NumericValue(text.subView(4), .312, true, false, false)),
           new ArgumentEntry(ArgumentName.START_Z, text.subView(5).setLowercase(), new NumericValue(text.subView(6), .54, true, true, false))
+        )
+      )
+    );
+  }
+
+  @Test
+  public void shouldParseEmptyStringValues() {
+    makeEmptyStringCase(false, false);
+    makeEmptyStringCase(false, true);
+    makeEmptyStringCase(true, false);
+    makeEmptyStringCase(true, true);
+  }
+
+  private void makeEmptyStringCase(boolean quoted, boolean negated) {
+    TextWithSubViews text = new TextWithSubViews(
+      "@`e´[`team´=" + (negated ? "!" : "") + (quoted ? "`\"\"´" : "`´") + "]"
+    );
+
+    makeCase(
+      text,
+      new TargetSelector(
+        TargetType.ALL_ENTITIES,
+        text.subView(0).setLowercase(),
+        Collections.singletonList(
+          new ArgumentEntry(ArgumentName.TEAM, text.subView(1).setLowercase(), new StringValue(text.subView(2), "", negated))
         )
       )
     );
