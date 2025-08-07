@@ -6,10 +6,10 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.ast.TransformerNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
-import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
+import at.blvckbytes.component_markup.markup.ast.node.FunctionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.util.ErrorScreen;
@@ -72,73 +72,73 @@ public class NumberTag extends TagDefinition {
     ExpressionNode rounding = format == null ? null : attributes.getOptionalExpressionNode("rounding");
     ExpressionNode locale = format == null ? null : attributes.getOptionalExpressionNode("locale");
 
-    return new ExpressionDrivenNode(
-      new TransformerNode(value, (input, environment) -> {
-        ValueInterpreter valueInterpreter = environment.getValueInterpreter();
-        Number number = environment.getValueInterpreter().asLongOrDouble(input);
+    return new FunctionNode(tagName, interpreter -> {
+      InterpretationEnvironment environment = interpreter.getEnvironment();
+      ValueInterpreter valueInterpreter = environment.getValueInterpreter();
 
-        if (integer != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(integer, environment)))
-          number = number.intValue();
+      Number number = environment.getValueInterpreter().asLongOrDouble(ExpressionInterpreter.interpret(value, environment));
 
-        if (absolute != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(absolute, environment))) {
-          if (number instanceof Double || number instanceof Float)
-            number = Math.abs(number.doubleValue());
-          else
-            number = Math.abs(number.longValue());
-        }
+      if (integer != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(integer, environment)))
+        number = number.intValue();
 
-        if (format != null) {
-          // This conversion is really not ideal, but I believe that it's more efficient on
-          // the large-scale than to make the whole system operate on big-decimals. This kind of
-          // precision should only matter when it comes to displaying values.
-          BigDecimal bigDecimal;
+      if (absolute != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(absolute, environment))) {
+        if (number instanceof Double || number instanceof Float)
+          number = Math.abs(number.doubleValue());
+        else
+          number = Math.abs(number.longValue());
+      }
 
-          if (number instanceof Double)
-            bigDecimal = new BigDecimal(Double.toString(number.doubleValue()));
-          else if (number instanceof Float)
-            bigDecimal = new BigDecimal(Float.toString(number.floatValue()));
-          else
-            bigDecimal = new BigDecimal(number.longValue());
+      if (format != null) {
+        // This conversion is really not ideal, but I believe that it's more efficient on
+        // the large-scale than to make the whole system operate on big-decimals. This kind of
+        // precision should only matter when it comes to displaying values.
+        BigDecimal bigDecimal;
 
-          try {
-            String pattern = valueInterpreter.asString(ExpressionInterpreter.interpret(format, environment));
+        if (number instanceof Double)
+          bigDecimal = new BigDecimal(Double.toString(number.doubleValue()));
+        else if (number instanceof Float)
+          bigDecimal = new BigDecimal(Float.toString(number.floatValue()));
+        else
+          bigDecimal = new BigDecimal(number.longValue());
+
+        try {
+          String pattern = valueInterpreter.asString(ExpressionInterpreter.interpret(format, environment));
+
+          // TODO: Consider caching this format
+          DecimalFormat decimalFormat = new DecimalFormat(pattern);
+
+          if (rounding != null) {
+            try {
+              String modeName = valueInterpreter.asString(ExpressionInterpreter.interpret(rounding, environment));
+              decimalFormat.setRoundingMode(RoundingMode.valueOf(modeName.toUpperCase()));
+            } catch (Throwable e) {
+              for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered; choose one of " + ROUNDING_MODES_STRING))
+                LoggerProvider.log(Level.WARNING, line, false);
+            }
+          }
+
+          if (locale != null) {
+            String localeName = valueInterpreter.asString(ExpressionInterpreter.interpret(locale, environment));
+            Locale formatLocale = LOCALE_BY_NAME_LOWER.get(localeName.toLowerCase());
 
             // TODO: Consider caching this format
-            DecimalFormat decimalFormat = new DecimalFormat(pattern);
+            if (formatLocale != null)
+              decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(formatLocale));
 
-            if (rounding != null) {
-              try {
-                String modeName = valueInterpreter.asString(ExpressionInterpreter.interpret(rounding, environment));
-                decimalFormat.setRoundingMode(RoundingMode.valueOf(modeName.toUpperCase()));
-              } catch (Throwable e) {
-                for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered; choose one of " + ROUNDING_MODES_STRING))
-                  LoggerProvider.log(Level.WARNING, line, false);
-              }
+            else {
+              for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
+                LoggerProvider.log(Level.WARNING, line, false);
             }
-
-            if (locale != null) {
-              String localeName = valueInterpreter.asString(ExpressionInterpreter.interpret(locale, environment));
-              Locale formatLocale = LOCALE_BY_NAME_LOWER.get(localeName.toLowerCase());
-
-              // TODO: Consider caching this format
-              if (formatLocale != null)
-                decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(formatLocale));
-
-              else {
-                for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
-                  LoggerProvider.log(Level.WARNING, line, false);
-              }
-            }
-
-            return decimalFormat.format(bigDecimal);
-          } catch (Throwable e) {
-            for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid decimal-format encountered: " + e.getMessage()))
-              LoggerProvider.log(Level.WARNING, line, false);
           }
-        }
 
-        return String.valueOf(number);
-      })
-    );
+          return decimalFormat.format(bigDecimal);
+        } catch (Throwable e) {
+          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid decimal-format encountered: " + e.getMessage()))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
+      }
+
+      return String.valueOf(number);
+    });
   }
 }
