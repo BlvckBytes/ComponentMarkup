@@ -25,10 +25,10 @@ public abstract class TagDefinition {
     this.tagPriority = tagPriority;
   }
 
-  public abstract boolean matchName(StringView tagNameLower);
+  public abstract boolean matchName(StringView tagName);
 
   public abstract @NotNull MarkupNode createNode(
-    @NotNull StringView tagNameLower,
+    @NotNull StringView tagName,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
