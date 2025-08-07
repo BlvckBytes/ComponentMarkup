@@ -31,7 +31,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class MarkupInterpreter implements Interpreter {
@@ -341,14 +340,12 @@ public class MarkupInterpreter implements Interpreter {
     interpretObjectAsNode(value, false);
   }
 
-  private <T> T interpretForLoop(ForLoopNode node, Supplier<T> afterEnvironmentSetup) {
+  private void interpretForLoop(ForLoopNode node) {
     Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
     LoopVariable loopVariable = new LoopVariable(items.size());
     environment.pushVariable("loop", loopVariable);
-
-    T passthroughValue = afterEnvironmentSetup.get();
 
     int size = items.size();
 
@@ -365,8 +362,7 @@ public class MarkupInterpreter implements Interpreter {
       }
 
       environment.popVariable("loop");
-
-      return passthroughValue;
+      return;
     }
 
     if (node.iterationVariable != null)
@@ -408,8 +404,6 @@ public class MarkupInterpreter implements Interpreter {
       environment.popVariable(node.iterationVariable);
 
     environment.popVariable("loop");
-
-    return passthroughValue;
   }
 
   private void _interpret(MarkupNode node) {
@@ -440,7 +434,7 @@ public class MarkupInterpreter implements Interpreter {
       interceptors.handleAfter(node);
   }
 
-  private Set<String> __interpret(MarkupNode node) {
+  private @Nullable Set<String> __interpret(MarkupNode node) {
     if (node.ifCondition != null) {
       Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
 
@@ -452,9 +446,12 @@ public class MarkupInterpreter implements Interpreter {
     // such that they have immediate access to said references; it does not make sense to define a
     // let-binding on the very same node a *for attribute is employed on *and* use said binding as
     // the iterable; thus, bindings are granted access to loop-variables, but the iterable doesn't
-    // get access to the let-bindings of this very same node - the only logical order.
-    if (node instanceof ForLoopNode)
-      return interpretForLoop((ForLoopNode) node, () -> introduceLetBindings(node));
+    // get access to the let-bindings of this very same node - the only logical order. Thus, we now
+    // hand control regarding the loop's bindings over to the corresponding sub-interpreter.
+    if (node instanceof ForLoopNode) {
+      interpretForLoop((ForLoopNode) node);
+      return null;
+    }
 
     Set<String> introducedBindings = introduceLetBindings(node);
 
