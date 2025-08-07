@@ -49,7 +49,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
     if (recipient == null)
       return null;
 
-    String name = parameter.displayName ? recipient.getDisplayName() : recipient.getName();
+    String name = parameter.displayName ? recipient.displayName : recipient.name;
 
     if (representation == null)
       return Collections.singletonList(componentConstructor.createTextComponent(name));

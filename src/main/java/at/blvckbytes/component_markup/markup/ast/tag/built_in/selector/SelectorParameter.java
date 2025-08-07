@@ -6,16 +6,14 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.selector;
 
 import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
-import org.jetbrains.annotations.Nullable;
+import at.blvckbytes.component_markup.platform.selector.TargetSelector;
 
 public class SelectorParameter implements RendererParameter {
 
-  public final String selector;
-  public final @Nullable Object separator;
+  public final TargetSelector selector;
 
-  public SelectorParameter(String selector, @Nullable Object separator) {
+  public SelectorParameter(TargetSelector selector) {
     this.selector = selector;
-    this.separator = separator;
   }
 
   @Override
@@ -25,9 +23,6 @@ public class SelectorParameter implements RendererParameter {
 
   @Override
   public String toString() {
-    return "SelectorParameter{" +
-      "selector='" + selector + '\'' +
-      ", separator=" + separator +
-      '}';
+    return "<SelectorParameter>";
   }
 }

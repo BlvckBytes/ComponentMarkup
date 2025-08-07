@@ -5,14 +5,32 @@
 
 package at.blvckbytes.component_markup.platform;
 
+import at.blvckbytes.component_markup.expression.interpreter.FieldGetter;
+import at.blvckbytes.component_markup.platform.selector.TargetSelector;
+
+import java.util.List;
 import java.util.UUID;
 
-public interface PlatformEntity {
+public abstract class PlatformEntity {
 
-  String getName();
+  public final String name;
+  public final String displayName;
+  public final UUID uuid;
 
-  String getDisplayName();
+  protected PlatformEntity(String name, String displayName, UUID uuid) {
+    this.name = name;
+    this.displayName = displayName;
+    this.uuid = uuid;
+  }
 
-  UUID getUuid();
+  @FieldGetter
+  public abstract int x();
 
+  @FieldGetter
+  public abstract int y();
+
+  @FieldGetter
+  public abstract int z();
+
+  public abstract List<PlatformEntity> executeSelector(TargetSelector selector);
 }

@@ -83,6 +83,19 @@ public class StringView {
     return new StringView(contents, new BitFlagArray(contents.length()), false, 0, contents.length());
   }
 
+  public static StringView of(String... lines) {
+    StringBuilder result = new StringBuilder();
+
+    for (String line : lines) {
+      if (result.length() != 0)
+        result.append('\n');
+
+      result.append(line);
+    }
+
+    return StringView.of(result.toString());
+  }
+
   public StringView buildSubViewRelative(int startInclusive) {
     return buildSubViewAbsolute(
       startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),

@@ -34,7 +34,7 @@ public class SelectorTag extends TagDefinition {
   ) {
     return new SelectorNode(
       attributes.getMandatoryExpressionNode("selector"),
-      attributes.getOptionalMarkupNode("separator"),
+      attributes.getOptionalMarkupNode("renderer"),
       tagName, letBindings
     );
   }
