@@ -9,15 +9,11 @@ import at.blvckbytes.component_markup.util.StringView;
 
 public class TextNode extends TerminalNode {
 
-  // Only kept for test-matching, as to compare against real views
-  private final StringView text;
-
   public final String textValue;
 
-  public TextNode(StringView text, String textValue) {
-    super(text, null);
+  public TextNode(StringView positionProvider, String textValue) {
+    super(positionProvider, null);
 
-    this.text = text;
     this.textValue = textValue;
   }
 }
