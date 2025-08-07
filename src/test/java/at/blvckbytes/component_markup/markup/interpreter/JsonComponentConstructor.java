@@ -500,11 +500,6 @@ public class JsonComponentConstructor implements ComponentConstructor {
     return copy;
   }
 
-  @Override
-  public String stripToPlainText(Object component) {
-    throw new UnsupportedOperationException();
-  }
-
   private JsonArray copyArray(JsonArray input) {
     JsonArray result = new JsonArray();
 

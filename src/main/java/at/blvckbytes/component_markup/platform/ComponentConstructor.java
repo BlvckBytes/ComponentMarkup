@@ -120,9 +120,4 @@ public interface ComponentConstructor {
    */
   Object shallowCopyIncludingMemberLists(Object component);
 
-  // ================================================================================
-  // Miscellaneous
-  // ================================================================================
-
-  String stripToPlainText(Object component);
 }
