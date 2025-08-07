@@ -11,6 +11,6 @@ import java.util.List;
 
 public interface DeferredComponent {
 
-  @Nullable List<Object> renderDeferredComponent(@Nullable Object recipient);
+  @Nullable List<Object> renderDeferredComponent(@Nullable PlatformEntity recipient);
 
 }

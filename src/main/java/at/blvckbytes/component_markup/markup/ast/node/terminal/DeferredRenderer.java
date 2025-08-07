@@ -7,6 +7,7 @@ package at.blvckbytes.component_markup.markup.ast.node.terminal;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,6 @@ public interface DeferredRenderer<Parameter extends RendererParameter> {
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,
     SlotContext slotContext,
-    @Nullable Object recipient
+    @Nullable PlatformEntity recipient
   );
 }

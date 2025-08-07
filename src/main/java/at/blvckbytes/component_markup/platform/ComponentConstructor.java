@@ -124,7 +124,5 @@ public interface ComponentConstructor {
   // Miscellaneous
   // ================================================================================
 
-  DeferredDataProvider getDataProvider();
-
   String stripToPlainText(Object component);
 }

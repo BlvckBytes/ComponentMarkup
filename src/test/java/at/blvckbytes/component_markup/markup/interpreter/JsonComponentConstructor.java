@@ -32,7 +32,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     @Override
-    public @Nullable List<Object> renderDeferredComponent(@Nullable Object recipient) {
+    public @Nullable List<Object> renderDeferredComponent(@Nullable PlatformEntity recipient) {
       throw new UnsupportedOperationException();
     }
   }
@@ -498,11 +498,6 @@ public class JsonComponentConstructor implements ComponentConstructor {
     }
 
     return copy;
-  }
-
-  @Override
-  public DeferredDataProvider getDataProvider() {
-    throw new UnsupportedOperationException();
   }
 
   @Override

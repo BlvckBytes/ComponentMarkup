@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
-import at.blvckbytes.component_markup.platform.DeferredDataProvider;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
@@ -44,13 +44,12 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,
     SlotContext slotContext,
-    @Nullable Object recipient
+    @Nullable PlatformEntity recipient
   ) {
     if (recipient == null)
       return null;
 
-    DeferredDataProvider provider = componentConstructor.getDataProvider();
-    String name = parameter.displayName ? provider.getDisplayName(recipient) : provider.getName(recipient);
+    String name = parameter.displayName ? recipient.getDisplayName() : recipient.getName();
 
     if (representation == null)
       return Collections.singletonList(componentConstructor.createTextComponent(name));

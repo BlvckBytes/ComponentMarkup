@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.DeferredComponent;
 import at.blvckbytes.component_markup.platform.MembersSlot;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,12 +32,12 @@ public class ComponentOutput {
     this.componentConstructor = componentConstructor;
   }
 
-  public List<Object> get(@Nullable Object recipient) {
+  public List<Object> get(@Nullable PlatformEntity recipient) {
     List<Object> result = _substituteDeferred(unprocessedComponents, recipient);
     return result == null ? unprocessedComponents : result;
   }
 
-  public @Nullable List<Object> _substituteDeferred(List<Object> components, @Nullable Object recipient) {
+  public @Nullable List<Object> _substituteDeferred(List<Object> components, @Nullable PlatformEntity recipient) {
     List<Object> result = null;
     int resultOffset = 0;
 

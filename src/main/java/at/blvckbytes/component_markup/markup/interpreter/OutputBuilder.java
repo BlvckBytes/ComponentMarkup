@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
@@ -30,7 +31,7 @@ public class OutputBuilder {
   private final Stack<ComponentSequence> sequencesStack;
 
   public OutputBuilder(
-    @Nullable Object recipient,
+    @Nullable PlatformEntity recipient,
     ComponentConstructor componentConstructor,
     Interpreter interpreter,
     SlotContext slotContext,

@@ -11,6 +11,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +45,7 @@ public class ScoreNode extends DeferredNode<ScoreParameter> {
     ComponentConstructor componentConstructor,
     InterpretationEnvironment environment,
     SlotContext slotContext,
-    @Nullable Object recipient
+    @Nullable PlatformEntity recipient
   ) {
     // TODO: Implement
     throw new UnsupportedOperationException();

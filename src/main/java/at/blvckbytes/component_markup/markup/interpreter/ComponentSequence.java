@@ -32,7 +32,7 @@ public class ComponentSequence {
     void apply(Object component, ComponentSequence addressHolder);
   }
 
-  private final @Nullable Object recipient;
+  private final @Nullable PlatformEntity recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
   private final Interpreter interpreter;
@@ -640,7 +640,7 @@ public class ComponentSequence {
   }
 
   public static ComponentSequence initial(
-    @Nullable Object recipient,
+    @Nullable PlatformEntity recipient,
     SlotContext slotContext,
     SlotContext resetContext,
     ComponentConstructor componentConstructor,
@@ -650,7 +650,7 @@ public class ComponentSequence {
   }
 
   private ComponentSequence(
-    @Nullable Object recipient,
+    @Nullable PlatformEntity recipient,
     ComputedStyle parentStyle,
     @Nullable MarkupNode nonTerminal,
     boolean isInitial,

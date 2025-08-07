@@ -21,6 +21,7 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.util.LoggerProvider;
@@ -37,7 +38,7 @@ public class MarkupInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
   private final TemporaryMemberEnvironment environment;
-  private final @Nullable Object recipient;
+  private final @Nullable PlatformEntity recipient;
 
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
@@ -46,7 +47,7 @@ public class MarkupInterpreter implements Interpreter {
   private MarkupInterpreter(
     ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
-    @Nullable Object recipient
+    @Nullable PlatformEntity recipient
   ) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
@@ -60,7 +61,7 @@ public class MarkupInterpreter implements Interpreter {
   public static ComponentOutput interpret(
     ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
-    @Nullable Object recipient,
+    @Nullable PlatformEntity recipient,
     SlotContext slotContext, MarkupNode node
   ) {
     return new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
