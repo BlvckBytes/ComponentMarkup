@@ -81,7 +81,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
     environment = environment
       .copy()
       .withVariable("selector_result", recipient.executeSelector(selectorParameter.selector))
-      .withVariable("recipient", recipient);
+      .withVariable("selector_origin", recipient);
 
     return MarkupInterpreter.interpret(
       componentConstructor, environment, recipient, slotContext,
