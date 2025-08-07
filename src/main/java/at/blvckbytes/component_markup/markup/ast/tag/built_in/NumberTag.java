@@ -33,13 +33,9 @@ public class NumberTag extends TagDefinition {
     .collect(Collectors.joining(", "));
 
   private static final Map<String, Locale> LOCALE_BY_NAME_LOWER;
-  private static final String LOCALE_NAMES_STRING;
 
   static {
     LOCALE_BY_NAME_LOWER = new HashMap<>();
-
-    StringBuilder namesStringBuilder = new StringBuilder();
-    Set<String> isoCountries = new HashSet<>(Arrays.asList(Locale.getISOCountries()));
 
     for (Locale locale : Locale.getAvailableLocales()) {
       String localeName = locale.toString();
@@ -47,24 +43,10 @@ public class NumberTag extends TagDefinition {
       for (int i = 0; i < localeName.length(); ++i) {
         if (!Character.isWhitespace(localeName.charAt(i))) {
           LOCALE_BY_NAME_LOWER.put(localeName.toLowerCase(), locale);
-
-          if (!isoCountries.contains(locale.getCountry()))
-            break;
-
-          if (!locale.getVariant().isEmpty() || !locale.getScript().isEmpty())
-            break;
-
-          if (namesStringBuilder.length() != 0)
-            namesStringBuilder.append(", ");
-
-          namesStringBuilder.append(localeName);
-
           break;
         }
       }
     }
-
-    LOCALE_NAMES_STRING = namesStringBuilder.toString();
   }
 
   public NumberTag() {
@@ -140,7 +122,7 @@ public class NumberTag extends TagDefinition {
                 decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(formatLocale));
 
               else {
-                for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale encountered; choose one of " + LOCALE_NAMES_STRING))
+                for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
                   LoggerProvider.log(Level.WARNING, line, false);
               }
             }
