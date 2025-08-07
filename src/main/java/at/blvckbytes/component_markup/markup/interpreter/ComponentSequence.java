@@ -61,49 +61,82 @@ public class ComponentSequence {
 
   private @Nullable EnumMap<MembersSlot, AddressTree> deferredAddresses;
 
+  private void handleDeferredNode(
+    DeferredNode<?> deferredNode,
+    @Nullable ComputedStyle nodeStyle,
+    @Nullable Consumer<Object> creationHandler
+  ) {
+    RendererParameter parameter;
+
+    try {
+      parameter = deferredNode.createParameter(interpreter);
+    } catch (Throwable e) {
+      for (String line : ErrorScreen.make(deferredNode.positionProvider, "An error occurred while trying to create the deferred component's parameter"))
+        LoggerProvider.log(Level.WARNING, line, false);
+
+      LoggerProvider.log(Level.WARNING, "This was the underlying error", e);
+      return;
+    }
+
+    if (this.recipient == null) {
+      Object deferredComponent = componentConstructor.createDeferredComponent(
+        deferredNode,
+        parameter,
+        interpreter.getEnvironment().snapshot(),
+        slotContext
+      );
+
+      addMember(deferredComponent, nodeStyle);
+
+      if (creationHandler != null)
+        creationHandler.accept(deferredComponent);
+
+      return;
+    }
+
+    List<Object> renderedComponents;
+
+    try {
+      //noinspection unchecked
+      renderedComponents = ((DeferredNode<RendererParameter>) deferredNode).renderComponent(
+        parameter,
+        componentConstructor,
+        interpreter.getEnvironment(),
+        slotContext,
+        this.recipient
+      );
+    } catch (Throwable e) {
+      for (String line : ErrorScreen.make(deferredNode.positionProvider, "An error occurred while trying to render the deferred component"))
+        LoggerProvider.log(Level.WARNING, line, false);
+
+      LoggerProvider.log(Level.WARNING, "This was the underlying error", e);
+      return;
+    }
+
+    if (renderedComponents == null)
+      return;
+
+    for (Object renderedComponent : renderedComponents) {
+      addMember(renderedComponent, nodeStyle);
+
+      if (creationHandler != null)
+        creationHandler.accept(renderedComponent);
+    }
+  }
+
   public void onUnit(UnitNode node, @Nullable Consumer<Object> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
+
+    if (node instanceof DeferredNode) {
+      handleDeferredNode((DeferredNode<?>) node, nodeStyle, creationHandler);
+      return;
+    }
 
     Object result = null;
 
     if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
       result = componentConstructor.createKeyComponent(key);
-    }
-
-    else if (node instanceof DeferredNode) {
-      DeferredNode<?> deferredNode = (DeferredNode<?>) node;
-      RendererParameter parameter = deferredNode.createParameter(interpreter);
-
-      if (this.recipient != null) {
-        //noinspection unchecked
-        List<Object> renderedComponents = ((DeferredNode<RendererParameter>) deferredNode).renderComponent(
-          parameter,
-          componentConstructor,
-          interpreter.getEnvironment(),
-          slotContext,
-          this.recipient
-        );
-
-        if (renderedComponents == null)
-          return;
-
-        for (Object renderedComponent : renderedComponents) {
-          addMember(renderedComponent, nodeStyle);
-
-          if (creationHandler != null)
-            creationHandler.accept(renderedComponent);
-        }
-
-        return;
-      }
-
-      result = componentConstructor.createDeferredComponent(
-        deferredNode,
-        parameter,
-        interpreter.getEnvironment().snapshot(),
-        slotContext
-      );
     }
 
     else if (node instanceof TranslateNode) {
