@@ -5,8 +5,12 @@
 
 package at.blvckbytes.component_markup.expression.interpreter;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class PublicFieldMapTests {
 
@@ -16,22 +20,54 @@ public class PublicFieldMapTests {
     private final long test3 = 3;
     public final boolean test4 = true;
     private double test5 = 3.1415;
-    public String test6 = "";
+    public String test6 = "hello";
     public double test7 = 8.8;
+
+    @FieldGetter
+    public int methodA() { return 1; }
+
+    @FieldGetter
+    public int methodB() { return 2; }
+
+    @FieldGetter
+    public int methodC(int x) { return 0; }
+
+    @FieldGetter
+    public int methodD(int x, int y) { return 0; }
   }
 
   @Test
   public void shouldTransformToSnakeCase() {
     PublicFieldMap fieldMap = new PublicFieldMap(ExampleClass.class);
+    ExampleClass instance = new ExampleClass();
 
     Assertions.assertEquals("hello_world", fieldMap.toSnakeCase("_12helloWorld"));
     Assertions.assertEquals("my_example12_variable", fieldMap.toSnakeCase("myExample12Variable"));
     Assertions.assertNull(fieldMap.locateField("test1"));
     Assertions.assertNull(fieldMap.locateField("test2"));
     Assertions.assertNull(fieldMap.locateField("test3"));
-    Assertions.assertNotNull(fieldMap.locateField("test4"));
+    assertFieldValue(instance, fieldMap.locateField("test4"), true);
     Assertions.assertNull(fieldMap.locateField("test5"));
-    Assertions.assertNotNull(fieldMap.locateField("test6"));
-    Assertions.assertNotNull(fieldMap.locateField("test7"));
+    assertFieldValue(instance, fieldMap.locateField("test6"), "hello");
+    assertFieldValue(instance, fieldMap.locateField("test7"), 8.8);
+
+    assertMethodValue(instance, fieldMap.locateFieldGetter("method_a"), 1);
+    assertMethodValue(instance, fieldMap.locateFieldGetter("method_b"), 2);
+    Assertions.assertNull(fieldMap.locateFieldGetter("method_c"));
+    Assertions.assertNull(fieldMap.locateFieldGetter("method_d"));
+  }
+
+  private void assertFieldValue(Object instance, @Nullable Field field, Object expectedValue) {
+    Assertions.assertNotNull(field);
+    Assertions.assertDoesNotThrow(() -> {
+      Assertions.assertEquals(expectedValue, field.get(instance));
+    });
+  }
+
+  private void assertMethodValue(Object instance, @Nullable Method method, Object expectedValue) {
+    Assertions.assertNotNull(method);
+    Assertions.assertDoesNotThrow(() -> {
+      Assertions.assertEquals(expectedValue, method.invoke(instance));
+    });
   }
 }

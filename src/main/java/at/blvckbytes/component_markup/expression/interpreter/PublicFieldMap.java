@@ -5,19 +5,24 @@
 
 package at.blvckbytes.component_markup.expression.interpreter;
 
+import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class PublicFieldMap {
 
   private final Map<String, Field> fieldByIdentifier;
+  private final Map<String, Method> fieldGetterByIdentifier;
 
   public PublicFieldMap(Class<?> clazz) {
     this.fieldByIdentifier = new HashMap<>();
+    this.fieldGetterByIdentifier = new HashMap<>();
 
     while (clazz != Object.class) {
       for (Field field : clazz.getDeclaredFields()) {
@@ -32,8 +37,35 @@ public class PublicFieldMap {
         fieldByIdentifier.put(toSnakeCase(field.getName()), field);
       }
 
+      for (Method method : clazz.getDeclaredMethods()) {
+        int modifiers = method.getModifiers();
+
+        if (Modifier.isStatic(modifiers))
+          continue;
+
+        if (!Modifier.isPublic(modifiers))
+          continue;
+
+        if (!method.isAnnotationPresent(FieldGetter.class))
+          continue;
+
+        if (method.getParameterCount() != 0) {
+          LoggerProvider.log(Level.WARNING, "Encountered @FieldGetter on a method (" + method + ") with a non-zero parameter-count; ignoring!");
+          continue;
+        }
+
+        fieldGetterByIdentifier.put(toSnakeCase(method.getName()), method);
+      }
+
       clazz = clazz.getSuperclass();
     }
+  }
+
+  public @Nullable Method locateFieldGetter(String name) {
+    if (name.isEmpty() || Character.isDigit(name.charAt(0)))
+      return null;
+
+    return fieldGetterByIdentifier.get(toSnakeCase(name));
   }
 
   public @Nullable Field locateField(String name) {
