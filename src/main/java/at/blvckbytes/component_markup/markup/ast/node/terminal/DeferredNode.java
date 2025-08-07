@@ -20,4 +20,7 @@ public abstract class DeferredNode<Parameter extends RendererParameter> extends 
 
   public abstract Parameter createParameter(Interpreter interpreter);
 
+  // TODO: Add this method
+  // public abstract boolean requiresRecipient();
+
 }

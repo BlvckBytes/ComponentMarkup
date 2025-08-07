@@ -102,6 +102,8 @@ public class NumberTag extends TagDefinition {
 
           try {
             String pattern = valueInterpreter.asString(ExpressionInterpreter.interpret(format, environment));
+
+            // TODO: Consider caching this format
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
             if (rounding != null) {
@@ -118,6 +120,7 @@ public class NumberTag extends TagDefinition {
               String localeName = valueInterpreter.asString(ExpressionInterpreter.interpret(locale, environment));
               Locale formatLocale = LOCALE_BY_NAME_LOWER.get(localeName.toLowerCase());
 
+              // TODO: Consider caching this format
               if (formatLocale != null)
                 decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(formatLocale));
 
