@@ -24,18 +24,18 @@ import java.util.List;
 public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
 
   public final @Nullable ExpressionNode displayName;
-  public final @Nullable MarkupNode representation;
+  public final @Nullable MarkupNode renderer;
 
   public PlayerNameNode(
     @Nullable ExpressionNode displayName,
-    @Nullable MarkupNode representation,
+    @Nullable MarkupNode renderer,
     StringView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(positionProvider, letBindings);
 
     this.displayName = displayName;
-    this.representation = representation;
+    this.renderer = renderer;
   }
 
   @Override
@@ -51,13 +51,13 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
 
     String name = parameter.displayName ? recipient.displayName : recipient.name;
 
-    if (representation == null)
+    if (renderer == null)
       return Collections.singletonList(componentConstructor.createTextComponent(name));
 
     environment = environment.copy().withVariable("player_name", name);
 
     return MarkupInterpreter.interpret(
-      componentConstructor, environment, recipient, slotContext, representation
+      componentConstructor, environment, recipient, slotContext, renderer
     ).unprocessedComponents;
   }
 
