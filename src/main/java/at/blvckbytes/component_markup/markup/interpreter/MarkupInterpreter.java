@@ -492,6 +492,9 @@ public class MarkupInterpreter implements Interpreter {
       ExpressionNode contents = ((InterpolationNode) node).contents;
       Object interpolationValue = evaluateAsPlainObject(contents);
 
+      if (interpolationValue == null)
+        return;
+
       MarkupNode interpolatedNode;
 
       if (interpolationValue instanceof MarkupNode)
