@@ -10,11 +10,11 @@ import at.blvckbytes.component_markup.util.StringView;
 
 import java.util.function.Function;
 
-public class FunctionNode extends MarkupNode {
+public class FunctionDrivenNode extends MarkupNode {
 
   public final Function<Interpreter, Object> function;
 
-  public FunctionNode(StringView positionProvider, Function<Interpreter, Object> function) {
+  public FunctionDrivenNode(StringView positionProvider, Function<Interpreter, Object> function) {
     super(positionProvider, null, null);
 
     this.function = function;

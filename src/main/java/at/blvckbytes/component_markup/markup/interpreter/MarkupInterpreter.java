@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
-import at.blvckbytes.component_markup.markup.ast.node.FunctionNode;
+import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
@@ -328,7 +328,7 @@ public class MarkupInterpreter implements Interpreter {
     _interpret((MarkupNode) value);
   }
 
-  private void interpretFunctionNode(FunctionNode node) {
+  private void interpretFunctionDriven(FunctionDrivenNode node) {
     Object value = node.function.apply(this);
 
     if (value instanceof Collection) {
@@ -484,8 +484,8 @@ public class MarkupInterpreter implements Interpreter {
       return introducedBindings;
     }
 
-    if (node instanceof FunctionNode) {
-      interpretFunctionNode((FunctionNode) node);
+    if (node instanceof FunctionDrivenNode) {
+      interpretFunctionDriven((FunctionDrivenNode) node);
       return introducedBindings;
     }
 

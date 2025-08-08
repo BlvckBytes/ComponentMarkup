@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
-import at.blvckbytes.component_markup.markup.ast.node.FunctionNode;
+import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.util.ErrorScreen;
@@ -72,7 +72,7 @@ public class NumberTag extends TagDefinition {
     ExpressionNode rounding = format == null ? null : attributes.getOptionalExpressionNode("rounding");
     ExpressionNode locale = format == null ? null : attributes.getOptionalExpressionNode("locale");
 
-    return new FunctionNode(tagName, interpreter -> {
+    return new FunctionDrivenNode(tagName, interpreter -> {
       InterpretationEnvironment environment = interpreter.getEnvironment();
       ValueInterpreter valueInterpreter = environment.getValueInterpreter();
 
