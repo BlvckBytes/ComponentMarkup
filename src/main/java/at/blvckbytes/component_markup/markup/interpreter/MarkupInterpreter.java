@@ -267,11 +267,9 @@ public class MarkupInterpreter implements Interpreter {
     return new CaptureNode(node, capturedBindings);
   }
 
-  private @Nullable Set<String> introduceLetBindings(MarkupNode node) {
+  private void introduceLetBindings(MarkupNode node) {
     if (node.letBindings == null)
-      return null;
-
-    Set<String> introducedNames = new HashSet<>();
+      return;
 
     for (LetBinding letBinding : node.letBindings) {
       Object value;
@@ -306,11 +304,8 @@ public class MarkupInterpreter implements Interpreter {
         continue;
       }
 
-      environment.pushVariable(name, value);
-      introducedNames.add(name);
+      environment.setScopeVariable(name, value);
     }
-
-    return introducedNames;
   }
 
   private void interpretObjectAsNode(
@@ -359,28 +354,18 @@ public class MarkupInterpreter implements Interpreter {
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
     LoopVariable loopVariable = new LoopVariable(items.size());
-    environment.pushVariable("loop", loopVariable);
+    environment.setScopeVariable("loop", loopVariable);
 
     int size = items.size();
 
     if (size == 0) {
       if (node.empty != null) {
-        Set<String> introducedNames = introduceLetBindings(node);
-
+        introduceLetBindings(node);
         _interpret(node.empty);
-
-        if (introducedNames != null) {
-          for (String introducedName : introducedNames)
-            environment.popVariable(introducedName);
-        }
       }
 
-      environment.popVariable("loop");
       return;
     }
-
-    if (node.iterationVariable != null)
-      environment.pushVariable(node.iterationVariable, null);
 
     boolean reversed;
 
@@ -397,9 +382,9 @@ public class MarkupInterpreter implements Interpreter {
       loopVariable.setIndex(index);
 
       if (node.iterationVariable != null)
-        environment.updateVariable(node.iterationVariable, item);
+        environment.setScopeVariable(node.iterationVariable, item);
 
-      Set<String> introducedNames = introduceLetBindings(node);
+      introduceLetBindings(node);
 
       if (node.separator != null) {
         if (reversed ? index != size - 1 : index != 0)
@@ -407,17 +392,7 @@ public class MarkupInterpreter implements Interpreter {
       }
 
       _interpret(node.body);
-
-      if (introducedNames != null) {
-        for (String introducedName : introducedNames)
-          environment.popVariable(introducedName);
-      }
     }
-
-    if (node.iterationVariable != null)
-      environment.popVariable(node.iterationVariable);
-
-    environment.popVariable("loop");
   }
 
   private void _interpret(MarkupNode node) {
@@ -437,23 +412,22 @@ public class MarkupInterpreter implements Interpreter {
         return;
     }
 
-    Set<String> introducedBindings = __interpret(node);
+    environment.beginScope();
 
-    if (introducedBindings != null) {
-      for (String introducedBinding : introducedBindings)
-        environment.popVariable(introducedBinding);
-    }
+    __interpret(node);
+
+    environment.endScope();
 
     if (!doNotUse)
       interceptors.handleAfter(node);
   }
 
-  private @Nullable Set<String> __interpret(MarkupNode node) {
+  private void __interpret(MarkupNode node) {
     if (node.ifCondition != null) {
       Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
 
       if (!environment.getValueInterpreter().asBoolean(result))
-        return null;
+        return;
     }
 
     // The for-loop introduces temporary variables itself, so only introduce bindings after the fact
@@ -464,36 +438,36 @@ public class MarkupInterpreter implements Interpreter {
     // hand control regarding the loop's bindings over to the corresponding sub-interpreter.
     if (node instanceof ForLoopNode) {
       interpretForLoop((ForLoopNode) node);
-      return null;
+      return;
     }
 
-    Set<String> introducedBindings = introduceLetBindings(node);
+    introduceLetBindings(node);
 
     if (node instanceof IfElseIfElseNode) {
       interpretIfElseIfElse((IfElseIfElseNode) node, environment);
-      return introducedBindings;
+      return;
     }
 
     if (node instanceof WhenMatchingNode) {
       interpretWhenMatching((WhenMatchingNode) node, environment);
-      return introducedBindings;
+      return;
     }
 
     if (node instanceof ExpressionDrivenNode) {
       interpretExpressionDriven((ExpressionDrivenNode) node);
-      return introducedBindings;
+      return;
     }
 
     if (node instanceof FunctionDrivenNode) {
       interpretFunctionDriven((FunctionDrivenNode) node);
-      return introducedBindings;
+      return;
     }
 
     OutputBuilder builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
       builder.onBreak();
-      return introducedBindings;
+      return;
     }
 
     if (node instanceof InterpolationNode) {
@@ -518,7 +492,7 @@ public class MarkupInterpreter implements Interpreter {
 
       _interpret(interpolatedNode);
 
-      return introducedBindings;
+      return;
     }
 
     // Terminal nodes always render, because since they do not bear any child-nodes,
@@ -530,7 +504,7 @@ public class MarkupInterpreter implements Interpreter {
       else if (node instanceof TextNode)
         builder.onText((TextNode) node, null, false);
 
-      return introducedBindings;
+      return;
     }
 
     if (node.children != null && !node.children.isEmpty()) {
@@ -541,7 +515,5 @@ public class MarkupInterpreter implements Interpreter {
 
       builder.onNonTerminalEnd();
     }
-
-    return introducedBindings;
   }
 }

@@ -16,70 +16,77 @@ import java.util.logging.Level;
 
 public class TemporaryMemberEnvironment extends InterpretationEnvironment {
 
+  private static final Object NULL_SENTINEL = new Object();
+
   private final InterpretationEnvironment baseEnvironment;
-  private final Map<String, Stack<Object>> shadowingVariables;
+  private final Stack<Map<String, Object>> scopeStack;
 
   public TemporaryMemberEnvironment(InterpretationEnvironment baseEnvironment) {
     this.baseEnvironment = baseEnvironment;
-    this.shadowingVariables = new HashMap<>();
+    this.scopeStack = new Stack<>();
   }
 
-  public void pushVariable(String name, Object value) {
-    shadowingVariables.computeIfAbsent(name, k -> new Stack<>()).push(value);
+  public void beginScope() {
+    scopeStack.push(new HashMap<>());
   }
 
-  public void updateVariable(String name, Object value) {
-    Stack<Object> valueStack = shadowingVariables.computeIfAbsent(name, k -> new Stack<>());
-
-    if (valueStack.isEmpty()) {
-      valueStack.push(value);
+  public void endScope() {
+    if (scopeStack.empty()) {
+      LoggerProvider.log(Level.WARNING, "Tried to end a scope on an empty scope-stack");
       return;
     }
 
-    valueStack.set(valueStack.size() - 1, value);
+    scopeStack.pop();
   }
 
-  public void popVariable(String name) {
-    Stack<Object> valueStack = shadowingVariables.computeIfAbsent(name, k -> new Stack<>());
-
-    if (valueStack.isEmpty()) {
-      LoggerProvider.log(Level.WARNING, "The temporary variable-stack for variable " + name + " was unbalanced");
+  public void setScopeVariable(String name, Object value) {
+    if (scopeStack.empty()) {
+      LoggerProvider.log(Level.WARNING, "Tried to set a scope-variable outside of having begun a scope");
       return;
     }
 
-    valueStack.pop();
+    scopeStack.peek().put(name, value);
   }
 
   public void forEachKnownName(Consumer<String> handler) {
-    Set<String> shadowingNames = shadowingVariables.keySet();
+    Set<String> encounteredNames = new HashSet<>();
 
-    for (String baseName : baseEnvironment.getNames()) {
-      if (shadowingNames.contains(baseName))
-        continue;
-
-      handler.accept(baseName);
+    for (int scopeIndex = scopeStack.size() - 1; scopeIndex >= 0; --scopeIndex) {
+      for (String scopeVariableName : scopeStack.get(scopeIndex).keySet()) {
+        if (encounteredNames.add(scopeVariableName))
+          handler.accept(scopeVariableName);
+      }
     }
 
-    for (String shadowingName : shadowingNames)
-      handler.accept(shadowingName);
+    for (String baseName : baseEnvironment.getNames()) {
+      if (encounteredNames.add(baseName))
+        handler.accept(baseName);
+    }
   }
 
   @Override
   public @Nullable Object getVariableValue(String name) {
-    Stack<Object> valueStack = shadowingVariables.get(name);
+    for (int scopeIndex = scopeStack.size() - 1; scopeIndex >= 0; --scopeIndex) {
+      Map<String, Object> scopeVariables = scopeStack.get(scopeIndex);
+      Object value = scopeVariables.getOrDefault(name, NULL_SENTINEL);
 
-    if (valueStack != null && !valueStack.isEmpty())
-      return valueStack.peek();
+      if (value == NULL_SENTINEL)
+        continue;
+
+      return value;
+    }
 
     return baseEnvironment.getVariableValue(name);
   }
 
   @Override
   public boolean doesVariableExist(String name) {
-    Stack<Object> valueStack = shadowingVariables.get(name);
+    for (int scopeIndex = scopeStack.size() - 1; scopeIndex >= 0; --scopeIndex) {
+      Map<String, Object> scopeVariables = scopeStack.get(scopeIndex);
 
-    if (valueStack != null && !valueStack.isEmpty())
-      return true;
+      if (scopeVariables.containsKey(name))
+        return true;
+    }
 
     return baseEnvironment.doesVariableExist(name);
   }
@@ -92,13 +99,22 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   public InterpretationEnvironment snapshot() {
     InterpretationEnvironment snapshot = this.baseEnvironment.copy();
 
-    for (String shadowingVariableName : shadowingVariables.keySet()) {
-      Object currentShadowingValue = shadowingVariables.get(shadowingVariableName).peek();
+    Set<String> encounteredNames = new HashSet<>();
 
-      if (currentShadowingValue instanceof InternalCopyable)
-        currentShadowingValue = ((InternalCopyable) currentShadowingValue).copy();
+    for (int scopeIndex = scopeStack.size() - 1; scopeIndex >= 0; --scopeIndex) {
+      Map<String, Object> scopeVariables = scopeStack.get(scopeIndex);
 
-      snapshot.withVariable(shadowingVariableName, currentShadowingValue);
+      for (String scopeVariableName : scopeVariables.keySet()) {
+        if (!encounteredNames.add(scopeVariableName))
+          continue;
+
+        Object scopeVariableValue = scopeVariables.get(scopeVariableName);
+
+        if (scopeVariableValue instanceof InternalCopyable)
+          scopeVariableValue = ((InternalCopyable) scopeVariableValue).copy();
+
+        snapshot.withVariable(scopeVariableName, scopeVariableValue);
+      }
     }
 
     return snapshot;
