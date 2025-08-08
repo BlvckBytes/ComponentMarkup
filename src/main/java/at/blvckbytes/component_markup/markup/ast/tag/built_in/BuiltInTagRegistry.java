@@ -56,5 +56,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new SpaceTag());
     register(new PlayerNameTag());
     register(new NumberTag());
+    register(new DeferredTag());
   }
 }
