@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.click.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient.GradientTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow.RainbowTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.transition.TransitionTag;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.duration.DurationTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverEntityTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverItemTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverTextTag;
@@ -58,5 +59,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new NumberTag());
     register(new DeferredTag());
     register(new DateTag());
+    register(new DurationTag());
   }
 }
