@@ -35,7 +35,7 @@ public class ComponentSequence {
   private final @Nullable PlatformEntity recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
-  private final Interpreter interpreter;
+  private final MarkupInterpreter interpreter;
   private final ComponentConstructor componentConstructor;
 
   private final @Nullable NonTerminalClosure applyKnownNonTerminal;
@@ -677,7 +677,7 @@ public class ComponentSequence {
     SlotContext slotContext,
     SlotContext resetContext,
     ComponentConstructor componentConstructor,
-    Interpreter interpreter
+    MarkupInterpreter interpreter
   ) {
     return new ComponentSequence(recipient, slotContext.defaultStyle, null, true, slotContext, resetContext, componentConstructor, interpreter);
   }
@@ -690,7 +690,7 @@ public class ComponentSequence {
     SlotContext slotContext,
     SlotContext resetContext,
     ComponentConstructor componentConstructor,
-    Interpreter interpreter
+    MarkupInterpreter interpreter
   ) {
     this.recipient = recipient;
     this.parentStyle = parentStyle;

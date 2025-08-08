@@ -33,7 +33,7 @@ public class OutputBuilder {
   public OutputBuilder(
     @Nullable PlatformEntity recipient,
     ComponentConstructor componentConstructor,
-    Interpreter interpreter,
+    MarkupInterpreter interpreter,
     SlotContext slotContext,
     SlotContext resetContext
   ) {

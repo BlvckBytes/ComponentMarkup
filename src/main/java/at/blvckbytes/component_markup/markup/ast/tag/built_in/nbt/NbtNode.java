@@ -72,12 +72,12 @@ public class NbtNode extends DeferredNode<NbtParameter> {
     Object separator = null;
 
     if (this.separator != null) {
-      List<Object> components = interpreter.interpretSubtree(
-        this.separator,
-        interpreter.getComponentConstructor().getSlotContext(SlotType.SINGLE_LINE_CHAT)
-      ).unprocessedComponents;
-
-      separator = components.isEmpty() ? null : components.get(0);
+//      List<Object> components = interpreter.interpretSubtree(
+//        this.separator,
+//        interpreter.getComponentConstructor().getSlotContext(SlotType.SINGLE_LINE_CHAT)
+//      ).unprocessedComponents;
+//
+//      separator = components.isEmpty() ? null : components.get(0);
     }
 
     return new NbtParameter(this.source, identifier, path, interpret, separator);

@@ -183,10 +183,9 @@ public class MarkupInterpreter implements Interpreter {
     }
   }
 
-  @Override
   public ComponentOutput interpretSubtree(MarkupNode node, SlotContext slotContext) {
     builderStack.push(new OutputBuilder(recipient, componentConstructor, this, slotContext, resetContext));
-    _interpret(node);
+    interpret(node);
     return builderStack.pop().build();
   }
 
@@ -216,7 +215,7 @@ public class MarkupInterpreter implements Interpreter {
       MarkupNode caseNode = node.matchingMap.get(inputLower);
 
       if (caseNode != null) {
-        _interpret(caseNode);
+        interpret(caseNode);
         return;
       }
     }
@@ -224,7 +223,7 @@ public class MarkupInterpreter implements Interpreter {
     if (node.other == null)
       return;
 
-    _interpret(node.other);
+    interpret(node.other);
   }
 
   private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
@@ -233,7 +232,7 @@ public class MarkupInterpreter implements Interpreter {
 
     for (MarkupNode conditional : node.conditions) {
       if (conditional.ifCondition == null) {
-        _interpret(conditional);
+        interpret(conditional);
         return;
       }
 
@@ -242,14 +241,14 @@ public class MarkupInterpreter implements Interpreter {
       if (!environment.getValueInterpreter().asBoolean(result))
         continue;
 
-      _interpret(conditional);
+      interpret(conditional);
       return;
     }
 
     if (node.fallback == null)
       return;
 
-    _interpret(node.fallback);
+    interpret(node.fallback);
   }
 
   private MarkupNode createVariableCapture(MarkupNode node, LetBinding binding) {
@@ -316,11 +315,11 @@ public class MarkupInterpreter implements Interpreter {
       return;
 
     if (!(value instanceof MarkupNode)) {
-      _interpret(new TextNode(StringView.EMPTY, String.valueOf(value)));
+      interpret(new TextNode(StringView.EMPTY, String.valueOf(value)));
       return;
     }
 
-    _interpret((MarkupNode) value);
+    interpret((MarkupNode) value);
   }
 
   private void interpretFunctionDriven(FunctionDrivenNode node) {
@@ -361,7 +360,7 @@ public class MarkupInterpreter implements Interpreter {
     if (size == 0) {
       if (node.empty != null) {
         introduceLetBindings(node);
-        _interpret(node.empty);
+        interpret(node.empty);
       }
 
       return;
@@ -388,14 +387,20 @@ public class MarkupInterpreter implements Interpreter {
 
       if (node.separator != null) {
         if (reversed ? index != size - 1 : index != 0)
-          _interpret(node.separator);
+          interpret(node.separator);
       }
 
-      _interpret(node.body);
+      interpret(node.body);
     }
   }
 
-  private void _interpret(MarkupNode node) {
+  @Override
+  public void interpret(MarkupNode node) {
+    interpret(node, null);
+  }
+
+  @Override
+  public void interpret(MarkupNode node, @Nullable Runnable afterScopeBegin) {
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
@@ -414,7 +419,10 @@ public class MarkupInterpreter implements Interpreter {
 
     environment.beginScope();
 
-    __interpret(node);
+    if (afterScopeBegin != null)
+      afterScopeBegin.run();
+
+    _interpret(node);
 
     environment.endScope();
 
@@ -422,7 +430,7 @@ public class MarkupInterpreter implements Interpreter {
       interceptors.handleAfter(node);
   }
 
-  private void __interpret(MarkupNode node) {
+  private void _interpret(MarkupNode node) {
     if (node.ifCondition != null) {
       Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
 
@@ -490,7 +498,7 @@ public class MarkupInterpreter implements Interpreter {
         ((StyledNode) interpolatedNode).getOrInstantiateStyle().inheritFrom(nodeStyle, node.useCondition);
       }
 
-      _interpret(interpolatedNode);
+      interpret(interpolatedNode);
 
       return;
     }
@@ -511,7 +519,7 @@ public class MarkupInterpreter implements Interpreter {
       builder.onNonTerminalBegin(node);
 
       for (MarkupNode child : node.children)
-        _interpret(child);
+        interpret(child);
 
       builder.onNonTerminalEnd();
     }
