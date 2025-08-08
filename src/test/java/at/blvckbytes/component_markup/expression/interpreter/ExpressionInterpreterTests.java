@@ -254,6 +254,44 @@ public class ExpressionInterpreterTests {
     makeCase("12345 ::: '\\d+'", true);
   }
 
+  @Test
+  public void shouldHandleFullBranchingOperator() {
+    String expression = "a ? \"first\" : \"second\"";
+
+    makeCase(
+      expression,
+      new InterpretationEnvironment()
+        .withVariable("a", true),
+      "first"
+    );
+
+    makeCase(
+      expression,
+      new InterpretationEnvironment()
+        .withVariable("a", false),
+      "second"
+    );
+  }
+
+  @Test
+  public void shouldHandleHalfBranchingOperator() {
+    String expression = "a ? \"first\"";
+
+    makeCase(
+      expression,
+      new InterpretationEnvironment()
+        .withVariable("a", true),
+      "first"
+    );
+
+    makeCase(
+      expression,
+      new InterpretationEnvironment()
+        .withVariable("a", false),
+      null
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }

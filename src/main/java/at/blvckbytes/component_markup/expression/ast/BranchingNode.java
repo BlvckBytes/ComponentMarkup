@@ -18,14 +18,14 @@ public class BranchingNode extends ExpressionNode {
   public @Nullable InfixOperatorToken branchingOperator;
   public ExpressionNode branchTrue;
   public @Nullable PunctuationToken branchingSeparator;
-  public ExpressionNode branchFalse;
+  public @Nullable ExpressionNode branchFalse;
 
   public BranchingNode(
     ExpressionNode condition,
     @Nullable InfixOperatorToken branchingOperator,
     ExpressionNode branchTrue,
     @Nullable PunctuationToken branchingSeparator,
-    ExpressionNode branchFalse
+    @Nullable ExpressionNode branchFalse
   ) {
     this.condition = condition;
     this.branchingOperator = branchingOperator;
@@ -41,11 +41,22 @@ public class BranchingNode extends ExpressionNode {
 
   @Override
   public StringView getLastMemberPositionProvider() {
+    if (branchFalse == null)
+      return branchTrue.getLastMemberPositionProvider();
+
     return branchFalse.getLastMemberPositionProvider();
   }
 
   @Override
   public String toExpression() {
+    if (branchFalse == null) {
+      return parenthesise(
+        condition.toExpression()
+          + " " + InfixOperator.BRANCHING
+          + " " + branchTrue.toExpression()
+      );
+    }
+
     return parenthesise(
       condition.toExpression()
         + " " + InfixOperator.BRANCHING

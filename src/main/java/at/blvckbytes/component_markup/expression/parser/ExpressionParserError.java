@@ -14,7 +14,6 @@ public enum ExpressionParserError {
   EXPECTED_SUBSTRING_UPPER_BOUND(args -> "Expected the substring's upper-bound or a closing-bracket ] as to leave it empty"),
   EXPECTED_RIGHT_INFIX_OPERAND(args -> "Expected a right-hand-side for this infix-operator: " + args[0]),
   EXPECTED_PREFIX_OPERAND(args -> "Expected a right-hand-side for this prefix-operator: " + args[0]),
-  EXPECTED_BRANCH_DELIMITER(args -> "Expected the branching-delimiter colon: :"),
   EXPECTED_FALSE_BRANCH(args -> "Expected an expression representing the false branch"),
   EXPECTED_ARRAY_ITEM(args -> "Expected a subsequent array-item"),
   EXPECTED_ARRAY_CLOSING_BRACKET(args -> "Expected a closing-bracket after specifying an array: ]"),

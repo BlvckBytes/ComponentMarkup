@@ -174,34 +174,6 @@ public class ExpressionParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnMissingBranchingDelimiter() {
-    TextWithSubViews text = new TextWithSubViews(
-      "a ? `test´"
-    );
-
-    makeErrorCase(
-      text,
-      ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-      text.subView(0).endExclusive - 1
-    );
-
-    for (Punctuation punctuation : Punctuation.values()) {
-      if (punctuation == Punctuation.COLON)
-        continue;
-
-      text = new TextWithSubViews(
-        "a ? test`" + punctuation + "´"
-      );
-
-      makeErrorCase(
-        text,
-        ExpressionParserError.EXPECTED_BRANCH_DELIMITER,
-        text.subView(0).startInclusive
-      );
-    }
-  }
-
-  @Test
   public void shouldThrowOnMissingBranchingFalseBranch() {
     TextWithSubViews text = new TextWithSubViews(
       "a ? test `:´"

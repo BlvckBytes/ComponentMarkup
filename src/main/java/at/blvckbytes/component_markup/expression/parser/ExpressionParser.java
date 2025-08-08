@@ -186,13 +186,12 @@ public class ExpressionParser {
     }
 
     if (operatorToken.operator == InfixOperator.BRANCHING) {
-      PunctuationToken delimiterToken = tokenizer.nextToken(PunctuationToken.class);
+      PunctuationToken delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
-      if (delimiterToken == null)
-        throw new ExpressionParseException(rhs.getEndExclusive() - 1, ExpressionParserError.EXPECTED_BRANCH_DELIMITER);
+      if (delimiterToken == null || delimiterToken.punctuation != Punctuation.COLON)
+        return new BranchingNode(lhs, operatorToken, rhs, null, null);
 
-      if (delimiterToken.punctuation != Punctuation.COLON)
-        throw new ExpressionParseException(delimiterToken.raw.startInclusive, ExpressionParserError.EXPECTED_BRANCH_DELIMITER);
+      tokenizer.nextToken();
 
       ExpressionNode falseBranch = parseExpression(null);
 

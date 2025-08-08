@@ -317,6 +317,20 @@ public class ExpressionParserTests {
         terminal("c", text.subView(4))
       )
     );
+
+    text = new TextWithSubViews(
+      "`a´ `?´ `b´"
+    );
+
+    makeCase(
+      text,
+      branching(
+        terminal("a", text.subView(0)),
+        token(InfixOperator.BRANCHING, text.subView(1)),
+        terminal("b", text.subView(2)),
+        null, null
+      )
+    );
   }
 
   @Test
