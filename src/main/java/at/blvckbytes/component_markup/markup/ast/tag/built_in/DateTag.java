@@ -6,9 +6,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -51,19 +48,16 @@ public class DateTag extends TagDefinition {
     ExpressionNode format = attributes.getOptionalExpressionNode("format");
 
     return new FunctionDrivenNode(tagName, interpreter -> {
-      InterpretationEnvironment environment = interpreter.getEnvironment();
-      ValueInterpreter valueInterpreter = environment.getValueInterpreter();
-
       Instant stamp = Instant.ofEpochMilli(
         value == null
           ? System.currentTimeMillis()
-          : valueInterpreter.asLong(ExpressionInterpreter.interpret(value, environment))
+          : interpreter.evaluateAsLong(value)
       );
 
       ZoneId timeZone = SYSTEM_ZONE;
 
       if (zone != null) {
-        String zoneString = valueInterpreter.asString(ExpressionInterpreter.interpret(zone, environment));
+        String zoneString = interpreter.evaluateAsString(zone);
         try {
           timeZone = ZoneId.of(zoneString);
         } catch (Throwable e1) {
@@ -81,7 +75,7 @@ public class DateTag extends TagDefinition {
       if (format != null) {
         try {
           // TODO: Consider caching this formatter
-          formatter = DateTimeFormatter.ofPattern(valueInterpreter.asString(ExpressionInterpreter.interpret(format, environment)));
+          formatter = DateTimeFormatter.ofPattern(interpreter.evaluateAsString(format));
         } catch (Throwable e) {
           for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered"))
             LoggerProvider.log(Level.WARNING, line, false);

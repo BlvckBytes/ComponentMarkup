@@ -149,6 +149,31 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
+  public @NotNull Number evaluateAsLongOrDouble(@Nullable ExpressionNode expression) {
+    Number value = evaluateAsLongOrDoubleOrNull(expression);
+
+    if (value == null)
+      return environment.getValueInterpreter().asLong(null);
+
+    return value;
+  }
+
+  @Override
+  public @Nullable Number evaluateAsLongOrDoubleOrNull(@Nullable ExpressionNode expression) {
+    try {
+      Object result = ExpressionInterpreter.interpret(expression, environment);
+
+      if (result == null)
+        return null;
+
+      return environment.getValueInterpreter().asLongOrDouble(result);
+    } catch (Throwable e) {
+      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long or double", e);
+      return null;
+    }
+  }
+
+  @Override
   public boolean evaluateAsBoolean(@Nullable ExpressionNode expression) {
     TriState value = evaluateAsTriState(expression);
 
@@ -204,11 +229,11 @@ public class MarkupInterpreter implements Interpreter {
     return builderStack.size() > 1;
   }
 
-  private void interpretWhenMatching(WhenMatchingNode node, TemporaryMemberEnvironment environment) {
+  private void interpretWhenMatching(WhenMatchingNode node) {
     if (node.matchingMap.isEmpty())
       LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
-    Object result = ExpressionInterpreter.interpret(node.input, environment);
+    Object result = evaluateAsPlainObject(node.input);
 
     if (result != null) {
       String inputLower = environment.getValueInterpreter().asString(result).toLowerCase();
@@ -226,7 +251,7 @@ public class MarkupInterpreter implements Interpreter {
     interpret(node.other);
   }
 
-  private void interpretIfElseIfElse(IfElseIfElseNode node, TemporaryMemberEnvironment environment) {
+  private void interpretIfElseIfElse(IfElseIfElseNode node) {
     if (node.conditions.isEmpty())
       LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
@@ -236,9 +261,7 @@ public class MarkupInterpreter implements Interpreter {
         return;
       }
 
-      Object result = ExpressionInterpreter.interpret(conditional.ifCondition, environment);
-
-      if (!environment.getValueInterpreter().asBoolean(result))
+      if (!evaluateAsBoolean(conditional.ifCondition))
         continue;
 
       interpret(conditional);
@@ -276,7 +299,7 @@ public class MarkupInterpreter implements Interpreter {
 
       if (letBinding instanceof ExpressionLetBinding) {
         ExpressionLetBinding expressionBinding = (ExpressionLetBinding) letBinding;
-        value = ExpressionInterpreter.interpret(((ExpressionLetBinding) letBinding).expression, environment);
+        value = evaluateAsPlainObject(((ExpressionLetBinding) letBinding).expression);
         name = expressionBinding.bindingName;
 
         if (expressionBinding.capture) {
@@ -336,7 +359,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretExpressionDriven(ExpressionDrivenNode node) {
-    Object value = ExpressionInterpreter.interpret(node.expression, environment);
+    Object value = evaluateAsPlainObject(node.expression);
 
     if (value instanceof Collection) {
       for (Object item : (Collection<?>) value)
@@ -349,7 +372,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretForLoop(ForLoopNode node) {
-    Object iterable = ExpressionInterpreter.interpret(node.iterable, environment);
+    Object iterable = evaluateAsPlainObject(node.iterable);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
     LoopVariable loopVariable = new LoopVariable(items.size());
@@ -366,14 +389,7 @@ public class MarkupInterpreter implements Interpreter {
       return;
     }
 
-    boolean reversed;
-
-    if (node.reversed == null)
-      reversed = false;
-    else {
-      Object reversedValue = ExpressionInterpreter.interpret(node.reversed, environment);
-      reversed = environment.getValueInterpreter().asBoolean(reversedValue);
-    }
+    boolean reversed = evaluateAsBoolean(node.reversed);
 
     for (int index = (reversed ? size - 1 : 0); (reversed ? index >= 0 : index < size); index += (reversed ? -1 : 1)) {
       Object item = items.get(index);
@@ -404,9 +420,7 @@ public class MarkupInterpreter implements Interpreter {
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
-      Object result = ExpressionInterpreter.interpret(node.useCondition, environment);
-
-      if (!environment.getValueInterpreter().asBoolean(result))
+      if (!evaluateAsBoolean(node.useCondition))
         doNotUse = true;
     }
 
@@ -431,12 +445,8 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void _interpret(MarkupNode node) {
-    if (node.ifCondition != null) {
-      Object result = ExpressionInterpreter.interpret(node.ifCondition, environment);
-
-      if (!environment.getValueInterpreter().asBoolean(result))
-        return;
-    }
+    if (node.ifCondition != null && !evaluateAsBoolean(node.ifCondition))
+      return;
 
     // The for-loop introduces temporary variables itself, so only introduce bindings after the fact
     // such that they have immediate access to said references; it does not make sense to define a
@@ -452,12 +462,12 @@ public class MarkupInterpreter implements Interpreter {
     introduceLetBindings(node);
 
     if (node instanceof IfElseIfElseNode) {
-      interpretIfElseIfElse((IfElseIfElseNode) node, environment);
+      interpretIfElseIfElse((IfElseIfElseNode) node);
       return;
     }
 
     if (node instanceof WhenMatchingNode) {
-      interpretWhenMatching((WhenMatchingNode) node, environment);
+      interpretWhenMatching((WhenMatchingNode) node);
       return;
     }
 

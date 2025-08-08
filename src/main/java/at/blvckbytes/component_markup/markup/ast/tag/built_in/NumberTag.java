@@ -6,9 +6,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -73,15 +70,12 @@ public class NumberTag extends TagDefinition {
     ExpressionNode locale = format == null ? null : attributes.getOptionalExpressionNode("locale");
 
     return new FunctionDrivenNode(tagName, interpreter -> {
-      InterpretationEnvironment environment = interpreter.getEnvironment();
-      ValueInterpreter valueInterpreter = environment.getValueInterpreter();
+      Number number = interpreter.evaluateAsLongOrDouble(value);
 
-      Number number = environment.getValueInterpreter().asLongOrDouble(ExpressionInterpreter.interpret(value, environment));
-
-      if (integer != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(integer, environment)))
+      if (integer != null && interpreter.evaluateAsBoolean(integer))
         number = number.intValue();
 
-      if (absolute != null && valueInterpreter.asBoolean(ExpressionInterpreter.interpret(absolute, environment))) {
+      if (absolute != null && interpreter.evaluateAsBoolean(absolute)) {
         if (number instanceof Double || number instanceof Float)
           number = Math.abs(number.doubleValue());
         else
@@ -102,14 +96,14 @@ public class NumberTag extends TagDefinition {
           bigDecimal = new BigDecimal(number.longValue());
 
         try {
-          String pattern = valueInterpreter.asString(ExpressionInterpreter.interpret(format, environment));
+          String pattern = interpreter.evaluateAsString(format);
 
           // TODO: Consider caching this format
           DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
           if (rounding != null) {
             try {
-              String modeName = valueInterpreter.asString(ExpressionInterpreter.interpret(rounding, environment));
+              String modeName = interpreter.evaluateAsString(rounding);
               decimalFormat.setRoundingMode(RoundingMode.valueOf(modeName.toUpperCase()));
             } catch (Throwable e) {
               for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered; choose one of " + ROUNDING_MODES_STRING))
@@ -118,7 +112,7 @@ public class NumberTag extends TagDefinition {
           }
 
           if (locale != null) {
-            String localeName = valueInterpreter.asString(ExpressionInterpreter.interpret(locale, environment));
+            String localeName = interpreter.evaluateAsString(locale);
             Locale formatLocale = LOCALE_BY_NAME_LOWER.get(localeName.toLowerCase());
 
             // TODO: Consider caching this format

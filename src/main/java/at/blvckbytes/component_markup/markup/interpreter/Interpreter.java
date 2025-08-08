@@ -28,6 +28,10 @@ public interface Interpreter {
 
   @Nullable Double evaluateAsDoubleOrNull(@Nullable ExpressionNode expression);
 
+  @NotNull Number evaluateAsLongOrDouble(@Nullable ExpressionNode expressionNode);
+
+  @Nullable Number evaluateAsLongOrDoubleOrNull(@Nullable ExpressionNode expressionNode);
+
   boolean evaluateAsBoolean(@Nullable ExpressionNode expression);
 
   TriState evaluateAsTriState(@Nullable ExpressionNode expression);
