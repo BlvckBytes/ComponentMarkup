@@ -5,14 +5,17 @@
 
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.logging.Level;
 
 public class TerminalNode extends ExpressionNode {
@@ -35,6 +38,33 @@ public class TerminalNode extends ExpressionNode {
       }
 
       return environment.getVariableValue(variableName);
+    }
+
+    if (token instanceof StringToken) {
+      List<Object> members = ((StringToken) token).members;
+
+      String plainValue;
+
+      if ((plainValue = (String) token.getPlainValue()) != null)
+        return plainValue;
+
+      StringBuilder result = new StringBuilder();
+
+      for (Object member : members) {
+        if (member instanceof String) {
+          result.append((String) member);
+          continue;
+        }
+
+        if (member instanceof ExpressionNode) {
+          result.append(ExpressionInterpreter.interpret((ExpressionNode) member, environment));
+          continue;
+        }
+
+        LoggerProvider.log(Level.WARNING, "Encountered unknown interpolation-member: " + (member == null ? null : member.getClass()));
+      }
+
+      return result.toString();
     }
 
     return token.getPlainValue();

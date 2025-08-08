@@ -10,6 +10,8 @@ import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class ExpressionTokenizer {
@@ -29,11 +31,13 @@ public class ExpressionTokenizer {
     this.dashIsPrefix = true;
   }
 
-  public StringToken parseStringToken() {
+  public StringToken parseStringToken(boolean allowForInterpolation) {
     char quoteChar;
 
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
       throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
+
+    List<Object> members = new ArrayList<>();
 
     int startInclusive = input.getPosition();
 
@@ -43,6 +47,9 @@ public class ExpressionTokenizer {
     while ((currentChar = input.nextChar()) != 0) {
       if (currentChar == '\n')
         break;
+
+      // TODO: Implement interpolation by handing over to the parser within {}
+      // TODO: Remember to emit {} as punctuation on the token-output
 
       if (currentChar == quoteChar) {
         if (input.priorChar(1) != '\\') {
@@ -62,7 +69,9 @@ public class ExpressionTokenizer {
     StringView rawContents = input.buildSubViewAbsolute(startInclusive, endInclusive + 1);
     StringView stringContents = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
 
-    return new StringToken(rawContents, stringContents);
+    members.add(stringContents.buildString());
+
+    return new StringToken(rawContents, members);
   }
 
   private Token parseIdentifierOrLiteralToken() {
@@ -437,7 +446,7 @@ public class ExpressionTokenizer {
         return null;
 
       if (upcomingChar == '\'' || upcomingChar == '"')
-        result = parseStringToken();
+        result = parseStringToken(true);
 
       else if (upcomingChar >= '0' && upcomingChar <= '9')
         result = parseLongOrDoubleToken();

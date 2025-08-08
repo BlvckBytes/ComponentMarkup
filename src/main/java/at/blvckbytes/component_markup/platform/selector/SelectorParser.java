@@ -165,8 +165,8 @@ public class SelectorParser {
           input.nextChar();
         }
 
-        StringToken stringToken = new ExpressionTokenizer(input, null).parseStringToken();
-        return new StringValue(stringToken.raw, stringToken.value, isNegated);
+        StringToken stringToken = new ExpressionTokenizer(input, null).parseStringToken(false);
+        return new StringValue(stringToken.raw, (String) stringToken.getPlainValue(), isNegated);
       } catch (ExpressionTokenizeException e) {
         // That's the only reason as to why this tokenizer-method would throw
         throw new SelectorParseException(input, e.position, SelectorParseError.UNTERMINATED_STRING);

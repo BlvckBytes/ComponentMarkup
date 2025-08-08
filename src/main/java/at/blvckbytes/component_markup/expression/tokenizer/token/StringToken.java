@@ -9,25 +9,34 @@ import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
+
 public class StringToken extends TerminalToken {
 
-  public final String value;
+  public final List<Object> members;
 
   public StringToken(StringView raw, String value) {
     super(raw);
 
-    this.value = value;
+    this.members = Collections.singletonList(value);
   }
 
-  public StringToken(StringView raw, StringView value) {
+  public StringToken(StringView raw, List<Object> members) {
     super(raw);
 
-    this.value = value.buildString();
+    this.members = members;
   }
 
   @Override
   public @Nullable Object getPlainValue() {
-    return value;
+    Object onlyMember;
+
+    // Strings which are not just mere literals have no plain value
+    if (members.size() != 1 || !((onlyMember = members.get(0)) instanceof String))
+      return null;
+
+    return onlyMember;
   }
 
   @Override
