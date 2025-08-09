@@ -60,7 +60,52 @@ public class TokenOutputTests {
     );
   }
 
-  // TODO: Add test-case regarding expression string-interpolation
+  @Test
+  public void shouldTokenizeNestedInterpolations() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`pre` ´´`{`a´` ´`+´` ´`×`hello` ´`{`×``{`a´}´` ´`{`b´}´×`´}´` ´world×`´}´`` ´post´"
+    );
+
+    makeHierarchicalCase(
+      StringView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(1)))
+        )
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(2))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(3)))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(4)))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(5)))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(6)))
+            .addChild(
+              new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(7))
+                .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(8)))
+                .addChild(
+                  new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(9))
+                    .addChild(
+                      new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(10))
+                        .addChild(
+                          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(11))
+                            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(12)))
+                        )
+                        .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(13)))
+                        .addChild(
+                          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(14))
+                            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(15)))
+                        )
+                    )
+                )
+                .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(16)))
+            )
+        )
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(17).setBuildFlags(SubstringFlag.LAST_TEXT))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(18)))
+        )
+    );
+  }
 
   private void makeCommentCase(String... lines) {
     String[] finalLines = new String[lines.length];

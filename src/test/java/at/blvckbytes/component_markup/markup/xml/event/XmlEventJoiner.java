@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.util.StringView;
@@ -63,8 +64,10 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
-  public void onInterpolation(StringView expression) {
-    events.add(new InterpolationEvent(expression, expression.buildString()));
+  public void onInterpolation(ExpressionNode expression, StringView raw) {
+    // Not going to test for the expression at this point, because that's
+    // already taken care of plenty higher up the stack.
+    events.add(new InterpolationEvent(raw, raw.buildString()));
   }
 
   @Override

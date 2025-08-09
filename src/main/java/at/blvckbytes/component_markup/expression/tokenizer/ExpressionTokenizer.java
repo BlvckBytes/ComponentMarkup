@@ -61,20 +61,20 @@ public class ExpressionTokenizer {
 
         int openingCurlyPosition = input.getPosition();
 
-        if (openingCurlyPosition  > literalStartInclusive)
+        if (openingCurlyPosition > literalStartInclusive)
           members.add(input.buildSubViewAbsolute(literalStartInclusive, openingCurlyPosition));
 
         ExpressionNode interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(this, tokenOutput);
 
-        // TODO: Proper error
-        if (interpolationExpression == null)
-          throw new IllegalStateException("Expected interpolation-expression after opening {");
-
         input.consumeWhitespace(tokenOutput);
 
-        // TODO: Proper error
+        // TODO: Proper error; add test-case
         if (input.nextChar() != '}')
           throw new IllegalStateException("Expected closing } of interpolation");
+
+        // TODO: Proper error; add test-case
+        if (interpolationExpression == null)
+          throw new IllegalStateException("Expected interpolation-expression after opening {");
 
         members.add(interpolationExpression);
 
@@ -84,6 +84,7 @@ public class ExpressionTokenizer {
         }
 
         literalStartInclusive = input.getPosition() + 1;
+        continue;
       }
 
       if (tokenOutput != null && Character.isWhitespace(currentChar))

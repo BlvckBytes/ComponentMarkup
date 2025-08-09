@@ -5,6 +5,11 @@
 
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
+import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.*;
@@ -31,8 +36,6 @@ public class XmlEventParser {
   public static void parse(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     new XmlEventParser(input, consumer, tokenOutput).parseInput(false);
   }
-
-  private final InStringDetector inStringDetector = new InStringDetector();
 
   private void parseInput(boolean isWithinCurlyBrackets) {
     boolean wasPriorTagOrInterpolation = false;
@@ -64,41 +67,36 @@ public class XmlEventParser {
         input.nextChar();
 
         int startInclusive = input.getPosition();
-        int endInclusive = -1;
 
-        // TODO: This consumption-loop should really parse an expression instead, as to support
-        //       nested interpolations and get rid of the in-string detector
-        // TODO: ^- Add test-case
+        ExpressionNode interpolationExpression;
 
-        while (input.peekChar(0) != 0) {
-          char currentChar = input.nextChar();
-
-          if (currentChar == '\n' || currentChar == '{')
-            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
-
-          if (tokenOutput != null && Character.isWhitespace(currentChar))
-            tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
-
-          inStringDetector.onEncounter(currentChar);
-
-          if (inStringDetector.isInString())
-            continue;
-
-          if (currentChar == '}') {
-            endInclusive = input.getPosition();
-            break;
-          }
+        try {
+          interpolationExpression = ExpressionParser.parse(input, tokenOutput);
+        } catch (ExpressionTokenizeException expressionTokenizeException) {
+          throw new MarkupParseException(startInclusive, expressionTokenizeException);
+        } catch (ExpressionParseException expressionParseException) {
+          throw new MarkupParseException(startInclusive, expressionParseException);
         }
 
-        inStringDetector.reset();
+        input.consumeWhitespace(tokenOutput);
 
-        if (endInclusive < 0)
+        if (input.nextChar() != '}')
           throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, input.buildSubViewAbsolute(startInclusive, endInclusive + 1));
+        if (interpolationExpression == null) {
+          if (input.nextChar() != '}')
+            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
 
-        consumer.onInterpolation(input.buildSubViewRelative(startInclusive + 1, endInclusive));
+          // TODO: Proper error; add test-case
+          throw new IllegalStateException("Expected interpolation-expression after opening {");
+        }
+
+        StringView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+
+        consumer.onInterpolation(interpolationExpression, rawInterpolation);
 
         wasPriorTagOrInterpolation = true;
         continue;

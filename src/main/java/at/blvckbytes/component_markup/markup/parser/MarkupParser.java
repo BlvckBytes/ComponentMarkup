@@ -258,13 +258,13 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onInterpolation(StringView expression) {
+  public void onInterpolation(ExpressionNode expression, StringView raw) {
     if (subtreeParser != null) {
-      subtreeParser.onInterpolation(expression);
+      subtreeParser.onInterpolation(expression, raw);
       return;
     }
 
-    tagStack.peek().addChild(new InterpolationNode(parseExpression(expression)));
+    tagStack.peek().addChild(new InterpolationNode(expression));
   }
 
   @Override

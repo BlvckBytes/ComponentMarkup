@@ -185,7 +185,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationExpressions() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`red´>`Hello, ´{`user.name´}`!´"
+      "<`red´>`Hello, ´`{user.name}´`!´"
     );
 
     makeCase(
@@ -193,7 +193,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
       new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello, "),
-      new InterpolationEvent(text.subView(2), "user.name"),
+      new InterpolationEvent(text.subView(2), "{user.name}"),
       new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
@@ -211,10 +211,10 @@ public class XmlEventParserTests {
       "         `limit´=`5´",
       "         `separator´=`{´<`br´/>}",
       "         `empty´=`{´<`red´>`No items found!´}",
-      "       >`- ´<`yellow´>{` member.item ´}`<´/`gray´><`br´/>",
+      "       >`- ´<`yellow´>`{ member.item }´`<´/`gray´><`br´/>",
       "       <`gray´>`Last line! :)",
       "  ´}",
-      ">`hover over ´{`\"me\"´}`! ´<`red´ `my_flag´>`:)´"
+      ">`hover over ´`{\"me\"}´`! ´<`red´ `my_flag´>`:)´"
     );
 
     makeCase(
@@ -253,7 +253,7 @@ public class XmlEventParserTests {
       new TextEvent(text.subView(27).setBuildFlags(SubstringFlag.INNER_TEXT), "- "),
       new TagOpenBeginEvent(text.subView(28), "yellow"),
       new TagOpenEndEvent(text.subView(28), false),
-      new InterpolationEvent(text.subView(29), " member.item "),
+      new InterpolationEvent(text.subView(29), "{ member.item }"),
       new TagCloseEvent(text.subView(31), text.subView(30).startInclusive, "gray"),
       new TagOpenBeginEvent(text.subView(32), "br"),
       new TagOpenEndEvent(text.subView(32), true),
@@ -263,7 +263,7 @@ public class XmlEventParserTests {
       new TagAttributeEndEvent(text.subView(7)),
       new TagOpenEndEvent(text.subView(0), false),
       new TextEvent(text.subView(35).setBuildFlags(SubstringFlag.INNER_TEXT), "hover over "),
-      new InterpolationEvent(text.subView(36), "\"me\""),
+      new InterpolationEvent(text.subView(36), "{\"me\"}"),
       new TextEvent(text.subView(37).setBuildFlags(SubstringFlag.INNER_TEXT), "! "),
       new TagOpenBeginEvent(text.subView(38), "red"),
       new FlagAttributeEvent(text.subView(39), "my_flag"),
@@ -276,7 +276,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseInterpolationWithCurlyBracketsInStrings() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`red´>`Hello, ´{`user.name + \"}\" + '}'´}`!´"
+      "<`red´>`Hello, ´`{user.name + \"}\" + '}'}´`!´"
     );
 
     makeCase(
@@ -284,7 +284,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
       new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello, "),
-      new InterpolationEvent(text.subView(2), "user.name + \"}\" + '}'"),
+      new InterpolationEvent(text.subView(2), "{user.name + \"}\" + '}'}"),
       new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), "!"),
       new InputEndEvent()
     );
@@ -373,7 +373,7 @@ public class XmlEventParserTests {
   @Test
   public void shouldPreserveSurroundingInterpolationSpaces() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`red´>`Hello ´{`user.name´}` world!´"
+      "<`red´>`Hello ´`{user.name}´` world!´"
     );
 
     makeCase(
@@ -381,7 +381,7 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false),
       new TextEvent(text.subView(1).setBuildFlags(SubstringFlag.INNER_TEXT), "Hello "),
-      new InterpolationEvent(text.subView(2), "user.name"),
+      new InterpolationEvent(text.subView(2), "{user.name}"),
       new TextEvent(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT), " world!"),
       new InputEndEvent()
     );
@@ -548,16 +548,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldNotEmitEmptyStrings() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`container´ `*let-test´=`{´ {`a´}` and ´{`b´} }>"
+      "<`container´ `*let-test´=`{´ `{a}´` and ´`{b}´ }>"
     );
 
     makeCase(
       text,
       new TagOpenBeginEvent(text.subView(0), "container"),
       new TagAttributeBeginEvent(text.subView(1), text.subView(2).startInclusive, "*let-test"),
-      new InterpolationEvent(text.subView(3), "a"),
+      new InterpolationEvent(text.subView(3), "{a}"),
       new TextEvent(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT), " and "),
-      new InterpolationEvent(text.subView(5), "b"),
+      new InterpolationEvent(text.subView(5), "{b}"),
       new TagAttributeEndEvent(text.subView(1)),
       new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
@@ -688,18 +688,6 @@ public class XmlEventParserTests {
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithSubViews text = new TextWithSubViews(
       "<`red´>`{´user.name + \"}\" + '}'"
-    );
-
-    makeCase(
-      text,
-      XmlParseError.UNTERMINATED_INTERPOLATION,
-      text.subView(1).startInclusive,
-      new TagOpenBeginEvent(text.subView(0), "red"),
-      new TagOpenEndEvent(text.subView(0), false)
-    );
-
-    text = new TextWithSubViews(
-      "<`red´>`{´user.name\n}"
     );
 
     makeCase(

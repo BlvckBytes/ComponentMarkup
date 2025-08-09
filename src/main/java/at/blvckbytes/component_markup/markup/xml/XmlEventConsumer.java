@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +29,7 @@ public interface XmlEventConsumer {
 
   void onText(StringView text);
 
-  void onInterpolation(StringView expression);
+  void onInterpolation(ExpressionNode expression, StringView raw);
 
   void onTagClose(@Nullable StringView tagName, int pointyPosition);
 
