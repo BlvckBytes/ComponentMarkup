@@ -5,20 +5,19 @@
 
 package at.blvckbytes.component_markup.expression.parser;
 
-import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
+import at.blvckbytes.component_markup.expression.tokenizer.*;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
-import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizerTests;
-import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ExpressionParserTests {
 
@@ -514,6 +513,68 @@ public class ExpressionParserTests {
     }
   }
 
+  @Test
+  public void shouldParseStringInterpolation() {
+    makeInterpolationCase("prefix ", " mid ", " suffix");
+    makeInterpolationCase("prefix ", "mid ", " suffix");
+    makeInterpolationCase("prefix ", "mid", " suffix");
+    makeInterpolationCase(null, "mid", " suffix");
+    makeInterpolationCase("prefix ", "mid", null);
+    makeInterpolationCase(null, "mid", null);
+    makeInterpolationCase("prefix", "mid", "suffix");
+    makeInterpolationCase(null, "mid", "suffix");
+    makeInterpolationCase("prefix", "mid", null);
+    makeInterpolationCase("prefix", null, "suffix");
+    makeInterpolationCase("prefix", " ", "suffix");
+  }
+
+  private void makeInterpolationCase(@Nullable String prefix, @Nullable String mid, @Nullable String suffix) {
+    TextWithSubViews text = new TextWithSubViews(
+      "`×`" + (prefix == null ? "" : ("`" + prefix + "´")) + "{`a´ `+´ `b´}" + (mid == null ? "" : ("`" + mid + "´")) + "{`b´}" + (suffix == null ? "" : ("`" + suffix + "´")) + "×`´"
+    );
+
+    List<InterpolationMember> members = new ArrayList<>();
+    int viewIndex = 1;
+
+    if (prefix != null)
+      members.add(text.subView(viewIndex++));
+
+    members.add(
+      infix(
+        terminal("a", text.subView(viewIndex++)),
+        token(InfixOperator.ADDITION, text.subView(viewIndex++)),
+        terminal("b", text.subView(viewIndex++))
+      )
+    );
+
+    if (mid != null)
+      members.add(text.subView(viewIndex++));
+
+    members.add(terminal("b", text.subView(viewIndex++)));
+
+    if (suffix != null)
+      members.add(text.subView(viewIndex));
+
+    makeCase(
+      text,
+      interpolation(text.subView(0), members)
+    );
+  }
+
+  @Test
+  public void shouldParseStringInterpolationWithoutInterpolations() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`×``hello world! :)´×`´"
+    );
+
+    makeCase(
+      text,
+      interpolation(
+        text.subView(0),
+        text.subView(1))
+    );
+  }
+
   private ExpressionNode makePrefixMemberSubscriptExpression(
     TextWithSubViews text,
     PrefixOperator[] prefixes,
@@ -623,6 +684,14 @@ public class ExpressionParserTests {
 
   protected static Token token(Object value, StringView subView) {
     return ExpressionTokenizerTests.makeToken(value, subView);
+  }
+
+  protected static TerminalNode interpolation(StringView raw, List<InterpolationMember> members) {
+    return new TerminalNode(new StringToken(raw, members));
+  }
+
+  protected static TerminalNode interpolation(StringView raw, InterpolationMember... members) {
+    return new TerminalNode(new StringToken(raw, Arrays.asList(members)));
   }
 
   protected static TerminalNode terminal(Object value, StringView subView) {

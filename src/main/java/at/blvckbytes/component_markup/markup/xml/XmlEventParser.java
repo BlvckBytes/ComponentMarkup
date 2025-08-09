@@ -66,6 +66,10 @@ public class XmlEventParser {
         int startInclusive = input.getPosition();
         int endInclusive = -1;
 
+        // TODO: This consumption-loop should really parse an expression instead, as to support
+        //       nested interpolations and get rid of the in-string detector
+        // TODO: ^- Add test-case
+
         while (input.peekChar(0) != 0) {
           char currentChar = input.nextChar();
 

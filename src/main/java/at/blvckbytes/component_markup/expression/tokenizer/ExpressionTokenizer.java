@@ -5,8 +5,11 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,25 +34,57 @@ public class ExpressionTokenizer {
     this.dashIsPrefix = true;
   }
 
-  public StringToken parseStringToken(boolean allowForInterpolation) {
+  public StringToken parseStringToken() {
     char quoteChar;
 
-    if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
-      throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
+    if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"' && quoteChar != '`')
+      throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"' or '`'");
 
     List<InterpolationMember> members = new ArrayList<>();
 
-    int startInclusive = input.getPosition();
+    int rawStartInclusive = input.getPosition();
 
     char currentChar;
     boolean isTerminated = false;
+
+    int literalStartInclusive = rawStartInclusive + 1;
 
     while ((currentChar = input.nextChar()) != 0) {
       if (currentChar == '\n')
         break;
 
-      // TODO: Implement interpolation by handing over to the parser within {}
-      // TODO: Remember to emit {} as punctuation on the token-output
+      if (quoteChar == '`' && currentChar == '{') {
+        if (input.priorChar(1) == '\\') {
+          input.addIndexToBeRemoved(input.getPosition() - 1);
+          continue;
+        }
+
+        int openingCurlyPosition = input.getPosition();
+
+        if (openingCurlyPosition  > literalStartInclusive)
+          members.add(input.buildSubViewAbsolute(literalStartInclusive, openingCurlyPosition));
+
+        ExpressionNode interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(this, tokenOutput);
+
+        // TODO: Proper error
+        if (interpolationExpression == null)
+          throw new IllegalStateException("Expected interpolation-expression after opening {");
+
+        input.consumeWhitespace(tokenOutput);
+
+        // TODO: Proper error
+        if (input.nextChar() != '}')
+          throw new IllegalStateException("Expected closing } of interpolation");
+
+        members.add(interpolationExpression);
+
+        if (tokenOutput != null) {
+          StringView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
+          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+        }
+
+        literalStartInclusive = input.getPosition() + 1;
+      }
 
       if (currentChar == quoteChar) {
         if (input.priorChar(1) != '\\') {
@@ -62,14 +97,14 @@ public class ExpressionTokenizer {
     }
 
     if (!isTerminated)
-      throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.UNTERMINATED_STRING);
+      throw new ExpressionTokenizeException(rawStartInclusive, ExpressionTokenizeError.UNTERMINATED_STRING);
 
-    int endInclusive = input.getPosition();
+    int rawEndInclusive = input.getPosition();
 
-    StringView rawContents = input.buildSubViewAbsolute(startInclusive, endInclusive + 1);
-    StringView stringContents = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
+    if (rawEndInclusive > literalStartInclusive || members.isEmpty())
+      members.add(input.buildSubViewAbsolute(literalStartInclusive, rawEndInclusive));
 
-    members.add(stringContents);
+    StringView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
 
     return new StringToken(rawContents, members);
   }
@@ -81,7 +116,7 @@ public class ExpressionTokenizer {
     boolean isFirst = true;
     char upcomingChar;
 
-    while ((upcomingChar = input.peekChar(0)) != 0) {
+    while ((upcomingChar = _peekChar(0)) != 0) {
       if (Character.isWhitespace(upcomingChar))
         break;
 
@@ -144,7 +179,7 @@ public class ExpressionTokenizer {
     char currentChar;
     int firstIndex = -1;
 
-    while ((currentChar = input.peekChar(0)) >= '0' && currentChar <= '9') {
+    while ((currentChar = _peekChar(0)) >= '0' && currentChar <= '9') {
       input.nextChar();
 
       if (firstIndex < 0)
@@ -162,9 +197,9 @@ public class ExpressionTokenizer {
 
     int lastDigitIndex = input.getPosition();
 
-    if (input.peekChar(0) == '.') {
+    if (_peekChar(0) == '.') {
       // Range-operator encountered
-      if (input.peekChar(1) == '.') {
+      if (_peekChar(1) == '.') {
         StringView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
         return new LongToken(value, Long.parseLong(value.buildString()));
       }
@@ -185,10 +220,10 @@ public class ExpressionTokenizer {
   }
 
   public @Nullable Token tryParseDotDoubleToken() {
-    if (input.peekChar(0) != '.')
+    if (_peekChar(0) != '.')
       throw new IllegalStateException("Expected to only be called if peekChar(0) = '.'");
 
-    char charAfterDot = input.peekChar(1);
+    char charAfterDot = _peekChar(1);
 
     if (!(charAfterDot >= '0' && charAfterDot <= '9'))
       return null;
@@ -208,7 +243,7 @@ public class ExpressionTokenizer {
   private @Nullable Token tryParseOperatorOrPunctuationOrDotDoubleToken() {
     EnumToken enumToken;
 
-    switch (input.peekChar(0)) {
+    switch (_peekChar(0)) {
       case '(':
         enumToken = Punctuation.OPENING_PARENTHESIS;
         break;
@@ -238,7 +273,7 @@ public class ExpressionTokenizer {
         break;
 
       case '*':
-        if (input.peekChar(1) == '*') {
+        if (_peekChar(1) == '*') {
           enumToken = InfixOperator.REPEAT;
           break;
         }
@@ -259,7 +294,7 @@ public class ExpressionTokenizer {
         break;
 
       case '&':
-        if (input.peekChar(1) == '&') {
+        if (_peekChar(1) == '&') {
           enumToken = InfixOperator.CONJUNCTION;
           break;
         }
@@ -268,7 +303,7 @@ public class ExpressionTokenizer {
         break;
 
       case '|':
-        if (input.peekChar(1) == '|') {
+        if (_peekChar(1) == '|') {
           enumToken = InfixOperator.DISJUNCTION;
           break;
         }
@@ -276,7 +311,7 @@ public class ExpressionTokenizer {
         throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_PIPE);
 
       case '?':
-        if (input.peekChar(1) == '?') {
+        if (_peekChar(1) == '?') {
           enumToken = InfixOperator.FALLBACK;
           break;
         }
@@ -285,7 +320,7 @@ public class ExpressionTokenizer {
         break;
 
       case '@':
-        if (input.peekChar(1) == '@') {
+        if (_peekChar(1) == '@') {
           enumToken = InfixOperator.EXPLODE_REGEX;
           break;
         }
@@ -294,8 +329,8 @@ public class ExpressionTokenizer {
         break;
 
       case ':':
-        if (input.peekChar(1) == ':') {
-          if (input.peekChar(2) == ':') {
+        if (_peekChar(1) == ':') {
+          if (_peekChar(2) == ':') {
             enumToken = InfixOperator.MATCHES_REGEX;
             break;
           }
@@ -308,7 +343,7 @@ public class ExpressionTokenizer {
         break;
 
       case '>':
-        if (input.peekChar(1) == '=') {
+        if (_peekChar(1) == '=') {
           enumToken = InfixOperator.GREATER_THAN_OR_EQUAL;
           break;
         }
@@ -317,7 +352,7 @@ public class ExpressionTokenizer {
         break;
 
       case '<':
-        if (input.peekChar(1) == '=') {
+        if (_peekChar(1) == '=') {
           enumToken = InfixOperator.LESS_THAN_OR_EQUAL;
           break;
         }
@@ -326,7 +361,7 @@ public class ExpressionTokenizer {
         break;
 
       case '=':
-        if (input.peekChar(1) == '=') {
+        if (_peekChar(1) == '=') {
           enumToken = InfixOperator.EQUAL_TO;
           break;
         }
@@ -334,7 +369,7 @@ public class ExpressionTokenizer {
         throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_EQUALS);
 
       case '!':
-        if (input.peekChar(1) == '=') {
+        if (_peekChar(1) == '=') {
           enumToken = InfixOperator.NOT_EQUAL_TO;
           break;
         }
@@ -343,7 +378,7 @@ public class ExpressionTokenizer {
         break;
 
       case '~':
-        switch (input.peekChar(1)) {
+        switch (_peekChar(1)) {
           case '^':
             enumToken = PrefixOperator.UPPER_CASE;
             break;
@@ -382,7 +417,7 @@ public class ExpressionTokenizer {
         break;
 
       case '.':
-        char upcomingChar = input.peekChar(1);
+        char upcomingChar = _peekChar(1);
 
         if (upcomingChar == '.') {
           enumToken = InfixOperator.RANGE;
@@ -440,13 +475,13 @@ public class ExpressionTokenizer {
     else {
       input.consumeWhitespace(tokenOutput);
 
-      char upcomingChar = input.peekChar(0);
+      char upcomingChar = _peekChar(0);
 
       if (upcomingChar == 0)
         return null;
 
-      if (upcomingChar == '\'' || upcomingChar == '"')
-        result = parseStringToken(true);
+      if (upcomingChar == '\'' || upcomingChar == '"' || upcomingChar == '`')
+        result = parseStringToken();
 
       else if (upcomingChar >= '0' && upcomingChar <= '9')
         result = parseLongOrDoubleToken();
@@ -470,11 +505,15 @@ public class ExpressionTokenizer {
       pendingStack = new Stack<>();
 
     if (pendingStack.isEmpty()) {
-      pendingStack.push(nextToken());
-      isNextPendingPeek = true;
+      Token token = nextToken();
+
+      if (token != null) {
+        pendingStack.push(token);
+        isNextPendingPeek = true;
+      }
     }
 
-    return this.pendingStack.peek();
+    return this.pendingStack.isEmpty() ? null : this.pendingStack.peek();
   }
 
   private void emitTokenToOutput(Token token) {
@@ -482,5 +521,16 @@ public class ExpressionTokenizer {
       return;
 
     tokenOutput.emitToken(token.getType(), token.raw);
+  }
+
+  private char _peekChar(int offset) {
+    char peekedChar = input.peekChar(offset);
+
+    // Let's interpret the interpolation-delimiters as EOF, as
+    // to enable parsing interpolations within strings.
+    if (peekedChar == '{' || peekedChar == '}')
+      return 0;
+
+    return peekedChar;
   }
 }

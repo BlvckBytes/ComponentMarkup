@@ -28,6 +28,11 @@ public class ExpressionParser {
     this.tokenOutput = tokenOutput;
   }
 
+  public static @Nullable ExpressionNode parseWithoutTrailingCheck(ExpressionTokenizer tokenizer, @Nullable TokenOutput tokenOutput) {
+    ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
+    return parser.parseExpression(null);
+  }
+
   public static @Nullable ExpressionNode parse(StringView value, @Nullable TokenOutput tokenOutput) {
     ExpressionTokenizer tokenizer = new ExpressionTokenizer(value, tokenOutput);
     ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);

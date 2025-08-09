@@ -14,6 +14,8 @@ public enum TokenType {
   MARKUP__PUNCTUATION__SUBTREE,
   MARKUP__PUNCTUATION__BINDING_SEPARATOR,
   MARKUP__PUNCTUATION__EQUALS,
+  // TODO: Since expressions now too support interpolation within strings,
+  //       this should be called ANY__INTERPOLATION, shouldn't it?
   MARKUP__INTERPOLATION,
   MARKUP__STRING,
   MARKUP__NUMBER,

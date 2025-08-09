@@ -46,6 +46,14 @@ public class TextWithSubViews {
         boolean isOpening;
 
         if ((isOpening = currentChar == '`') || currentChar == '´') {
+          // This escape-sequence is a bit awkward, yes, but there are no other options, because
+          // `` is perfectly valid (two nested sub-views), and sometimes, backslashes are in need
+          // of being captured into a sub-view, i.e. `\´, which is why that also falls flat.
+          if (lineCharIndex != 0 && line.charAt(lineCharIndex - 1) == '×') {
+            result.setCharAt(result.length() - 1, currentChar);
+            continue;
+          }
+
           if (isOpening) {
             ViewIndices indices = new ViewIndices(charIndex);
             indicesStack.push(indices);

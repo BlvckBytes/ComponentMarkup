@@ -292,6 +292,30 @@ public class ExpressionInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldHandleSimpleInterpolations() {
+    makeCase(
+      "`hello {a} world \\` {b} :)!`",
+      new InterpretationEnvironment()
+        .withVariable("a", 5)
+        .withVariable("b", 6),
+      "hello 5 world ` 6 :)!"
+    );
+  }
+
+  @Test
+  public void shouldHandleComplexInterpolation() {
+    makeCase(
+      "`hello {`pre {c} {d} post`} world \\` {b} :)!`",
+      new InterpretationEnvironment()
+        .withVariable("a", 5)
+        .withVariable("b", 6)
+        .withVariable("c", 7)
+        .withVariable("d", 8),
+      "hello pre 7 8 post world ` 6 :)!"
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
