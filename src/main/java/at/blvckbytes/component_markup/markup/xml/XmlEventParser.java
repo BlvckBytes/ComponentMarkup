@@ -83,13 +83,8 @@ public class XmlEventParser {
         if (input.nextChar() != '}')
           throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
 
-        if (interpolationExpression == null) {
-          if (input.nextChar() != '}')
-            throw new XmlParseException(XmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
-
-          // TODO: Proper error; add test-case
-          throw new IllegalStateException("Expected interpolation-expression after opening {");
-        }
+        if (interpolationExpression == null)
+          throw new XmlParseException(XmlParseError.EMPTY_INTERPOLATION, startInclusive);
 
         StringView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
 

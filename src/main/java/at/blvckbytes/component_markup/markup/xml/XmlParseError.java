@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.ErrorMessage;
 
 public enum XmlParseError implements ErrorMessage {
   UNTERMINATED_INTERPOLATION("This placeholder misses its closing-bracket: }"),
+  EMPTY_INTERPOLATION("This placeholder must contain an expression"),
   UNTERMINATED_STRING("This string misses its closing-quotes: \""),
   UNTERMINATED_MARKUP_VALUE("This markup-value misses its closing-bracket: }"),
   UNTERMINATED_TAG("This tag misses its closing-bracket: >"),

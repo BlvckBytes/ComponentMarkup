@@ -343,6 +343,61 @@ public class ExpressionTokenizerTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnUnterminatedInterpolation() {
+    TextWithSubViews text = new TextWithSubViews(
+      "×`hello `{´ a + b world ×`"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION,
+      text.subView(0).startInclusive
+    );
+
+    text = new TextWithSubViews(
+      "×`hello `{´ a + b { world ×`"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnUnescapedCurlyWithinTemplateLiteral() {
+    TextWithSubViews text = new TextWithSubViews(
+      "×`hello `}´ world ×`"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.UNESCAPED_TEMPLATE_LITERAL_CURLY,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnEmptyPlaceholderWithinTemplateLiteral() {
+    TextWithSubViews text = new TextWithSubViews("×`hello `{}´ world ×`");
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.EMPTY_TEMPLATE_LITERAL_INTERPOLATION,
+      text.subView(0).startInclusive
+    );
+
+    text = new TextWithSubViews("×`hello `{   }´ world ×`");
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.EMPTY_TEMPLATE_LITERAL_INTERPOLATION,
+      text.subView(0).startInclusive
+    );
+  }
+
   private static void makeErrorCase(TextWithSubViews input, ExpressionTokenizeError expectedError, int expectedPosition) {
     ExpressionTokenizeException thrownException = null;
 

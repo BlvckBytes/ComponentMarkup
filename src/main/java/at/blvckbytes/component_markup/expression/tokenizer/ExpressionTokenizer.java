@@ -75,13 +75,11 @@ public class ExpressionTokenizer {
 
           input.consumeWhitespace(tokenOutput);
 
-          // TODO: Proper error; add test-case
           if (input.nextChar() != '}')
-            throw new IllegalStateException("Expected closing } of interpolation");
+            throw new ExpressionTokenizeException(openingCurlyPosition, ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION);
 
-          // TODO: Proper error; add test-case
           if (interpolationExpression == null)
-            throw new IllegalStateException("Expected interpolation-expression after opening {");
+            throw new ExpressionTokenizeException(openingCurlyPosition, ExpressionTokenizeError.EMPTY_TEMPLATE_LITERAL_INTERPOLATION);
 
           members.add(interpolationExpression);
 
@@ -95,9 +93,8 @@ public class ExpressionTokenizer {
         }
 
         if (currentChar == '}') {
-          // TODO: Proper error; add test-case
           if (input.priorChar(1) != '\\')
-            throw new IllegalStateException("Unescaped curly within template-literal");
+            throw new ExpressionTokenizeException(input.getPosition(), ExpressionTokenizeError.UNESCAPED_TEMPLATE_LITERAL_CURLY);
 
           int backslashPosition = input.getPosition() - 1;
 

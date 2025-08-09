@@ -812,6 +812,27 @@ public class XmlEventParserTests {
     makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
   }
 
+  @Test
+  public void shouldThrowOnEmptyInterpolation() {
+    TextWithSubViews text = new TextWithSubViews("`hello ´`{}´ world");
+
+    makeCase(
+      text,
+      XmlParseError.EMPTY_INTERPOLATION,
+      text.subView(1).startInclusive,
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "hello ")
+    );
+
+    text = new TextWithSubViews("`hello ´`{   }´ world");
+
+    makeCase(
+      text,
+      XmlParseError.EMPTY_INTERPOLATION,
+      text.subView(1).startInclusive,
+      new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "hello ")
+    );
+  }
+
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
     TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 
