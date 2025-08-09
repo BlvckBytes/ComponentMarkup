@@ -53,38 +53,46 @@ public class ExpressionTokenizer {
       if (currentChar == '\n')
         break;
 
-      if (quoteChar == '`' && currentChar == '{') {
-        if (input.priorChar(1) == '\\') {
-          input.addIndexToBeRemoved(input.getPosition() - 1);
+      if (quoteChar == '`') {
+        if (currentChar == '{') {
+          if (input.priorChar(1) == '\\') {
+            input.addIndexToBeRemoved(input.getPosition() - 1);
+            continue;
+          }
+
+          int openingCurlyPosition = input.getPosition();
+
+          if (openingCurlyPosition > literalStartInclusive)
+            members.add(input.buildSubViewAbsolute(literalStartInclusive, openingCurlyPosition));
+
+          ExpressionNode interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(this, tokenOutput);
+
+          input.consumeWhitespace(tokenOutput);
+
+          // TODO: Proper error; add test-case
+          if (input.nextChar() != '}')
+            throw new IllegalStateException("Expected closing } of interpolation");
+
+          // TODO: Proper error; add test-case
+          if (interpolationExpression == null)
+            throw new IllegalStateException("Expected interpolation-expression after opening {");
+
+          members.add(interpolationExpression);
+
+          if (tokenOutput != null) {
+            StringView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
+            tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+          }
+
+          literalStartInclusive = input.getPosition() + 1;
           continue;
         }
 
-        int openingCurlyPosition = input.getPosition();
-
-        if (openingCurlyPosition > literalStartInclusive)
-          members.add(input.buildSubViewAbsolute(literalStartInclusive, openingCurlyPosition));
-
-        ExpressionNode interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(this, tokenOutput);
-
-        input.consumeWhitespace(tokenOutput);
-
-        // TODO: Proper error; add test-case
-        if (input.nextChar() != '}')
-          throw new IllegalStateException("Expected closing } of interpolation");
-
-        // TODO: Proper error; add test-case
-        if (interpolationExpression == null)
-          throw new IllegalStateException("Expected interpolation-expression after opening {");
-
-        members.add(interpolationExpression);
-
-        if (tokenOutput != null) {
-          StringView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
-          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+        if (currentChar == '}') {
+          // TODO: Proper error; add test-case
+          if (input.priorChar(1) != '\\')
+            throw new IllegalStateException("Unescaped curly within template-literal");
         }
-
-        literalStartInclusive = input.getPosition() + 1;
-        continue;
       }
 
       if (tokenOutput != null && Character.isWhitespace(currentChar))
