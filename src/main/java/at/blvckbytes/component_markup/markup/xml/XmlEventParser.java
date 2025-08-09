@@ -133,7 +133,13 @@ public class XmlEventParser {
       }
 
       if (currentChar == '\\' && ((upcomingChar = input.peekChar(0)) == '<' || upcomingChar == '}' || upcomingChar == '{')) {
-        input.addIndexToBeRemoved(input.getPosition());
+        int backslashPosition = input.getPosition();
+
+        input.addIndexToBeRemoved(backslashPosition);
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+
         input.nextChar();
       }
 
@@ -197,7 +203,12 @@ public class XmlEventParser {
 
       if (currentChar == '"') {
         if (input.priorChar(1) == '\\') {
-          input.addIndexToBeRemoved(input.getPosition() - 1);
+          int backslashPosition = input.getPosition() - 1;
+
+          input.addIndexToBeRemoved(backslashPosition);
+
+          if (tokenOutput != null)
+            tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
         } else {
           endInclusive = input.getPosition();
           break;

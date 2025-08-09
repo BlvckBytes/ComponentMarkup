@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.parser.token;
 public enum TokenType {
   ANY__WHITESPACE,
   ANY__INTERPOLATION,
+  ANY__ESCAPE_SEQUENCE,
 
   MARKUP__COMMENT,
   MARKUP__PLAIN_TEXT,

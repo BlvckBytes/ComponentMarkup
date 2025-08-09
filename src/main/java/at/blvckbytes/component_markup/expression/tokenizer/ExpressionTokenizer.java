@@ -56,7 +56,13 @@ public class ExpressionTokenizer {
       if (quoteChar == '`') {
         if (currentChar == '{') {
           if (input.priorChar(1) == '\\') {
-            input.addIndexToBeRemoved(input.getPosition() - 1);
+            int backslashPosition = input.getPosition() - 1;
+
+            input.addIndexToBeRemoved(backslashPosition);
+
+            if (tokenOutput != null)
+              tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+
             continue;
           }
 
@@ -92,6 +98,13 @@ public class ExpressionTokenizer {
           // TODO: Proper error; add test-case
           if (input.priorChar(1) != '\\')
             throw new IllegalStateException("Unescaped curly within template-literal");
+
+          int backslashPosition = input.getPosition() - 1;
+
+          input.addIndexToBeRemoved(backslashPosition);
+
+          if (tokenOutput != null)
+            tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
         }
       }
 
@@ -104,7 +117,12 @@ public class ExpressionTokenizer {
           break;
         }
 
-        input.addIndexToBeRemoved(input.getPosition() - 1);
+        int backslashPosition = input.getPosition() - 1;
+
+        input.addIndexToBeRemoved(backslashPosition);
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
       }
     }
 
