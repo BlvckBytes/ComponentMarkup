@@ -74,7 +74,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(1)))
         )
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(2))
+          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(2))
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(3)))
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(4)))
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(5)))
@@ -83,16 +83,16 @@ public class TokenOutputTests {
               new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(7))
                 .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(8)))
                 .addChild(
-                  new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(9))
+                  new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(9))
                     .addChild(
                       new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(10))
                         .addChild(
-                          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(11))
+                          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(11))
                             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(12)))
                         )
                         .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(13)))
                         .addChild(
-                          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(14))
+                          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(14))
                             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(15)))
                         )
                     )
@@ -257,7 +257,7 @@ public class TokenOutputTests {
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(86))) // ">"
         .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(87).setBuildFlags(SubstringFlag.INNER_TEXT))) // "#"
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(88)) // "{position_number}"
+          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(88)) // "{position_number}"
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
         )
         .add(
@@ -265,7 +265,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(92).buildSubViewRelative(0, 1)))
         ) // " "
         .add(
-          new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(93)) // "{  player_name }
+          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(93)) // "{  player_name }
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(96))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(97))) // "player_name"
@@ -375,16 +375,16 @@ public class TokenOutputTests {
         .with(list -> addWhitespace(rootView, text.subView(85), list))
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(86))) // ">"
         .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(87))) // "#"
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(89))) // "{"
+        .add(new Token(TokenType.ANY__INTERPOLATION, text.subView(89))) // "{"
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(91))) // "}"
+        .add(new Token(TokenType.ANY__INTERPOLATION, text.subView(91))) // "}"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(92).buildSubViewRelative(0, 1))) // " "
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(94))) // "{"
+        .add(new Token(TokenType.ANY__INTERPOLATION, text.subView(94))) // "{"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(96))) // " "
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(97))) // "player_name"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(98))) // " "
-        .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(99))) // "}"
+        .add(new Token(TokenType.ANY__INTERPOLATION, text.subView(99))) // "}"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(100))) // "<"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(101))) // "/"
         .add(new Token(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(102))) // ">"

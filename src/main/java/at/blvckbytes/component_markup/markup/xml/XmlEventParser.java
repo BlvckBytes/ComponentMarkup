@@ -94,7 +94,7 @@ public class XmlEventParser {
         StringView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+          tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
 
         consumer.onInterpolation(interpolationExpression, rawInterpolation);
 

@@ -81,7 +81,7 @@ public class ExpressionTokenizer {
 
           if (tokenOutput != null) {
             StringView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
-            tokenOutput.emitToken(TokenType.MARKUP__INTERPOLATION, rawInterpolation);
+            tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
           }
 
           literalStartInclusive = input.getPosition() + 1;
