@@ -86,6 +86,9 @@ public class ExpressionTokenizer {
         literalStartInclusive = input.getPosition() + 1;
       }
 
+      if (tokenOutput != null && Character.isWhitespace(currentChar))
+        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
+
       if (currentChar == quoteChar) {
         if (input.priorChar(1) != '\\') {
           isTerminated = true;
