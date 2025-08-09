@@ -557,7 +557,7 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      interpolation(text.subView(0), members)
+      templateLiteral(text.subView(0), members)
     );
   }
 
@@ -569,7 +569,7 @@ public class ExpressionParserTests {
 
     makeCase(
       text,
-      interpolation(
+      templateLiteral(
         text.subView(0),
         text.subView(1))
     );
@@ -686,12 +686,12 @@ public class ExpressionParserTests {
     return ExpressionTokenizerTests.makeToken(value, subView);
   }
 
-  protected static TerminalNode interpolation(StringView raw, List<InterpolationMember> members) {
-    return new TerminalNode(new StringToken(raw, members));
+  protected static TerminalNode templateLiteral(StringView raw, List<InterpolationMember> members) {
+    return new TerminalNode(new TemplateLiteralToken(raw, members));
   }
 
-  protected static TerminalNode interpolation(StringView raw, InterpolationMember... members) {
-    return new TerminalNode(new StringToken(raw, Arrays.asList(members)));
+  protected static TerminalNode templateLiteral(StringView raw, InterpolationMember... members) {
+    return new TerminalNode(new TemplateLiteralToken(raw, Arrays.asList(members)));
   }
 
   protected static TerminalNode terminal(Object value, StringView subView) {

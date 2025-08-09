@@ -9,14 +9,13 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
-import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.TemplateLiteralToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.logging.Level;
 
 public class TerminalNode extends ExpressionNode {
@@ -41,17 +40,10 @@ public class TerminalNode extends ExpressionNode {
       return environment.getVariableValue(variableName);
     }
 
-    if (token instanceof StringToken) {
-      List<InterpolationMember> members = ((StringToken) token).members;
-
-      String plainValue;
-
-      if ((plainValue = (String) token.getPlainValue()) != null)
-        return plainValue;
-
+    if (token instanceof TemplateLiteralToken) {
       StringBuilder result = new StringBuilder();
 
-      for (Object member : members) {
+      for (InterpolationMember member : ((TemplateLiteralToken) token).members) {
         if (member instanceof StringView) {
           result.append(((StringView) member).buildString());
           continue;

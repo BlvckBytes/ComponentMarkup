@@ -34,13 +34,13 @@ public class ExpressionTokenizer {
     this.dashIsPrefix = true;
   }
 
-  public StringToken parseStringToken() {
+  public TerminalToken parseStringToken() {
     char quoteChar;
 
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"' && quoteChar != '`')
       throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"' or '`'");
 
-    List<InterpolationMember> members = new ArrayList<>();
+    List<InterpolationMember> members = quoteChar == '`' ? new ArrayList<>() : null;
 
     int rawStartInclusive = input.getPosition();
 
@@ -128,12 +128,15 @@ public class ExpressionTokenizer {
 
     int rawEndInclusive = input.getPosition();
 
+    StringView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
+
+    if (quoteChar != '`')
+      return new StringToken(rawContents, rawContents.buildSubViewRelative(1, -1).buildString());
+
     if (rawEndInclusive > literalStartInclusive || members.isEmpty())
       members.add(input.buildSubViewAbsolute(literalStartInclusive, rawEndInclusive));
 
-    StringView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
-
-    return new StringToken(rawContents, members);
+    return new TemplateLiteralToken(rawContents, members);
   }
 
   private Token parseIdentifierOrLiteralToken() {

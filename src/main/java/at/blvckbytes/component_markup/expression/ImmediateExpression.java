@@ -28,6 +28,6 @@ public class ImmediateExpression {
   }
 
   public static TerminalNode ofString(StringView raw, String value) {
-    return new TerminalNode(new StringToken(raw, StringView.of(value)));
+    return new TerminalNode(new StringToken(raw, value));
   }
 }
