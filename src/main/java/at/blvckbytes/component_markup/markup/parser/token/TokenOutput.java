@@ -91,7 +91,40 @@ public class TokenOutput {
 
   public void emitToken(TokenType type, StringView value) {
     validateTokenIndex(type, value);
-    tokenByCharIndex[value.startInclusive] = new HierarchicalToken(type, value);
+
+    HierarchicalToken newToken = new HierarchicalToken(type, value);
+    HierarchicalToken priorToken = tokenByCharIndex[value.startInclusive];
+
+    if (priorToken != null && priorToken.type != type) {
+      HierarchicalToken longerToken, shorterToken;
+
+      // The longer token always persists
+      if (priorToken.value.length() > newToken.value.length()) {
+        longerToken = priorToken;
+        shorterToken = newToken;
+      }
+      // Special case: equal lengths, then whitespace looses
+      else if (priorToken.value.length() == newToken.value.length()) {
+        if (priorToken.type == TokenType.ANY__WHITESPACE) {
+          longerToken = newToken;
+          shorterToken = priorToken;
+        } else {
+          longerToken = priorToken;
+          shorterToken = newToken;
+        }
+      }
+      else {
+        longerToken = newToken;
+        shorterToken = priorToken;
+      }
+
+      longerToken.addChild(shorterToken);
+
+      tokenByCharIndex[value.startInclusive] = longerToken;
+      return;
+    }
+
+    tokenByCharIndex[value.startInclusive] = newToken;
   }
 
   private void validateTokenIndex(TokenType type, StringView value) {

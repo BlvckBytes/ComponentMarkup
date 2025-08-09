@@ -215,7 +215,10 @@ public class TokenOutputTests {
           new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(88)) // "{position_number}"
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
         )
-        .add(new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(92).setBuildFlags(SubstringFlag.INNER_TEXT))) // " "
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(92).setBuildFlags(SubstringFlag.INNER_TEXT))
+            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(92).buildSubViewRelative(0, 1)))
+        ) // " "
         .add(
           new HierarchicalToken(TokenType.MARKUP__INTERPOLATION, text.subView(93)) // "{  player_name }
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
@@ -330,7 +333,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(89))) // "{"
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(91))) // "}"
-        .add(new Token(TokenType.MARKUP__PLAIN_TEXT, text.subView(92))) // " "
+        .add(new Token(TokenType.ANY__WHITESPACE, text.subView(92).buildSubViewRelative(0, 1))) // " "
         .add(new Token(TokenType.MARKUP__INTERPOLATION, text.subView(94))) // "{"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(95))) // " "
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(96))) // " "
