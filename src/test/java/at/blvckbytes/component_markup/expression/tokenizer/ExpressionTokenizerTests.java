@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.util.StringView;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -395,8 +396,14 @@ public class ExpressionTokenizerTests {
           throw new IllegalStateException("Invalid string: " + stringValue);
 
         String stringContents = stringValue.substring(1, stringLength - 1);
+        StringView contentsView = subView.buildSubViewRelative(1, -1);
 
-        token = new StringToken(subView, stringContents);
+        // Make sure the provided plain-string equals the desired value.
+        // It's really only used as a sentinel to identify strings,
+        // but since it also improves case-readability, so I'll keep it this way.
+        Assertions.assertEquals(stringContents, contentsView.buildString());
+
+        token = new StringToken(subView, contentsView);
       }
       else
         token = new IdentifierToken(subView, stringValue);

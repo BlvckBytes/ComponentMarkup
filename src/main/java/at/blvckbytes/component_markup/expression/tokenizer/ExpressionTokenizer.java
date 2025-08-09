@@ -37,7 +37,7 @@ public class ExpressionTokenizer {
     if ((quoteChar = input.nextChar()) != '\'' && quoteChar != '"')
       throw new IllegalStateException("Expected to only be called if nextChar() = '\\'' or '\"'");
 
-    List<Object> members = new ArrayList<>();
+    List<InterpolationMember> members = new ArrayList<>();
 
     int startInclusive = input.getPosition();
 
@@ -69,7 +69,7 @@ public class ExpressionTokenizer {
     StringView rawContents = input.buildSubViewAbsolute(startInclusive, endInclusive + 1);
     StringView stringContents = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
 
-    members.add(stringContents.buildString());
+    members.add(stringContents);
 
     return new StringToken(rawContents, members);
   }

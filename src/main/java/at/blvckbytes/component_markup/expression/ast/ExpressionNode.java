@@ -5,10 +5,11 @@
 
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.util.JsonifyGetter;
 import at.blvckbytes.component_markup.util.StringView;
 
-public abstract class ExpressionNode {
+public abstract class ExpressionNode implements InterpolationMember {
 
   public boolean parenthesised = false;
 

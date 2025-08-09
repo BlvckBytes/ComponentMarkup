@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.util;
 
+import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
-public class StringView {
+public class StringView implements InterpolationMember {
 
   public static final StringView EMPTY = new StringView("", new BitFlagArray(1), false, 0, 0);
 

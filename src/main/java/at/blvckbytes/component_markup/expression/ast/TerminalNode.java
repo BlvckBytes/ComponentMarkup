@@ -7,6 +7,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
@@ -41,7 +42,7 @@ public class TerminalNode extends ExpressionNode {
     }
 
     if (token instanceof StringToken) {
-      List<Object> members = ((StringToken) token).members;
+      List<InterpolationMember> members = ((StringToken) token).members;
 
       String plainValue;
 
@@ -51,8 +52,8 @@ public class TerminalNode extends ExpressionNode {
       StringBuilder result = new StringBuilder();
 
       for (Object member : members) {
-        if (member instanceof String) {
-          result.append((String) member);
+        if (member instanceof StringView) {
+          result.append(((StringView) member).buildString());
           continue;
         }
 
