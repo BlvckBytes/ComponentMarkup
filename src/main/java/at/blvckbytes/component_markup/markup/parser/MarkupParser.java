@@ -452,6 +452,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (currentLayer.forIterable != null)
         throw new MarkupParseException(attributeName.fullName, MarkupParseError.MULTIPLE_LOOPS);
 
+      currentLayer.forAttribute = attributeName.fullName;
       currentLayer.forIterable = (ExpressionNode) value;
       currentLayer.forIterationVariable = iterationVariable;
       return;

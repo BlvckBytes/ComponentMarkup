@@ -289,11 +289,11 @@ public class MarkupInterpreter implements Interpreter {
     return new CaptureNode(node, capturedBindings);
   }
 
-  private void introduceLetBindings(MarkupNode node) {
-    if (node.letBindings == null)
+  private void introduceLetBindings(@Nullable Collection<LetBinding> letBindings) {
+    if (letBindings == null)
       return;
 
-    for (LetBinding letBinding : node.letBindings) {
+    for (LetBinding letBinding : letBindings) {
       Object value;
       String name;
 
@@ -372,6 +372,8 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   private void interpretForLoop(ForLoopNode node) {
+    introduceLetBindings(node.letBindingsBeforeForAttribute);
+
     Object iterable = evaluateAsPlainObject(node.iterable);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
@@ -382,7 +384,7 @@ public class MarkupInterpreter implements Interpreter {
 
     if (size == 0) {
       if (node.empty != null) {
-        introduceLetBindings(node);
+        introduceLetBindings(node.letBindingsAfterForAttribute);
         interpret(node.empty);
       }
 
@@ -399,7 +401,7 @@ public class MarkupInterpreter implements Interpreter {
       if (node.iterationVariable != null)
         environment.setScopeVariable(node.iterationVariable, item);
 
-      introduceLetBindings(node);
+      introduceLetBindings(node.letBindingsAfterForAttribute);
 
       if (node.separator != null) {
         if (reversed ? index != size - 1 : index != 0)
@@ -459,7 +461,7 @@ public class MarkupInterpreter implements Interpreter {
       return;
     }
 
-    introduceLetBindings(node);
+    introduceLetBindings(node.letBindings);
 
     if (node instanceof IfElseIfElseNode) {
       interpretIfElseIfElse((IfElseIfElseNode) node);

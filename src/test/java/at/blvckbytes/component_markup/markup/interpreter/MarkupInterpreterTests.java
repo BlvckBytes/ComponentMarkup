@@ -1041,4 +1041,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "third and second | first and second")
     );
   }
+
+  @Test
+  public void shouldLoopAParameterizedRange() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<container",
+      "  *let-a=4",
+      "  *let-b=6",
+      "  *for-i=\"a..b\"",
+      ">{i}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "456")
+    );
+  }
 }

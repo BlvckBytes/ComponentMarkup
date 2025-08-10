@@ -58,7 +58,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseForLoop() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`container´ *for-`member´=\"`members´\">",
+      "<`container´ `*for-`member´´=\"`members´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
     );
@@ -66,12 +66,13 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(2)),
         text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2),
         container(text.subView(0).setLowercase())
-          .child(text(text.subView(3).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .child(interpolation(text.subView(4)))
-          .child(text(text.subView(5).setBuildFlags(SubstringFlag.INNER_TEXT))),
+          .child(text(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(interpolation(text.subView(5)))
+          .child(text(text.subView(6).setBuildFlags(SubstringFlag.INNER_TEXT))),
         null,
         null,
         null
@@ -82,7 +83,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseForLoopWithConditional() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`container´ *for-`member´=\"`members´\" *if=\"`member != null´\">",
+      "<`container´ `*for-`member´´=\"`members´\" *if=\"`member != null´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
     );
@@ -90,13 +91,14 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(2)),
         text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2),
         container(text.subView(0).setLowercase())
-          .child(text(text.subView(4).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .child(interpolation(text.subView(5)))
-          .child(text(text.subView(6).setBuildFlags(SubstringFlag.INNER_TEXT)))
-          .ifCondition(expr(text.subView(3))),
+          .child(text(text.subView(5).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .child(interpolation(text.subView(6)))
+          .child(text(text.subView(7).setBuildFlags(SubstringFlag.INNER_TEXT)))
+          .ifCondition(expr(text.subView(4))),
         null,
         null,
         null
@@ -108,7 +110,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   public void shouldParseForLoopWithSeparatorAndReversedAndEmpty() {
     TextWithSubViews text = new TextWithSubViews(
       "<`red´",
-      "  *for-`member´=\"`members´\"",
+      "  `*for-`member´´=\"`members´\"",
       "  *for-separator={ <`aqua´>`separator ´}",
       "  *`for-reversed´",
       "  *for-empty={<`red´>`No entries!´}",
@@ -118,15 +120,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
     makeCase(
       text,
       forLoop(
-        expr(text.subView(2)),
-        text.subView(1).setLowercase(),
-        text(text.subView(8).setBuildFlags(SubstringFlag.LAST_TEXT))
+        text.subView(1),
+        expr(text.subView(3)),
+        text.subView(2).setLowercase(),
+        text(text.subView(9).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(0).setLowercase()),
-        text(text.subView(4).setBuildFlags(SubstringFlag.LAST_TEXT))
-          .color(text.subView(3).setLowercase()),
-        bool(text.subView(5).setLowercase(), true),
-        text(text.subView(7).setBuildFlags(SubstringFlag.LAST_TEXT))
-          .color(text.subView(6).setLowercase())
+        text(text.subView(5).setBuildFlags(SubstringFlag.LAST_TEXT))
+          .color(text.subView(4).setLowercase()),
+        bool(text.subView(6).setLowercase(), true),
+        text(text.subView(8).setBuildFlags(SubstringFlag.LAST_TEXT))
+          .color(text.subView(7).setLowercase())
       )
     );
   }
@@ -301,15 +304,16 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldAllowForLoopWithoutIterationVariable() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`red´ *for=\"`members´\">`Hello, world!´"
+      "<`red´ `*for´=\"`members´\">`Hello, world!´"
     );
 
     makeCase(
       text,
       forLoop(
-        expr(text.subView(1)),
+        text.subView(1),
+        expr(text.subView(2)),
         null,
-        text(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT))
+        text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
           .color(text.subView(0).setLowercase()),
         null,
         null,

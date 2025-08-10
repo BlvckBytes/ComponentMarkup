@@ -7,6 +7,7 @@ package at.blvckbytes.component_markup.expression.interpreter;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -316,12 +317,43 @@ public class ExpressionInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldGenerateRanges() {
+    makeCase(
+      "1..5",
+      new InterpretationEnvironment(),
+      Arrays.asList(1, 2, 3, 4, 5)
+    );
+
+    makeCase(
+      "4..a",
+      new InterpretationEnvironment()
+        .withVariable("a", 10),
+      Arrays.asList(4, 5, 6, 7, 8, 9, 10)
+    );
+
+    makeCase(
+      "a..10",
+      new InterpretationEnvironment()
+        .withVariable("a", 4),
+      Arrays.asList(4, 5, 6, 7, 8, 9, 10)
+    );
+
+    makeCase(
+      "a..b",
+      new InterpretationEnvironment()
+        .withVariable("a", 4)
+        .withVariable("b", 10),
+      Arrays.asList(4, 5, 6, 7, 8, 9, 10)
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
 
   private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
     ExpressionNode node = ExpressionParser.parse(StringView.of(expression), null);
-    Assertions.assertEquals(expectedResult, ExpressionInterpreter.interpret(node, environment));
+    Assertions.assertEquals(Jsonifier.jsonify(expectedResult), Jsonifier.jsonify(ExpressionInterpreter.interpret(node, environment)));
   }
 }

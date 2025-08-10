@@ -28,6 +28,7 @@ import java.util.*;
 public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ForLoopNode> forLoop(
+    StringView forAttribute,
     ExpressionNode iterable,
     @Nullable StringView iterationVariable,
     NodeWrapper<?> wrappedBody,
@@ -36,6 +37,7 @@ public abstract class MarkupParserTestsBase {
     @Nullable NodeWrapper<?> wrappedEmpty
   ) {
     return new NodeWrapper<>(new ForLoopNode(
+      forAttribute,
       iterable,
       iterationVariable,
       wrappedBody.get(),
