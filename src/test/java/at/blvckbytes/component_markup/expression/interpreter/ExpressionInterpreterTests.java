@@ -389,19 +389,19 @@ public class ExpressionInterpreterTests {
     makeCase(
       "round(2.4)",
       new InterpretationEnvironment(),
-      2
+      2.0
     );
 
     makeCase(
       "round(2.5)",
       new InterpretationEnvironment(),
-      3
+      3.0
     );
 
     makeCase(
       "round(2.6)",
       new InterpretationEnvironment(),
-      3
+      3.0
     );
   }
 

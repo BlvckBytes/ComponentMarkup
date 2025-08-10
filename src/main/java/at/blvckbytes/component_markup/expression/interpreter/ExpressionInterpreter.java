@@ -110,7 +110,7 @@ public class ExpressionInterpreter {
 
           switch (prefixOperator) {
             case ROUND:
-              return Math.round(doubleValue);
+              return (double) Math.round(doubleValue);
             case FLOOR:
               return Math.floor(doubleValue);
             case CEIL:
