@@ -320,6 +320,12 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldGenerateRanges() {
     makeCase(
+      "1..1",
+      new InterpretationEnvironment(),
+      Arrays.asList(1)
+    );
+
+    makeCase(
       "1..5",
       new InterpretationEnvironment(),
       Arrays.asList(1, 2, 3, 4, 5)

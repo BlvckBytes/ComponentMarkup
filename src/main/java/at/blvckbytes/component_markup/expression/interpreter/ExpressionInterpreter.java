@@ -210,7 +210,7 @@ public class ExpressionInterpreter {
           long upperBound = valueInterpreter.asLong(rhsValue);
           List<Long> result = new ArrayList<>();
 
-          if (upperBound > lowerBound) {
+          if (upperBound >= lowerBound) {
             for (long index = lowerBound; index <= upperBound; ++index)
               result.add(index);
           }
