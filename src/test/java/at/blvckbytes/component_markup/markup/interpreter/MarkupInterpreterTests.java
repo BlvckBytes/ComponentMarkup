@@ -286,7 +286,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   public void shouldGenerateARainbow() {
     makeRecordedCase(
       new TextWithSubViews(
-        "<rainbow>I am the <b>coolest rainbow</b> on earth"
+        "<rainbow> I am the <b>coolest rainbow</b> on earth </>"
       ),
       new InterpretationEnvironment(),
       SlotType.CHAT

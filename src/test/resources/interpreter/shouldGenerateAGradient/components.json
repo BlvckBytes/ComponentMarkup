@@ -23,36 +23,33 @@
         "color": "#C6558D"
       },
       {
-        "text": ",",
+        "text": ", ",
         "color": "#B8559B"
       },
       {
-        "text": " "
-      },
-      {
         "text": "w",
-        "bold": true,
-        "color": "#AA55AA"
+        "color": "#AA55AA",
+        "bold": true
       },
       {
         "text": "o",
-        "bold": true,
-        "color": "#9B55B8"
+        "color": "#9B55B8",
+        "bold": true
       },
       {
         "text": "r",
-        "bold": true,
-        "color": "#8D55C6"
+        "color": "#8D55C6",
+        "bold": true
       },
       {
         "text": "l",
-        "bold": true,
-        "color": "#7F55D4"
+        "color": "#7F55D4",
+        "bold": true
       },
       {
         "text": "d",
-        "bold": true,
-        "color": "#7155E2"
+        "color": "#7155E2",
+        "bold": true
       },
       {
         "text": "!",

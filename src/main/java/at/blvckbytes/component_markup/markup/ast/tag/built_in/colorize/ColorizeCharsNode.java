@@ -6,7 +6,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
@@ -38,32 +37,38 @@ public class ColorizeCharsNode extends ColorizeNode {
     NodeStyle nodeStyle = node.getStyle();
 
     boolean skipWhitespace = state.flags.contains(ColorizeFlag.SKIP_WHITESPACE);
-    StringBuilder whitespaceAccumulator = skipWhitespace ? new StringBuilder() : null;
 
-    for (int charIndex = 0; charIndex < node.textValue.length(); ++charIndex) {
+    int lastIndex = node.textValue.length() - 1;
+
+    for (int charIndex = 0; charIndex <= lastIndex; ++charIndex) {
       char currentChar = node.textValue.charAt(charIndex);
 
-      if (Character.isWhitespace(currentChar)) {
-        if (skipWhitespace) {
-          whitespaceAccumulator.append(currentChar);
-          continue;
+      String nodeContents;
+
+      if (!skipWhitespace || charIndex == lastIndex)
+        nodeContents = String.valueOf(currentChar);
+
+      else {
+        int beginIndex = charIndex;
+
+        while (charIndex < lastIndex) {
+          if (!Character.isWhitespace(node.textValue.charAt(charIndex + 1)))
+            break;
+
+          ++charIndex;
         }
+
+        nodeContents = node.textValue.substring(beginIndex, charIndex + 1);
       }
 
-      if (skipWhitespace)
-        emitWhitespace(node, builder, whitespaceAccumulator);
-
-      TextNode charNode = new TextNode(StringView.EMPTY, String.valueOf(currentChar));
+      TextNode charNode = new TextNode(StringView.EMPTY, nodeContents);
 
       if (nodeStyle != null)
         charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
 
       // No need to buffer, as all chars will be colored differently
-      builder.onText(charNode, state::addInjected, true);
+      builder.onText(charNode, skipWhitespace && Character.isWhitespace(currentChar) ? null : state::addInjected, true);
     }
-
-    if (skipWhitespace)
-      emitWhitespace(node, builder, whitespaceAccumulator);
 
     return false;
   }
@@ -72,20 +77,5 @@ public class ColorizeCharsNode extends ColorizeNode {
   protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter) {
     interpreter.getCurrentBuilder().onUnit(node, state::addInjected);
     return false;
-  }
-
-  private void emitWhitespace(StyledNode styleHolder, OutputBuilder builder, StringBuilder accumulator) {
-    if (accumulator.length() == 0)
-      return;
-
-    TextNode whitespaceNode = new TextNode(StringView.EMPTY, accumulator.toString());
-    NodeStyle nodeStyle = styleHolder.getStyle();
-
-    if (nodeStyle != null)
-      whitespaceNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
-
-    // No need to buffer, as all chars will be colored differently
-    builder.onText(whitespaceNode, null, true);
-    accumulator.setLength(0);
   }
 }
