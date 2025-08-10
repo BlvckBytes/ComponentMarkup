@@ -354,6 +354,24 @@ public class ExpressionInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldCastToLong() {
+    makeCase(
+      "5 + long(3.8)",
+      new InterpretationEnvironment(),
+      8
+    );
+  }
+
+  @Test
+  public void shouldCastToDouble() {
+    makeCase(
+      "5 / double(2)",
+      new InterpretationEnvironment(),
+      2.5
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }

@@ -92,6 +92,12 @@ public class ExpressionInterpreter {
         case REVERSE:
           return new StringBuilder(valueInterpreter.asString(operandValue)).reverse().toString();
 
+        case LONG:
+          return valueInterpreter.asLong(operandValue);
+
+        case DOUBLE:
+          return valueInterpreter.asDouble(operandValue);
+
         default:
           LoggerProvider.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;

@@ -21,6 +21,8 @@ public enum PrefixOperator implements EnumToken {
   ASCIIFY    ("asciify", true),
   TRIM       ("trim", true),
   REVERSE    ("reverse", true),
+  LONG       ("long", true),
+  DOUBLE     ("double", true),
   ;
 
   public final String representation;
@@ -64,6 +66,10 @@ public enum PrefixOperator implements EnumToken {
         return TRIM;
       case "reverse":
         return REVERSE;
+      case "long":
+        return LONG;
+      case "double":
+        return DOUBLE;
       default:
         return null;
     }
