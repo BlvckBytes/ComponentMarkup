@@ -303,7 +303,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
           "color=\"red\"",
           "color=\"blue\"",
           "[phase]=\"i/5.0 * 100\"",
-        ">This is a multi-line transition"
+        ">This is a <gold>multi-line</> transition"
       ),
       new InterpretationEnvironment(),
       SlotType.ITEM_LORE

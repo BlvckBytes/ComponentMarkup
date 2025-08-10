@@ -1,26 +1,104 @@
 [
   {
-    "text": "This is a multi-line transition",
-    "color": "red"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "red"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "red"
+      }
+    ]
   },
   {
-    "text": "This is a multi-line transition",
-    "color": "#DD5577"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "#DD5577"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "#DD5577"
+      }
+    ]
   },
   {
-    "text": "This is a multi-line transition",
-    "color": "#BB5599"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "#BB5599"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "#BB5599"
+      }
+    ]
   },
   {
-    "text": "This is a multi-line transition",
-    "color": "#9955BB"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "#9955BB"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "#9955BB"
+      }
+    ]
   },
   {
-    "text": "This is a multi-line transition",
-    "color": "#7755DD"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "#7755DD"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "#7755DD"
+      }
+    ]
   },
   {
-    "text": "This is a multi-line transition",
-    "color": "blue"
+    "text": "",
+    "extra": [
+      {
+        "text": "This is a ",
+        "color": "blue"
+      },
+      {
+        "text": "multi-line",
+        "color": "gold"
+      },
+      {
+        "text": " transition",
+        "color": "blue"
+      }
+    ]
   }
 ]

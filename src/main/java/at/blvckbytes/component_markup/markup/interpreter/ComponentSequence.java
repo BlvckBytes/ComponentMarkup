@@ -224,8 +224,6 @@ public class ComponentSequence {
   }
 
   private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
-    this.textCreationHandler = creationHandler;
-
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
@@ -242,6 +240,7 @@ public class ComponentSequence {
 
     this.bufferedTexts.add(text);
     bufferedTextsStyle = style;
+    this.textCreationHandler = creationHandler;
   }
 
   private boolean areStylesEffectivelyEqual(@Nullable ComputedStyle a, @Nullable ComputedStyle b) {
@@ -283,14 +282,16 @@ public class ComponentSequence {
       result = componentConstructor.createTextComponent(accumulator.toString());
     }
 
+    if (textCreationHandler != null) {
+      textCreationHandler.accept(result);
+      textCreationHandler = null;
+    }
+
     bufferedTexts.clear();
 
     addMember(result, bufferedTextsStyle);
 
     bufferedTextsStyle = null;
-
-    if (textCreationHandler != null)
-      textCreationHandler.accept(result);
   }
 
   public Object addSequence(ComponentSequence sequence) {
