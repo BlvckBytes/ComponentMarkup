@@ -1,0 +1,26 @@
+[
+  {
+    "text": "This is a multi-line transition",
+    "color": "red"
+  },
+  {
+    "text": "This is a multi-line transition",
+    "color": "#DD5577"
+  },
+  {
+    "text": "This is a multi-line transition",
+    "color": "#BB5599"
+  },
+  {
+    "text": "This is a multi-line transition",
+    "color": "#9955BB"
+  },
+  {
+    "text": "This is a multi-line transition",
+    "color": "#7755DD"
+  },
+  {
+    "text": "This is a multi-line transition",
+    "color": "blue"
+  }
+]

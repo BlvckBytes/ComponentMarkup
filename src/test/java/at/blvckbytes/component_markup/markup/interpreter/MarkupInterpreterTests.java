@@ -294,6 +294,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldGenerateATransition() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<transition",
+          "*for-i=\"0..5\"",
+          "*for-separator={<br/>}",
+          "color=\"red\"",
+          "color=\"blue\"",
+          "[phase]=\"i/5.0 * 100\"",
+        ">This is a multi-line transition"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE
+    );
+  }
+
+  @Test
   public void shouldDifferentiateBetweenIfAndUse() {
     TextWithSubViews text = new TextWithSubViews(
       "<red *if=\"a\" *use=\"b\">Hello, world!"
