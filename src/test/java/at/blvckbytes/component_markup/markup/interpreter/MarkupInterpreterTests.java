@@ -1060,4 +1060,29 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "456")
     );
   }
+
+  @Test
+  public void shouldRenderLetBindingComponent() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<container",
+      "  *let-spacer={",
+      "    <dark_gray><st>{ ' ' ** 15 }",
+      "  }",
+      ">",
+      "  {spacer}<br/>",
+      "  <aqua>First line!</><br/>",
+      "  {spacer}<br/>",
+      "  <aqua>Second line!</><br/>",
+      "  {spacer}<br/>",
+      "  <aqua>Third line!</><br/>",
+      "  {spacer}",
+      "</>"
+    );
+
+    makeRecordedCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE
+    );
+  }
 }

@@ -1,0 +1,34 @@
+[
+  {
+    "text": "               ",
+    "color": "dark_gray",
+    "strikethrough": true
+  },
+  {
+    "text": "First line!",
+    "color": "aqua"
+  },
+  {
+    "text": "               ",
+    "color": "dark_gray",
+    "strikethrough": true
+  },
+  {
+    "text": "Second line!",
+    "color": "aqua"
+  },
+  {
+    "text": "               ",
+    "color": "dark_gray",
+    "strikethrough": true
+  },
+  {
+    "text": "Third line!",
+    "color": "aqua"
+  },
+  {
+    "text": "               ",
+    "color": "dark_gray",
+    "strikethrough": true
+  }
+]
