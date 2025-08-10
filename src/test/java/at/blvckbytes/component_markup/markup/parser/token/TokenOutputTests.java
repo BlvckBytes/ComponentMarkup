@@ -77,7 +77,7 @@ public class TokenOutputTests {
           new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(2))
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(3)))
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(4)))
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(5)))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(5)))
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(6)))
             .addChild(
               new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(7))
@@ -198,7 +198,7 @@ public class TokenOutputTests {
           new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(33)) // "\"player_name != 'Steve'\""
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(37))) // "!="
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(37))) // "!="
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         )
@@ -212,10 +212,10 @@ public class TokenOutputTests {
           new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(46)) // "\" loop.index + 1\""
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(48))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(49))) // "loop"
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(50))) // "."
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(50))) // "."
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(51))) // "index"
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(52))) // " "
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(53))) // "+"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(53))) // "+"
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(54))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__NUMBER, text.subView(55))) // "1"
         )
@@ -249,7 +249,7 @@ public class TokenOutputTests {
                 .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(79))) // " "
             )
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(81))) // " "
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(82))) // "+"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(82))) // "+"
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(83))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(84))) // "player_name"
         )
@@ -322,7 +322,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(34))) // "\""
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(37))) // "!="
+        .add(new Token(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(37))) // "!="
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
         .add(new Token(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         .add(new Token(TokenType.MARKUP__STRING, text.subView(40))) // "\""
@@ -335,10 +335,10 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(47))) // "\""
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(48))) // " "
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(49))) // "loop"
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(50))) // "."
+        .add(new Token(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(50))) // "."
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(51))) // "index"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(52))) // " "
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(53))) // "+"
+        .add(new Token(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(53))) // "+"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(54))) // " "
         .add(new Token(TokenType.EXPRESSION__NUMBER, text.subView(55))) // "1"
         .add(new Token(TokenType.MARKUP__STRING, text.subView(56))) // "\""
@@ -368,7 +368,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(79))) // " "
         .add(new Token(TokenType.EXPRESSION__STRING, text.subView(80))) // "'"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(81))) // " "
-        .add(new Token(TokenType.EXPRESSION__OPERATOR__ANY, text.subView(82))) // "+"
+        .add(new Token(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(82))) // "+"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(83))) // " "
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(84))) // "player_name"
         .add(new Token(TokenType.MARKUP__STRING, text.subView(85))) // "\""

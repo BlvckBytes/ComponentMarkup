@@ -21,6 +21,6 @@ public class PrefixOperatorToken extends Token {
 
   @Override
   public TokenType getType() {
-    return TokenType.EXPRESSION__OPERATOR__ANY;
+    return TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY;
   }
 }

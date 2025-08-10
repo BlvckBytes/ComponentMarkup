@@ -165,7 +165,7 @@ public class ExpressionParser {
 
     // For visual consistency, it's considered a two-part operator
     if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.EXPRESSION__OPERATOR__ANY, terminationToken.raw);
+      tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, terminationToken.raw);
 
     return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
@@ -180,7 +180,7 @@ public class ExpressionParser {
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET) {
         // For visual consistency, it's considered a two-part operator
         if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.EXPRESSION__OPERATOR__ANY, delimiterToken.raw);
+          tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, delimiterToken.raw);
 
         return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
       }
@@ -314,7 +314,8 @@ public class ExpressionParser {
 
       tokenizer.nextToken();
 
-      // TODO: upcomingToken should now emit a special token-type
+      if (tokenOutput != null)
+        tokenOutput.emitToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, upcomingToken.raw);
 
       operatorToken = new PrefixOperatorToken(upcomingToken.raw, namedOperator);
       openingParenthesisToken = punctuationToken;
