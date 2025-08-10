@@ -98,6 +98,26 @@ public class ExpressionInterpreter {
         case DOUBLE:
           return valueInterpreter.asDouble(operandValue);
 
+        case ROUND:
+        case CEIL:
+        case FLOOR: {
+          Number numericValue = valueInterpreter.asLongOrDouble(operandValue);
+
+          if (numericValue instanceof Long)
+            return numericValue;
+
+          double doubleValue = numericValue.doubleValue();
+
+          switch (prefixOperator) {
+            case ROUND:
+              return Math.round(doubleValue);
+            case FLOOR:
+              return Math.floor(doubleValue);
+            case CEIL:
+              return Math.ceil(doubleValue);
+          }
+        }
+
         default:
           LoggerProvider.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;

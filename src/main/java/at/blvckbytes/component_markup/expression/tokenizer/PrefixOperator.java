@@ -23,6 +23,9 @@ public enum PrefixOperator implements EnumToken {
   REVERSE    ("reverse", true),
   LONG       ("long", true),
   DOUBLE     ("double", true),
+  FLOOR      ("floor", true),
+  CEIL       ("ceil", true),
+  ROUND      ("round", true),
   ;
 
   public final String representation;
@@ -70,6 +73,12 @@ public enum PrefixOperator implements EnumToken {
         return LONG;
       case "double":
         return DOUBLE;
+      case "floor":
+        return FLOOR;
+      case "ceil":
+        return CEIL;
+      case "round":
+        return ROUND;
       default:
         return null;
     }

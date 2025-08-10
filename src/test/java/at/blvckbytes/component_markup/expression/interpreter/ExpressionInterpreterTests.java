@@ -372,6 +372,39 @@ public class ExpressionInterpreterTests {
     );
   }
 
+  @Test
+  public void shouldFloorCeilAndRoundDouble() {
+    makeCase(
+      "floor(2.6)",
+      new InterpretationEnvironment(),
+      2.0
+    );
+
+    makeCase(
+      "ceil(2.3)",
+      new InterpretationEnvironment(),
+      3.0
+    );
+
+    makeCase(
+      "round(2.4)",
+      new InterpretationEnvironment(),
+      2
+    );
+
+    makeCase(
+      "round(2.5)",
+      new InterpretationEnvironment(),
+      3
+    );
+
+    makeCase(
+      "round(2.6)",
+      new InterpretationEnvironment(),
+      3
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
