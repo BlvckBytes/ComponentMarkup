@@ -76,10 +76,6 @@ public class OutputBuilder {
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 
-  public void emitComponent(Object component) {
-    sequencesStack.peek().emitComponent(component);
-  }
-
   private void combineAllSequencesAndResult() {
     for (int index = sequencesStack.size() - 1; index >= 0; --index) {
       ComponentSequence sequence = sequencesStack.get(index);

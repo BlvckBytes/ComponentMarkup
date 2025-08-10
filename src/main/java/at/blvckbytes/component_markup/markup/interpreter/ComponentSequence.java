@@ -219,10 +219,6 @@ public class ComponentSequence {
     return setMembersResult;
   }
 
-  public void emitComponent(Object component) {
-    addMember(component, null);
-  }
-
   private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
