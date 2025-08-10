@@ -189,14 +189,42 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      TextWithSubViews text = new TextWithSubViews(
-        "`" + operator + "´"
-      );
+      if (operator.isNamed) {
+        TextWithSubViews text = new TextWithSubViews(operator + "`(´");
+
+        makeErrorCase(
+          text,
+          ExpressionParserError.EXPECTED_PREFIX_OPERAND,
+          text.subView(0).startInclusive
+        );
+
+        continue;
+      }
+
+      TextWithSubViews text = new TextWithSubViews("`" + operator + "´");
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_PREFIX_OPERAND,
         text.subView(0).endExclusive - 1
+      );
+    }
+  }
+
+  @Test
+  public void shouldThrowOnMissingPrefixOperatorClosingParenthesis() {
+    for (PrefixOperator operator : PrefixOperator.values()) {
+      if (!operator.isNamed)
+        continue;
+
+      TextWithSubViews text = new TextWithSubViews(
+        operator + "`(´x"
+      );
+
+      makeErrorCase(
+        text,
+        ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS,
+        text.subView(0).startInclusive
       );
     }
   }

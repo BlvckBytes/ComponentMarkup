@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.expression.parser;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
@@ -288,17 +289,60 @@ public class ExpressionParser {
   // ================================================================================
 
   private @Nullable ExpressionNode parsePrefixExpression() {
-    PrefixOperatorToken operatorToken = tokenizer.peekToken(PrefixOperatorToken.class);
+    Token upcomingToken = tokenizer.peekToken();
 
-    if (operatorToken == null)
-      return parseParenthesesExpression();
+    PrefixOperatorToken operatorToken;
+    PunctuationToken openingParenthesisToken = null;
 
-    tokenizer.nextToken();
+    if (!(upcomingToken instanceof PrefixOperatorToken)) {
+      if (!(upcomingToken instanceof IdentifierToken))
+        return parseParenthesesExpression();
+
+      PrefixOperator namedOperator = PrefixOperator.byName(((IdentifierToken) upcomingToken).identifier);
+
+      if (namedOperator == null)
+        return parseParenthesesExpression();
+
+      tokenizer.nextToken();
+
+      PunctuationToken punctuationToken = tokenizer.peekToken(PunctuationToken.class);
+
+      if (punctuationToken == null || punctuationToken.punctuation != Punctuation.OPENING_PARENTHESIS) {
+        tokenizer.putBackToken(upcomingToken);
+        return parseParenthesesExpression();
+      }
+
+      tokenizer.nextToken();
+
+      // TODO: upcomingToken should now emit a special token-type
+
+      operatorToken = new PrefixOperatorToken(upcomingToken.raw, namedOperator);
+      openingParenthesisToken = punctuationToken;
+    }
+
+    else {
+      tokenizer.nextToken();
+      operatorToken = (PrefixOperatorToken) upcomingToken;
+    }
 
     ExpressionNode operand = parsePrefixExpression();
 
-    if (operand == null)
-      throw new ExpressionParseException(operatorToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_PREFIX_OPERAND, operatorToken.operator.representation);
+    if (operand == null) {
+      throw new ExpressionParseException(
+        openingParenthesisToken == null
+          ? operatorToken.raw.endExclusive - 1
+          : openingParenthesisToken.raw.startInclusive,
+        ExpressionParserError.EXPECTED_PREFIX_OPERAND,
+        operatorToken.operator.representation
+      );
+    }
+
+    if (openingParenthesisToken != null) {
+      PunctuationToken punctuationToken = tokenizer.nextToken(PunctuationToken.class);
+
+      if (punctuationToken == null || punctuationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
+        throw new ExpressionParseException(openingParenthesisToken.raw.startInclusive, ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS, operatorToken.operator.representation);
+    }
 
     return new PrefixOperationNode(operatorToken, operand);
   }

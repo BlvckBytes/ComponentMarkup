@@ -407,45 +407,6 @@ public class ExpressionTokenizer {
         enumToken = PrefixOperator.NEGATION;
         break;
 
-      case '~':
-        switch (_peekChar(1)) {
-          case '^':
-            enumToken = PrefixOperator.UPPER_CASE;
-            break;
-
-          case '_':
-            enumToken = PrefixOperator.LOWER_CASE;
-            break;
-
-          case '#':
-            enumToken = PrefixOperator.TITLE_CASE;
-            break;
-
-          case '!':
-            enumToken = PrefixOperator.TOGGLE_CASE;
-            break;
-
-          case '-':
-            enumToken = PrefixOperator.SLUGIFY;
-            break;
-
-          case '?':
-            enumToken = PrefixOperator.ASCIIFY;
-            break;
-
-          case '|':
-            enumToken = PrefixOperator.TRIM;
-            break;
-
-          case '<':
-            enumToken = PrefixOperator.REVERSE;
-            break;
-
-          default:
-            throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_TILDE);
-        }
-        break;
-
       case '.':
         char upcomingChar = _peekChar(1);
 
@@ -488,6 +449,13 @@ public class ExpressionTokenizer {
       return requiredType.cast(nextToken());
 
     return null;
+  }
+
+  public void putBackToken(Token token) {
+    if (pendingStack == null)
+      pendingStack = new Stack<>();
+
+    pendingStack.push(token);
   }
 
   public @Nullable Token nextToken() {

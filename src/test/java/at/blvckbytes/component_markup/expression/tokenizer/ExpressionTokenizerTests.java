@@ -24,7 +24,7 @@ public class ExpressionTokenizerTests {
     TextWithSubViews text = new TextWithSubViews(
       "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `&&´ `2.7182´ `>=´ `*´ `||´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `==´ `^´ `my_variable´ `!=´ `&´ `)´ `..´ `.5´",
-      "`~^´ `~_´ `~#´ `~!´ `~-´ `~?´ `~|´ `~<´ `@´ `@@´ `**´ `::´ `:::´ `:::´`::´"
+      "`@´ `@@´ `**´ `::´ `:::´ `:::´`::´"
     );
 
     int index = 0;
@@ -63,14 +63,6 @@ public class ExpressionTokenizerTests {
       Punctuation.CLOSING_PARENTHESIS, text.subView(index++),
       InfixOperator.RANGE, text.subView(index++),
       DotDouble.of(.5), text.subView(index++),
-      PrefixOperator.UPPER_CASE, text.subView(index++),
-      PrefixOperator.LOWER_CASE, text.subView(index++),
-      PrefixOperator.TITLE_CASE, text.subView(index++),
-      PrefixOperator.TOGGLE_CASE, text.subView(index++),
-      PrefixOperator.SLUGIFY, text.subView(index++),
-      PrefixOperator.ASCIIFY, text.subView(index++),
-      PrefixOperator.TRIM, text.subView(index++),
-      PrefixOperator.REVERSE, text.subView(index++),
       InfixOperator.EXPLODE, text.subView(index++),
       InfixOperator.EXPLODE_REGEX, text.subView(index++),
       InfixOperator.REPEAT, text.subView(index++),
@@ -328,16 +320,6 @@ public class ExpressionTokenizerTests {
     makeErrorCase(
       text,
       ExpressionTokenizeError.SINGLE_EQUALS,
-      text.subView(0).startInclusive
-    );
-
-    text = new TextWithSubViews(
-      "`~´"
-    );
-
-    makeErrorCase(
-      text,
-      ExpressionTokenizeError.SINGLE_TILDE,
       text.subView(0).startInclusive
     );
   }

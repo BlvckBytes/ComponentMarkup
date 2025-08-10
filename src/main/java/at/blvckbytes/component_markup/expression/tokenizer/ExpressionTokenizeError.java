@@ -22,12 +22,6 @@ public enum ExpressionTokenizeError implements ErrorMessage {
         .map(InfixOperator::toString)
         .collect(Collectors.joining(", "))
   ),
-  SINGLE_TILDE(
-    "Encountered a single tilde (~); use one of: " +
-      PrefixOperator.CONTAINING_TILDE.stream()
-        .map(PrefixOperator::toString)
-        .collect(Collectors.joining(", "))
-  ),
   SINGLE_PIPE(
     "Encountered a single pipe (|); use one of: " +
       InfixOperator.CONTAINING_PIPE.stream()

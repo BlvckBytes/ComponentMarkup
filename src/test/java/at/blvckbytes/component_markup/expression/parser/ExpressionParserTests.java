@@ -648,6 +648,37 @@ public class ExpressionParserTests {
     makeCasePlain("a + --b * c & --a.b[c].d");
   }
 
+  @Test
+  public void shouldParseNamedPrefixOperator() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`lower´(`x´)"
+    );
+
+    makeCase(
+      text,
+      prefix(
+        token(PrefixOperator.LOWER_CASE, text.subView(0)),
+        terminal("x", text.subView(1))
+      )
+    );
+  }
+
+  @Test
+  public void shouldParseMisleadingNonOperators() {
+    TextWithSubViews text = new TextWithSubViews("`lower´");
+    makeCase(text, terminal("lower", text.subView(0)));
+
+    text = new TextWithSubViews("`lower´ `+´ `5´");
+    makeCase(
+      text,
+      infix(
+        terminal("lower", text.subView(0)),
+        token(InfixOperator.ADDITION, text.subView(1)),
+        terminal(5, text.subView(2))
+      )
+    );
+  }
+
   protected static ExpressionNode array(
     Token openingBracket,
     Token closingBracket,

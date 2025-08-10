@@ -21,7 +21,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformUpperCase() {
     makeCase(
-      "'before ' & ~^my_string & ' after'",
+      "'before ' & upper(my_string) & ' after'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLo, woRld"),
       "before HELLO, WORLD after"
@@ -31,7 +31,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformLowerCase() {
     makeCase(
-      "'before ' & ~_my_string & ' after'",
+      "'before ' & lower(my_string) & ' after'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLo, woRld"),
       "before hello, world after"
@@ -41,7 +41,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformTitleCase() {
     makeCase(
-      "'before ' & ~#my_string & ' test'",
+      "'before ' & title(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLo, woRld"),
       "before Hello, World test"
@@ -51,7 +51,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformSlugify() {
     makeCase(
-      "'before ' & ~-my_string & ' test'",
+      "'before ' & slugify(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLö, @wöRld"),
       "before hellö-wörld test"
@@ -61,7 +61,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformAsciify() {
     makeCase(
-      "'before ' & ~?my_string & ' test'",
+      "'before ' & asciify(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLö, wèRld"),
       "before helLo, weRld test"
@@ -71,7 +71,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformTrim() {
     makeCase(
-      "'before ' & ~|my_string & ' test'",
+      "'before ' & trim(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "  Hello, World  "),
       "before Hello, World test"
@@ -81,7 +81,7 @@ public class ExpressionInterpreterTests {
   @Test
   public void shouldTransformReverse() {
     makeCase(
-      "'before ' & ~<my_string & ' test'",
+      "'before ' & reverse(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "Hello, World"),
       "before dlroW ,olleH test"
@@ -219,7 +219,7 @@ public class ExpressionInterpreterTests {
     makeCase("'abc' :: 'abcde'", false);
     makeCase("'abcde' :: 'abc'", true);
     makeCase("'ABCDE' :: 'abc'", false);
-    makeCase("~_'ABCDE' :: 'abc'", true);
+    makeCase("lower('ABCDE') :: 'abc'", true);
     makeCase("null :: 'abc'", false);
     makeCase("'abc' :: null", false);
     makeCase("null :: null", true);
@@ -242,7 +242,7 @@ public class ExpressionInterpreterTests {
     makeCase("'start middle end' ::: '^middle'", false);
     makeCase("'start middle end' ::: 'middle$'", false);
     makeCase("'Hello' ::: 'hello'", false);
-    makeCase("~_'Hello' ::: 'hello'", true);
+    makeCase("lower('Hello') ::: 'hello'", true);
     makeCase("'Hello' ::: '(?i)hello'", true);
     makeCase("'cat' ::: 'cat|dog'", true);
     makeCase("'dog' ::: 'cat|dog'", true);
@@ -322,7 +322,7 @@ public class ExpressionInterpreterTests {
     makeCase(
       "1..1",
       new InterpretationEnvironment(),
-      Arrays.asList(1)
+      Collections.singletonList(1)
     );
 
     makeCase(
