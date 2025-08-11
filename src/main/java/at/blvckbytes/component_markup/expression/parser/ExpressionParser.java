@@ -100,6 +100,9 @@ public class ExpressionParser {
 
     InfixOperator upcomingOperator = upcomingToken.operator;
 
+    if (upcomingOperator == InfixOperator.BRANCHING_ELSE)
+      return lhs;
+
     if (priorOperator != null) {
       if (upcomingOperator == priorOperator) {
         if (!upcomingOperator.rightAssociative)
@@ -191,10 +194,10 @@ public class ExpressionParser {
       throw new ExpressionParseException(delimiterToken.raw.startInclusive, ExpressionParserError.EXPECTED_SUBSCRIPT_CLOSING_BRACKET);
     }
 
-    if (operatorToken.operator == InfixOperator.BRANCHING) {
-      PunctuationToken delimiterToken = tokenizer.peekToken(PunctuationToken.class);
+    if (operatorToken.operator == InfixOperator.BRANCHING_THEN) {
+      InfixOperatorToken delimiterToken = tokenizer.peekToken(InfixOperatorToken.class);
 
-      if (delimiterToken == null || delimiterToken.punctuation != Punctuation.COLON)
+      if (delimiterToken == null || delimiterToken.operator != InfixOperator.BRANCHING_ELSE)
         return new BranchingNode(lhs, operatorToken, rhs, null, null);
 
       tokenizer.nextToken();

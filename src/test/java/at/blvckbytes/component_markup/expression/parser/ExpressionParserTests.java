@@ -303,29 +303,29 @@ public class ExpressionParserTests {
   @Test
   public void shouldParseBranchingOperator() {
     TextWithSubViews text = new TextWithSubViews(
-      "`a´ `?´ `b´ `:´ `c´"
+      "`a´ `then´ `b´ `else´ `c´"
     );
 
     makeCase(
       text,
       branching(
         terminal("a", text.subView(0)),
-        token(InfixOperator.BRANCHING, text.subView(1)),
+        token(InfixOperator.BRANCHING_THEN, text.subView(1)),
         terminal("b", text.subView(2)),
-        token(Punctuation.COLON, text.subView(3)),
+        token(InfixOperator.BRANCHING_ELSE, text.subView(3)),
         terminal("c", text.subView(4))
       )
     );
 
     text = new TextWithSubViews(
-      "`a´ `?´ `b´"
+      "`a´ `then´ `b´"
     );
 
     makeCase(
       text,
       branching(
         terminal("a", text.subView(0)),
-        token(InfixOperator.BRANCHING, text.subView(1)),
+        token(InfixOperator.BRANCHING_THEN, text.subView(1)),
         terminal("b", text.subView(2)),
         null, null
       )
@@ -643,7 +643,7 @@ public class ExpressionParserTests {
     makeCasePlain("a[b:]");
     makeCasePlain("a[:b]");
     makeCasePlain("a[c:b]");
-    makeCasePlain("a ? b : c");
+    makeCasePlain("a then b else c");
     makeCasePlain("[a, b, c]");
     makeCasePlain("[]");
   }
@@ -701,7 +701,7 @@ public class ExpressionParserTests {
     Token branchingSeparator,
     ExpressionNode branchFalse
   ) {
-    return new BranchingNode(condition, (InfixOperatorToken) branchingOperator, branchTrue, (PunctuationToken) branchingSeparator, branchFalse);
+    return new BranchingNode(condition, (InfixOperatorToken) branchingOperator, branchTrue, (InfixOperatorToken) branchingSeparator, branchFalse);
   }
 
   protected static ExpressionNode substring(

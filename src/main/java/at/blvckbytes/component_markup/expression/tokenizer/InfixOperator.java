@@ -11,7 +11,8 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public enum InfixOperator implements EnumToken {
-  BRANCHING            ("?",        1, false, false),
+  BRANCHING_THEN       ("then",     1, false,  true),
+  BRANCHING_ELSE       ("else",     1, false,  true),
   DISJUNCTION          ("or",       2, false, true),
   CONJUNCTION          ("and",      3, false, true),
   EQUAL_TO             ("eq",       4, false, true),
@@ -74,6 +75,10 @@ public enum InfixOperator implements EnumToken {
 
   public static @Nullable InfixOperator byName(String name) {
     switch (name) {
+      case "then":
+        return BRANCHING_THEN;
+      case "else":
+        return BRANCHING_ELSE;
       case "or":
         return DISJUNCTION;
       case "and":

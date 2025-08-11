@@ -22,7 +22,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeAllTypes() {
     TextWithSubViews text = new TextWithSubViews(
-      "`?´ `(´ `not´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
+      "`then´ `else´ `(´ `not´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `eq´ `^´ `my_variable´ `neq´ `&´ `)´ `..´ `.5´",
       "`@´ `@@´ `**´ `in´ `matches´"
     );
@@ -31,7 +31,8 @@ public class ExpressionTokenizerTests {
 
     makeCase(
       text,
-      InfixOperator.BRANCHING, text.subView(index++),
+      InfixOperator.BRANCHING_THEN, text.subView(index++),
+      InfixOperator.BRANCHING_ELSE, text.subView(index++),
       Punctuation.OPENING_PARENTHESIS, text.subView(index++),
       PrefixOperator.NEGATION, text.subView(index++),
       "'hello, world'", text.subView(index++),

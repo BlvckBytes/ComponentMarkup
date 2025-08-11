@@ -6,9 +6,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
-import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,14 +15,14 @@ public class BranchingNode extends ExpressionNode {
   public ExpressionNode condition;
   public @Nullable InfixOperatorToken branchingOperator;
   public ExpressionNode branchTrue;
-  public @Nullable PunctuationToken branchingSeparator;
+  public @Nullable InfixOperatorToken branchingSeparator;
   public @Nullable ExpressionNode branchFalse;
 
   public BranchingNode(
     ExpressionNode condition,
     @Nullable InfixOperatorToken branchingOperator,
     ExpressionNode branchTrue,
-    @Nullable PunctuationToken branchingSeparator,
+    @Nullable InfixOperatorToken branchingSeparator,
     @Nullable ExpressionNode branchFalse
   ) {
     this.condition = condition;
@@ -52,16 +50,16 @@ public class BranchingNode extends ExpressionNode {
     if (branchFalse == null) {
       return parenthesise(
         condition.toExpression()
-          + " " + InfixOperator.BRANCHING
+          + " " + InfixOperator.BRANCHING_THEN
           + " " + branchTrue.toExpression()
       );
     }
 
     return parenthesise(
       condition.toExpression()
-        + " " + InfixOperator.BRANCHING
+        + " " + InfixOperator.BRANCHING_THEN
         + " " + branchTrue.toExpression()
-        + " " + Punctuation.COLON
+        + " " + InfixOperator.BRANCHING_ELSE
         + " " + branchFalse.toExpression()
     );
   }

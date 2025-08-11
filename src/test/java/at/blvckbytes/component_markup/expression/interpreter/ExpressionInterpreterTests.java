@@ -257,7 +257,7 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldHandleFullBranchingOperator() {
-    String expression = "a ? \"first\" : \"second\"";
+    String expression = "a then \"first\" else \"second\"";
 
     makeCase(
       expression,
@@ -276,7 +276,7 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldHandleHalfBranchingOperator() {
-    String expression = "a ? \"first\"";
+    String expression = "a then \"first\"";
 
     makeCase(
       expression,

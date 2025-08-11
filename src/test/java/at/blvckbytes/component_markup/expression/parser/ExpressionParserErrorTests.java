@@ -52,6 +52,9 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingInfixRightOperand() {
     for (InfixOperator operator : InfixOperator.values()) {
+      if (operator == InfixOperator.BRANCHING_ELSE)
+        continue;
+
       TextWithSubViews text = new TextWithSubViews(
         "a `" + operator + "´"
       );
@@ -176,13 +179,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingBranchingFalseBranch() {
     TextWithSubViews text = new TextWithSubViews(
-      "a ? test `:´"
+      "a then test `else´"
     );
 
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_FALSE_BRANCH,
-      text.subView(0).startInclusive
+      text.subView(0).endExclusive - 1
     );
   }
 

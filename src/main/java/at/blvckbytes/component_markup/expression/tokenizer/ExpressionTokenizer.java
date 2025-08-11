@@ -359,7 +359,7 @@ public class ExpressionTokenizer {
           break;
         }
 
-        enumToken = InfixOperator.BRANCHING;
+        enumToken = InfixOperator.BRANCHING_THEN;
         break;
 
       case '@':
