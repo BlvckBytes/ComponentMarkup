@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.OperatorFlag;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.StringView;
 
@@ -21,7 +22,7 @@ public class InfixOperatorToken extends Token {
 
   @Override
   public TokenType getType() {
-    if (operator.isNamed)
+    if (operator.flags.contains(OperatorFlag.NAMED))
       return TokenType.EXPRESSION__NAMED_INFIX_OPERATOR;
 
     return TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY;

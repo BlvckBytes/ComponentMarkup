@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.expression.parser;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.OperatorFlag;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
@@ -192,7 +193,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      if (operator.isNamed && operator.requiresParentheses) {
+      if (operator.flags.contains(OperatorFlag.NAMED) && operator.flags.contains(OperatorFlag.PARENS)) {
         TextWithSubViews text = new TextWithSubViews(operator + "`(´");
 
         makeErrorCase(
@@ -217,7 +218,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperatorClosingParenthesis() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      if (!operator.isNamed || !operator.requiresParentheses)
+      if (!operator.flags.contains(OperatorFlag.NAMED) || !operator.flags.contains(OperatorFlag.PARENS))
         continue;
 
       TextWithSubViews text = new TextWithSubViews(

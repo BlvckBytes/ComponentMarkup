@@ -213,7 +213,7 @@ public class ExpressionTokenizer {
 
     PrefixOperator prefixOperator = PrefixOperator.byName(value);
 
-    if (prefixOperator != null && !prefixOperator.requiresParentheses) {
+    if (prefixOperator != null && !prefixOperator.flags.contains(OperatorFlag.PARENS)) {
       // Did push a token which was wedged against the identifier that terminated it
       if (pushedPendingIndex >= 0) {
         Token pushedToken = pendingStack.get(pushedPendingIndex);

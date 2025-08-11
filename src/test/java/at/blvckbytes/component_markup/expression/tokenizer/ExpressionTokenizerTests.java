@@ -134,7 +134,7 @@ public class ExpressionTokenizerTests {
     items.addAll(Arrays.asList(Punctuation.values()));
 
     for (Object item : items) {
-      if (item instanceof InfixOperator && ((InfixOperator) item).isNamed)
+      if (item instanceof InfixOperator && ((InfixOperator) item).flags.contains(OperatorFlag.NAMED))
         continue;
 
       TextWithSubViews text = new TextWithSubViews(

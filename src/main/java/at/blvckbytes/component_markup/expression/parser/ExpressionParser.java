@@ -6,10 +6,7 @@
 package at.blvckbytes.component_markup.expression.parser;
 
 import at.blvckbytes.component_markup.expression.ast.*;
-import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
-import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
+import at.blvckbytes.component_markup.expression.tokenizer.*;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
@@ -105,7 +102,7 @@ public class ExpressionParser {
 
     if (priorOperator != null) {
       if (upcomingOperator == priorOperator) {
-        if (!upcomingOperator.rightAssociative)
+        if (!upcomingOperator.flags.contains(OperatorFlag.RIGHT_ASSOCIATIVE))
           return lhs;
       }
 
@@ -308,7 +305,7 @@ public class ExpressionParser {
 
       tokenizer.nextToken();
 
-      if (!namedOperator.requiresParentheses)
+      if (!namedOperator.flags.contains(OperatorFlag.PARENS))
         throw new IllegalStateException("Named non-parenthesised prefix-operators should've been taken care of in the tokenizer");
 
       PunctuationToken punctuationToken = tokenizer.peekToken(PunctuationToken.class);

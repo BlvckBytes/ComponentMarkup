@@ -596,12 +596,12 @@ public class ExpressionParserTests {
     StringBuilder result = new StringBuilder();
 
     for (PrefixOperator prefix : prefixes) {
-      if (!prefix.requiresParentheses)
+      if (!prefix.flags.contains(OperatorFlag.PARENS))
         result.append(' ');
 
       result.append('`').append(prefix).append('´');
 
-      if (!prefix.requiresParentheses)
+      if (!prefix.flags.contains(OperatorFlag.PARENS))
         result.append(' ');
     }
 

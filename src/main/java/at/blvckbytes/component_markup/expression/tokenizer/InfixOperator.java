@@ -11,43 +11,44 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum InfixOperator implements EnumToken {
-  BRANCHING_THEN       ("then",     1, false,  true),
-  BRANCHING_ELSE       ("else",     1, false,  true),
-  DISJUNCTION          ("or",       2, false, true),
-  CONJUNCTION          ("and",      3, false, true),
-  EQUAL_TO             ("eq",       4, false, true),
-  NOT_EQUAL_TO         ("neq",      4, false, true),
-  IN                   ("in",       4, false, true),
-  MATCHES_REGEX        ("matches",  4, false, true),
-  GREATER_THAN         (">",        5, false, false),
-  GREATER_THAN_OR_EQUAL(">=",       5, false, false),
-  LESS_THAN            ("<",        5, false, false),
-  LESS_THAN_OR_EQUAL   ("<=",       5, false, false),
-  CONCATENATION        ("&",        6, false, false),
-  RANGE                ("..",       7, false, false),
-  ADDITION             ("+",        8, false, false),
-  SUBTRACTION          ("-",        8, false, false),
-  MULTIPLICATION       ("*",        9, false, false),
-  DIVISION             ("/",        9, false, false),
-  MODULO               ("%",        9, false, false),
-  EXPONENTIATION       ("^",       10,  true, false),
-  SPLIT                ("split",   11, false,  true),
-  REGEX_SPLIT          ("rsplit",  11, false,  true),
-  REPEAT               ("**",      11, false, false),
-  FALLBACK             ("??",      12, false, false),
-  SUBSCRIPTING         ("[",       13, false, false),
-  MEMBER               (".",       13, false, false),
+  BRANCHING_THEN       ("then",     1, OperatorFlag.NAMED),
+  BRANCHING_ELSE       ("else",     1, OperatorFlag.NAMED),
+  DISJUNCTION          ("or",       2, OperatorFlag.NAMED),
+  CONJUNCTION          ("and",      3, OperatorFlag.NAMED),
+  EQUAL_TO             ("eq",       4, OperatorFlag.NAMED),
+  NOT_EQUAL_TO         ("neq",      4, OperatorFlag.NAMED),
+  IN                   ("in",       4, OperatorFlag.NAMED),
+  MATCHES_REGEX        ("matches",  4, OperatorFlag.NAMED),
+  GREATER_THAN         (">",        5),
+  GREATER_THAN_OR_EQUAL(">=",       5),
+  LESS_THAN            ("<",        5),
+  LESS_THAN_OR_EQUAL   ("<=",       5),
+  CONCATENATION        ("&",        6),
+  RANGE                ("..",       7),
+  ADDITION             ("+",        8),
+  SUBTRACTION          ("-",        8),
+  MULTIPLICATION       ("*",        9),
+  DIVISION             ("/",        9),
+  MODULO               ("%",        9),
+  EXPONENTIATION       ("^",       10, OperatorFlag.RIGHT_ASSOCIATIVE),
+  SPLIT                ("split",   11, OperatorFlag.NAMED),
+  REGEX_SPLIT          ("rsplit",  11, OperatorFlag.NAMED),
+  REPEAT               ("**",      11),
+  FALLBACK             ("??",      12),
+  SUBSCRIPTING         ("[",       13),
+  MEMBER               (".",       13),
   ;
 
   public static final Set<String> RESERVED_NAMES;
 
   static {
     RESERVED_NAMES = Arrays.stream(values())
-      .filter(it -> it.isNamed)
+      .filter(it -> it.flags.contains(OperatorFlag.NAMED))
       .map(it -> it.representation)
       .collect(Collectors.toSet());
   }
@@ -60,15 +61,12 @@ public enum InfixOperator implements EnumToken {
   // former has precedence relative to the latter, thus a higher number.
   public final int precedence;
 
-  public final boolean rightAssociative;
+  public final EnumSet<OperatorFlag> flags;
 
-  public final boolean isNamed;
-
-  InfixOperator(String representation, int precedence, boolean rightAssociative, boolean isNamed) {
+  InfixOperator(String representation, int precedence, OperatorFlag... flags) {
     this.representation = representation;
     this.precedence = precedence;
-    this.rightAssociative = rightAssociative;
-    this.isNamed = isNamed;
+    this.flags = flags.length == 0 ? EnumSet.noneOf(OperatorFlag.class) : EnumSet.of(flags[0], flags);
   }
 
   @Override
