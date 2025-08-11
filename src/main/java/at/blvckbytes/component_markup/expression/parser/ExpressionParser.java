@@ -329,7 +329,7 @@ public class ExpressionParser {
       operatorToken = (PrefixOperatorToken) upcomingToken;
     }
 
-    ExpressionNode operand = parsePrefixExpression();
+    ExpressionNode operand = parseArrayExpression();
 
     if (operand == null) {
       throw new ExpressionParseException(
@@ -366,7 +366,7 @@ public class ExpressionParser {
 
         tokenizer.nextToken();
 
-        ExpressionNode nextOperand = parsePrefixExpression();
+        ExpressionNode nextOperand = parseArrayExpression();
 
         if (nextOperand == null) {
           throw new ExpressionParseException(

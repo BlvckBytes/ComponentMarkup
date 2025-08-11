@@ -123,16 +123,7 @@ public class ExpressionInterpreter {
           if (!(operandValue instanceof Iterable<?>))
             return operandValue;
 
-          Number maximumValue = null;
-
-          for (Object operand : (Iterable<?>) operandValue) {
-            Number number = valueInterpreter.asLongOrDouble(operand);
-
-            if (maximumValue == null || ((compareNumbers(number, maximumValue) > 0) ^ (prefixOperator == PrefixOperator.MIN)))
-              maximumValue = number;
-          }
-
-          return maximumValue;
+          return getMinOrMaxOfIterable((Iterable<?>) operandValue, valueInterpreter, prefixOperator == PrefixOperator.MIN);
         }
 
         default:
@@ -334,6 +325,24 @@ public class ExpressionInterpreter {
       return Double.compare(a.doubleValue(), b.doubleValue());
 
     return Long.compare(a.longValue(), b.longValue());
+  }
+
+  private static @Nullable Number getMinOrMaxOfIterable(Iterable<?> y, ValueInterpreter valueInterpreter, boolean min) {
+    Number maximumValue = null;
+
+    for (Object operand : y) {
+      Number number;
+
+      if (operand instanceof Iterable<?>)
+        number = getMinOrMaxOfIterable((Iterable<?>) operand, valueInterpreter, min);
+      else
+        number = valueInterpreter.asLongOrDouble(operand);
+
+      if (maximumValue == null || ((compareNumbers(number, maximumValue) > 0) ^ min))
+        maximumValue = number;
+    }
+
+    return maximumValue;
   }
 
   private static @Nullable Object performSubscripting(

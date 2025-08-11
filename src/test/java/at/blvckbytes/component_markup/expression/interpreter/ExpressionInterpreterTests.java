@@ -388,6 +388,12 @@ public class ExpressionInterpreterTests {
     makeCase("min(4, -2, 5, 3, -1)", null, -2);
   }
 
+  @Test
+  public void shouldMinOrMaxVariadicValuesDeep() {
+    makeCase("max(4, -2, [5, 3], [-1, [6, -3]])", null, 6);
+    makeCase("min(4, -2, [5, 3], [-1, [6, -3]])", null, -3);
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
