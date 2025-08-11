@@ -46,6 +46,9 @@ public class MarkupParser implements XmlEventConsumer {
     RESERVED_OPERATOR_NAMES = new HashSet<>();
     RESERVED_OPERATOR_NAMES.addAll(InfixOperator.RESERVED_NAMES);
     RESERVED_OPERATOR_NAMES.addAll(PrefixOperator.RESERVED_NAMES);
+    RESERVED_OPERATOR_NAMES.add("true");
+    RESERVED_OPERATOR_NAMES.add("false");
+    RESERVED_OPERATOR_NAMES.add("null");
   }
 
   private final StringView rootView;

@@ -26,7 +26,7 @@ public enum MarkupParseError {
   EMPTY_BINDING_NAME(args -> "This binding-name is empty"),
   MALFORMED_ATTRIBUTE_NAME(args -> "The attribute-name " + args[0] + " is malformed: cannot start with digits or hyphens, may only contain a-z, 0-9 and hyphens"),
   MALFORMED_IDENTIFIER(args -> "The variable-name " + args[0] + " is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),
-  RESERVED_IDENTIFIER(args -> "The variable-name " + args[0] + " is reserved by an operator and thus inaccessible within expressions"),
+  RESERVED_IDENTIFIER(args -> "The variable-name " + args[0] + " is reserved by an operator or a literal and thus inaccessible within expressions"),
   UNBALANCED_ATTRIBUTE_BRACKETS(args -> "The brackets used to enable binding on this attribute are unbalanced: missing opening- or closing-bracket"),
   UNBALANCED_CAPTURE_PARENTHESES(args -> "The parentheses used to enable capturing on this binding are unbalanced: missing opening- or closing-parentheses"),
   MULTIPLE_ATTRIBUTE_BRACKETS(args -> "The brackets used to enable binding on this attribute may only be used once!"),

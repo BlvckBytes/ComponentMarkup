@@ -897,6 +897,21 @@ public class MarkupParserErrorTests {
       MarkupParseError.RESERVED_IDENTIFIER,
       "<red *let-`split´=\"a\">"
     );
+
+    makeErrorCase(
+      MarkupParseError.RESERVED_IDENTIFIER,
+      "<red *let-`true´=\"a\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.RESERVED_IDENTIFIER,
+      "<red *let-`false´=\"a\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.RESERVED_IDENTIFIER,
+      "<red *let-`null´=\"a\">"
+    );
   }
 
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
