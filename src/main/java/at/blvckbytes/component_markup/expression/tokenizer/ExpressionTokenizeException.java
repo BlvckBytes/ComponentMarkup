@@ -11,14 +11,16 @@ public class ExpressionTokenizeException extends RuntimeException implements Err
 
   public final int position;
   public final ExpressionTokenizeError error;
+  public final String[] messagePlaceholders;
 
-  public ExpressionTokenizeException(int position, ExpressionTokenizeError error) {
+  public ExpressionTokenizeException(int position, ExpressionTokenizeError error, String... messagePlaceholders) {
     this.position = position;
     this.error = error;
+    this.messagePlaceholders = messagePlaceholders;
   }
 
   @Override
   public String getErrorMessage() {
-    return error.getErrorMessage();
+    return error.messageBuilder.apply(messagePlaceholders);
   }
 }

@@ -124,7 +124,7 @@ public class ExpressionTokenizer {
     }
 
     if (!isTerminated)
-      throw new ExpressionTokenizeException(rawStartInclusive, ExpressionTokenizeError.UNTERMINATED_STRING);
+      throw new ExpressionTokenizeException(rawStartInclusive, ExpressionTokenizeError.UNTERMINATED_STRING, String.valueOf(quoteChar));
 
     int rawEndInclusive = input.getPosition();
 

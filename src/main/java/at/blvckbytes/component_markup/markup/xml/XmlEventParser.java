@@ -194,7 +194,15 @@ public class XmlEventParser {
     // By calling into expression-syntax for strings, we also inherit the ability to have
     // template-literals as direct attribute-values without having to bind them separately, all
     // while avoiding duplicate string-parser logic; win-win!
-    TerminalToken stringToken = expressionTokenizer.parseStringToken();
+    TerminalToken stringToken;
+
+    try {
+      stringToken = expressionTokenizer.parseStringToken();
+    } catch (ExpressionTokenizeException expressionTokenizeException) {
+      throw new MarkupParseException(attributeName.startInclusive, expressionTokenizeException);
+    } catch (ExpressionParseException expressionParseException) {
+      throw new MarkupParseException(attributeName.startInclusive, expressionParseException);
+    }
 
     if (stringToken == null)
       throw new IllegalStateException("Expected to always receive a value");
