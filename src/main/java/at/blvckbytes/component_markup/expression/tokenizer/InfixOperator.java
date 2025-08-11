@@ -10,6 +10,10 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public enum InfixOperator implements EnumToken {
   BRANCHING_THEN       ("then",     1, false,  true),
   BRANCHING_ELSE       ("else",     1, false,  true),
@@ -38,6 +42,15 @@ public enum InfixOperator implements EnumToken {
   SUBSCRIPTING         ("[",       13, false, false),
   MEMBER               (".",       13, false, false),
   ;
+
+  public static final Set<String> RESERVED_NAMES;
+
+  static {
+    RESERVED_NAMES = Arrays.stream(values())
+      .filter(it -> it.isNamed)
+      .map(it -> it.representation)
+      .collect(Collectors.toSet());
+  }
 
   public final String representation;
 

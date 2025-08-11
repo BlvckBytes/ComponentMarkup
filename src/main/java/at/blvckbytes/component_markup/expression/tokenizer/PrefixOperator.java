@@ -10,6 +10,10 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public enum PrefixOperator implements EnumToken {
   NEGATION   ("not",     true, false),
   FLIP_SIGN  ("-",      false, false),
@@ -27,6 +31,15 @@ public enum PrefixOperator implements EnumToken {
   CEIL       ("ceil",    true,  true),
   ROUND      ("round",   true,  true),
   ;
+
+  public static final Set<String> RESERVED_NAMES;
+
+  static {
+    RESERVED_NAMES = Arrays.stream(values())
+      .filter(it -> it.isNamed && !it.requiresParentheses)
+      .map(it -> it.representation)
+      .collect(Collectors.toSet());
+  }
 
   public final String representation;
   public final boolean isNamed;

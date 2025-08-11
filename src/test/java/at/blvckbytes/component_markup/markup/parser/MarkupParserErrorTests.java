@@ -886,6 +886,19 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnBindingNamesWhichAreReservedForOperators() {
+    makeErrorCase(
+      MarkupParseError.RESERVED_IDENTIFIER,
+      "<red *for-`split´=\"a\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.RESERVED_IDENTIFIER,
+      "<red *let-`split´=\"a\">"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

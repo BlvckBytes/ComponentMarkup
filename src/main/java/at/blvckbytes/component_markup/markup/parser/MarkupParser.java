@@ -7,6 +7,8 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
@@ -32,9 +34,19 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 public class MarkupParser implements XmlEventConsumer {
+
+  public static final Set<String> RESERVED_OPERATOR_NAMES;
+
+  static {
+    RESERVED_OPERATOR_NAMES = new HashSet<>();
+    RESERVED_OPERATOR_NAMES.addAll(InfixOperator.RESERVED_NAMES);
+    RESERVED_OPERATOR_NAMES.addAll(PrefixOperator.RESERVED_NAMES);
+  }
 
   private final StringView rootView;
   private final @Nullable TokenOutput tokenOutput;
@@ -819,6 +831,9 @@ public class MarkupParser implements XmlEventConsumer {
 
     if (length == 0)
       return true;
+
+    if (expression && RESERVED_OPERATOR_NAMES.contains(identifier.buildString()))
+      throw new MarkupParseException(identifier, MarkupParseError.RESERVED_IDENTIFIER, identifier.buildString());
 
     char separator = expression ? '_' : '-';
 
