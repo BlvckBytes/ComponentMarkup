@@ -15,6 +15,8 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MarkupInterpreterTests extends InterpreterTestsBase {
 
@@ -1115,6 +1117,28 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
                 .string("translate", "first middle second")
             ))
         ))
+    );
+  }
+
+  @Test
+  public void shouldBeAbleToIterateAMap() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<container *for-entry=\"my_map\">{entry}{my_map[entry]}"
+    );
+
+    Map<String, String> myMap = new HashMap<>();
+
+    myMap.put("A", "1");
+    myMap.put("B", "2");
+    myMap.put("C", "3");
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("my_map", myMap),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "A1B2C3")
     );
   }
 }
