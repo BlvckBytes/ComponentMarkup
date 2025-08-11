@@ -7,13 +7,17 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.util.StringView;
 
-public class FlagAttributeEvent implements XmlEvent {
+public class NullAttributeEvent implements XmlEvent {
 
   public final StringView name;
   public final String nameBuildResult;
+  public final StringView raw;
+  public final String rawBuildResult;
 
-  public FlagAttributeEvent(StringView name, String nameBuildResult) {
+  public NullAttributeEvent(StringView name, StringView raw, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
+    this.raw = raw;
+    this.rawBuildResult = rawBuildResult;
   }
 }

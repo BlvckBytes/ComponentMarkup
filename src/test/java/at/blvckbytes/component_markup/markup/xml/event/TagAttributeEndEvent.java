@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.util.StringView;
 
-public class TagAttributeEndEvent extends XmlEvent {
+public class TagAttributeEndEvent implements XmlEvent {
 
   public final StringView name;
 

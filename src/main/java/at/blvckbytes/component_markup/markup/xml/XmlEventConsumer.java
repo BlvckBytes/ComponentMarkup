@@ -19,6 +19,10 @@ public interface XmlEventConsumer {
 
   void onDoubleAttribute(StringView name, StringView raw, double value);
 
+  void onBooleanAttribute(StringView name, StringView raw, boolean value);
+
+  void onNullAttribute(StringView name, StringView raw);
+
   void onTagAttributeBegin(StringView name, int valueBeginPosition);
 
   void onTagAttributeEnd(StringView name);

@@ -16,7 +16,8 @@ public enum XmlParseError implements ErrorMessage {
   UNESCAPED_CURLY("Literal curly-brackets need to be escaped: \\{ or \\}"),
   MALFORMED_NUMBER("This number is malformed"),
   MALFORMED_COMMENT("This comment is malformed, use: <!-- ... -->"),
-  UNSUPPORTED_ATTRIBUTE_VALUE("This value is not one of: string, number, markup"),
+  UNSUPPORTED_ATTRIBUTE_VALUE("This value is not one of: string, number, markup, literal (true, false, null)"),
+  MISSING_ATTRIBUTE_VALUE("This attribute expected a value after the equals-sign"),
   MISSING_TAG_NAME("This tag is missing its name"),
   EXPECTED_ATTRIBUTE_KEY("Expected an attribute-key but found a value");
 

@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.util.StringView;
 
-public class InterpolationEvent extends XmlEvent {
+public class InterpolationEvent implements XmlEvent {
 
   public final StringView expression;
   public final String expressionBuildResult;

@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-public class TagCloseEvent extends XmlEvent {
+public class TagCloseEvent implements XmlEvent {
 
   public final @Nullable StringView tagName;
   public final @Nullable String tagNameBuildResult;

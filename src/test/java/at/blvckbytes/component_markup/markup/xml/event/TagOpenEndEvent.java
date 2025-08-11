@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.util.StringView;
 
-public class TagOpenEndEvent extends XmlEvent {
+public class TagOpenEndEvent implements XmlEvent {
 
   public final StringView tagName;
   public final boolean wasSelfClosing;

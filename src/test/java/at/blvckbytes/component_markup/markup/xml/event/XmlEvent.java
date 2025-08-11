@@ -5,4 +5,4 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-public class XmlEvent {}
+public interface XmlEvent {}

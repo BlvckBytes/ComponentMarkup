@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.util.StringView;
 
-public class StringAttributeEvent extends XmlEvent {
+public class StringAttributeEvent implements XmlEvent {
 
   public final StringView name;
   public final String nameBuildResult;

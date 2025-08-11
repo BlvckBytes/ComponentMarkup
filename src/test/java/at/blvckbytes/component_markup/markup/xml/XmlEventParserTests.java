@@ -742,8 +742,12 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnUnsupportedAttributeValues() {
     makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "<red>");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "'test'");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "tru");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "truea");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "fals");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "falsea");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nul");
+    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nulla");
   }
 
   @Test
@@ -830,6 +834,53 @@ public class XmlEventParserTests {
       XmlParseError.EMPTY_INTERPOLATION,
       text.subView(1).startInclusive,
       new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "hello ")
+    );
+  }
+
+  @Test
+  public void shouldParseLiterals() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`red´ `a´=`true´ `b´=`false´ `c´=`null´>"
+    );
+
+    makeCase(
+      text,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new BooleanAttributeEvent(text.subView(1), text.subView(2), true, "a", "true"),
+      new BooleanAttributeEvent(text.subView(3), text.subView(4), false, "b", "false"),
+      new NullAttributeEvent(text.subView(5), text.subView(6), "c", "null"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMissingAttributeValue() {
+    TextWithSubViews text = new TextWithSubViews("<`red´ `a´=>");
+
+    makeCase(
+      text,
+      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      text.subView(1).startInclusive,
+      new TagOpenBeginEvent(text.subView(0), "red")
+    );
+
+    text = new TextWithSubViews("<`red´ `a´=   >");
+
+    makeCase(
+      text,
+      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      text.subView(1).startInclusive,
+      new TagOpenBeginEvent(text.subView(0), "red")
+    );
+
+    text = new TextWithSubViews("<`red´ `a´= <red>>");
+
+    makeCase(
+      text,
+      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      text.subView(1).startInclusive,
+      new TagOpenBeginEvent(text.subView(0), "red")
     );
   }
 

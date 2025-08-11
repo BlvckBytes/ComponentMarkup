@@ -380,8 +380,35 @@ public class XmlEventParser {
         parseNumericAttributeValue(attributeName);
         return true;
 
-      default:
-        throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, input.getPosition() + 1);
+      default: {
+        int beginPosition = input.getPosition() + 1;
+        StringView valueIdentifier = tryParseIdentifier();
+
+        if (valueIdentifier == null)
+          throw new XmlParseException(XmlParseError.MISSING_ATTRIBUTE_VALUE, attributeName.startInclusive);
+
+        switch (valueIdentifier.buildString()) {
+          case "true":
+            consumer.onBooleanAttribute(attributeName, valueIdentifier, true);
+            break;
+
+          case "false":
+            consumer.onBooleanAttribute(attributeName, valueIdentifier, false);
+            break;
+
+          case "null":
+            consumer.onNullAttribute(attributeName, valueIdentifier);
+            break;
+
+          default:
+            throw new XmlParseException(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, beginPosition);
+        }
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(TokenType.MARKUP__LITERAL, valueIdentifier);
+
+        return true;
+      }
     }
   }
 

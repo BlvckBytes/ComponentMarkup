@@ -39,6 +39,16 @@ public class XmlEventJoiner implements XmlEventConsumer {
   }
 
   @Override
+  public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
+    events.add(new BooleanAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
+  }
+
+  @Override
+  public void onNullAttribute(StringView name, StringView raw) {
+    events.add(new NullAttributeEvent(name, raw, name.buildString(), raw.buildString()));
+  }
+
+  @Override
   public void onTagOpenEnd(StringView tagName, boolean wasSelfClosing) {
     events.add(new TagOpenEndEvent(tagName, wasSelfClosing));
   }
