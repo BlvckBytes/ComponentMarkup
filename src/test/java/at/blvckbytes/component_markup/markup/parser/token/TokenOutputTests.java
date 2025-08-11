@@ -145,7 +145,7 @@ public class TokenOutputTests {
       /*   3 */ "  ``Currently,´` ´`the´` ´`following´` ´`players´` ´`are´` ´`online:´´`<´`space´`/´`>´",
       /*  19 */ "  `<´`red´",
       /*  21 */ "    `*´`for´`-´`player_name´`=´``\"´`player_names´`\"´´",
-      /*  30 */ "    `*´`if´`=´``\"´`player_name´` ´`!=´` ´`'Steve'´`\"´´",
+      /*  30 */ "    `*´`if´`=´``\"´`player_name´` ´`neq´` ´`'Steve'´`\"´´",
       /*  41 */ "    `*´`let´`-´`position_number´`=´``\"´` ´`loop´`.´`index´` ´`+´` ´`1´`\"´´",
       /*  57 */ "    `*´`for-separator´`=´`{´`<´`gray´`>´``,´` ´´`}´",
       /*  68 */ "  `>´",
@@ -198,7 +198,7 @@ public class TokenOutputTests {
           new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(33)) // "\"player_name != 'Steve'\""
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
-            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(37))) // "!="
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__NAMED_INFIX_OPERATOR, text.subView(37))) // "!="
             .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         )
@@ -322,7 +322,7 @@ public class TokenOutputTests {
         .add(new Token(TokenType.MARKUP__STRING, text.subView(34))) // "\""
         .add(new Token(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(35))) // "player_name"
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(36))) // " "
-        .add(new Token(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(37))) // "!="
+        .add(new Token(TokenType.EXPRESSION__NAMED_INFIX_OPERATOR, text.subView(37))) // "!="
         .add(new Token(TokenType.ANY__WHITESPACE, text.subView(38))) // " "
         .add(new Token(TokenType.EXPRESSION__STRING, text.subView(39))) // "'Steve'"
         .add(new Token(TokenType.MARKUP__STRING, text.subView(40))) // "\""

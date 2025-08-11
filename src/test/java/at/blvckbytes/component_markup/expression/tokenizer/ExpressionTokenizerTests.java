@@ -22,9 +22,9 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeAllTypes() {
     TextWithSubViews text = new TextWithSubViews(
-      "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `&&´ `2.7182´ `>=´ `*´ `||´ `true´",
-      "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `==´ `^´ `my_variable´ `!=´ `&´ `)´ `..´ `.5´",
-      "`@´ `@@´ `**´ `::´ `:::´ `:::´`::´"
+      "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
+      "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `eq´ `^´ `my_variable´ `neq´ `&´ `)´ `..´ `.5´",
+      "`@´ `@@´ `**´ `in´ `matches´"
     );
 
     int index = 0;
@@ -66,10 +66,8 @@ public class ExpressionTokenizerTests {
       InfixOperator.EXPLODE, text.subView(index++),
       InfixOperator.EXPLODE_REGEX, text.subView(index++),
       InfixOperator.REPEAT, text.subView(index++),
-      InfixOperator.CONTAINS, text.subView(index++),
-      InfixOperator.MATCHES_REGEX, text.subView(index++),
-      InfixOperator.MATCHES_REGEX, text.subView(index++),
-      InfixOperator.CONTAINS, text.subView(index)
+      InfixOperator.IN, text.subView(index++),
+      InfixOperator.MATCHES_REGEX, text.subView(index)
     );
   }
 
@@ -135,6 +133,9 @@ public class ExpressionTokenizerTests {
     items.addAll(Arrays.asList(Punctuation.values()));
 
     for (Object item : items) {
+      if (item instanceof InfixOperator && ((InfixOperator) item).isNamed)
+        continue;
+
       TextWithSubViews text = new TextWithSubViews(
         "`before´ `a´`" + item + "´`b´ `after´"
       );
@@ -297,29 +298,6 @@ public class ExpressionTokenizerTests {
     makeErrorCase(
       text,
       ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS,
-      text.subView(0).startInclusive
-    );
-  }
-
-  @Test
-  public void shouldThrowOnMalformedKnownOperators() {
-    TextWithSubViews text = new TextWithSubViews(
-      "`|´"
-    );
-
-    makeErrorCase(
-      text,
-      ExpressionTokenizeError.SINGLE_PIPE,
-      text.subView(0).startInclusive
-    );
-
-    text = new TextWithSubViews(
-      "`=´"
-    );
-
-    makeErrorCase(
-      text,
-      ExpressionTokenizeError.SINGLE_EQUALS,
       text.subView(0).startInclusive
     );
   }

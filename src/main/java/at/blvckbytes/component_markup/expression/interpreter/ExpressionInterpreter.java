@@ -256,8 +256,8 @@ public class ExpressionInterpreter {
         case SUBSCRIPTING:
           return performSubscripting(node.operatorToken, lhsValue, rhsValue, false, environment);
 
-        case CONTAINS:
-          return checkContains(lhsValue, rhsValue, valueInterpreter);
+        case IN:
+          return checkContains(rhsValue, lhsValue, valueInterpreter);
 
         case MATCHES_REGEX: {
           String input = valueInterpreter.asString(lhsValue);

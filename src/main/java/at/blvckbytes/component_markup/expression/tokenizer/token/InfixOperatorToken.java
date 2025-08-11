@@ -21,6 +21,9 @@ public class InfixOperatorToken extends Token {
 
   @Override
   public TokenType getType() {
+    if (operator.isNamed)
+      return TokenType.EXPRESSION__NAMED_INFIX_OPERATOR;
+
     return TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY;
   }
 }

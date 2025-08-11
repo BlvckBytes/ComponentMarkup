@@ -216,43 +216,43 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldCheckIfStringContains() {
-    makeCase("'abc' :: 'abcde'", false);
-    makeCase("'abcde' :: 'abc'", true);
-    makeCase("'ABCDE' :: 'abc'", false);
-    makeCase("lower('ABCDE') :: 'abc'", true);
-    makeCase("null :: 'abc'", false);
-    makeCase("'abc' :: null", false);
-    makeCase("null :: null", true);
-    makeCase("'' :: 'abc'", false);
-    makeCase("'a' :: ''", true);
-    makeCase("'' :: ''", true);
-    makeCase("'abc' :: 123", false);
-    makeCase("123 :: '123'", true);
+    makeCase("'abcde' in 'abc'", false);
+    makeCase("'abc' in 'abcde'", true);
+    makeCase("'abc' in 'ABCDE'", false);
+    makeCase("'abc' in lower('ABCDE')", true);
+    makeCase("'abc' in null", false);
+    makeCase("null in 'abc'", false);
+    makeCase("null in null", true);
+    makeCase("'abc' in ''", false);
+    makeCase("'' in 'a'", true);
+    makeCase("'' in ''", true);
+    makeCase("123 in 'abc'", false);
+    makeCase("'123' in 123", true);
   }
 
   @Test
   public void shouldCheckIfRegexMatches() {
-    makeCase("'ABCDEF' ::: '[A-Z]{4,}'", true);
-    makeCase("'ABC' ::: '[A-Z]{4,}'", false);
-    makeCase("'foobar123' ::: '\\d+'", true);
-    makeCase("'foobar' ::: '\\d+'", false);
-    makeCase("'hello world' ::: 'world'", true);
-    makeCase("'start middle end' ::: '^start'", true);
-    makeCase("'start middle end' ::: 'end$'", true);
-    makeCase("'start middle end' ::: '^middle'", false);
-    makeCase("'start middle end' ::: 'middle$'", false);
-    makeCase("'Hello' ::: 'hello'", false);
-    makeCase("lower('Hello') ::: 'hello'", true);
-    makeCase("'Hello' ::: '(?i)hello'", true);
-    makeCase("'cat' ::: 'cat|dog'", true);
-    makeCase("'dog' ::: 'cat|dog'", true);
-    makeCase("'cow' ::: 'cat|dog'", false);
-    makeCase("'foobar' ::: '(foo)(bar)'", true);
-    makeCase("'aaaab' ::: 'a{3,5}b'", true);
-    makeCase("'aaab' ::: 'a{4,5}b'", false);
-    makeCase("'price: $12.50' ::: '\\$\\d+\\.\\d{2}'", true);
-    makeCase("'just text' ::: '\\$\\d+'", false);
-    makeCase("12345 ::: '\\d+'", true);
+    makeCase("'ABCDEF' matches '[A-Z]{4,}'", true);
+    makeCase("'ABC' matches '[A-Z]{4,}'", false);
+    makeCase("'foobar123' matches '\\d+'", true);
+    makeCase("'foobar' matches '\\d+'", false);
+    makeCase("'hello world' matches 'world'", true);
+    makeCase("'start middle end' matches '^start'", true);
+    makeCase("'start middle end' matches 'end$'", true);
+    makeCase("'start middle end' matches '^middle'", false);
+    makeCase("'start middle end' matches 'middle$'", false);
+    makeCase("'Hello' matches 'hello'", false);
+    makeCase("lower('Hello') matches 'hello'", true);
+    makeCase("'Hello' matches '(?i)hello'", true);
+    makeCase("'cat' matches 'cat|dog'", true);
+    makeCase("'dog' matches 'cat|dog'", true);
+    makeCase("'cow' matches 'cat|dog'", false);
+    makeCase("'foobar' matches '(foo)(bar)'", true);
+    makeCase("'aaaab' matches 'a{3,5}b'", true);
+    makeCase("'aaab' matches 'a{4,5}b'", false);
+    makeCase("'price: $12.50' matches '\\$\\d+\\.\\d{2}'", true);
+    makeCase("'just text' matches '\\$\\d+'", false);
+    makeCase("12345 matches '\\d+'", true);
   }
 
   @Test

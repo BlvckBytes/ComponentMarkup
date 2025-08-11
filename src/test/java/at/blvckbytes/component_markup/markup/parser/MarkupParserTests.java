@@ -83,7 +83,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseForLoopWithConditional() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`container´ `*for-`member´´=\"`members´\" *if=\"`member != null´\">",
+      "<`container´ `*for-`member´´=\"`members´\" *if=\"`member neq null´\">",
       "  `hello, ´{`member´}`!",
       "´</container>"
     );

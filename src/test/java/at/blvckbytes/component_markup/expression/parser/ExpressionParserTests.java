@@ -226,7 +226,7 @@ public class ExpressionParserTests {
     );
 
     text = new TextWithSubViews(
-      "`a´ `&&´ `!´`b´"
+      "`a´ `and´ `!´`b´"
     );
 
     makeCase(
@@ -630,7 +630,7 @@ public class ExpressionParserTests {
   public void shouldConvertNodesToExpressions() {
     makeCasePlain("5 + 4");
     makeCasePlain("a[b].c");
-    makeCasePlain("d && (f || g)");
+    makeCasePlain("d and (f or g)");
     makeCasePlain(".23 - .4 & 'hello'");
     makeCasePlain("a[:]");
     makeCasePlain("a[b:]");

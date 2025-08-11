@@ -8,61 +8,53 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.StringView;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public enum InfixOperator implements EnumToken {
-  BRANCHING            ("?",   1, false),
-  DISJUNCTION          ("||",  2, false),
-  CONJUNCTION          ("&&",  3, false),
-  EQUAL_TO             ("==",  4, false),
-  NOT_EQUAL_TO         ("!=",  4, false),
-  CONTAINS             ("::",  4, false),
-  MATCHES_REGEX        (":::", 4, false),
-  GREATER_THAN         (">",   5, false),
-  GREATER_THAN_OR_EQUAL(">=",  5, false),
-  LESS_THAN            ("<",   5, false),
-  LESS_THAN_OR_EQUAL   ("<=",  5, false),
-  CONCATENATION        ("&",   6, false),
-  RANGE                ("..",  7, false),
-  ADDITION             ("+",   8, false),
-  SUBTRACTION          ("-",   8, false),
-  MULTIPLICATION       ("*",   9, false),
-  DIVISION             ("/",   9, false),
-  MODULO               ("%",   9, false),
-  EXPONENTIATION       ("^",  10, true),
-  EXPLODE              ("@",  11, false),
-  EXPLODE_REGEX        ("@@", 11, false),
-  REPEAT               ("**", 11, false),
-  FALLBACK             ("??", 12, false),
-  SUBSCRIPTING         ("[",  13, false),
-  MEMBER               (".",  13, false),
+  BRANCHING            ("?",        1, false, false),
+  DISJUNCTION          ("or",       2, false, true),
+  CONJUNCTION          ("and",      3, false, true),
+  EQUAL_TO             ("eq",       4, false, true),
+  NOT_EQUAL_TO         ("neq",      4, false, true),
+  IN                   ("in",       4, false, true),
+  MATCHES_REGEX        ("matches",  4, false, true),
+  GREATER_THAN         (">",        5, false, false),
+  GREATER_THAN_OR_EQUAL(">=",       5, false, false),
+  LESS_THAN            ("<",        5, false, false),
+  LESS_THAN_OR_EQUAL   ("<=",       5, false, false),
+  CONCATENATION        ("&",        6, false, false),
+  RANGE                ("..",       7, false, false),
+  ADDITION             ("+",        8, false, false),
+  SUBTRACTION          ("-",        8, false, false),
+  MULTIPLICATION       ("*",        9, false, false),
+  DIVISION             ("/",        9, false, false),
+  MODULO               ("%",        9, false, false),
+  EXPONENTIATION       ("^",       10,  true, false),
+  EXPLODE              ("@",       11, false, false),
+  EXPLODE_REGEX        ("@@",      11, false, false),
+  REPEAT               ("**",      11, false, false),
+  FALLBACK             ("??",      12, false, false),
+  SUBSCRIPTING         ("[",       13, false, false),
+  MEMBER               (".",       13, false, false),
   ;
-
-  public static final List<InfixOperator> CONTAINING_PIPE = Collections.singletonList(
-    DISJUNCTION
-  );
-
-  public static final List<InfixOperator> CONTAINING_EQUALS = Arrays.asList(
-    EQUAL_TO, NOT_EQUAL_TO, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL
-  );
 
   public final String representation;
 
   // Higher precedence means is evaluated *earlier*.
-  // Assuming the following input: "5 + 3 >= 2 + 1", the
-  // operator + is evaluated before the operator >= is, so the
+  // Assuming the following input: "5 + 3 gt 2 + 1", the
+  // operator + is evaluated before the operator gt is, so the
   // former has precedence relative to the latter, thus a higher number.
   public final int precedence;
 
   public final boolean rightAssociative;
 
-  InfixOperator(String representation, int precedence, boolean rightAssociative) {
+  public final boolean isNamed;
+
+  InfixOperator(String representation, int precedence, boolean rightAssociative, boolean isNamed) {
     this.representation = representation;
     this.precedence = precedence;
     this.rightAssociative = rightAssociative;
+    this.isNamed = isNamed;
   }
 
   @Override
@@ -78,5 +70,24 @@ public enum InfixOperator implements EnumToken {
   @Override
   public int getLength() {
     return representation.length();
+  }
+
+  public static @Nullable InfixOperator byName(String name) {
+    switch (name) {
+      case "or":
+        return DISJUNCTION;
+      case "and":
+        return CONJUNCTION;
+      case "eq":
+        return EQUAL_TO;
+      case "neq":
+        return NOT_EQUAL_TO;
+      case "in":
+        return IN;
+      case "matches":
+        return MATCHES_REGEX;
+      default:
+        return null;
+    }
   }
 }

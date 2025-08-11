@@ -92,7 +92,7 @@ public class ExpressionParserErrorTests {
     }
 
     for (InfixOperator operator : InfixOperator.values()) {
-      if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION || operator == InfixOperator.CONTAINS || operator == InfixOperator.MATCHES_REGEX)
+      if (operator == InfixOperator.SUBSCRIPTING || operator == InfixOperator.SUBTRACTION || operator == InfixOperator.IN || operator == InfixOperator.MATCHES_REGEX)
         continue;
 
       text = new TextWithSubViews(

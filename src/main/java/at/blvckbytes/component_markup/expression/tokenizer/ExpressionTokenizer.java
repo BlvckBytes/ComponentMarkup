@@ -189,20 +189,26 @@ public class ExpressionTokenizer {
     if (beginInclusive < 0)
       throw new IllegalStateException("Expected to only be called if peekChar(0) != 0 or ' ' or '.'");
 
-    StringView value = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
+    StringView raw = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
+    String value = raw.buildString();
 
-    switch (value.buildString()) {
+    switch (value) {
       case "true":
-        return new BooleanToken(value, true);
+        return new BooleanToken(raw, true);
 
       case "false":
-        return new BooleanToken(value, false);
+        return new BooleanToken(raw, false);
 
       case "null":
-        return new NullToken(value);
+        return new NullToken(raw);
     }
 
-    return new IdentifierToken(value, value.buildString());
+    InfixOperator operator = InfixOperator.byName(value);
+
+    if (operator != null)
+      return new InfixOperatorToken(raw, operator);
+
+    return new IdentifierToken(raw, raw.buildString());
   }
 
   private int collectSubsequentDigitsAndGetFirstIndex() {
@@ -324,21 +330,8 @@ public class ExpressionTokenizer {
         break;
 
       case '&':
-        if (_peekChar(1) == '&') {
-          enumToken = InfixOperator.CONJUNCTION;
-          break;
-        }
-
         enumToken = InfixOperator.CONCATENATION;
         break;
-
-      case '|':
-        if (_peekChar(1) == '|') {
-          enumToken = InfixOperator.DISJUNCTION;
-          break;
-        }
-
-        throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_PIPE);
 
       case '?':
         if (_peekChar(1) == '?') {
@@ -359,16 +352,6 @@ public class ExpressionTokenizer {
         break;
 
       case ':':
-        if (_peekChar(1) == ':') {
-          if (_peekChar(2) == ':') {
-            enumToken = InfixOperator.MATCHES_REGEX;
-            break;
-          }
-
-          enumToken = InfixOperator.CONTAINS;
-          break;
-        }
-
         enumToken = Punctuation.COLON;
         break;
 
@@ -390,20 +373,7 @@ public class ExpressionTokenizer {
         enumToken = InfixOperator.LESS_THAN;
         break;
 
-      case '=':
-        if (_peekChar(1) == '=') {
-          enumToken = InfixOperator.EQUAL_TO;
-          break;
-        }
-
-        throw new ExpressionTokenizeException(input.getPosition() + 1, ExpressionTokenizeError.SINGLE_EQUALS);
-
       case '!':
-        if (_peekChar(1) == '=') {
-          enumToken = InfixOperator.NOT_EQUAL_TO;
-          break;
-        }
-
         enumToken = PrefixOperator.NEGATION;
         break;
 
