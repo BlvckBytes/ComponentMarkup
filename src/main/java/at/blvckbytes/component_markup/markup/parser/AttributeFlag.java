@@ -10,5 +10,4 @@ public enum AttributeFlag {
   INTRINSIC_LITERAL,
   SPREAD_MODE,
   BINDING_MODE,
-  FLAG_NEGATION,
 }

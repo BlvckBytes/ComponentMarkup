@@ -475,14 +475,13 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   @Test
   public void shouldParseFlagAttributes() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`style´ `i´ !`b´>`hello, world´"
+      "<`style´ `i´>`hello, world´"
     );
 
     makeCase(
       text,
-      text(text.subView(3).setBuildFlags(SubstringFlag.LAST_TEXT))
+      text(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT))
         .format(Format.ITALIC, bool(text.subView(1).setLowercase(), true))
-        .format(Format.BOLD, bool(text.subView(2).setLowercase(), false))
     );
   }
 }

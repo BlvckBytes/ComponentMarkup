@@ -28,7 +28,7 @@ public class AttributeName {
     return flags.contains(flag);
   }
 
-  public static AttributeName parse(StringView attributeName, @Nullable TokenOutput tokenOutput, boolean allowsNegation) {
+  public static AttributeName parse(StringView attributeName, @Nullable TokenOutput tokenOutput) {
     StringView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
@@ -108,24 +108,6 @@ public class AttributeName {
 
         flags.add(AttributeFlag.SPREAD_MODE);
         attributeName = attributeName.buildSubViewRelative(3);
-        continue;
-      }
-
-      if (firstChar == '!') {
-        if (flags.contains(AttributeFlag.FLAG_NEGATION))
-          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS);
-
-        if (!allowsNegation)
-          throw new MarkupParseException(attributeName, MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION);
-
-        if (tokenOutput != null)
-          tokenOutput.emitCharToken(attributeName.startInclusive, TokenType.MARKUP__OPERATOR__NEGATE);
-
-        if (nameLength == 1)
-          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
-
-        flags.add(AttributeFlag.FLAG_NEGATION);
-        attributeName = attributeName.buildSubViewRelative(1);
         continue;
       }
 

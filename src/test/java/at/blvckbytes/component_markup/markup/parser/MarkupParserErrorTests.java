@@ -133,32 +133,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnMultipleNegations() {
-    makeErrorCase(
-      MarkupParseError.MULTIPLE_ATTRIBUTE_NEGATIONS,
-      "<container !`!´test>"
-    );
-  }
-
-  @Test
-  public void shouldThrowOnDisallowedNegation() {
-    makeErrorCase(
-      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container `!´my-attr=5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container *`!´my-attr=\"hello\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.DISALLOWED_ATTRIBUTE_NEGATION,
-      "<container `!´my-attr={}>"
-    );
-  }
-
-  @Test
   public void shouldThrowOnUnnamedForLoop() {
     makeErrorCase(
       MarkupParseError.UNNAMED_FOR_LOOP,
@@ -543,7 +517,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<red *for-member=\"members\" *for-reversed `*!for-reversed´>"
+      "<red *for-member=\"members\" *for-reversed `*for-reversed´=false>"
     );
 
     makeErrorCase(
@@ -583,7 +557,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt coordinates=\"a\" path=\"b\" interpret `!interpret´/>"
+      "<block-nbt coordinates=\"a\" path=\"b\" interpret `interpret´=false/>"
     );
   }
 
@@ -691,21 +665,6 @@ public class MarkupParserErrorTests {
         "----^",
         "Error: This tag requires a separate closing-tag </red>, as it expects content and does not support self-closing <red />",
         "2:   let-a=\"b\"",
-        "3: />"
-      )
-    );
-
-    makeErrorScreenCase(
-      new TextWithSubViews(
-        "<red",
-        "  !!my-attr",
-        "/>"
-      ),
-      new TextWithSubViews(
-        "1: <red",
-        "2:   !!my-attr",
-        "------^",
-        "Error: The exclamation-mark used to mark flag-attributes as negated may only be used once!",
         "3: />"
       )
     );

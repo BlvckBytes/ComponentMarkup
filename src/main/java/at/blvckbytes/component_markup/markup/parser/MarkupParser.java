@@ -93,7 +93,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
       handleIntrinsicAttribute(attributeName, value, null);
@@ -115,7 +115,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
       handleIntrinsicAttribute(attributeName, raw, null);
@@ -139,7 +139,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
       handleIntrinsicAttribute(attributeName, raw, value);
@@ -163,7 +163,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
       handleIntrinsicAttribute(attributeName, raw, value);
@@ -187,7 +187,7 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
       handleIntrinsicAttribute(attributeName, raw, null);
@@ -228,7 +228,7 @@ public class MarkupParser implements XmlEventConsumer {
     else
       throw new IllegalStateException("Expected there to be a subtree-parser");
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, false);
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     MarkupNode subtree = subtreeParser.result;
     subtreeParser = null;
@@ -251,8 +251,8 @@ public class MarkupParser implements XmlEventConsumer {
       return;
     }
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput, true);
-    ExpressionNode value = ImmediateExpression.ofBoolean(attributeName.finalName, !attributeName.has(AttributeFlag.FLAG_NEGATION));
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
+    ExpressionNode value = ImmediateExpression.ofBoolean(attributeName.finalName, true);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
       handleIntrinsicAttribute(attributeName, null, value);

@@ -29,8 +29,6 @@ public enum MarkupParseError {
   UNBALANCED_CAPTURE_PARENTHESES(args -> "The parentheses used to enable capturing on this binding are unbalanced: missing opening- or closing-parentheses"),
   MULTIPLE_ATTRIBUTE_BRACKETS(args -> "The brackets used to enable binding on this attribute may only be used once!"),
   MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS(args -> "The asterisk-/plus-symbol used to mark intrinsic attributes may only be used once!"),
-  MULTIPLE_ATTRIBUTE_NEGATIONS(args -> "The exclamation-mark used to mark flag-attributes as negated may only be used once!"),
-  DISALLOWED_ATTRIBUTE_NEGATION(args -> "Negation may only be used on flag-attributes"),
   LATE_ATTRIBUTE_BRACKETS(args -> "The brackets used to enable binding on this attribute may only appear at the very outside of the name!"),
   MULTIPLE_ATTRIBUTE_SPREADS(args -> "The three dots used to enable spreading on this attribute may only be used once!"),
   MULTIPLE_CAPTURE_PARENTHESES(args -> "The parentheses used to enable capturing on this binding may only be used once!"),
