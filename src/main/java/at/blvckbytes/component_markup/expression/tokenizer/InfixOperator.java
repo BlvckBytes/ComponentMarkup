@@ -10,10 +10,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public enum InfixOperator implements EnumToken {
   BRANCHING_THEN       ("then",     1, OperatorFlag.NAMED),
@@ -45,12 +42,17 @@ public enum InfixOperator implements EnumToken {
   ;
 
   public static final Set<String> RESERVED_NAMES;
+  private static final Map<String, InfixOperator> OPERATOR_BY_NAME;
 
   static {
-    RESERVED_NAMES = Arrays.stream(values())
-      .filter(it -> it.flags.contains(OperatorFlag.NAMED))
-      .map(it -> it.representation)
-      .collect(Collectors.toSet());
+    OPERATOR_BY_NAME = new HashMap<>();
+
+    for (InfixOperator operator : values()) {
+      if (operator.flags.contains(OperatorFlag.NAMED))
+        OPERATOR_BY_NAME.put(operator.representation, operator);
+    }
+
+    RESERVED_NAMES = OPERATOR_BY_NAME.keySet();
   }
 
   public final String representation;
@@ -85,29 +87,6 @@ public enum InfixOperator implements EnumToken {
   }
 
   public static @Nullable InfixOperator byName(String name) {
-    switch (name) {
-      case "then":
-        return BRANCHING_THEN;
-      case "else":
-        return BRANCHING_ELSE;
-      case "or":
-        return DISJUNCTION;
-      case "and":
-        return CONJUNCTION;
-      case "eq":
-        return EQUAL_TO;
-      case "neq":
-        return NOT_EQUAL_TO;
-      case "in":
-        return IN;
-      case "matches":
-        return MATCHES_REGEX;
-      case "split":
-        return SPLIT;
-      case "rsplit":
-        return REGEX_SPLIT;
-      default:
-        return null;
-    }
+    return OPERATOR_BY_NAME.get(name);
   }
 }

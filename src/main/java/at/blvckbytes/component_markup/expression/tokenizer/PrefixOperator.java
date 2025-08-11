@@ -10,10 +10,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public enum PrefixOperator implements EnumToken {
   NEGATION   ("not",     OperatorFlag.NAMED),
@@ -34,12 +31,21 @@ public enum PrefixOperator implements EnumToken {
   ;
 
   public static final Set<String> RESERVED_NAMES;
+  private static final Map<String, PrefixOperator> OPERATOR_BY_NAME;
 
   static {
-    RESERVED_NAMES = Arrays.stream(values())
-      .filter(it -> it.flags.contains(OperatorFlag.NAMED) && !it.flags.contains(OperatorFlag.PARENS))
-      .map(it -> it.representation)
-      .collect(Collectors.toSet());
+    RESERVED_NAMES = new HashSet<>();
+    OPERATOR_BY_NAME = new HashMap<>();
+
+    for (PrefixOperator operator : values()) {
+      if (!operator.flags.contains(OperatorFlag.NAMED))
+        continue;
+
+      OPERATOR_BY_NAME.put(operator.representation, operator);
+
+      if (!operator.flags.contains(OperatorFlag.PARENS))
+        RESERVED_NAMES.add(operator.representation);
+    }
   }
 
   public final String representation;
@@ -66,37 +72,6 @@ public enum PrefixOperator implements EnumToken {
   }
 
   public static @Nullable PrefixOperator byName(String name) {
-    switch (name) {
-      case "not":
-        return NEGATION;
-      case "upper":
-        return UPPER_CASE;
-      case "lower":
-        return LOWER_CASE;
-      case "title":
-        return TITLE_CASE;
-      case "toggle":
-        return TOGGLE_CASE;
-      case "slugify":
-        return SLUGIFY;
-      case "asciify":
-        return ASCIIFY;
-      case "trim":
-        return TRIM;
-      case "reverse":
-        return REVERSE;
-      case "long":
-        return LONG;
-      case "double":
-        return DOUBLE;
-      case "floor":
-        return FLOOR;
-      case "ceil":
-        return CEIL;
-      case "round":
-        return ROUND;
-      default:
-        return null;
-    }
+    return OPERATOR_BY_NAME.get(name);
   }
 }
