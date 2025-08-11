@@ -124,11 +124,12 @@ public class StringView implements InterpolationMember {
     return new StringView(contents, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
-  public void addIndexToBeRemoved(int index) {
+  public StringView addIndexToBeRemoved(int index) {
     if (index < startInclusive || index >= endExclusive)
       throw new IllegalStateException("Index " + index + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
 
     removeIndices.set(index);
+    return this;
   }
 
   public char nextChar() {

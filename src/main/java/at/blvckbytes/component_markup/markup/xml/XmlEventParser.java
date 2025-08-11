@@ -184,8 +184,10 @@ public class XmlEventParser {
   }
 
   private void parseAndEmitStringAttributeValue(StringView attributeName) {
-    if (input.nextChar() != '"')
-      throw new IllegalStateException("Expected opening double-quotes");
+    char quoteChar;
+
+    if ((quoteChar = input.nextChar()) != '"' && quoteChar != '\'')
+      throw new IllegalStateException("Expected to only be called if nextChar() is \" or '");
 
     int startInclusive = input.getPosition();
     int endInclusive = -1;
@@ -196,7 +198,7 @@ public class XmlEventParser {
       if (currentChar == '\r' || currentChar == '\n')
         throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
 
-      if (currentChar == '"') {
+      if (currentChar == quoteChar) {
         if (input.priorChar(1) == '\\') {
           int backslashPosition = input.getPosition() - 1;
 
@@ -336,6 +338,7 @@ public class XmlEventParser {
     input.consumeWhitespace(tokenOutput);
 
     switch (input.peekChar(0)) {
+      case '\'':
       case '"':
         parseAndEmitStringAttributeValue(attributeName);
         return true;

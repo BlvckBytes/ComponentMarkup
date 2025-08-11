@@ -884,6 +884,30 @@ public class XmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldParseBothSingleQuotedAndDoubleQuotedStringAttributeValues() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`red´ `a´='`hello `\\´' \\\" world´' `b´=\"`hello \\' `\\´\" world´\">"
+    );
+
+    makeCase(
+      text,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(
+        text.subView(1),
+        text.subView(2).addIndexToBeRemoved(text.subView(3).startInclusive),
+        "a", "hello ' \\\" world"
+      ),
+      new StringAttributeEvent(
+        text.subView(4),
+        text.subView(5).addIndexToBeRemoved(text.subView(6).startInclusive),
+        "b", "hello \\' \" world"
+      ),
+      new TagOpenEndEvent(text.subView(0), false),
+      new InputEndEvent()
+    );
+  }
+
   private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
     TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 
