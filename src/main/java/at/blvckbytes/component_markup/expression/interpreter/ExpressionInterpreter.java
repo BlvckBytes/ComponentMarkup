@@ -118,6 +118,23 @@ public class ExpressionInterpreter {
           }
         }
 
+        case MIN:
+        case MAX: {
+          if (!(operandValue instanceof Iterable<?>))
+            return operandValue;
+
+          Number maximumValue = null;
+
+          for (Object operand : (Iterable<?>) operandValue) {
+            Number number = valueInterpreter.asLongOrDouble(operand);
+
+            if (maximumValue == null || ((compareNumbers(number, maximumValue) > 0) ^ (prefixOperator == PrefixOperator.MIN)))
+              maximumValue = number;
+          }
+
+          return maximumValue;
+        }
+
         default:
           LoggerProvider.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;
@@ -208,15 +225,10 @@ public class ExpressionInterpreter {
 
         case GREATER_THAN:
         case LESS_THAN: {
-          Number lhs = valueInterpreter.asLongOrDouble(lhsValue);
-          Number rhs = valueInterpreter.asLongOrDouble(rhsValue);
-
-          int comparisonResult;
-
-          if (lhs instanceof Double || rhs instanceof Double)
-            comparisonResult = Double.compare(lhs.doubleValue(), rhs.doubleValue());
-          else
-            comparisonResult = Long.compare(lhs.longValue(), rhs.longValue());
+          int comparisonResult = compareNumbers(
+            valueInterpreter.asLongOrDouble(lhsValue),
+            valueInterpreter.asLongOrDouble(rhsValue)
+          );
 
           return (
             infixOperator == InfixOperator.GREATER_THAN || infixOperator == InfixOperator.GREATER_THAN_OR_EQUAL
@@ -315,6 +327,13 @@ public class ExpressionInterpreter {
 
     LoggerProvider.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
+  }
+
+  private static int compareNumbers(Number a, Number b) {
+    if (a instanceof Double || b instanceof Double)
+      return Double.compare(a.doubleValue(), b.doubleValue());
+
+    return Long.compare(a.longValue(), b.longValue());
   }
 
   private static @Nullable Object performSubscripting(

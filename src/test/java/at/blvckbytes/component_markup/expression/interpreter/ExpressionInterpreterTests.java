@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -356,60 +357,45 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldCastToLong() {
-    makeCase(
-      "5 + long(3.8)",
-      new InterpretationEnvironment(),
-      8
-    );
+    makeCase("5 + long(3.8)", null, 8);
   }
 
   @Test
   public void shouldCastToDouble() {
-    makeCase(
-      "5 / double(2)",
-      new InterpretationEnvironment(),
-      2.5
-    );
+    makeCase("5 / double(2)", null, 2.5);
   }
 
   @Test
   public void shouldFloorCeilAndRoundDouble() {
-    makeCase(
-      "floor(2.6)",
-      new InterpretationEnvironment(),
-      2.0
-    );
+    makeCase("floor(2.6)", null, 2.0);
+    makeCase("ceil(2.3)", null, 3.0);
+    makeCase("round(2.4)", null, 2.0);
+    makeCase("round(2.5)", null, 3.0);
+    makeCase("round(2.6)", null, 3.0);
+  }
 
-    makeCase(
-      "ceil(2.3)",
-      new InterpretationEnvironment(),
-      3.0
-    );
+  @Test
+  public void shouldPassThroughSingularMinOrMaxValue() {
+    makeCase("max(5)", null, 5);
+    makeCase("max(-.2)", null, -.2);
+    makeCase("min(5)", null, 5);
+    makeCase("min(-.2)", null, -.2);
+  }
 
-    makeCase(
-      "round(2.4)",
-      new InterpretationEnvironment(),
-      2.0
-    );
-
-    makeCase(
-      "round(2.5)",
-      new InterpretationEnvironment(),
-      3.0
-    );
-
-    makeCase(
-      "round(2.6)",
-      new InterpretationEnvironment(),
-      3.0
-    );
+  @Test
+  public void shouldMinOrMaxVariadicValues() {
+    makeCase("max(4, -2, 5, 3, -1)", null, 5);
+    makeCase("min(4, -2, 5, 3, -1)", null, -2);
   }
 
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
 
-  private void makeCase(String expression, InterpretationEnvironment environment, Object expectedResult) {
+  private void makeCase(String expression, @Nullable InterpretationEnvironment environment, Object expectedResult) {
+    if (environment == null)
+      environment = new InterpretationEnvironment();
+
     ExpressionNode node = ExpressionParser.parse(StringView.of(expression), null);
     Assertions.assertEquals(Jsonifier.jsonify(expectedResult), Jsonifier.jsonify(ExpressionInterpreter.interpret(node, environment)));
   }

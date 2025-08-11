@@ -28,6 +28,8 @@ public enum PrefixOperator implements EnumToken {
   FLOOR      ("floor",   OperatorFlag.NAMED, OperatorFlag.PARENS),
   CEIL       ("ceil",    OperatorFlag.NAMED, OperatorFlag.PARENS),
   ROUND      ("round",   OperatorFlag.NAMED, OperatorFlag.PARENS),
+  MAX        ("max",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
+  MIN        ("min",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   ;
 
   public static final Set<String> RESERVED_NAMES;

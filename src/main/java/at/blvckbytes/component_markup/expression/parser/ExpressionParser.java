@@ -342,10 +342,46 @@ public class ExpressionParser {
     }
 
     if (openingParenthesisToken != null) {
-      PunctuationToken punctuationToken = tokenizer.nextToken(PunctuationToken.class);
+      PunctuationToken punctuationToken;
 
+      boolean isVariadic = operatorToken.operator.flags.contains(OperatorFlag.VARIADIC);
+
+      List<ExpressionNode> operands = null;
+
+      if (isVariadic) {
+        operands = new ArrayList<>();
+        operands.add(operand);
+      }
+
+      while ((punctuationToken = tokenizer.peekToken(PunctuationToken.class)) != null) {
+        if (punctuationToken.punctuation != Punctuation.COMMA)
+          break;
+
+        // TODO: Proper error
+        if (!isVariadic)
+          throw new IllegalStateException("This operator only accepts a single value");
+
+        tokenizer.nextToken();
+
+        ExpressionNode nextOperand = parsePrefixExpression();
+
+        // TODO: Proper error
+        if (nextOperand == null)
+          throw new IllegalStateException("Expected an additional prefix-operand after a comma");
+
+        operands.add(nextOperand);
+      }
+
+      punctuationToken = tokenizer.nextToken(PunctuationToken.class);
+
+      // TODO: Maybe point at the last index of the operand instead?
       if (punctuationToken == null || punctuationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
         throw new ExpressionParseException(openingParenthesisToken.raw.startInclusive, ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS, operatorToken.operator.representation);
+
+      // Basically, I'm using the parens of operator() as a short-hand for operator([]) to
+      // save on the explicit immediate array-syntax - same intent, more expressivity.
+      if (operands != null)
+        operand = new ArrayNode(openingParenthesisToken, operands, punctuationToken);
     }
 
     return new PrefixOperationNode(operatorToken, operand);

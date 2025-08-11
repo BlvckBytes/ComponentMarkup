@@ -9,4 +9,5 @@ public enum OperatorFlag {
   RIGHT_ASSOCIATIVE,
   NAMED,
   PARENS,
+  VARIADIC,
 }
