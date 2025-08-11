@@ -192,7 +192,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperand() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      if (operator.isNamed) {
+      if (operator.isNamed && operator.requiresParentheses) {
         TextWithSubViews text = new TextWithSubViews(operator + "`(´");
 
         makeErrorCase(
@@ -217,7 +217,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingPrefixOperatorClosingParenthesis() {
     for (PrefixOperator operator : PrefixOperator.values()) {
-      if (!operator.isNamed)
+      if (!operator.isNamed || !operator.requiresParentheses)
         continue;
 
       TextWithSubViews text = new TextWithSubViews(

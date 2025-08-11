@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public enum PrefixOperator implements EnumToken {
-  NEGATION   ("not",    false, false),
+  NEGATION   ("not",     true, false),
   FLIP_SIGN  ("-",      false, false),
   UPPER_CASE ("upper",   true,  true),
   LOWER_CASE ("lower",   true,  true),
