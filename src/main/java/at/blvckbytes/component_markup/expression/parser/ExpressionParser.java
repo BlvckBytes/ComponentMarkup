@@ -357,17 +357,23 @@ public class ExpressionParser {
         if (punctuationToken.punctuation != Punctuation.COMMA)
           break;
 
-        // TODO: Proper error
-        if (!isVariadic)
-          throw new IllegalStateException("This operator only accepts a single value");
+        if (!isVariadic) {
+          throw new ExpressionParseException(
+            punctuationToken.raw.startInclusive,
+            ExpressionParserError.NON_VARIADIC_PREFIX_OPERATOR,
+            operatorToken.operator.representation);
+        }
 
         tokenizer.nextToken();
 
         ExpressionNode nextOperand = parsePrefixExpression();
 
-        // TODO: Proper error
-        if (nextOperand == null)
-          throw new IllegalStateException("Expected an additional prefix-operand after a comma");
+        if (nextOperand == null) {
+          throw new ExpressionParseException(
+            punctuationToken.raw.startInclusive,
+            ExpressionParserError.EXPECTED_VARIADIC_OPERAND,
+            operatorToken.operator.representation);
+        }
 
         operands.add(nextOperand);
       }

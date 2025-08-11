@@ -352,6 +352,32 @@ public class ExpressionParserErrorTests {
     }
   }
 
+  @Test
+  public void shouldThrowOnMultipleOperandsToANonVariadicPrefixOperator() {
+    TextWithSubViews text = new TextWithSubViews(
+      "floor(a`,´ b)"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.NON_VARIADIC_PREFIX_OPERATOR,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMissingVariadicPrefixOperatorOperand() {
+    TextWithSubViews text = new TextWithSubViews(
+      "min(1, 2, 3`,´)"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_VARIADIC_OPERAND,
+      text.subView(0).startInclusive
+    );
+  }
+
   private void makeErrorCase(TextWithSubViews input, ExpressionParserError error, int position) {
     ExpressionParseException thrownException = null;
 
