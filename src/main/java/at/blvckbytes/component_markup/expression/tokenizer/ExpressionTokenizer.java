@@ -362,15 +362,6 @@ public class ExpressionTokenizer {
         enumToken = InfixOperator.BRANCHING_THEN;
         break;
 
-      case '@':
-        if (_peekChar(1) == '@') {
-          enumToken = InfixOperator.REGEX_SPLIT;
-          break;
-        }
-
-        enumToken = InfixOperator.SPLIT;
-        break;
-
       case ':':
         enumToken = Punctuation.COLON;
         break;
