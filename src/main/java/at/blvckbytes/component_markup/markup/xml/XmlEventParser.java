@@ -388,10 +388,6 @@ public class XmlEventParser {
           throw new XmlParseException(XmlParseError.MISSING_ATTRIBUTE_VALUE, attributeName.startInclusive);
 
         switch (valueIdentifier.buildString()) {
-          case "true":
-            consumer.onBooleanAttribute(attributeName, valueIdentifier, true);
-            break;
-
           case "false":
             consumer.onBooleanAttribute(attributeName, valueIdentifier, false);
             break;

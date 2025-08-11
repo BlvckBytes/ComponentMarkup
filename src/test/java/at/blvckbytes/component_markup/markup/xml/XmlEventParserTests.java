@@ -830,15 +830,14 @@ public class XmlEventParserTests {
   @Test
   public void shouldParseLiterals() {
     TextWithSubViews text = new TextWithSubViews(
-      "<`red´ `a´=`true´ `b´=`false´ `c´=`null´>"
+      "<`red´ `b´=`false´ `c´=`null´>"
     );
 
     makeCase(
       text,
       new TagOpenBeginEvent(text.subView(0), "red"),
-      new BooleanAttributeEvent(text.subView(1), text.subView(2), true, "a", "true"),
-      new BooleanAttributeEvent(text.subView(3), text.subView(4), false, "b", "false"),
-      new NullAttributeEvent(text.subView(5), text.subView(6), "c", "null"),
+      new BooleanAttributeEvent(text.subView(1), text.subView(2), false, "b", "false"),
+      new NullAttributeEvent(text.subView(3), text.subView(4), "c", "null"),
       new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()
     );

@@ -183,7 +183,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       "<red",
       "  *for-char=\"my_chars\"",
       "  *for-separator={ <aqua>separator }",
-      "  *for-reversed=" + reversed,
+      reversed ? "*for-reversed" : "",
       "  *let-index=\"loop.index\"",
       ">",
       "  {char} at index {index}"
