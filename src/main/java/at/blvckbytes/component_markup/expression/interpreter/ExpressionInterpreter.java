@@ -319,7 +319,7 @@ public class ExpressionInterpreter {
     if (expression instanceof MapNode) {
       MapNode node = (MapNode) expression;
 
-      Map<String, Object> result = new HashMap<>();
+      Map<String, Object> result = new LinkedHashMap<>();
 
       for (Map.Entry<String, ExpressionNode> item : node.items.entrySet())
         result.put(item.getKey(), interpret(item.getValue(), environment));
