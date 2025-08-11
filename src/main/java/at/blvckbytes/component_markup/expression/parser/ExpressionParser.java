@@ -305,6 +305,9 @@ public class ExpressionParser {
 
       tokenizer.nextToken();
 
+      if (!namedOperator.requiresParentheses)
+        throw new IllegalStateException("Named non-parenthesised prefix-operators should've been taken care of in the tokenizer");
+
       PunctuationToken punctuationToken = tokenizer.peekToken(PunctuationToken.class);
 
       if (punctuationToken == null || punctuationToken.punctuation != Punctuation.OPENING_PARENTHESIS) {

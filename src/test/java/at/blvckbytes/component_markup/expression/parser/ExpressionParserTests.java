@@ -226,7 +226,7 @@ public class ExpressionParserTests {
     );
 
     text = new TextWithSubViews(
-      "`a´ `and´ `!´`b´"
+      "`a´ `and´ `not´ `b´"
     );
 
     makeCase(
@@ -242,7 +242,7 @@ public class ExpressionParserTests {
     );
 
     text = new TextWithSubViews(
-      "`!´`b´"
+      "`not´ `b´"
     );
 
     makeCase(
@@ -595,8 +595,15 @@ public class ExpressionParserTests {
   private String joinAtPrependedPrefixes(PrefixOperator[] prefixes) {
     StringBuilder result = new StringBuilder();
 
-    for (PrefixOperator prefix : prefixes)
+    for (PrefixOperator prefix : prefixes) {
+      if (!prefix.requiresParentheses)
+        result.append(' ');
+
       result.append('`').append(prefix).append('´');
+
+      if (!prefix.requiresParentheses)
+        result.append(' ');
+    }
 
     return result.toString();
   }

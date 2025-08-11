@@ -11,29 +11,31 @@ import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
 public enum PrefixOperator implements EnumToken {
-  NEGATION   ("!", false),
-  FLIP_SIGN  ("-", false),
-  UPPER_CASE ("upper", true),
-  LOWER_CASE ("lower", true),
-  TITLE_CASE ("title", true),
-  TOGGLE_CASE("toggle", true),
-  SLUGIFY    ("slugify", true),
-  ASCIIFY    ("asciify", true),
-  TRIM       ("trim", true),
-  REVERSE    ("reverse", true),
-  LONG       ("long", true),
-  DOUBLE     ("double", true),
-  FLOOR      ("floor", true),
-  CEIL       ("ceil", true),
-  ROUND      ("round", true),
+  NEGATION   ("not",    false, false),
+  FLIP_SIGN  ("-",      false, false),
+  UPPER_CASE ("upper",   true,  true),
+  LOWER_CASE ("lower",   true,  true),
+  TITLE_CASE ("title",   true,  true),
+  TOGGLE_CASE("toggle",  true,  true),
+  SLUGIFY    ("slugify", true,  true),
+  ASCIIFY    ("asciify", true,  true),
+  TRIM       ("trim",    true,  true),
+  REVERSE    ("reverse", true,  true),
+  LONG       ("long",    true,  true),
+  DOUBLE     ("double",  true,  true),
+  FLOOR      ("floor",   true,  true),
+  CEIL       ("ceil",    true,  true),
+  ROUND      ("round",   true,  true),
   ;
 
   public final String representation;
   public final boolean isNamed;
+  public final boolean requiresParentheses;
 
-  PrefixOperator(String representation, boolean isNamed) {
+  PrefixOperator(String representation, boolean isNamed, boolean requiresParentheses) {
     this.representation = representation;
     this.isNamed = isNamed;
+    this.requiresParentheses = requiresParentheses;
   }
 
   @Override
@@ -53,6 +55,8 @@ public enum PrefixOperator implements EnumToken {
 
   public static @Nullable PrefixOperator byName(String name) {
     switch (name) {
+      case "not":
+        return NEGATION;
       case "upper":
         return UPPER_CASE;
       case "lower":

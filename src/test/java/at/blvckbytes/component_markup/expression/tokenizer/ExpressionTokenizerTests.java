@@ -22,7 +22,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldTokenizeAllTypes() {
     TextWithSubViews text = new TextWithSubViews(
-      "`?´ `(´ `!´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
+      "`?´ `(´ `not´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `eq´ `^´ `my_variable´ `neq´ `&´ `)´ `..´ `.5´",
       "`@´ `@@´ `**´ `in´ `matches´"
     );
@@ -354,6 +354,33 @@ public class ExpressionTokenizerTests {
       text,
       ExpressionTokenizeError.EMPTY_TEMPLATE_LITERAL_INTERPOLATION,
       text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldProperlyIdentifyFirstWedgedMinusSignAsInfixAndNotPrefix() {
+    TextWithSubViews text = new TextWithSubViews("`a´`-´`b´");
+
+    makeCase(
+      text,
+      "a", text.subView(0),
+      InfixOperator.SUBTRACTION, text.subView(1),
+      "b", text.subView(2)
+    );
+  }
+
+  @Test
+  public void shouldProperlyIdentifyWedgedFlipSignsAndNegationsAsPrefix() {
+    TextWithSubViews text = new TextWithSubViews("`-´`not´`-´`not´`-´`b´");
+
+    makeCase(
+      text,
+      PrefixOperator.FLIP_SIGN, text.subView(0),
+      PrefixOperator.NEGATION, text.subView(1),
+      PrefixOperator.FLIP_SIGN, text.subView(2),
+      PrefixOperator.NEGATION, text.subView(3),
+      PrefixOperator.FLIP_SIGN, text.subView(4),
+      "b", text.subView(5)
     );
   }
 

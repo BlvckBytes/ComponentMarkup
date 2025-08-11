@@ -146,19 +146,22 @@ public class ExpressionTokenizer {
     boolean isFirst = true;
     char upcomingChar;
 
+    int pushedPendingIndex = -1;
+
     while ((upcomingChar = _peekChar(0)) != 0) {
       if (Character.isWhitespace(upcomingChar))
         break;
 
       Token upcomingOperatorOrPunctuation;
 
-      // The current token is most definitely an operand, so don't interpret as a prefix-operator
+      // The current token is possibly an operand, so don't interpret as a prefix-operator
       dashIsPrefix = false;
 
       if ((upcomingOperatorOrPunctuation = tryParseOperatorOrPunctuationOrDotDoubleToken()) != null) {
         if (pendingStack == null)
           pendingStack = new Stack<>();
 
+        pushedPendingIndex = pendingStack.size();
         pendingStack.push(upcomingOperatorOrPunctuation);
         break;
       }
@@ -203,10 +206,27 @@ public class ExpressionTokenizer {
         return new NullToken(raw);
     }
 
-    InfixOperator operator = InfixOperator.byName(value);
+    InfixOperator infixOperator = InfixOperator.byName(value);
 
-    if (operator != null)
-      return new InfixOperatorToken(raw, operator);
+    if (infixOperator != null)
+      return new InfixOperatorToken(raw, infixOperator);
+
+    PrefixOperator prefixOperator = PrefixOperator.byName(value);
+
+    if (prefixOperator != null && !prefixOperator.requiresParentheses) {
+      // Did push a token which was wedged against the identifier that terminated it
+      if (pushedPendingIndex >= 0) {
+        Token pushedToken = pendingStack.get(pushedPendingIndex);
+
+        // Was an infix-operator that could've possibly been affected by wrong dash-interpretation
+        if (pushedToken instanceof InfixOperatorToken) {
+          if (((InfixOperatorToken) pushedToken).operator == InfixOperator.SUBTRACTION)
+            pendingStack.set(pushedPendingIndex, new PrefixOperatorToken(pushedToken.raw, PrefixOperator.FLIP_SIGN));
+        }
+      }
+
+      return new PrefixOperatorToken(raw, prefixOperator);
+    }
 
     return new IdentifierToken(raw, raw.buildString());
   }
@@ -371,10 +391,6 @@ public class ExpressionTokenizer {
         }
 
         enumToken = InfixOperator.LESS_THAN;
-        break;
-
-      case '!':
-        enumToken = PrefixOperator.NEGATION;
         break;
 
       case '.':
