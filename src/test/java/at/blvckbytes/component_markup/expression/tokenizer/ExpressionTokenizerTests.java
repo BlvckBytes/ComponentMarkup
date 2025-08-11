@@ -137,6 +137,10 @@ public class ExpressionTokenizerTests {
       if (item instanceof InfixOperator && ((InfixOperator) item).flags.contains(OperatorFlag.NAMED))
         continue;
 
+      // Invisible to the tokenizer in this context
+      if (item == Punctuation.CLOSING_CURLY)
+        continue;
+
       TextWithSubViews text = new TextWithSubViews(
         "`before´ `a´`" + item + "´`b´ `after´"
       );

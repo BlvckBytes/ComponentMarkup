@@ -84,6 +84,10 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_BRACKET || punctuation == Punctuation.COLON)
         continue;
 
+      // Invisible to the tokenizer in this context
+      if (punctuation == Punctuation.CLOSING_CURLY)
+        continue;
+
       text = new TextWithSubViews(
         "a[:`" + punctuation + "´"
       );
@@ -137,6 +141,10 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.CLOSING_BRACKET)
         continue;
 
+      // Invisible to the tokenizer in this context
+      if (punctuation == Punctuation.CLOSING_CURLY)
+        continue;
+
       text = new TextWithSubViews(
         "a[:test`" + punctuation + "´"
       );
@@ -163,6 +171,10 @@ public class ExpressionParserErrorTests {
 
     for (Punctuation punctuation : Punctuation.values()) {
       if (punctuation == Punctuation.CLOSING_BRACKET || punctuation == Punctuation.COLON)
+        continue;
+
+      // Invisible to the tokenizer in this context
+      if (punctuation == Punctuation.CLOSING_CURLY)
         continue;
 
       text = new TextWithSubViews(
@@ -282,6 +294,10 @@ public class ExpressionParserErrorTests {
       if (punctuation == Punctuation.COMMA || punctuation == Punctuation.CLOSING_BRACKET)
         continue;
 
+      // Invisible to the tokenizer in this context
+      if (punctuation == Punctuation.CLOSING_CURLY)
+        continue;
+
       text = new TextWithSubViews(
         "[true`" + punctuation + "´"
       );
@@ -321,6 +337,10 @@ public class ExpressionParserErrorTests {
 
     for (Punctuation punctuation : Punctuation.values()) {
       if (punctuation == Punctuation.CLOSING_PARENTHESIS)
+        continue;
+
+      // Invisible to the tokenizer in this context
+      if (punctuation == Punctuation.CLOSING_CURLY)
         continue;
 
       text = new TextWithSubViews(
@@ -374,6 +394,57 @@ public class ExpressionParserErrorTests {
     makeErrorCase(
       text,
       ExpressionParserError.EXPECTED_VARIADIC_OPERAND,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnExpectedMapKey() {
+    TextWithSubViews text = new TextWithSubViews("{a, b`,´}");
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_MAP_KEY,
+      text.subView(0).startInclusive
+    );
+
+    text = new TextWithSubViews("{a, b: c`,´}");
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_MAP_KEY,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnExpectedMapValue() {
+    TextWithSubViews text = new TextWithSubViews(
+      "{a, b`:´}"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_MAP_VALUE,
+      text.subView(0).startInclusive
+    );
+  }
+
+  @Test
+  public void shouldThrowOnExpectedMapClosingCurly() {
+    TextWithSubViews text = new TextWithSubViews("{a, b: `555´");
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY,
+      text.subView(0).endExclusive - 1
+    );
+
+    text = new TextWithSubViews("`{´");
+
+    makeErrorCase(
+      text,
+      ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY,
       text.subView(0).startInclusive
     );
   }

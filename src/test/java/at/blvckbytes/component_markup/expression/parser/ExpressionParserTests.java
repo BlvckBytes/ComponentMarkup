@@ -10,14 +10,13 @@ import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
+import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ExpressionParserTests {
 
@@ -366,6 +365,56 @@ public class ExpressionParserTests {
   }
 
   @Test
+  public void shouldParseMapSyntax() {
+    TextWithSubViews text = new TextWithSubViews("`{´`}´");
+
+    makeCase(
+      text,
+      map(
+        token(Punctuation.OPENING_CURLY, text.subView(0)),
+        token(Punctuation.CLOSING_CURLY, text.subView(1))
+      )
+    );
+
+    text = new TextWithSubViews("`{´`a´, `b´, `c´`}´");
+
+    makeCase(
+      text,
+      map(
+        token(Punctuation.OPENING_CURLY, text.subView(0)),
+        token(Punctuation.CLOSING_CURLY, text.subView(4)),
+        token("a", text.subView(1)), terminal("a", text.subView(1)),
+        token("b", text.subView(2)), terminal("b", text.subView(2)),
+        token("c", text.subView(3)), terminal("c", text.subView(3))
+      )
+    );
+
+    text = new TextWithSubViews("`{´`a´: `5´ `+´ `2´, `b´, `c´: `{´`d´: `\"hello, world!\"´`}´`}´");
+
+    makeCase(
+      text,
+      map(
+        token(Punctuation.OPENING_CURLY, text.subView(0)),
+        token(Punctuation.CLOSING_CURLY, text.subView(11)),
+        token("a", text.subView(1)),
+        infix(
+          terminal(5, text.subView(2)),
+          token(InfixOperator.ADDITION, text.subView(3)),
+          terminal(2, text.subView(4))
+        ),
+        token("b", text.subView(5)), terminal("b", text.subView(5)),
+        token("c", text.subView(6)),
+        map(
+          token(Punctuation.OPENING_CURLY, text.subView(7)),
+          token(Punctuation.CLOSING_CURLY, text.subView(10)),
+          token("d", text.subView(8)),
+          terminal("\"hello, world!\"", text.subView(9))
+        )
+      )
+    );
+  }
+
+  @Test
   public void shouldSubscriptIntoImmediateArray() {
     TextWithSubViews text = new TextWithSubViews(
       "`[´`0´, `1´, `2´`]´`[´`0´`]´"
@@ -691,7 +740,23 @@ public class ExpressionParserTests {
     Token closingBracket,
     ExpressionNode... items
   ) {
-    return new ArrayNode((InfixOperatorToken) openingBracket, Arrays.asList(items), (PunctuationToken) closingBracket);
+    return new ArrayNode(openingBracket, Arrays.asList(items), closingBracket);
+  }
+
+  protected static ExpressionNode map(
+    Token openingBracket,
+    Token closingBracket,
+    Object... keyValuePairs
+  ) {
+    MapNodeItems mapItems = new MapNodeItems();
+
+    if (keyValuePairs.length % 2 != 0)
+      throw new IllegalStateException("Expected there to be an even number of keys and values for 1:1 correspondence");
+
+    for (int i = 0; i < keyValuePairs.length; i += 2)
+      mapItems.put((IdentifierToken) keyValuePairs[i], (ExpressionNode) keyValuePairs[i + 1]);
+
+    return new MapNode(openingBracket, mapItems, closingBracket);
   }
 
   protected static ExpressionNode branching(
@@ -759,7 +824,19 @@ public class ExpressionParserTests {
   }
 
   private void makeCase(TextWithSubViews input, @Nullable ExpressionNode expectedNode) {
-    ExpressionNode actualNode = ExpressionParser.parse(StringView.of(input.text), null);
+    ExpressionNode actualNode;
+
+    try {
+      actualNode = ExpressionParser.parse(StringView.of(input.text), null);
+    } catch (ExpressionTokenizeException e) {
+      for (String line : ErrorScreen.make(input.text, e.position, e.getErrorMessage()))
+        System.out.println(line);
+      throw e;
+    } catch (ExpressionParseException e) {
+      for (String line : ErrorScreen.make(input.text, e.position, e.getErrorMessage()))
+        System.out.println(line);
+      throw e;
+    }
 
     if (expectedNode == null) {
       Assertions.assertNull(actualNode, "Expected the parse-result to be null");

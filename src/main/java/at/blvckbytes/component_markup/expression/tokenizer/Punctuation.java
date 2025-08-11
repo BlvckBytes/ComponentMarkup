@@ -12,6 +12,8 @@ import at.blvckbytes.component_markup.util.StringView;
 public enum Punctuation implements EnumToken {
   OPENING_PARENTHESIS('('),
   CLOSING_PARENTHESIS(')'),
+  OPENING_CURLY('{'),
+  CLOSING_CURLY('}'),
   CLOSING_BRACKET(']'),
   COMMA(','),
   COLON(':'),

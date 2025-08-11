@@ -316,6 +316,17 @@ public class ExpressionInterpreter {
       return result;
     }
 
+    if (expression instanceof MapNode) {
+      MapNode node = (MapNode) expression;
+
+      Map<String, Object> result = new HashMap<>();
+
+      for (Map.Entry<String, ExpressionNode> item : node.items.entrySet())
+        result.put(item.getKey(), interpret(item.getValue(), environment));
+
+      return result;
+    }
+
     LoggerProvider.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
   }

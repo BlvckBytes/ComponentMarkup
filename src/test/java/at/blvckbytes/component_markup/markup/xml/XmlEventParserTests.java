@@ -707,7 +707,7 @@ public class XmlEventParserTests {
     );
 
     text = new TextWithSubViews(
-      "<`red´>`{´{"
+      "<`red´>`{´a{"
     );
 
     makeCase(

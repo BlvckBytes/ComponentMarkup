@@ -394,6 +394,19 @@ public class ExpressionInterpreterTests {
     makeCase("min(4, -2, [5, 3], [-1, [6, -3]])", null, -3);
   }
 
+  @Test
+  public void shouldIndexIntoImmediateArray() {
+    makeCase("[[1, 2]][0][1]", null, 2);
+  }
+
+  @Test
+  public void shouldIndexIntoImmediateMap() {
+    makeCase("{a: {b: 'world'}}['a']['b']", null, "world");
+
+    // Let's one-up this by moving the above into an interpolation within a template-literal
+    makeCase("`{{a: {b: 'world'}}['a']['b']}`", null, "world");
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }

@@ -13,8 +13,7 @@ import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ExpressionParser {
 
@@ -222,11 +221,8 @@ public class ExpressionParser {
   private @Nullable ExpressionNode parseArrayExpression() {
     InfixOperatorToken introductionToken = tokenizer.peekToken(InfixOperatorToken.class);
 
-    if (introductionToken == null)
-      return parsePrefixExpression();
-
-    if (introductionToken.operator != InfixOperator.SUBSCRIPTING)
-      return parsePrefixExpression();
+    if (introductionToken == null || introductionToken.operator != InfixOperator.SUBSCRIPTING)
+      return parseMapExpression();
 
     // In this context, it's not really an operator
     if (tokenOutput != null)
@@ -284,6 +280,100 @@ public class ExpressionParser {
 
     return new ArrayNode(introductionToken, arrayItems, terminatorToken);
   }
+
+  // ================================================================================
+  // Map
+  // ================================================================================
+
+  private @Nullable PunctuationToken peekPossibleClosingCurly() {
+    tokenizer.allowPeekingClosingCurly = true;
+    PunctuationToken introductionToken = tokenizer.peekToken(PunctuationToken.class);
+    tokenizer.allowPeekingClosingCurly = false;
+    return introductionToken;
+  }
+
+  private @Nullable ExpressionNode parseMapExpression() {
+    PunctuationToken introductionToken = tokenizer.peekToken(PunctuationToken.class);
+
+    if (introductionToken == null || introductionToken.punctuation != Punctuation.OPENING_CURLY)
+      return parsePrefixExpression();
+
+    tokenizer.nextToken();
+
+    MapNodeItems mapItems = new MapNodeItems();
+    ExpressionNode lastMapItem = null;
+
+    PunctuationToken delimiterToken = null;
+    IdentifierToken keyToken;
+
+    while (true) {
+      if ((keyToken = tokenizer.peekToken(IdentifierToken.class)) == null) {
+        if (mapItems.isEmpty() || delimiterToken == null)
+          break;
+
+        throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_MAP_KEY);
+      }
+
+      tokenizer.nextToken(); // <identifier>
+
+      if ((delimiterToken = peekPossibleClosingCurly()) == null)
+        break;
+
+      // Shorthand for equal key-name and value-identifier
+      if (delimiterToken.punctuation == Punctuation.CLOSING_CURLY || delimiterToken.punctuation == Punctuation.COMMA) {
+        lastMapItem = new TerminalNode(keyToken);
+        mapItems.put(keyToken, lastMapItem);
+
+        if (delimiterToken.punctuation == Punctuation.CLOSING_CURLY)
+          break;
+
+        tokenizer.nextToken(); // ,
+        continue;
+      }
+
+      if (delimiterToken.punctuation == Punctuation.COLON) {
+        tokenizer.nextToken(); // :
+
+        lastMapItem = parseExpression(null);
+
+        if (lastMapItem == null)
+          throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_MAP_VALUE);
+
+        mapItems.put(keyToken, lastMapItem);
+      }
+
+      delimiterToken = peekPossibleClosingCurly();
+
+      if (delimiterToken == null || delimiterToken.punctuation == Punctuation.CLOSING_CURLY)
+        break;
+
+      if (delimiterToken.punctuation != Punctuation.COMMA)
+        break;
+
+      tokenizer.nextToken(); // ,
+    }
+
+    PunctuationToken terminatorToken = peekPossibleClosingCurly();
+
+    if (terminatorToken == null) {
+      int position;
+
+      if (lastMapItem != null)
+        position = lastMapItem.getEndExclusive() - 1;
+      else
+        position = introductionToken.raw.endExclusive - 1;
+
+      throw new ExpressionParseException(position, ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY);
+    }
+
+    if (terminatorToken.punctuation != Punctuation.CLOSING_CURLY)
+      throw new ExpressionParseException(terminatorToken.raw.startInclusive, ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY);
+
+    tokenizer.nextToken();
+
+    return new MapNode(introductionToken, mapItems, terminatorToken);
+  }
+
   // ================================================================================
   // Prefix
   // ================================================================================

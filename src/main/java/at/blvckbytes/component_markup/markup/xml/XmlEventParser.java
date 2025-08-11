@@ -78,7 +78,7 @@ public class XmlEventParser {
         ExpressionNode interpolationExpression;
 
         try {
-          interpolationExpression = ExpressionParser.parse(input, tokenOutput);
+          interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(new ExpressionTokenizer(input, tokenOutput), tokenOutput);
         } catch (ExpressionTokenizeException expressionTokenizeException) {
           throw new MarkupParseException(startInclusive, expressionTokenizeException);
         } catch (ExpressionParseException expressionParseException) {

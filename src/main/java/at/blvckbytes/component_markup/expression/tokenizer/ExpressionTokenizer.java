@@ -26,6 +26,8 @@ public class ExpressionTokenizer {
   private final @Nullable TokenOutput tokenOutput;
   private boolean dashIsPrefix;
 
+  public boolean allowPeekingClosingCurly;
+
   public ExpressionTokenizer(StringView input, @Nullable TokenOutput tokenOutput) {
     this.input = input;
     this.tokenOutput = tokenOutput;
@@ -308,6 +310,14 @@ public class ExpressionTokenizer {
         enumToken = Punctuation.CLOSING_PARENTHESIS;
         break;
 
+      case '{':
+        enumToken = Punctuation.OPENING_CURLY;
+        break;
+
+      case '}':
+        enumToken = Punctuation.CLOSING_CURLY;
+        break;
+
       case '[':
         enumToken = InfixOperator.SUBSCRIPTING;
         break;
@@ -501,9 +511,10 @@ public class ExpressionTokenizer {
   private char _peekChar(int offset) {
     char peekedChar = input.peekChar(offset);
 
-    // Let's interpret the interpolation-delimiters as EOF, as
-    // to enable parsing interpolations within strings.
-    if (peekedChar == '{' || peekedChar == '}')
+    // Otherwise, the tokenizer would consume possible interpolation-terminators.
+    // The expression-parser calling into the tokenizer may toggle this flag whenever it
+    // expects a closing-curly, as it keeps track of balance on the call-stack.
+    if (!allowPeekingClosingCurly && peekedChar == '}')
       return 0;
 
     return peekedChar;
