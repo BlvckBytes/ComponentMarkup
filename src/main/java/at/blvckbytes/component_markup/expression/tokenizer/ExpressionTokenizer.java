@@ -364,11 +364,11 @@ public class ExpressionTokenizer {
 
       case '@':
         if (_peekChar(1) == '@') {
-          enumToken = InfixOperator.EXPLODE_REGEX;
+          enumToken = InfixOperator.REGEX_SPLIT;
           break;
         }
 
-        enumToken = InfixOperator.EXPLODE;
+        enumToken = InfixOperator.SPLIT;
         break;
 
       case ':':

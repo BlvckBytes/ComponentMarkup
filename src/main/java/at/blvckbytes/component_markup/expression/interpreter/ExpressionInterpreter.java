@@ -166,8 +166,8 @@ public class ExpressionInterpreter {
         case CONCATENATION:
           return valueInterpreter.asString(lhsValue) + valueInterpreter.asString(rhsValue);
 
-        case EXPLODE_REGEX:
-        case EXPLODE: {
+        case REGEX_SPLIT:
+        case SPLIT: {
           String input = valueInterpreter.asString(lhsValue);
           String delimiter = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
 
@@ -177,7 +177,7 @@ public class ExpressionInterpreter {
             // TODO: Consider caching this compilation
             pattern = Pattern.compile(
               delimiter,
-              infixOperator == InfixOperator.EXPLODE ? Pattern.LITERAL : 0
+              infixOperator == InfixOperator.SPLIT ? Pattern.LITERAL : 0
             );
           } catch (Throwable e) {
             for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\""))

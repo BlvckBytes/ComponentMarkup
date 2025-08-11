@@ -24,7 +24,7 @@ public class ExpressionTokenizerTests {
     TextWithSubViews text = new TextWithSubViews(
       "`then´ `else´ `(´ `not´ `'hello, world'´ `+´ `:´ `[´ `8192´ `>´ `-´ `and´ `2.7182´ `>=´ `*´ `or´ `true´",
       "`<´ `/´ `??´ `]´ `false´ `<=´ `%´ `null´ `eq´ `^´ `my_variable´ `neq´ `&´ `)´ `..´ `.5´",
-      "`@´ `@@´ `**´ `in´ `matches´"
+      "`split´ `rsplit´ `**´ `in´ `matches´"
     );
 
     int index = 0;
@@ -64,8 +64,8 @@ public class ExpressionTokenizerTests {
       Punctuation.CLOSING_PARENTHESIS, text.subView(index++),
       InfixOperator.RANGE, text.subView(index++),
       DotDouble.of(.5), text.subView(index++),
-      InfixOperator.EXPLODE, text.subView(index++),
-      InfixOperator.EXPLODE_REGEX, text.subView(index++),
+      InfixOperator.SPLIT, text.subView(index++),
+      InfixOperator.REGEX_SPLIT, text.subView(index++),
       InfixOperator.REPEAT, text.subView(index++),
       InfixOperator.IN, text.subView(index++),
       InfixOperator.MATCHES_REGEX, text.subView(index)

@@ -31,8 +31,8 @@ public enum InfixOperator implements EnumToken {
   DIVISION             ("/",        9, false, false),
   MODULO               ("%",        9, false, false),
   EXPONENTIATION       ("^",       10,  true, false),
-  EXPLODE              ("@",       11, false, false),
-  EXPLODE_REGEX        ("@@",      11, false, false),
+  SPLIT                ("split",   11, false,  true),
+  REGEX_SPLIT          ("rsplit",  11, false,  true),
   REPEAT               ("**",      11, false, false),
   FALLBACK             ("??",      12, false, false),
   SUBSCRIPTING         ("[",       13, false, false),
@@ -91,6 +91,10 @@ public enum InfixOperator implements EnumToken {
         return IN;
       case "matches":
         return MATCHES_REGEX;
+      case "split":
+        return SPLIT;
+      case "rsplit":
+        return REGEX_SPLIT;
       default:
         return null;
     }

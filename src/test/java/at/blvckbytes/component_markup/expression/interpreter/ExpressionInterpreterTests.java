@@ -89,44 +89,44 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
-  public void shouldExplodeStringWithNullOrEmptyString() {
+  public void shouldSplitStringWithNullOrEmptyString() {
     List<String> result = Arrays.asList("h", "e", "l", "l", "o");
 
     makeCase(
-      "'hello' @ null",
+      "'hello' split null",
       new InterpretationEnvironment(),
       result
     );
 
     makeCase(
-      "'hello' @ ''",
+      "'hello' split ''",
       new InterpretationEnvironment(),
       result
     );
   }
 
   @Test
-  public void shouldExplodeStringWithDelimiter() {
+  public void shouldSplitStringWithDelimiter() {
     makeCase(
-      "'first second third' @ ' '",
+      "'first second third' split ' '",
       new InterpretationEnvironment(),
       Arrays.asList("first", "second", "third")
     );
   }
 
   @Test
-  public void shouldExplodeStringWithRegex() {
+  public void shouldSplitStringWithRegex() {
     InterpretationEnvironment environment = new InterpretationEnvironment()
       .withVariable("input", "first0second1third2fourth");
 
     makeCase(
-      "input @ '[0-9]'",
+      "input split '[0-9]'",
       environment,
       Collections.singletonList(environment.getVariableValue("input"))
     );
 
     makeCase(
-      "input @@ '[0-9]'",
+      "input rsplit '[0-9]'",
       environment,
       Arrays.asList("first", "second", "third", "fourth")
     );
