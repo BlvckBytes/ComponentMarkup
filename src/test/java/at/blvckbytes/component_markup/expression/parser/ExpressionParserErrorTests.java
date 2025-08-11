@@ -222,13 +222,13 @@ public class ExpressionParserErrorTests {
         continue;
 
       TextWithSubViews text = new TextWithSubViews(
-        operator + "`(´x"
+        operator + "(`my_variable´"
       );
 
       makeErrorCase(
         text,
         ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS,
-        text.subView(0).startInclusive
+        text.subView(0).endExclusive - 1
       );
     }
   }

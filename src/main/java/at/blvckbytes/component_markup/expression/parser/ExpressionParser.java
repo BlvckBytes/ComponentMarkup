@@ -374,9 +374,17 @@ public class ExpressionParser {
 
       punctuationToken = tokenizer.nextToken(PunctuationToken.class);
 
-      // TODO: Maybe point at the last index of the operand instead?
-      if (punctuationToken == null || punctuationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
-        throw new ExpressionParseException(openingParenthesisToken.raw.startInclusive, ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS, operatorToken.operator.representation);
+      if (punctuationToken == null || punctuationToken.punctuation != Punctuation.CLOSING_PARENTHESIS) {
+        // Point at the end of the very last variadic operand
+        if (operands != null)
+          operand = operands.get(operands.size() - 1);
+
+        throw new ExpressionParseException(
+          operand.getLastMemberPositionProvider().endExclusive - 1,
+          ExpressionParserError.EXPECTED_PREFIX_OPERAND_CLOSING_PARENTHESIS,
+          operatorToken.operator.representation
+        );
+      }
 
       // Basically, I'm using the parens of operator() as a short-hand for operator([]) to
       // save on the explicit immediate array-syntax - same intent, more expressivity.
