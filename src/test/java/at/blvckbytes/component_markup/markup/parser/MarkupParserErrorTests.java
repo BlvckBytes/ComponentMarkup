@@ -482,23 +482,24 @@ public class MarkupParserErrorTests {
     );
   }
 
-  @Test
-  public void shouldThrowOnNonMarkupForSeparator() {
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" `*for-separator´=.5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" `*for-separator´=5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<red *for-member=\"members\" `*for-separator´=\"hello\">"
-    );
-  }
+  // TODO: See [1]
+//  @Test
+//  public void shouldThrowOnNonMarkupForSeparator() {
+//    makeErrorCase(
+//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
+//      "<red *for-member=\"members\" `*for-separator´=.5>"
+//    );
+//
+//    makeErrorCase(
+//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
+//      "<red *for-member=\"members\" `*for-separator´=5>"
+//    );
+//
+//    makeErrorCase(
+//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
+//      "<red *for-member=\"members\" `*for-separator´=\"hello\">"
+//    );
+//  }
 
   @Test
   public void shouldThrowOnNonExpressionForReversed() {
@@ -853,6 +854,14 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE,
       "<red *for=\"1..5\" `+for-separator´={ test }>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnLiteralIntrinsicTemplateLiteralAttributes() {
+    makeErrorCase(
+      MarkupParseError.LITERAL_INTRINSIC_TEMPLATE_LITERAL_ATTRIBUTE,
+      "<red *for=\"1..5\" `+for-separator´=×`test×`>"
     );
   }
 

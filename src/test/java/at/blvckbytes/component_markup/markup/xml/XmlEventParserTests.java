@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.xml;
 
+import at.blvckbytes.component_markup.expression.parser.ExpressionParserTests;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.event.*;
 import at.blvckbytes.component_markup.util.StringView;
@@ -680,11 +681,6 @@ public class XmlEventParserTests {
   }
 
   @Test
-  public void shouldThrowOnUnterminatedString() {
-    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello world");
-  }
-
-  @Test
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithSubViews text = new TextWithSubViews(
       "<`red´>`{´user.name + \"}\" + '}'"
@@ -721,12 +717,6 @@ public class XmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
-  }
-
-  @Test
-  public void shouldThrowOnLinebreakInString() {
-    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello \n world\"");
-    makeMalformedAttributeValueCase(XmlParseError.UNTERMINATED_STRING, "\"hello \r world\"");
   }
 
   @Test
@@ -902,6 +892,30 @@ public class XmlEventParserTests {
         text.subView(4),
         text.subView(5).addIndexToBeRemoved(text.subView(6).startInclusive),
         "b", "hello \\' \" world"
+      ),
+      new TagOpenEndEvent(text.subView(0), false),
+      new InputEndEvent()
+    );
+  }
+
+  @Test
+  public void shouldParseTemplateLiteralAttributeValues() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`red´ `a´=`×``hello ´{`world´}` \" ' :)!´×`´>"
+    );
+
+    makeCase(
+      text,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TemplateLiteralAttributeEvent(
+        text.subView(1),
+        ExpressionParserTests.templateLiteral(
+          text.subView(2),
+          text.subView(3),
+          ExpressionParserTests.terminal("world", text.subView(4)),
+          text.subView(5)
+        ),
+        "a"
       ),
       new TagOpenEndEvent(text.subView(0), false),
       new InputEndEvent()

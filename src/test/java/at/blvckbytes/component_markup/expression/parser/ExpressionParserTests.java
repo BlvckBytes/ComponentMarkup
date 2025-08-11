@@ -728,11 +728,11 @@ public class ExpressionParserTests {
     return new TerminalNode(new TemplateLiteralToken(raw, members));
   }
 
-  protected static TerminalNode templateLiteral(StringView raw, InterpolationMember... members) {
+  public static TerminalNode templateLiteral(StringView raw, InterpolationMember... members) {
     return new TerminalNode(new TemplateLiteralToken(raw, Arrays.asList(members)));
   }
 
-  protected static TerminalNode terminal(Object value, StringView subView) {
+  public static TerminalNode terminal(Object value, StringView subView) {
     Token token = ExpressionTokenizerTests.makeToken(value, subView);
 
     if (!(token instanceof TerminalToken))

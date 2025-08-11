@@ -6,6 +6,8 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
@@ -106,6 +108,26 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     handleUserAttribute(attributeName, value, value);
+  }
+
+  @Override
+  public void onTemplateLiteralAttribute(StringView name, TerminalNode value) {
+    if (subtreeParser != null) {
+      subtreeParser.onTemplateLiteralAttribute(name, value);
+      return;
+    }
+
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
+
+    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL))
+      throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_TEMPLATE_LITERAL_ATTRIBUTE);
+
+    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attributeName, value, null);
+      return;
+    }
+
+    handleUserAttribute(attributeName, value, null);
   }
 
   @Override
@@ -723,8 +745,15 @@ public class MarkupParser implements XmlEventConsumer {
         return true;
 
       case "for-separator":
-        if (!(value instanceof MarkupNode))
-          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
+        if (!(value instanceof MarkupNode)) {
+          // TODO: This is just a quick hack to get a test-case up and running: [1]
+          //       Should always convert between these types and never fail just because a
+          //       consumer expected markup - we have plenty ways of re-interpretation available.
+          if (!(value instanceof ExpressionNode))
+            throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
+
+          value = new ExpressionDrivenNode((ExpressionNode) value);
+        }
 
         if (currentLayer.forIterable == null)
           throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());

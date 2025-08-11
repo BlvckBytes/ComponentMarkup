@@ -1085,4 +1085,36 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       SlotType.ITEM_LORE
     );
   }
+
+  @Test
+  public void shouldProcessTemplateLiteralValuesProperly() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<translate *for=\"1..2\" *for-separator=×`{b}X{a}×` key=×`{a} middle {b}×` />"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("a", "first")
+        .withVariable("b", "second"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("translate", "first middle second")
+            ))
+            .object(item -> (
+              item
+                .string("text", "secondXfirst")
+            ))
+            .object(item -> (
+              item
+                .string("translate", "first middle second")
+            ))
+        ))
+    );
+  }
 }

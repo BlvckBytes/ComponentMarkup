@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,8 @@ public interface XmlEventConsumer {
   void onTagOpenBegin(StringView tagName);
 
   void onStringAttribute(StringView name, StringView value);
+
+  void onTemplateLiteralAttribute(StringView name, TerminalNode value);
 
   void onLongAttribute(StringView name, StringView raw, long value);
 

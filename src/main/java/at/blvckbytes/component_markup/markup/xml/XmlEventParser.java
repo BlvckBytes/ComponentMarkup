@@ -6,9 +6,14 @@
 package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
+import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
+import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.TemplateLiteralToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
@@ -22,11 +27,13 @@ public class XmlEventParser {
   private final XmlEventConsumer consumer;
   private final TokenOutput tokenOutput;
   private final StringView input;
+  private final ExpressionTokenizer expressionTokenizer;
 
   private XmlEventParser(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     this.consumer = consumer;
     this.tokenOutput = tokenOutput;
     this.input = input;
+    this.expressionTokenizer = new ExpressionTokenizer(input, tokenOutput);
   }
 
   public static void parse(StringView input, XmlEventConsumer consumer) {
@@ -184,47 +191,28 @@ public class XmlEventParser {
   }
 
   private void parseAndEmitStringAttributeValue(StringView attributeName) {
-    char quoteChar;
+    // By calling into expression-syntax for strings, we also inherit the ability to have
+    // template-literals as direct attribute-values without having to bind them separately, all
+    // while avoiding duplicate string-parser logic; win-win!
+    TerminalToken stringToken = expressionTokenizer.parseStringToken();
 
-    if ((quoteChar = input.nextChar()) != '"' && quoteChar != '\'')
-      throw new IllegalStateException("Expected to only be called if nextChar() is \" or '");
-
-    int startInclusive = input.getPosition();
-    int endInclusive = -1;
-
-    char currentChar;
-
-    while ((currentChar = input.nextChar()) != 0) {
-      if (currentChar == '\r' || currentChar == '\n')
-        throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
-
-      if (currentChar == quoteChar) {
-        if (input.priorChar(1) == '\\') {
-          int backslashPosition = input.getPosition() - 1;
-
-          input.addIndexToBeRemoved(backslashPosition);
-
-          if (tokenOutput != null)
-            tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
-        } else {
-          endInclusive = input.getPosition();
-          break;
-        }
-      }
-
-      if (tokenOutput != null && Character.isWhitespace(currentChar))
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
-    }
-
-    if (endInclusive < 0)
-      throw new XmlParseException(XmlParseError.UNTERMINATED_STRING, startInclusive);
-
-    StringView stringValue = input.buildSubViewAbsolute(startInclusive + 1, endInclusive);
+    if (stringToken == null)
+      throw new IllegalStateException("Expected to always receive a value");
 
     if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__STRING, input.buildSubViewAbsolute(startInclusive, endInclusive + 1));
+      tokenOutput.emitToken(TokenType.MARKUP__STRING, stringToken.raw);
 
-    consumer.onStringAttribute(attributeName, stringValue);
+    if (stringToken instanceof StringToken) {
+      consumer.onStringAttribute(attributeName, stringToken.raw.buildSubViewRelative(1, -1));
+      return;
+    }
+
+    if (stringToken instanceof TemplateLiteralToken) {
+      consumer.onTemplateLiteralAttribute(attributeName, new TerminalNode(stringToken));
+      return;
+    }
+
+    throw new IllegalStateException("Unexpected string-token type: " + stringToken.getClass());
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -340,6 +328,7 @@ public class XmlEventParser {
     switch (input.peekChar(0)) {
       case '\'':
       case '"':
+      case '`':
         parseAndEmitStringAttributeValue(attributeName);
         return true;
 

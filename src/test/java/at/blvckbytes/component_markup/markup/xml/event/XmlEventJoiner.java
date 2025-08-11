@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.util.StringView;
@@ -26,6 +27,11 @@ public class XmlEventJoiner implements XmlEventConsumer {
   @Override
   public void onStringAttribute(StringView name, StringView value) {
     events.add(new StringAttributeEvent(name, value, name.buildString(), value.buildString()));
+  }
+
+  @Override
+  public void onTemplateLiteralAttribute(StringView name, TerminalNode value) {
+    events.add(new TemplateLiteralAttributeEvent(name, value, name.buildString()));
   }
 
   @Override
