@@ -395,6 +395,26 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldCalculateAverageValue() {
+    makeCase("avg(8, 21, 4, 3, 3, 5, 8, 2)", null, 6.75);
+  }
+
+  @Test
+  public void shouldCalculateAverageValueDeep() {
+    makeCase("avg([8], [[21, 4], 3, 3], 5, 8, 2)", null, 6.75);
+  }
+
+  @Test
+  public void shouldCalculateSumValue() {
+    makeCase("sum(8, 21, 4, 3, 3, 5, 8, 2)", null, 54.0);
+  }
+
+  @Test
+  public void shouldCalculateSumValueDeep() {
+    makeCase("sum([8], [[21, 4], 3, 3], 5, 8, 2)", null, 54.0);
+  }
+
+  @Test
   public void shouldIndexIntoImmediateArray() {
     makeCase("[[1, 2]][0][1]", null, 2);
   }

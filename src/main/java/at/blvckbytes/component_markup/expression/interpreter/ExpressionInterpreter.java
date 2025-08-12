@@ -12,6 +12,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.util.DeepIterator;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
@@ -123,7 +124,38 @@ public class ExpressionInterpreter {
           if (!(operandValue instanceof Iterable<?>))
             return operandValue;
 
-          return getMinOrMaxOfIterable((Iterable<?>) operandValue, valueInterpreter, prefixOperator == PrefixOperator.MIN);
+          Number result = null;
+
+          for (Iterator<Number> it = new DeepIterator<>((Iterable<?>) operandValue, valueInterpreter::asLongOrDouble); it.hasNext();) {
+            Number number = it.next();
+
+            if (result == null || ((compareNumbers(number, result) > 0) ^ (prefixOperator == PrefixOperator.MIN)))
+              result = number;
+          }
+
+          return result;
+        }
+
+        case SUM:
+        case AVG: {
+          if (!(operandValue instanceof Iterable<?>))
+            return operandValue;
+
+          double accumulator = 0;
+          int memberCount = 0;
+
+          for (Iterator<Number> it = new DeepIterator<>((Iterable<?>) operandValue, valueInterpreter::asLongOrDouble); it.hasNext();) {
+            accumulator += it.next().doubleValue();
+            ++memberCount;
+          }
+
+          if (memberCount == 0)
+            return 0;
+
+          if (memberCount == 1 || prefixOperator == PrefixOperator.SUM)
+            return accumulator;
+
+          return accumulator / memberCount;
         }
 
         default:
@@ -336,24 +368,6 @@ public class ExpressionInterpreter {
       return Double.compare(a.doubleValue(), b.doubleValue());
 
     return Long.compare(a.longValue(), b.longValue());
-  }
-
-  private static @Nullable Number getMinOrMaxOfIterable(Iterable<?> y, ValueInterpreter valueInterpreter, boolean min) {
-    Number maximumValue = null;
-
-    for (Object operand : y) {
-      Number number;
-
-      if (operand instanceof Iterable<?>)
-        number = getMinOrMaxOfIterable((Iterable<?>) operand, valueInterpreter, min);
-      else
-        number = valueInterpreter.asLongOrDouble(operand);
-
-      if (maximumValue == null || ((compareNumbers(number, maximumValue) > 0) ^ min))
-        maximumValue = number;
-    }
-
-    return maximumValue;
   }
 
   private static @Nullable Object performSubscripting(
