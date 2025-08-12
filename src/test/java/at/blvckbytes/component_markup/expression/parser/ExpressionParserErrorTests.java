@@ -40,7 +40,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnArrayAfterSubscripting() {
     TextWithSubViews text = new TextWithSubViews(
-      "a[0][1`,´ 2]"
+      "a[0]`[´1, 2]"
     );
 
     makeErrorCase(
@@ -266,28 +266,28 @@ public class ExpressionParserErrorTests {
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
+      ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET,
       text.subView(0).startInclusive
     );
 
     text = new TextWithSubViews(
-      "[`true´"
+      "`[´true"
     );
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.subView(0).endExclusive - 1
+      ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET,
+      text.subView(0).startInclusive
     );
 
     text = new TextWithSubViews(
-      "[true, `false´"
+      "`[´true, false"
     );
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
-      text.subView(0).endExclusive - 1
+      ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET,
+      text.subView(0).startInclusive
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -299,12 +299,12 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithSubViews(
-        "[true`" + punctuation + "´"
+        "`[´true" + punctuation
       );
 
       makeErrorCase(
         text,
-        ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET,
+        ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET,
         text.subView(0).startInclusive
       );
     }
@@ -326,13 +326,13 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnMissingParenthesesTermination() {
     TextWithSubViews text = new TextWithSubViews(
-      "(`true´"
+      "`(´true"
     );
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
-      text.subView(0).endExclusive - 1
+      ExpressionParserError.MISSING_CLOSING_PARENTHESIS,
+      text.subView(0).startInclusive
     );
 
     for (Punctuation punctuation : Punctuation.values()) {
@@ -344,12 +344,12 @@ public class ExpressionParserErrorTests {
         continue;
 
       text = new TextWithSubViews(
-        "(true`" + punctuation + "´"
+        "`(´true"
       );
 
       makeErrorCase(
         text,
-        ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS,
+        ExpressionParserError.MISSING_CLOSING_PARENTHESIS,
         text.subView(0).startInclusive
       );
     }
@@ -432,19 +432,19 @@ public class ExpressionParserErrorTests {
 
   @Test
   public void shouldThrowOnExpectedMapClosingCurly() {
-    TextWithSubViews text = new TextWithSubViews("{a, b: `555´");
+    TextWithSubViews text = new TextWithSubViews("`{´a, b: 555");
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY,
-      text.subView(0).endExclusive - 1
+      ExpressionParserError.MISSING_MAP_CLOSING_CURLY,
+      text.subView(0).startInclusive
     );
 
     text = new TextWithSubViews("`{´");
 
     makeErrorCase(
       text,
-      ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY,
+      ExpressionParserError.MISSING_MAP_CLOSING_CURLY,
       text.subView(0).startInclusive
     );
   }

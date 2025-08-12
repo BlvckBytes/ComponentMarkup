@@ -249,7 +249,7 @@ public class ExpressionParser {
       delimiterToken = tokenizer.peekToken(PunctuationToken.class);
 
       if (delimiterToken == null)
-        throw new ExpressionParseException(arrayItem.getEndExclusive() - 1, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
+        throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET);
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET)
         break;
@@ -259,24 +259,16 @@ public class ExpressionParser {
         continue;
       }
 
-      throw new ExpressionParseException(delimiterToken.raw.startInclusive, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET);
     }
 
     PunctuationToken terminatorToken = tokenizer.nextToken(PunctuationToken.class);
 
-    if (terminatorToken == null) {
-      int position;
-
-      if (!arrayItems.isEmpty())
-        position = arrayItems.get(arrayItems.size() - 1).getEndExclusive() - 1;
-      else
-        position = introductionToken.raw.endExclusive - 1;
-
-      throw new ExpressionParseException(position, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
-    }
+    if (terminatorToken == null)
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET);
 
     if (terminatorToken.punctuation != Punctuation.CLOSING_BRACKET)
-      throw new ExpressionParseException(terminatorToken.raw.startInclusive, ExpressionParserError.EXPECTED_ARRAY_CLOSING_BRACKET);
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_ARRAY_CLOSING_BRACKET);
 
     return new ArrayNode(introductionToken, arrayItems, terminatorToken);
   }
@@ -301,7 +293,7 @@ public class ExpressionParser {
     tokenizer.nextToken();
 
     MapNodeItems mapItems = new MapNodeItems();
-    ExpressionNode lastMapItem = null;
+    ExpressionNode lastMapItem;
 
     PunctuationToken delimiterToken = null;
     IdentifierToken keyToken;
@@ -355,19 +347,11 @@ public class ExpressionParser {
 
     PunctuationToken terminatorToken = peekPossibleClosingCurly();
 
-    if (terminatorToken == null) {
-      int position;
-
-      if (lastMapItem != null)
-        position = lastMapItem.getEndExclusive() - 1;
-      else
-        position = introductionToken.raw.endExclusive - 1;
-
-      throw new ExpressionParseException(position, ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY);
-    }
+    if (terminatorToken == null)
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_MAP_CLOSING_CURLY);
 
     if (terminatorToken.punctuation != Punctuation.CLOSING_CURLY)
-      throw new ExpressionParseException(terminatorToken.raw.startInclusive, ExpressionParserError.EXPECTED_MAP_CLOSING_CURLY);
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_MAP_CLOSING_CURLY);
 
     tokenizer.nextToken();
 
@@ -514,10 +498,10 @@ public class ExpressionParser {
     PunctuationToken terminationToken = tokenizer.nextToken(PunctuationToken.class);
 
     if (terminationToken == null)
-      throw new ExpressionParseException(expression.getEndExclusive() - 1, ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS);
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_CLOSING_PARENTHESIS);
 
     if (terminationToken.punctuation != Punctuation.CLOSING_PARENTHESIS)
-      throw new ExpressionParseException(terminationToken.raw.startInclusive, ExpressionParserError.EXPECTED_CLOSING_PARENTHESIS);
+      throw new ExpressionParseException(introductionToken.raw.startInclusive, ExpressionParserError.MISSING_CLOSING_PARENTHESIS);
 
     expression.parenthesised = true;
 
