@@ -40,7 +40,7 @@ public class ExpressionParserErrorTests {
   @Test
   public void shouldThrowOnArrayAfterSubscripting() {
     TextWithSubViews text = new TextWithSubViews(
-      "a[0]`[´1, 2]"
+      "a[0][1`,´ 2]"
     );
 
     makeErrorCase(
