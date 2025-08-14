@@ -281,22 +281,19 @@ public class MarkupParser implements XmlEventConsumer {
 
   @Override
   public void onTagAttributeEnd(StringView name) {
-    if (subtreeParser != null) {
-      if (subtreeParser.subtreeParser != null) {
-        subtreeParser.onTagAttributeEnd(name);
-        return;
-      }
-
-      subtreeParser.onInputEnd();
-    }
-
-    else
+    if (subtreeParser == null)
       throw new IllegalStateException("Expected there to be a subtree-parser");
 
-    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
+    if (subtreeParser.subtreeParser != null) {
+      subtreeParser.onTagAttributeEnd(name);
+      return;
+    }
 
+    subtreeParser.onInputEnd();
     MarkupNode subtree = subtreeParser.result;
     subtreeParser = null;
+
+    AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL))
       throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
@@ -816,17 +813,7 @@ public class MarkupParser implements XmlEventConsumer {
 
     assert currentLayer.attributeMap != null;
 
-    if (attribute instanceof MarkupAttribute) {
-      currentLayer.attributeMap.add(new MarkupAttribute(attributeName, ((MarkupAttribute) attribute).value));
-      return;
-    }
-
-    if (attribute instanceof ExpressionAttribute) {
-      currentLayer.attributeMap.add(new ExpressionAttribute(attributeName, ((ExpressionAttribute) attribute).value));
-      return;
-    }
-
-    throw new IllegalStateException("Unexpected attribute-type: " + attribute.getClass());
+    currentLayer.attributeMap.add(attribute);
   }
 
   private boolean isInvalidIdentifier(StringView identifier, boolean expression) {
