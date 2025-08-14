@@ -6,6 +6,8 @@
 package at.blvckbytes.component_markup.markup.ast.tag.attribute;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
+import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.parser.AttributeName;
 
 public class ExpressionAttribute extends Attribute {
@@ -16,5 +18,10 @@ public class ExpressionAttribute extends Attribute {
     super(attributeName);
 
     this.value = value;
+  }
+
+  @Override
+  public MarkupNode asMarkupNode() {
+    return new ExpressionDrivenNode(value);
   }
 }

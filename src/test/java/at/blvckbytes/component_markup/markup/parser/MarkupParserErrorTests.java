@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.util.StringView;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -405,21 +406,13 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnExpectedMarkupValue() {
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text `value´=\"hello, world\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text `value´=5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-      "<hover-text `value´=5.5>"
-    );
+  public void shouldNotThrowOnNonMarkupValue() {
+    makeErrorCase(null, "<hover-text `value´=\"hello, world\">");
+    makeErrorCase(null, "<hover-text `value´=5>");
+    makeErrorCase(null, "<hover-text `value´=5.5>");
+    makeErrorCase(null, "<red *for-member=\"members\" `*for-separator´=.5>");
+    makeErrorCase(null, "<red *for-member=\"members\" `*for-separator´=5>");
+    makeErrorCase(null, "<red *for-member=\"members\" `*for-separator´=\"hello\">");
   }
 
   @Test
@@ -458,25 +451,6 @@ public class MarkupParserErrorTests {
       "<red `*else´=-2.3>"
     );
   }
-
-  // TODO: See [1]
-//  @Test
-//  public void shouldThrowOnNonMarkupForSeparator() {
-//    makeErrorCase(
-//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-//      "<red *for-member=\"members\" `*for-separator´=.5>"
-//    );
-//
-//    makeErrorCase(
-//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-//      "<red *for-member=\"members\" `*for-separator´=5>"
-//    );
-//
-//    makeErrorCase(
-//      MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE,
-//      "<red *for-member=\"members\" `*for-separator´=\"hello\">"
-//    );
-//  }
 
   @Test
   public void shouldThrowOnNonExpressionForReversed() {
@@ -901,7 +875,7 @@ public class MarkupParserErrorTests {
     Assertions.assertEquals(screen.text, String.join("\n", screenLines));
   }
 
-  private void makeErrorCase(MarkupParseError error, String... lines) {
+  private void makeErrorCase(@Nullable MarkupParseError error, String... lines) {
     TextWithSubViews input = new TextWithSubViews(lines);
     Throwable thrownError = null;
 
@@ -909,6 +883,11 @@ public class MarkupParserErrorTests {
       MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (Throwable e) {
       thrownError = e;
+    }
+
+    if (error == null) {
+      Assertions.assertNull(thrownError, "Expected no error to be thrown");
+      return;
     }
 
     Assertions.assertNotNull(thrownError, "Expected an error to be thrown, but got none");

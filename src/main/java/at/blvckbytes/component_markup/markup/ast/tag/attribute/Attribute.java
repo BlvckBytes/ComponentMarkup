@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.attribute;
 
+import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.parser.AttributeName;
 
 public abstract class Attribute {
@@ -16,4 +17,6 @@ public abstract class Attribute {
   protected Attribute(AttributeName attributeName) {
     this.attributeName = attributeName;
   }
+
+  public abstract MarkupNode asMarkupNode();
 }

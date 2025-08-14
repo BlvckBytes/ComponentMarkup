@@ -17,4 +17,9 @@ public class MarkupAttribute extends Attribute {
 
     this.value = value;
   }
+
+  @Override
+  public MarkupNode asMarkupNode() {
+    return value;
+  }
 }

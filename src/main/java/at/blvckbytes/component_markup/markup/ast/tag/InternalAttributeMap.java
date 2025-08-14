@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
-import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
@@ -101,10 +100,7 @@ public class InternalAttributeMap implements AttributeMap {
     if (attribute == null)
       return null;
 
-    if (!(attribute instanceof MarkupAttribute))
-      throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
-
-    return ((MarkupAttribute) attribute).value;
+    return attribute.asMarkupNode();
   }
 
   private @Nullable Attribute selectNonMultiAttributeOrNull(String name, String... aliases) {
@@ -175,13 +171,6 @@ public class InternalAttributeMap implements AttributeMap {
 
         attribute.hasBeenUsed = true;
         continue;
-      }
-
-      if (!(attribute instanceof MarkupAttribute)) {
-        // Immediate values are obviously nonsensical and were probably a mistake of the user
-        // An expression-value will instantiate an expression-driven node later on
-        if ((attribute instanceof ExpressionAttribute) && !attribute.attributeName.has(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
       }
 
       attribute.hasBeenUsed = true;

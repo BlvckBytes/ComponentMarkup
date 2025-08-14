@@ -5,8 +5,6 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag;
 
-import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
@@ -50,14 +48,13 @@ public class MarkupList {
       }
 
       ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
-      ExpressionNode expression = expressionAttribute.value;
 
       if (!expressionAttribute.attributeName.has(AttributeFlag.SPREAD_MODE)) {
-        result.add(new ExpressionDrivenNode(expression));
+        result.add(expressionAttribute.asMarkupNode());
         continue;
       }
 
-      Object evaluatedValue = interpreter.evaluateAsPlainObject(expression);
+      Object evaluatedValue = interpreter.evaluateAsPlainObject(expressionAttribute.value);
 
       if (evaluatedValue instanceof Collection) {
         Collection<?> collection = (Collection<?>) evaluatedValue;

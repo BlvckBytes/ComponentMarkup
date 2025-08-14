@@ -9,7 +9,6 @@ import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
-import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
@@ -774,40 +773,23 @@ public class MarkupParser implements XmlEventConsumer {
         return true;
 
       case "for-empty":
-        if (!(attribute instanceof MarkupAttribute))
-          throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_MARKUP_ATTRIBUTE_VALUE, name.fullName.buildString());
-
         if (currentLayer.forIterable == null)
           throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.forEmpty != null)
           throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
 
-        currentLayer.forEmpty = ((MarkupAttribute) attribute).value;
+        currentLayer.forEmpty = attribute.asMarkupNode();
         return true;
 
       case "for-separator":
-        MarkupNode value;
-
-        if (!(attribute instanceof MarkupAttribute)) {
-          // TODO: This is just a quick hack to get a test-case up and running: [1]
-          //       Should always convert between these types and never fail just because a
-          //       consumer expected markup - we have plenty ways of re-interpretation available.
-          if (!(attribute instanceof ExpressionAttribute))
-            throw new IllegalStateException("Unexpected attribute-type: " + attribute.getClass());
-
-          value = new ExpressionDrivenNode(((ExpressionAttribute) attribute).value);
-        }
-        else
-          value = ((MarkupAttribute) attribute).value;
-
         if (currentLayer.forIterable == null)
           throw new MarkupParseException(name.fullName, MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.forSeparator != null)
           throw new MarkupParseException(name.fullName, MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE, name.fullName.buildString(), currentLayer.tagName.buildString());
 
-        currentLayer.forSeparator = value;
+        currentLayer.forSeparator = attribute.asMarkupNode();
         return true;
 
       case "for-":
