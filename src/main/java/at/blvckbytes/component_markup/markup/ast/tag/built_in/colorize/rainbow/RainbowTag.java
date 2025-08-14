@@ -42,6 +42,7 @@ public class RainbowTag extends ColorizeTag {
       interpreter -> (
         new RainbowNodeState(
           tagName,
+          interpreter.getCurrentSubtreeDepth(),
           baseAttributes.getPhase(interpreter),
           baseAttributes.getFlags(interpreter)
         )

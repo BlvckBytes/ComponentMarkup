@@ -46,6 +46,6 @@ public interface Interpreter {
 
   ComponentConstructor getComponentConstructor();
 
-  boolean isInSubtree();
+  int getCurrentSubtreeDepth();
 
 }

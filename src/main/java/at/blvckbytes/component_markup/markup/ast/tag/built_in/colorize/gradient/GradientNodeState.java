@@ -23,6 +23,7 @@ public class GradientNodeState extends ColorizeNodeState {
 
   public GradientNodeState(
     StringView tagName,
+    int initialSubtreeDepth,
     ExpressionList colors,
     ExpressionList offsets,
     ExpressionList zIndices,
@@ -30,7 +31,7 @@ public class GradientNodeState extends ColorizeNodeState {
     EnumSet<ColorizeFlag> flags,
     Interpreter interpreter
   ) {
-    super(tagName, phase, flags);
+    super(tagName, initialSubtreeDepth, phase, flags);
 
     this.gradientGenerator = new GradientGenerator(
       evaluatePackedColors(colors, interpreter),

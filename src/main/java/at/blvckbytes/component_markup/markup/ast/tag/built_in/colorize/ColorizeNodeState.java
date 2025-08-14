@@ -19,11 +19,13 @@ public abstract class ColorizeNodeState {
   public final StringView tagName;
   public final double phase;
   public final EnumSet<ColorizeFlag> flags;
+  public final int initialSubtreeDepth;
 
   private final Stack<List<Object>> injectedComponentsStack;
 
-  public ColorizeNodeState(StringView tagName, double phase, EnumSet<ColorizeFlag> flags) {
+  public ColorizeNodeState(StringView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
     this.tagName = tagName;
+    this.initialSubtreeDepth = initialSubtreeDepth;
     this.phase = phase;
     this.flags = flags;
 

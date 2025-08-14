@@ -44,6 +44,7 @@ public class TransitionTag extends ColorizeTag {
       interpreter -> (
         new TransitionNodeState(
           tagName,
+          interpreter.getCurrentSubtreeDepth(),
           colors,
           offsets,
           zIndices,

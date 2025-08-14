@@ -15,8 +15,8 @@ public class RainbowNodeState extends ColorizeNodeState {
 
   private static final RainbowGenerator rainbowGenerator = new RainbowGenerator();
 
-  public RainbowNodeState(StringView tagName, double phase, EnumSet<ColorizeFlag> flags) {
-    super(tagName, phase, flags);
+  public RainbowNodeState(StringView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
+    super(tagName, initialSubtreeDepth, phase, flags);
   }
 
   @Override

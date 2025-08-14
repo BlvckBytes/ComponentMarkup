@@ -64,7 +64,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
     ColorizeNodeState state = getState(interpreter);
 
-    if (!state.flags.contains(ColorizeFlag.DEEP) && interpreter.isInSubtree())
+    if (interpreter.getCurrentSubtreeDepth() > state.initialSubtreeDepth && !state.flags.contains(ColorizeFlag.DEEP))
       return InterceptionResult.DO_PROCESS;
 
     if (node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)) {

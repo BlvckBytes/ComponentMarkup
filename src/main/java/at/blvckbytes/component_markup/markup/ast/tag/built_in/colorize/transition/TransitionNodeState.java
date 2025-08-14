@@ -17,6 +17,7 @@ public class TransitionNodeState extends GradientNodeState {
 
   public TransitionNodeState(
     StringView tagName,
+    int initialSubtreeDepth,
     ExpressionList colors,
     ExpressionList offsets,
     ExpressionList zIndices,
@@ -24,7 +25,7 @@ public class TransitionNodeState extends GradientNodeState {
     EnumSet<ColorizeFlag> flags,
     Interpreter interpreter
   ) {
-    super(tagName, colors, offsets, zIndices, phase, flags, interpreter);
+    super(tagName, initialSubtreeDepth, colors, offsets, zIndices, phase, flags, interpreter);
   }
 
   @Override

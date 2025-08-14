@@ -45,6 +45,7 @@ public class GradientTag extends ColorizeTag {
       interpreter -> (
         new GradientNodeState(
           tagName,
+          interpreter.getCurrentSubtreeDepth(),
           colors,
           offsets,
           zIndices,

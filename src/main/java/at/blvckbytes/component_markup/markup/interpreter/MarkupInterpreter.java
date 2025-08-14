@@ -225,8 +225,8 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public boolean isInSubtree() {
-    return builderStack.size() > 1;
+  public int getCurrentSubtreeDepth() {
+    return builderStack.size() - 1;
   }
 
   private void interpretWhenMatching(WhenMatchingNode node) {
