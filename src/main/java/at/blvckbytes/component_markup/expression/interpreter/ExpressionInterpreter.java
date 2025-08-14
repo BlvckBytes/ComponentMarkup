@@ -28,9 +28,6 @@ public class ExpressionInterpreter {
 
   private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
 
-  private static final Pattern NON_WORDS = Pattern.compile("[^\\p{IsAlphabetic}\\d]+");
-  private static final Pattern DASHES = Pattern.compile("(^-+)(|-+$)");
-
   private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
 
   private ExpressionInterpreter() {}
@@ -618,9 +615,8 @@ public class ExpressionInterpreter {
   }
 
   private static String slugify(String input) {
-    String slug = NON_WORDS.matcher(input).replaceAll("-");
-    slug = DASHES.matcher(slug).replaceAll("");
-    return slug.toLowerCase();
+    LoggerProvider.log(Level.WARNING, "slugify() has not yet been implemented");
+    return input;
   }
 
   private static String asciify(String input) {

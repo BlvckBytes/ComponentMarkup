@@ -40,16 +40,6 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
-  public void shouldTransformSlugify() {
-    makeCase(
-      "'before ' & slugify(my_string) & ' test'",
-      new InterpretationEnvironment()
-        .withVariable("my_string", "helLö, @wöRld"),
-      "before hellö-wörld test"
-    );
-  }
-
-  @Test
   public void shouldTransformTrim() {
     makeCase(
       "'before ' & trim(my_string) & ' test'",
