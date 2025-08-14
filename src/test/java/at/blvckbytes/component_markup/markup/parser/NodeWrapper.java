@@ -36,7 +36,7 @@ public class NodeWrapper<T extends MarkupNode> {
     if(node.letBindings == null)
       node.letBindings = new LinkedHashSet<>();
 
-    node.letBindings.add(new ExpressionLetBinding(expression, false, name));
+    node.letBindings.add(new ExpressionLetBinding(expression, name, false));
     return this;
   }
 

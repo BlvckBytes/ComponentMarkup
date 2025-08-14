@@ -15,8 +15,8 @@ public class ExpressionLetBinding extends LetBinding {
 
   public ExpressionLetBinding(
     ExpressionNode expression,
-    boolean capture,
-    StringView name
+    StringView name,
+    boolean capture
   ) {
     super(name);
 

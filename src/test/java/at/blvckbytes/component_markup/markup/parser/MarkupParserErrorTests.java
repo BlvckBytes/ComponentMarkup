@@ -272,19 +272,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnNonMarkupOrExpressionCaptureLetBinding() {
-    makeErrorCase(
-      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container `*let-(my_var)´=-24>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_MARKUP_OR_EXPRESSION_CAPTURE,
-      "<container `*let-(my_var)´=-.24>"
-    );
-  }
-
-  @Test
   public void shouldThrowOnMultipleAttributeBrackets() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_BRACKETS,
@@ -378,33 +365,23 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnSomeNonStringIntrinsicAttributes() {
-    makeNonStringIntrinsicAttributeCase("if");
-    makeNonStringIntrinsicAttributeCase("else-if");
-    makeNonStringIntrinsicAttributeCase("for-member");
-    makeNonStringIntrinsicAttributeCase("use");
-    makeNonStringIntrinsicAttributeCase("when");
-    makeNonStringIntrinsicAttributeCase("for-test");
+  public void shouldThrowOnSomeIntrinsicMarkupOrFlagAttributeValues() {
+    makeMarkupOrFlagAttributeValueCase("if");
+    makeMarkupOrFlagAttributeValueCase("else-if");
+    makeMarkupOrFlagAttributeValueCase("for-member");
+    makeMarkupOrFlagAttributeValueCase("use");
+    makeMarkupOrFlagAttributeValueCase("when");
+    makeMarkupOrFlagAttributeValueCase("for-test");
   }
 
-  private void makeNonStringIntrinsicAttributeCase(String attribute) {
-    makeErrorCase(
-      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container `*" + attribute + "´=5>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-      "<container `*" + attribute + "´=5.5>"
-    );
-
+  private void makeMarkupOrFlagAttributeValueCase(String attribute) {
     makeErrorCase(
       MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
       "<container `*" + attribute + "´={}>"
     );
 
     makeErrorCase(
-      MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
+      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG,
       "<container `*" + attribute + "´>"
     );
   }
@@ -720,7 +697,12 @@ public class MarkupParserErrorTests {
 
   @Test
   public void shouldThrowOnWrongValuedWhenAttributes() {
-    String[] values = { "=5", "=5.5", "" };
+    makeErrorCase(
+      MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG,
+      "<red `*when´>"
+    );
+
+    String[] values = { "=5", "=false", "=5.5", "" };
 
     for (String value : values) {
       // is-labels support literals, for convenience
@@ -730,11 +712,6 @@ public class MarkupParserErrorTests {
           "<red `+is´" + value + ">"
         );
       }
-
-      makeErrorCase(
-        MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE,
-        "<red `*when´" + value + ">"
-      );
 
       if (!value.isEmpty()) {
         makeErrorCase(
