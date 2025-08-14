@@ -40,32 +40,12 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
-  public void shouldTransformTitleCase() {
-    makeCase(
-      "'before ' & title(my_string) & ' test'",
-      new InterpretationEnvironment()
-        .withVariable("my_string", "helLo, woRld"),
-      "before Hello, World test"
-    );
-  }
-
-  @Test
   public void shouldTransformSlugify() {
     makeCase(
       "'before ' & slugify(my_string) & ' test'",
       new InterpretationEnvironment()
         .withVariable("my_string", "helLö, @wöRld"),
       "before hellö-wörld test"
-    );
-  }
-
-  @Test
-  public void shouldTransformAsciify() {
-    makeCase(
-      "'before ' & asciify(my_string) & ' test'",
-      new InterpretationEnvironment()
-        .withVariable("my_string", "helLö, wèRld"),
-      "before helLo, weRld test"
     );
   }
 

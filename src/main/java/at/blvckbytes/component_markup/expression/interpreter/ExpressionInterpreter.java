@@ -20,8 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.text.BreakIterator;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -30,8 +28,6 @@ public class ExpressionInterpreter {
 
   private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
 
-  private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]");
-  private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
   private static final Pattern NON_WORDS = Pattern.compile("[^\\p{IsAlphabetic}\\d]+");
   private static final Pattern DASHES = Pattern.compile("(^-+)(|-+$)");
 
@@ -599,32 +595,8 @@ public class ExpressionInterpreter {
   }
 
   private static String toTitleCase(String input) {
-    if (input.isEmpty())
-      return input;
-
-    Locale locale = Locale.ROOT;
-    StringBuilder result = new StringBuilder(input.length());
-
-    BreakIterator wordIterator = BreakIterator.getWordInstance(locale);
-    wordIterator.setText(input);
-
-    int start = wordIterator.first();
-    for (int end = wordIterator.next(); end != BreakIterator.DONE; start = end, end = wordIterator.next()) {
-      String word = input.substring(start, end);
-
-      if (Character.isLetterOrDigit(word.codePointAt(0))) {
-        int firstCodepoint = word.codePointAt(0);
-        int firstCharLength = Character.charCount(firstCodepoint);
-
-        result.appendCodePoint(Character.toTitleCase(firstCodepoint));
-        result.append(word.substring(firstCharLength).toLowerCase(locale));
-        continue;
-      }
-
-      result.append(word);
-    }
-
-    return result.toString();
+    LoggerProvider.log(Level.WARNING, "title() has not yet been implemented");
+    return input;
   }
 
   private static String toggleCase(String input) {
@@ -652,8 +624,7 @@ public class ExpressionInterpreter {
   }
 
   private static String asciify(String input) {
-    String decomposed = Normalizer.normalize(input, Normalizer.Form.NFD);
-    String withoutDiacritics = DIACRITICS.matcher(decomposed).replaceAll("");
-    return NON_ASCII.matcher(withoutDiacritics).replaceAll("");
+    LoggerProvider.log(Level.WARNING, "asciify() has not yet been implemented");
+    return input;
   }
 }
