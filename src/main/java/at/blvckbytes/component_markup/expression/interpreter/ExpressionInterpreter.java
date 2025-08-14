@@ -12,6 +12,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import at.blvckbytes.component_markup.util.DeepIterator;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
@@ -447,6 +448,14 @@ public class ExpressionInterpreter {
       return null;
 
     String stringKey = environment.getValueInterpreter().asString(key);
+
+    if (source instanceof DirectFieldAccess) {
+      Object accessResult = ((DirectFieldAccess) source).accessField(stringKey);
+
+      if (accessResult != DirectFieldAccess.UNKNOWN_FIELD_SENTINEL)
+        return accessResult;
+    }
+
     PublicFieldMap fieldMap = publicFieldsByClass.computeIfAbsent(source.getClass(), PublicFieldMap::new);
     Field field = fieldMap.locateField(stringKey);
 

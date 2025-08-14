@@ -5,7 +5,9 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
-public class LoopVariable implements InternalCopyable {
+import org.jetbrains.annotations.Nullable;
+
+public class LoopVariable implements InternalCopyable, DirectFieldAccess {
 
   public int index;
   public final int length;
@@ -35,5 +37,25 @@ public class LoopVariable implements InternalCopyable {
     copy.isEven = isEven;
     copy.isOdd = isOdd;
     return copy;
+  }
+
+  @Override
+  public @Nullable Object accessField(String rawIdentifier) {
+    switch (rawIdentifier) {
+      case "index":
+        return index;
+      case "length":
+        return length;
+      case "is_first":
+        return isFirst;
+      case "is_last":
+        return isLast;
+      case "is_even":
+        return isEven;
+      case "is_odd":
+        return isOdd;
+      default:
+        return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
+    }
   }
 }
