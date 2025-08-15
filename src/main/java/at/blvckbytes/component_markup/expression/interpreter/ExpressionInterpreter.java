@@ -29,6 +29,7 @@ public class ExpressionInterpreter {
   private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
 
   private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
+  private static final Map<String, Pattern> patternCache = new HashMap<>();
 
   private ExpressionInterpreter() {}
 
@@ -207,11 +208,10 @@ public class ExpressionInterpreter {
           Pattern pattern;
 
           try {
-            // TODO: Consider caching this compilation
-            pattern = Pattern.compile(
-              delimiter,
-              infixOperator == InfixOperator.SPLIT ? Pattern.LITERAL : 0
-            );
+            if (infixOperator == InfixOperator.SPLIT)
+              pattern = Pattern.compile(delimiter, Pattern.LITERAL);
+            else
+              pattern = patternCache.computeIfAbsent(delimiter, Pattern::compile);
           } catch (Throwable e) {
             for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\""))
               LoggerProvider.log(Level.WARNING, line, false);
@@ -294,8 +294,7 @@ public class ExpressionInterpreter {
           Pattern pattern;
 
           try {
-            // TODO: Consider caching this compilation
-            pattern = Pattern.compile(patternString);
+            pattern = patternCache.computeIfAbsent(patternString, Pattern::compile);
           } catch (Throwable e) {
             for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + patternString + "\""))
               LoggerProvider.log(Level.WARNING, line, false);
