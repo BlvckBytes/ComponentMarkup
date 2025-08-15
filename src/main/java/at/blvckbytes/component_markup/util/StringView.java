@@ -270,7 +270,12 @@ public class StringView implements InterpolationMember {
     if (targetIndex >= endExclusive)
       return 0;
 
-    return contents.charAt(targetIndex);
+    char targetChar = contents.charAt(targetIndex);
+
+    if (lowercase)
+      targetChar = Character.toLowerCase(targetChar);
+
+    return targetChar;
   }
 
   public int length() {

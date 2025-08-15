@@ -1160,4 +1160,20 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "#1 A, #3 C, #4 D")
     );
   }
+
+  @Test
+  public void shouldApplyAllUppercaseHexColors() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<#E8871E>Hello, world"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world")
+        .string("color", "#E8871E")
+    );
+  }
 }
