@@ -38,9 +38,9 @@ public interface Interpreter {
 
   @Nullable Object evaluateAsPlainObject(@Nullable ExpressionNode expression);
 
-  void interpret(MarkupNode node);
+  boolean interpret(MarkupNode node);
 
-  void interpret(MarkupNode node, @Nullable Runnable afterScopeBegin);
+  boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin);
 
   OutputBuilder getCurrentBuilder();
 

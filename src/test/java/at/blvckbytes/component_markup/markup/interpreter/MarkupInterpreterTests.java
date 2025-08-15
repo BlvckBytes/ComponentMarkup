@@ -1141,4 +1141,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "A1B2C3")
     );
   }
+
+  @Test
+  public void shouldOnlyAppendForSeparatorWhenIterationWasSuccessful() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<container",
+      "  *for-name=\"['A', 'B', 'C', 'D']\"",
+      "  +for-separator=', '",
+      "  *if=\"name neq 'B'\"",
+      ">#{loop.index + 1} {name}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "#1 A, #3 C, #4 D")
+    );
+  }
 }

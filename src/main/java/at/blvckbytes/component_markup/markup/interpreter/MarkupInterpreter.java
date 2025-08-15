@@ -392,6 +392,7 @@ public class MarkupInterpreter implements Interpreter {
     }
 
     boolean reversed = evaluateAsBoolean(node.reversed);
+    boolean requiresSeparator = false;
 
     for (int index = (reversed ? size - 1 : 0); (reversed ? index >= 0 : index < size); index += (reversed ? -1 : 1)) {
       Object item = items.get(index);
@@ -404,21 +405,21 @@ public class MarkupInterpreter implements Interpreter {
       introduceLetBindings(node.letBindingsAfterForAttribute);
 
       if (node.separator != null) {
-        if (reversed ? index != size - 1 : index != 0)
+        if (requiresSeparator)
           interpret(node.separator);
       }
 
-      interpret(node.body);
+      requiresSeparator = interpret(node.body);
     }
   }
 
   @Override
-  public void interpret(MarkupNode node) {
-    interpret(node, null);
+  public boolean interpret(MarkupNode node) {
+    return interpret(node, null);
   }
 
   @Override
-  public void interpret(MarkupNode node, @Nullable Runnable afterScopeBegin) {
+  public boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin) {
     boolean doNotUse = false;
 
     if (node.useCondition != null) {
@@ -430,7 +431,7 @@ public class MarkupInterpreter implements Interpreter {
     // of their call-sites in this method if the current node itself is not to be used
     if (!doNotUse) {
       if (interceptors.handleBeforeAndGetIfSkip(node))
-        return;
+        return true;
     }
 
     environment.beginScope();
@@ -438,18 +439,22 @@ public class MarkupInterpreter implements Interpreter {
     if (afterScopeBegin != null)
       afterScopeBegin.run();
 
-    _interpret(node);
+    boolean hasBeenRendered = false;
+
+    if (node.ifCondition == null || evaluateAsBoolean(node.ifCondition)) {
+      _interpret(node);
+      hasBeenRendered = true;
+    }
 
     environment.endScope();
 
     if (!doNotUse)
       interceptors.handleAfter(node);
+
+    return hasBeenRendered;
   }
 
   private void _interpret(MarkupNode node) {
-    if (node.ifCondition != null && !evaluateAsBoolean(node.ifCondition))
-      return;
-
     // The for-loop introduces temporary variables itself, so only introduce bindings after the fact
     // such that they have immediate access to said references; it does not make sense to define a
     // let-binding on the very same node a *for attribute is employed on *and* use said binding as
