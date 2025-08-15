@@ -27,18 +27,13 @@ import java.util.logging.Level;
 
 public class ComponentSequence {
 
-  @FunctionalInterface
-  private interface NonTerminalClosure {
-    void apply(Object component, ComponentSequence addressHolder);
-  }
-
   private final @Nullable PlatformEntity recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
   private final MarkupInterpreter interpreter;
   private final ComponentConstructor componentConstructor;
 
-  private final @Nullable NonTerminalClosure applyKnownNonTerminal;
+  private final @Nullable MarkupNode nonTerminal;
   private final boolean isInitial;
 
   private @Nullable List<MemberAndStyle> memberEntries;
@@ -353,7 +348,7 @@ public class ComponentSequence {
     // all elements to the parent-sequence, effectively making this instance invisible.
     if (
       !isInitial
-        && applyKnownNonTerminal == null
+        && this.nonTerminal == null
         && !ComputedStyle.hasEffect(this.membersEqualStyle)
         && !ComputedStyle.hasEffect(this.computedStyle)
         && (textCreationHandler == null)
@@ -412,8 +407,7 @@ public class ComponentSequence {
       result = setChildren(result, members);
     }
 
-    if (applyKnownNonTerminal != null)
-      applyKnownNonTerminal.apply(result, parentSequence == null ? this : parentSequence);
+    possiblyApplyNonTerminal(result, parentSequence == null ? this : parentSequence);
 
     ComputedStyle styleToApply;
 
@@ -444,10 +438,7 @@ public class ComponentSequence {
     return combinationResult;
   }
 
-  private @Nullable NonTerminalClosure makeKnownNonTerminalClosure(MarkupNode nonTerminal) {
-    if (nonTerminal == null || nonTerminal instanceof ContainerNode)
-      return null;
-
+  private void possiblyApplyNonTerminal(Object result, ComponentSequence addressHolder) {
     if (nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminal;
 
@@ -455,51 +446,55 @@ public class ComponentSequence {
 
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
-          return (result, addressTree) -> componentConstructor.setClickCopyToClipboardAction(result, value);
+          componentConstructor.setClickCopyToClipboardAction(result, value);
+          return;
 
         case SUGGEST_COMMAND:
-          return (result, addressTree) -> componentConstructor.setClickSuggestCommandAction(result, value);
+          componentConstructor.setClickSuggestCommandAction(result, value);
+          return;
 
         case RUN_COMMAND:
-          return (result, addressTree) -> componentConstructor.setClickRunCommandAction(result, value);
+          componentConstructor.setClickRunCommandAction(result, value);
+          return;
 
         case CHANGE_PAGE:
-          return (result, addressTree) -> componentConstructor.setClickChangePageAction(result, value);
+          componentConstructor.setClickChangePageAction(result, value);
+          return;
 
         case OPEN_FILE:
-          return (result, addressTree) -> componentConstructor.setClickOpenFileAction(result, value);
+          componentConstructor.setClickOpenFileAction(result, value);
+          return;
 
         case OPEN_URL: {
-          String urlValue = interpreter.evaluateAsString(clickNode.value);
-
           try {
-            URL url = URI.create(urlValue).toURL();
+            URL url = URI.create(value).toURL();
             String protocol = url.getProtocol();
 
             if (!(protocol.equals("http") || protocol.equals("https")))
               throw new IllegalStateException("Non-web protocol: \"" + protocol + "\"; use \"http\" or \"https\"");
 
-            return (result, addressTree) -> componentConstructor.setClickOpenUrlAction(result, url);
+            componentConstructor.setClickOpenUrlAction(result, url);
           } catch (Throwable e) {
-            for (String line : ErrorScreen.make(clickNode.value.getFirstMemberPositionProvider(), "Encountered malformed URL \"" + urlValue + "\": " + e.getMessage()))
+            for (String line : ErrorScreen.make(clickNode.value.getFirstMemberPositionProvider(), "Encountered malformed URL \"" + value + "\": " + e.getMessage()))
               LoggerProvider.log(Level.WARNING, line, false);
 
           }
 
-          return null;
+          return;
         }
 
         default:
           LoggerProvider.log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
-      return null;
+      return;
     }
 
     if (nonTerminal instanceof InsertNode) {
       InsertNode insertNode = (InsertNode) nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
-      return (result, addressTree) -> componentConstructor.setInsertAction(result, value);
+      componentConstructor.setInsertAction(result, value);
+      return;
     }
 
     if (nonTerminal instanceof EntityHoverNode) {
@@ -526,29 +521,27 @@ public class ComponentSequence {
         for (String line : ErrorScreen.make(entityHoverNode.id.getFirstMemberPositionProvider(), "Encountered malformed UUID: \"" + id + "\""))
           LoggerProvider.log(Level.WARNING, line, false);
 
-        return null;
+        return;
       }
 
-      return (result, addressHolder) -> {
-        Object nameComponent = null;
+      Object nameComponent = null;
 
-        if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
-          nameComponent = nameOutput.unprocessedComponents.get(0);
+      if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
+        nameComponent = nameOutput.unprocessedComponents.get(0);
 
-          if (nameOutput.deferredAddresses != null) {
-            EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
+        if (nameOutput.deferredAddresses != null) {
+          EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
 
-            if (first != null) {
-              if (addressHolder.deferredAddresses == null)
-                addressHolder.deferredAddresses = AddressTree.emptyValue();
+          if (first != null) {
+            if (addressHolder.deferredAddresses == null)
+              addressHolder.deferredAddresses = AddressTree.emptyValue();
 
-              addressHolder.deferredAddresses.put(MembersSlot.HOVER_ENTITY_NAME, AddressTree.singleton(first));
-            }
+            addressHolder.deferredAddresses.put(MembersSlot.HOVER_ENTITY_NAME, AddressTree.singleton(first));
           }
         }
+      }
 
-        componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
-      };
+      componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
@@ -595,39 +588,37 @@ public class ComponentSequence {
       else
         hideProperties = false;
 
-      return (result, addressHolder) -> {
-        Object nameComponent = null;
+      Object nameComponent = null;
 
-        if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
-          nameComponent = nameOutput.unprocessedComponents.get(0);
+      if (nameOutput != null && !nameOutput.unprocessedComponents.isEmpty()) {
+        nameComponent = nameOutput.unprocessedComponents.get(0);
 
-          if (nameOutput.deferredAddresses != null) {
-            EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
+        if (nameOutput.deferredAddresses != null) {
+          EnumMap<MembersSlot, AddressTree> first = nameOutput.deferredAddresses.getForFirstIndex();
 
-            if (first != null) {
-              if (addressHolder.deferredAddresses == null)
-                addressHolder.deferredAddresses = AddressTree.emptyValue();
-
-              addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_NAME, AddressTree.singleton(first));
-            }
-          }
-        }
-
-        List<Object> loreComponents = null;
-
-        if (loreOutput != null && !loreOutput.unprocessedComponents.isEmpty()) {
-          loreComponents = loreOutput.unprocessedComponents;
-
-          if (loreOutput.deferredAddresses != null) {
+          if (first != null) {
             if (addressHolder.deferredAddresses == null)
               addressHolder.deferredAddresses = AddressTree.emptyValue();
 
-            addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_LORE, loreOutput.deferredAddresses);
+            addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_NAME, AddressTree.singleton(first));
           }
         }
+      }
 
-        componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
-      };
+      List<Object> loreComponents = null;
+
+      if (loreOutput != null && !loreOutput.unprocessedComponents.isEmpty()) {
+        loreComponents = loreOutput.unprocessedComponents;
+
+        if (loreOutput.deferredAddresses != null) {
+          if (addressHolder.deferredAddresses == null)
+            addressHolder.deferredAddresses = AddressTree.emptyValue();
+
+          addressHolder.deferredAddresses.put(MembersSlot.HOVER_ITEM_LORE, loreOutput.deferredAddresses);
+        }
+      }
+
+      componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
     }
 
     if (nonTerminal instanceof TextHoverNode) {
@@ -639,23 +630,19 @@ public class ComponentSequence {
       );
 
       if (textOutput.unprocessedComponents.isEmpty())
-        return null;
+        return;
 
       Object textComponent = textOutput.unprocessedComponents.get(0);
 
-      return (result, addressHolder) -> {
-        if (textOutput.deferredAddresses != null) {
-          if (addressHolder.deferredAddresses == null)
-            addressHolder.deferredAddresses = AddressTree.emptyValue();
+      if (textOutput.deferredAddresses != null) {
+        if (addressHolder.deferredAddresses == null)
+          addressHolder.deferredAddresses = AddressTree.emptyValue();
 
-          addressHolder.deferredAddresses.put(MembersSlot.HOVER_TEXT_VALUE, textOutput.deferredAddresses);
-        }
+        addressHolder.deferredAddresses.put(MembersSlot.HOVER_TEXT_VALUE, textOutput.deferredAddresses);
+      }
 
-        componentConstructor.setHoverTextAction(result, textComponent);
-      };
+      componentConstructor.setHoverTextAction(result, textComponent);
     }
-
-    return null;
   }
 
   public ComponentSequence makeChildSequence(MarkupNode childNode) {
@@ -696,10 +683,7 @@ public class ComponentSequence {
     this.memberEntries = new ArrayList<>();
     this.componentConstructor = componentConstructor;
     this.interpreter = interpreter;
-
-    // Captures the required environment-variable values at the time of entering this tag
-    // and also makes applying this exact same non-terminal again reusable.
-    this.applyKnownNonTerminal = makeKnownNonTerminalClosure(nonTerminal);
+    this.nonTerminal = doesNonTerminalHaveEffect(nonTerminal) ? nonTerminal : null;
 
     this.isInitial = isInitial;
 
@@ -724,5 +708,24 @@ public class ComponentSequence {
       style.addMissingDefaults(parentStyle, resetContext);
       style.reset = false;
     }
+  }
+
+  private boolean doesNonTerminalHaveEffect(MarkupNode nonTerminal) {
+    if (nonTerminal == null || nonTerminal instanceof ContainerNode)
+      return false;
+
+    if (nonTerminal instanceof ClickNode)
+      return true;
+
+    if (nonTerminal instanceof InsertNode)
+      return true;
+
+    if (nonTerminal instanceof EntityHoverNode)
+      return true;
+
+    if (nonTerminal instanceof ItemHoverNode)
+      return true;
+
+    return nonTerminal instanceof TextHoverNode;
   }
 }
