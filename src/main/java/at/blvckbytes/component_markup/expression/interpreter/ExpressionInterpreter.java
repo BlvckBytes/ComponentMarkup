@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -460,19 +459,6 @@ public class ExpressionInterpreter {
     Field field = fieldMap.locateField(stringKey);
 
     if (field == null) {
-      Method method = fieldMap.locateFieldGetter(stringKey);
-
-      if (method != null) {
-        try {
-          return method.invoke(source);
-        } catch (Exception e) {
-          for (String line : ErrorScreen.make(operatorToken.raw, "Could not call method \"" + method + "\": " + e.getMessage()))
-            LoggerProvider.log(Level.WARNING, line, false);
-
-          return null;
-        }
-      }
-
       for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field or getter \"" + stringKey + "\""))
         LoggerProvider.log(Level.WARNING, line, false);
 

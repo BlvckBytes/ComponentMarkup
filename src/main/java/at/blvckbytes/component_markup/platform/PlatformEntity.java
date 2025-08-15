@@ -5,13 +5,14 @@
 
 package at.blvckbytes.component_markup.platform;
 
-import at.blvckbytes.component_markup.expression.interpreter.FieldGetter;
+import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import at.blvckbytes.component_markup.platform.selector.TargetSelector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-public abstract class PlatformEntity {
+public abstract class PlatformEntity implements DirectFieldAccess {
 
   public final String name;
   public final String displayName;
@@ -23,14 +24,25 @@ public abstract class PlatformEntity {
     this.uuid = uuid;
   }
 
-  @FieldGetter
   public abstract int x();
 
-  @FieldGetter
   public abstract int y();
 
-  @FieldGetter
   public abstract int z();
 
   public abstract List<PlatformEntity> executeSelector(TargetSelector selector);
+
+  @Override
+  public @Nullable Object accessField(String rawIdentifier) {
+    switch (rawIdentifier) {
+      case "x":
+        return x();
+      case "y":
+        return y();
+      case "z":
+        return z();
+      default:
+        return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
+    }
+  }
 }

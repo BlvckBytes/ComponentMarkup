@@ -22,18 +22,6 @@ public class PublicFieldMapTests {
     private double test5 = 3.1415;
     public String test6 = "hello";
     public double test7 = 8.8;
-
-    @FieldGetter
-    public int methodA() { return 1; }
-
-    @FieldGetter
-    public int methodB() { return 2; }
-
-    @FieldGetter
-    public int methodC(int x) { return 0; }
-
-    @FieldGetter
-    public int methodD(int x, int y) { return 0; }
   }
 
   @Test
@@ -50,11 +38,6 @@ public class PublicFieldMapTests {
     Assertions.assertNull(fieldMap.locateField("test5"));
     assertFieldValue(instance, fieldMap.locateField("test6"), "hello");
     assertFieldValue(instance, fieldMap.locateField("test7"), 8.8);
-
-    assertMethodValue(instance, fieldMap.locateFieldGetter("method_a"), 1);
-    assertMethodValue(instance, fieldMap.locateFieldGetter("method_b"), 2);
-    Assertions.assertNull(fieldMap.locateFieldGetter("method_c"));
-    Assertions.assertNull(fieldMap.locateFieldGetter("method_d"));
   }
 
   private void assertFieldValue(Object instance, @Nullable Field field, Object expectedValue) {
