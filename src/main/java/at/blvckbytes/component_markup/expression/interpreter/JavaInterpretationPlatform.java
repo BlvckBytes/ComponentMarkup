@@ -113,8 +113,13 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
   }
 
   @Override
-  public FormatDateResult formatDate(String format, @Nullable String locale, @Nullable String timeZone, long timestamp) {
-    EnumSet<FormatDateWarning> warnings = EnumSet.noneOf(FormatDateWarning.class);
+  public String formatDate(
+    String format,
+    @Nullable String locale,
+    @Nullable String timeZone,
+    long timestamp,
+    EnumSet<FormatDateWarning> warningsOutput
+  ) {
     Instant stamp = Instant.ofEpochMilli(timestamp);
 
     ZoneId zone = SYSTEM_ZONE;
@@ -126,7 +131,7 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
         try {
           zone = ZoneId.of(timeZone, ZoneId.SHORT_IDS);
         } catch (Throwable e2) {
-          warnings.add(FormatDateWarning.INVALID_TIMEZONE);
+          warningsOutput.add(FormatDateWarning.INVALID_TIMEZONE);
         }
       }
     }
@@ -137,7 +142,7 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
       formatLocale = LOCALE_BY_NAME_LOWER.get(AsciiCasing.lower(locale));
 
       if (formatLocale == null)
-        warnings.add(FormatDateWarning.INVALID_LOCALE);
+        warningsOutput.add(FormatDateWarning.INVALID_LOCALE);
     }
 
     DateTimeFormatter formatter = DEFAULT_FORMATTER;
@@ -151,21 +156,25 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
 
       else {
         try {
-          formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, formatLocale);
+          formatter = formatLocale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, formatLocale);
           dateTimeFormatterCache.put(formatIdentifier, formatter);
         } catch (Throwable e) {
-          warnings.add(FormatDateWarning.INVALID_FORMAT);
+          warningsOutput.add(FormatDateWarning.INVALID_FORMAT);
         }
       }
     }
 
-    return new FormatDateResult(formatter.format(stamp.atZone(zone)), warnings);
+    return formatter.format(stamp.atZone(zone));
   }
 
   @Override
-  public FormatNumberResult formatNumber(String format, @Nullable String roundingMode, @Nullable String locale, Number number) {
-    EnumSet<FormatNumberWarning> warnings = EnumSet.noneOf(FormatNumberWarning.class);
-
+  public String formatNumber(
+    String format,
+    @Nullable String roundingMode,
+    @Nullable String locale,
+    Number number,
+    EnumSet<FormatNumberWarning> warningsOutput
+  ) {
     // This conversion is really not ideal, but I believe that it's more efficient on
     // the large-scale than to make the whole system operate on big-decimals. This kind of
     // precision should only matter when it comes to displaying values.
@@ -184,7 +193,7 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
       formatLocale = LOCALE_BY_NAME_LOWER.get(AsciiCasing.lower(locale));
 
       if (formatLocale == null)
-        warnings.add(FormatNumberWarning.INVALID_LOCALE);
+        warningsOutput.add(FormatNumberWarning.INVALID_LOCALE);
     }
 
     DecimalFormat decimalFormat;
@@ -200,8 +209,8 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
         decimalFormat = formatLocale == null ? new DecimalFormat(format) : new DecimalFormat(format, new DecimalFormatSymbols(formatLocale));
         decimalFormatCache.put(formatIdentifier, decimalFormat);
       } catch (Throwable e) {
-        warnings.add(FormatNumberWarning.INVALID_FORMAT);
-        return new FormatNumberResult(String.valueOf(number), warnings);
+        warningsOutput.add(FormatNumberWarning.INVALID_FORMAT);
+        return String.valueOf(number);
       }
     }
 
@@ -209,11 +218,11 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
       try {
         decimalFormat.setRoundingMode(RoundingMode.valueOf(AsciiCasing.upper(roundingMode)));
       } catch (Throwable e) {
-        warnings.add(FormatNumberWarning.INVALID_ROUNDING_MODE);
+        warningsOutput.add(FormatNumberWarning.INVALID_ROUNDING_MODE);
       }
     }
 
-    return new FormatNumberResult(decimalFormat.format(bigDecimal), warnings);
+    return decimalFormat.format(bigDecimal);
   }
 
   @Override

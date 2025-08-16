@@ -8,6 +8,8 @@ package at.blvckbytes.component_markup.expression.interpreter;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+
 public interface InterpretationPlatform {
 
   /**
@@ -26,8 +28,19 @@ public interface InterpretationPlatform {
 
   String toTitleCase(String input);
 
-  FormatDateResult formatDate(String format, @Nullable String locale, @Nullable String timeZone, long timestamp);
+  String formatDate(
+    String format,
+    @Nullable String locale,
+    @Nullable String timeZone,
+    long timestamp,
+    EnumSet<FormatDateWarning> warningsOutput
+  );
 
-  FormatNumberResult formatNumber(String format, @Nullable String roundingMode, @Nullable String locale, Number number);
-
+  String formatNumber(
+    String format,
+    @Nullable String roundingMode,
+    @Nullable String locale,
+    Number number,
+    EnumSet<FormatNumberWarning> warningsOutput
+  );
 }

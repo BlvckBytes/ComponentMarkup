@@ -6,7 +6,6 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.interpreter.FormatNumberResult;
 import at.blvckbytes.component_markup.expression.interpreter.FormatNumberWarning;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
@@ -64,24 +63,25 @@ public class NumberTag extends TagDefinition {
         String roundingString = rounding == null ? null : interpreter.evaluateAsStringOrNull(rounding);
         String localeString = locale == null ? null : interpreter.evaluateAsStringOrNull(locale);
 
-        FormatNumberResult result = interpreter.getEnvironment().interpretationPlatform.formatNumber(formatString, roundingString, localeString, number);
+        EnumSet<FormatNumberWarning> warnings = EnumSet.noneOf(FormatNumberWarning.class);
+        String formattedString = interpreter.getEnvironment().interpretationPlatform.formatNumber(formatString, roundingString, localeString, number, warnings);
 
-        if (result.warnings.contains(FormatNumberWarning.INVALID_FORMAT)) {
+        if (warnings.contains(FormatNumberWarning.INVALID_FORMAT)) {
           for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered: \"" + formatString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 
-        if (result.warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null) {
+        if (warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null) {
           for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered: \"" + roundingString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 
-        if (result.warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null) {
+        if (warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null) {
           for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered: \"" + localeString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 
-        return result.formattedString;
+        return formattedString;
       }
 
       return String.valueOf(number);
