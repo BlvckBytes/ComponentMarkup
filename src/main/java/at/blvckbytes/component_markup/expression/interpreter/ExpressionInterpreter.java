@@ -19,7 +19,6 @@ import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -28,7 +27,6 @@ public class ExpressionInterpreter {
 
   private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
 
-  private static final Map<Class<?>, PublicFieldMap> publicFieldsByClass = new HashMap<>();
   private static final Map<String, Pattern> patternCache = new HashMap<>();
 
   private ExpressionInterpreter() {}
@@ -454,24 +452,8 @@ public class ExpressionInterpreter {
         return accessResult;
     }
 
-    PublicFieldMap fieldMap = publicFieldsByClass.computeIfAbsent(source.getClass(), PublicFieldMap::new);
-    Field field = fieldMap.locateField(stringKey);
-
-    if (field == null) {
-      for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field or getter \"" + stringKey + "\""))
-        LoggerProvider.log(Level.WARNING, line, false);
-
-      return null;
-    }
-
-    try {
-      return field.get(source);
-    } catch (Exception e) {
-      for (String line : ErrorScreen.make(operatorToken.raw, "Could not access field \"" + field + "\": " + e.getMessage()))
-        LoggerProvider.log(Level.WARNING, line, false);
-
-      return null;
-    }
+    LoggerProvider.log(Level.WARNING, "Don't know how to access field " + stringKey + " of " + source.getClass());
+    return null;
   }
 
   private static @Nullable String extractStringTerminal(@Nullable ExpressionNode node) {

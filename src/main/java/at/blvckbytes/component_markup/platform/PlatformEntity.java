@@ -35,6 +35,12 @@ public abstract class PlatformEntity implements DirectFieldAccess {
   @Override
   public @Nullable Object accessField(String rawIdentifier) {
     switch (rawIdentifier) {
+      case "name":
+        return name;
+      case "display_name":
+        return displayName;
+      case "uuid":
+        return uuid;
       case "x":
         return x();
       case "y":
