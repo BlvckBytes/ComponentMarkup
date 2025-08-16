@@ -19,8 +19,6 @@ import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -469,13 +467,7 @@ public class ComponentSequence {
 
         case OPEN_URL: {
           try {
-            URL url = URI.create(value).toURL();
-            String protocol = url.getProtocol();
-
-            if (!(protocol.equals("http") || protocol.equals("https")))
-              throw new IllegalStateException("Non-web protocol: \"" + protocol + "\"; use \"http\" or \"https\"");
-
-            componentConstructor.setClickOpenUrlAction(result, url);
+            componentConstructor.setClickOpenUrlAction(result, value);
           } catch (Throwable e) {
             for (String line : ErrorScreen.make(clickNode.value.getFirstMemberPositionProvider(), "Encountered malformed URL \"" + value + "\": " + e.getMessage()))
               LoggerProvider.log(Level.WARNING, line, false);

@@ -16,7 +16,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -117,8 +116,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setClickOpenUrlAction(Object component, URL value) {
-    setClickAction(component, "open_url", value.toString());
+  public void setClickOpenUrlAction(Object component, String value) {
+    setClickAction(component, "open_url", value);
   }
 
   @Override
