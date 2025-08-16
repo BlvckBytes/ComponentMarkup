@@ -27,8 +27,8 @@ public class WhenMatchingMap {
     return caseByValue.put(value.buildString().toLowerCase(), node);
   }
 
-  public @Nullable MarkupNode get(String valueLower) {
-    return caseByValue.get(valueLower);
+  public @Nullable MarkupNode get(String value) {
+    return caseByValue.get(value.toLowerCase());
   }
 
   public boolean isEmpty() {

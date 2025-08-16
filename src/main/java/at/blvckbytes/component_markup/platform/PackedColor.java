@@ -5,6 +5,8 @@
 
 package at.blvckbytes.component_markup.platform;
 
+import at.blvckbytes.component_markup.util.AsciiCasing;
+
 public class PackedColor {
 
   public static final long NULL_SENTINEL = -1;
@@ -104,7 +106,7 @@ public class PackedColor {
       return PackedColor.of(r, g, b, a);
     }
 
-    ansiColor = AnsiStyleColor.fromNameLowerOrNull(input.toLowerCase());
+    ansiColor = AnsiStyleColor.fromNameLowerOrNull(AsciiCasing.lower(input));
     return ansiColor == null ? NULL_SENTINEL : ansiColor.packedColor;
   }
 

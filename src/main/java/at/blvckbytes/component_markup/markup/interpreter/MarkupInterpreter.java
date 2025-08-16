@@ -236,8 +236,7 @@ public class MarkupInterpreter implements Interpreter {
     Object result = evaluateAsPlainObject(node.input);
 
     if (result != null) {
-      String inputLower = environment.getValueInterpreter().asString(result).toLowerCase();
-      MarkupNode caseNode = node.matchingMap.get(inputLower);
+      MarkupNode caseNode = node.matchingMap.get(environment.getValueInterpreter().asString(result));
 
       if (caseNode != null) {
         interpret(caseNode);

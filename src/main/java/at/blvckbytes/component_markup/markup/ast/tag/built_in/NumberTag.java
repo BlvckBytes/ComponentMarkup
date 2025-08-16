@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.util.AsciiCasing;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.StringView;
@@ -39,7 +40,7 @@ public class NumberTag extends TagDefinition {
 
       for (int i = 0; i < localeName.length(); ++i) {
         if (!Character.isWhitespace(localeName.charAt(i))) {
-          LOCALE_BY_NAME_LOWER.put(localeName.toLowerCase(), locale);
+          LOCALE_BY_NAME_LOWER.put(AsciiCasing.lower(localeName), locale);
           break;
         }
       }
@@ -104,7 +105,7 @@ public class NumberTag extends TagDefinition {
           if (rounding != null) {
             try {
               String modeName = interpreter.evaluateAsString(rounding);
-              decimalFormat.setRoundingMode(RoundingMode.valueOf(modeName.toUpperCase()));
+              decimalFormat.setRoundingMode(RoundingMode.valueOf(AsciiCasing.upper(modeName)));
             } catch (Throwable e) {
               for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered; choose one of " + ROUNDING_MODES_STRING))
                 LoggerProvider.log(Level.WARNING, line, false);
@@ -113,7 +114,7 @@ public class NumberTag extends TagDefinition {
 
           if (locale != null) {
             String localeName = interpreter.evaluateAsString(locale);
-            Locale formatLocale = LOCALE_BY_NAME_LOWER.get(localeName.toLowerCase());
+            Locale formatLocale = LOCALE_BY_NAME_LOWER.get(AsciiCasing.lower(localeName));
 
             // TODO: Consider caching this format
             if (formatLocale != null)

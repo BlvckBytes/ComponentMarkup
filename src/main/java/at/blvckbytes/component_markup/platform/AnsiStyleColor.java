@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.platform;
 
+import at.blvckbytes.component_markup.util.AsciiCasing;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -54,7 +55,7 @@ public enum AnsiStyleColor {
   private final float[] labColor;
 
   AnsiStyleColor(char colorChar, int r, int g, int b, String... aliases) {
-    this.name = name().toLowerCase();
+    this.name = AsciiCasing.lower(name());
     this.colorChar = colorChar;
     this.aliases = Collections.unmodifiableList(Arrays.asList(aliases));
     this.packedColor = PackedColor.of(r, g, b, 255);

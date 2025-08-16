@@ -198,7 +198,7 @@ public class StringView implements InterpolationMember {
       }
 
       if (lowercase)
-        currentChar = Character.toLowerCase(currentChar);
+        currentChar = AsciiCasing.lower(currentChar);
 
       result[nextResultIndex++] = currentChar;
     }
@@ -252,10 +252,10 @@ public class StringView implements InterpolationMember {
       char contentsChar = contents.charAt(index);
 
       if (ignoreCase)
-        valueChar = Character.toLowerCase(valueChar);
+        valueChar = AsciiCasing.lower(valueChar);
 
       if (ignoreCase || lowercase)
-        contentsChar = Character.toLowerCase(contentsChar);
+        contentsChar = AsciiCasing.lower(contentsChar);
 
       if (valueChar != contentsChar)
         return index;
@@ -273,7 +273,7 @@ public class StringView implements InterpolationMember {
     char targetChar = contents.charAt(targetIndex);
 
     if (lowercase)
-      targetChar = Character.toLowerCase(targetChar);
+      targetChar = AsciiCasing.lower(targetChar);
 
     return targetChar;
   }
