@@ -5,10 +5,16 @@
 
 package at.blvckbytes.component_markup.expression.interpreter;
 
+import at.blvckbytes.component_markup.util.AsciiCasing;
 import at.blvckbytes.component_markup.util.TriState;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.BreakIterator;
 import java.text.Normalizer;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +29,28 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
   private static final Pattern NON_WORDS = Pattern.compile("[^\\p{IsAlphabetic}\\d]+");
   private static final Pattern DASHES = Pattern.compile("(^-+)(|-+$)");
 
+  private static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
+  private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final Map<String, Locale> LOCALE_BY_NAME_LOWER;
+
   private static final Map<String, Pattern> patternCache = new HashMap<>();
+  private static final Map<String, DateTimeFormatter> dateTimeFormatterCache = new HashMap<>();
+
+
+  static {
+    LOCALE_BY_NAME_LOWER = new HashMap<>();
+
+    for (Locale locale : Locale.getAvailableLocales()) {
+      String localeName = locale.toString();
+
+      for (int i = 0; i < localeName.length(); ++i) {
+        if (!Character.isWhitespace(localeName.charAt(i))) {
+          LOCALE_BY_NAME_LOWER.put(AsciiCasing.lower(localeName), locale);
+          break;
+        }
+      }
+    }
+  }
 
   private JavaInterpretationPlatform() {}
 
@@ -82,6 +109,56 @@ public class JavaInterpretationPlatform implements InterpretationPlatform {
     }
 
     return result.toString();
+  }
+
+  @Override
+  public FormatDateResult formatDate(String format, @Nullable String locale, @Nullable String timeZone, long timestamp) {
+    EnumSet<FormatDateWarning> errors = EnumSet.noneOf(FormatDateWarning.class);
+    Instant stamp = Instant.ofEpochMilli(timestamp);
+
+    ZoneId zone = SYSTEM_ZONE;
+
+    if (timeZone != null) {
+      try {
+        zone = ZoneId.of(timeZone);
+      } catch (Throwable e1) {
+        try {
+          zone = ZoneId.of(timeZone, ZoneId.SHORT_IDS);
+        } catch (Throwable e2) {
+          errors.add(FormatDateWarning.INVALID_TIMEZONE);
+        }
+      }
+    }
+
+    Locale formatLocale = null;
+
+    if (locale != null) {
+      formatLocale = LOCALE_BY_NAME_LOWER.get(AsciiCasing.lower(locale));
+
+      if (formatLocale == null)
+        errors.add(FormatDateWarning.INVALID_LOCALE);
+    }
+
+    DateTimeFormatter formatter = DEFAULT_FORMATTER;
+
+    if (format != null) {
+      String formatIdentifier = format + (formatLocale == null ? "" : ("___" + formatLocale));
+      DateTimeFormatter cachedFormatter = dateTimeFormatterCache.get(formatIdentifier);
+
+      if (cachedFormatter != null)
+        formatter = cachedFormatter;
+
+      else {
+        try {
+          formatter = locale == null ? DateTimeFormatter.ofPattern(format) : DateTimeFormatter.ofPattern(format, formatLocale);
+          dateTimeFormatterCache.put(formatIdentifier, formatter);
+        } catch (Throwable e) {
+          errors.add(FormatDateWarning.INVALID_FORMAT);
+        }
+      }
+    }
+
+    return new FormatDateResult(formatter.format(stamp.atZone(zone)), errors);
   }
 
   @Override

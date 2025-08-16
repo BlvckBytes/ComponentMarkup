@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.expression.interpreter;
 
 import at.blvckbytes.component_markup.util.TriState;
+import org.jetbrains.annotations.Nullable;
 
 public interface InterpretationPlatform {
 
@@ -24,5 +25,7 @@ public interface InterpretationPlatform {
   String slugify(String input);
 
   String toTitleCase(String input);
+
+  FormatDateResult formatDate(String format, @Nullable String locale, @Nullable String timeZone, long timestamp);
 
 }
