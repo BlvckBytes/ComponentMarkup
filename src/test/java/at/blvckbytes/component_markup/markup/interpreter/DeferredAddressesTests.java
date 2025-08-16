@@ -14,6 +14,7 @@ import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.MembersSlot;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.platform.SlotType;
+import at.blvckbytes.component_markup.test_utils.Environment;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
@@ -72,7 +73,7 @@ public class DeferredAddressesTests {
 
     ComponentOutput output = MarkupInterpreter.interpret(
       componentConstructor,
-      new InterpretationEnvironment(),
+      new Environment(),
       null,
       chatContextNewComponent,
       ast

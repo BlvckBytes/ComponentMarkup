@@ -16,18 +16,16 @@ import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import at.blvckbytes.component_markup.util.DeepIterator;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 public class ExpressionInterpreter {
 
   private static final double DOUBLE_EQUALITY_THRESHOLD = .001;
-
-  private static final Map<String, Pattern> patternCache = new HashMap<>();
 
   private ExpressionInterpreter() {}
 
@@ -68,16 +66,16 @@ public class ExpressionInterpreter {
           return valueInterpreter.asString(operandValue).toUpperCase(Locale.ROOT);
 
         case TITLE_CASE:
-          return toTitleCase(valueInterpreter.asString(operandValue));
+          return environment.interpretationPlatform.toTitleCase(valueInterpreter.asString(operandValue));
 
         case TOGGLE_CASE:
           return toggleCase(valueInterpreter.asString(operandValue));
 
         case SLUGIFY:
-          return slugify(valueInterpreter.asString(operandValue));
+          return environment.interpretationPlatform.slugify(valueInterpreter.asString(operandValue));
 
         case ASCIIFY:
-          return asciify(valueInterpreter.asString(operandValue));
+          return environment.interpretationPlatform.asciify(valueInterpreter.asString(operandValue));
 
         case TRIM:
           return valueInterpreter.asString(operandValue).trim();
@@ -203,21 +201,16 @@ public class ExpressionInterpreter {
           String input = valueInterpreter.asString(lhsValue);
           String delimiter = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
 
-          Pattern pattern;
+          String[] result = environment.interpretationPlatform.split(input, delimiter, infixOperator == InfixOperator.REGEX_SPLIT);
 
-          try {
-            if (infixOperator == InfixOperator.SPLIT)
-              pattern = Pattern.compile(delimiter, Pattern.LITERAL);
-            else
-              pattern = patternCache.computeIfAbsent(delimiter, Pattern::compile);
-          } catch (Throwable e) {
+          if (result == null) {
             for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\""))
               LoggerProvider.log(Level.WARNING, line, false);
 
             return Collections.emptyList();
           }
 
-          return Arrays.asList(pattern.split(input));
+          return Arrays.asList(result);
         }
 
         case REPEAT: {
@@ -289,18 +282,16 @@ public class ExpressionInterpreter {
           String input = valueInterpreter.asString(lhsValue);
           String patternString = rhsValue == null ? "" : valueInterpreter.asString(rhsValue);
 
-          Pattern pattern;
+          TriState result = environment.interpretationPlatform.matchesPattern(input, patternString);
 
-          try {
-            pattern = patternCache.computeIfAbsent(patternString, Pattern::compile);
-          } catch (Throwable e) {
+          if (result == TriState.NULL) {
             for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + patternString + "\""))
               LoggerProvider.log(Level.WARNING, line, false);
 
             return false;
           }
 
-          return pattern.matcher(input).find();
+          return result == TriState.TRUE;
         }
 
         default:
@@ -567,11 +558,6 @@ public class ExpressionInterpreter {
     return flipSignOf(input.longValue());
   }
 
-  private static String toTitleCase(String input) {
-    LoggerProvider.log(Level.WARNING, "title() has not yet been implemented");
-    return input;
-  }
-
   private static String toggleCase(String input) {
     StringBuilder result = new StringBuilder(input.length());
 
@@ -588,15 +574,5 @@ public class ExpressionInterpreter {
     }
 
     return result.toString();
-  }
-
-  private static String slugify(String input) {
-    LoggerProvider.log(Level.WARNING, "slugify() has not yet been implemented");
-    return input;
-  }
-
-  private static String asciify(String input) {
-    LoggerProvider.log(Level.WARNING, "asciify() has not yet been implemented");
-    return input;
   }
 }

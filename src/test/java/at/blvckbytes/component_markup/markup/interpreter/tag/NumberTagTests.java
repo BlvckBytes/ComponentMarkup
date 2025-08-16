@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.markup.interpreter.InterpreterTestsBase;
 import at.blvckbytes.component_markup.markup.interpreter.JsonObjectBuilder;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.SlotType;
+import at.blvckbytes.component_markup.test_utils.Environment;
 import org.junit.jupiter.api.Test;
 
 public class NumberTagTests extends InterpreterTestsBase {
@@ -22,7 +23,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "15")
@@ -35,7 +36,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "15")
@@ -45,7 +46,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "15.12345")
@@ -58,7 +59,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "05.56")
@@ -68,7 +69,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "05,56")
@@ -81,7 +82,7 @@ public class NumberTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new InterpretationEnvironment(),
+      new Environment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "05.55")

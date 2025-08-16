@@ -13,18 +13,17 @@ import java.util.Set;
 
 public class InterpretationEnvironment {
 
-  private static final DefaultValueInterpreter DEFAULT_INTERPRETER = new DefaultValueInterpreter();
+  public static final DefaultValueInterpreter DEFAULT_INTERPRETER = new DefaultValueInterpreter();
 
   protected final Map<String, Object> variables;
   protected ValueInterpreter valueInterpreter;
 
-  public InterpretationEnvironment() {
-    this(new HashMap<>(), DEFAULT_INTERPRETER);
-  }
+  public final InterpretationPlatform interpretationPlatform;
 
-  private InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter) {
+  public InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter, InterpretationPlatform interpretationPlatform) {
     this.variables = variables;
     this.valueInterpreter = valueInterpreter;
+    this.interpretationPlatform = interpretationPlatform;
   }
 
   public Set<String> getNames() {
@@ -59,6 +58,6 @@ public class InterpretationEnvironment {
   }
 
   public InterpretationEnvironment copy() {
-    return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter);
+    return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter, interpretationPlatform);
   }
 }
