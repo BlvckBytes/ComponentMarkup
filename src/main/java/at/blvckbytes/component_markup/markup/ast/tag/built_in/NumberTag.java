@@ -61,25 +61,23 @@ public class NumberTag extends TagDefinition {
       String formatString;
 
       if (format != null && (formatString = interpreter.evaluateAsStringOrNull(format)) != null) {
-        FormatNumberResult result = interpreter.getEnvironment().interpretationPlatform.formatNumber(
-          formatString,
-          rounding == null ? null : interpreter.evaluateAsStringOrNull(rounding),
-          locale == null ? null : interpreter.evaluateAsStringOrNull(locale),
-          number
-        );
+        String roundingString = rounding == null ? null : interpreter.evaluateAsStringOrNull(rounding);
+        String localeString = locale == null ? null : interpreter.evaluateAsStringOrNull(locale);
+
+        FormatNumberResult result = interpreter.getEnvironment().interpretationPlatform.formatNumber(formatString, roundingString, localeString, number);
 
         if (result.warnings.contains(FormatNumberWarning.INVALID_FORMAT)) {
-          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered"))
+          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered: \"" + formatString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 
         if (result.warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null) {
-          for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered"))
+          for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered: \"" + roundingString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 
         if (result.warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null) {
-          for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered"))
+          for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered: \"" + localeString + "\""))
             LoggerProvider.log(Level.WARNING, line, false);
         }
 

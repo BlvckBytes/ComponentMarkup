@@ -49,25 +49,27 @@ public class DateTag extends TagDefinition {
     return new FunctionDrivenNode(tagName, interpreter -> {
       String evaluatedFormat = format == null ? null : interpreter.evaluateAsStringOrNull(format);
 
+      String formatString = evaluatedFormat == null ? DEFAULT_FORMAT : evaluatedFormat;
+      String localeString = locale == null ? null : interpreter.evaluateAsStringOrNull(locale);
+      String zoneString = zone == null ? null : interpreter.evaluateAsStringOrNull(zone);
+
       FormatDateResult result = interpreter.getEnvironment().interpretationPlatform.formatDate(
-        evaluatedFormat == null ? DEFAULT_FORMAT : evaluatedFormat,
-        locale == null ? null : interpreter.evaluateAsStringOrNull(locale),
-        zone == null ? null : interpreter.evaluateAsStringOrNull(zone),
+        formatString, localeString, zoneString,
         value == null ? System.currentTimeMillis() : interpreter.evaluateAsLong(value)
       );
 
       if (result.warnings.contains(FormatDateWarning.INVALID_FORMAT) && evaluatedFormat != null) {
-        for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered"))
+        for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered: \"" + formatString + "\""))
           LoggerProvider.log(Level.WARNING, line, false);
       }
 
       if (result.warnings.contains(FormatDateWarning.INVALID_LOCALE) && locale != null) {
-        for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
+        for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered: \"" + localeString + "\""))
           LoggerProvider.log(Level.WARNING, line, false);
       }
 
       if (result.warnings.contains(FormatDateWarning.INVALID_TIMEZONE) && zone != null) {
-        for (String line : ErrorScreen.make(zone.getFirstMemberPositionProvider(), "Invalid zone encountered"))
+        for (String line : ErrorScreen.make(zone.getFirstMemberPositionProvider(), "Invalid zone encountered: \"" + zoneString + "\""))
           LoggerProvider.log(Level.WARNING, line, false);
       }
 
