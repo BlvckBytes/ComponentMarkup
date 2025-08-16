@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class ExpressionLetBinding extends LetBinding {
 
@@ -15,7 +15,7 @@ public class ExpressionLetBinding extends LetBinding {
 
   public ExpressionLetBinding(
     ExpressionNode expression,
-    StringView name,
+    InputView name,
     boolean capture
   ) {
     super(name);

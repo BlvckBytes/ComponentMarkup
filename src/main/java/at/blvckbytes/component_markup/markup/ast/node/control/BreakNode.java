@@ -6,11 +6,11 @@
 package at.blvckbytes.component_markup.markup.ast.node.control;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class BreakNode extends MarkupNode {
 
-  public BreakNode(StringView positionProvider) {
+  public BreakNode(InputView positionProvider) {
     super(positionProvider, null, null);
   }
 }

@@ -7,18 +7,18 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
 public class AttributeName {
 
-  public final StringView finalName;
-  public final StringView fullName;
+  public final InputView finalName;
+  public final InputView fullName;
   private final EnumSet<AttributeFlag> flags;
 
-  private AttributeName(StringView finalName, StringView fullName, EnumSet<AttributeFlag> flags) {
+  private AttributeName(InputView finalName, InputView fullName, EnumSet<AttributeFlag> flags) {
     this.finalName = finalName;
     this.fullName = fullName;
     this.flags = flags;
@@ -28,8 +28,8 @@ public class AttributeName {
     return flags.contains(flag);
   }
 
-  public static AttributeName parse(StringView attributeName, @Nullable TokenOutput tokenOutput) {
-    StringView fullName = attributeName;
+  public static AttributeName parse(InputView attributeName, @Nullable TokenOutput tokenOutput) {
+    InputView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
     int nameLength;

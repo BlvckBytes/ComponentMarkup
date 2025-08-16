@@ -5,11 +5,11 @@
 
 package at.blvckbytes.component_markup.markup.parser.token;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 @FunctionalInterface
 public interface SequenceTokenConsumer {
 
-  void handle(TokenType type, StringView value);
+  void handle(TokenType type, InputView value);
 
 }

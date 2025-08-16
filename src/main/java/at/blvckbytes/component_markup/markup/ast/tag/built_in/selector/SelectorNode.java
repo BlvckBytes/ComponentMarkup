@@ -23,7 +23,7 @@ import at.blvckbytes.component_markup.platform.selector.TargetSelector;
 import at.blvckbytes.component_markup.platform.selector.TargetType;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -40,7 +40,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
 
   static {
     DEFAULT_RENDERER = MarkupParser.parse(
-      StringView.of(
+      InputView.of(
         "<container",
         "*for-entity=\"selector_result\"",
         "*for-separator={ <gray>,<space/> }",
@@ -54,7 +54,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
   public SelectorNode(
     ExpressionNode selector,
     @Nullable MarkupNode renderer,
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(positionProvider, letBindings);
@@ -91,7 +91,7 @@ public class SelectorNode extends DeferredNode<SelectorParameter> {
 
   @Override
   public SelectorParameter createParameter(Interpreter interpreter) {
-    StringView selectorString = StringView.of(interpreter.evaluateAsString(this.selector));
+    InputView selectorString = InputView.of(interpreter.evaluateAsString(this.selector));
 
     TargetSelector targetSelector;
 

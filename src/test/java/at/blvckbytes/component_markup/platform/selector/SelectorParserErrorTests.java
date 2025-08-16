@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.platform.selector;
 
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -126,7 +126,7 @@ public class SelectorParserErrorTests {
       new TextWithSubViews("@p[team=a,`team´=b]")
     );
 
-    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@p[team=a,team=!b]")));
+    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(InputView.of("@p[team=a,team=!b]")));
   }
 
   @Test
@@ -136,7 +136,7 @@ public class SelectorParserErrorTests {
       new TextWithSubViews("@p[team=hello`\"´world]")
     );
 
-    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@p[team=hello\\\"world]")));
+    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(InputView.of("@p[team=hello\\\"world]")));
   }
 
   @Test
@@ -147,7 +147,7 @@ public class SelectorParserErrorTests {
       new TextWithSubViews("@p[team=`\"hello world\\\"´]")
     );
 
-    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@p[team=\"hello\\\"world\"]")));
+    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(InputView.of("@p[team=\"hello\\\"world\"]")));
   }
 
   @Test
@@ -230,7 +230,7 @@ public class SelectorParserErrorTests {
       new TextWithSubViews("@e[`sort´=!furthest]")
     );
 
-    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(StringView.of("@e[sort=furthest]")));
+    Assertions.assertDoesNotThrow(() -> SelectorParser.parse(InputView.of("@e[sort=furthest]")));
   }
 
   @Test
@@ -336,7 +336,7 @@ public class SelectorParserErrorTests {
   private void makeErrorCase(TextWithSubViews input, SelectorParseError expectedError, int expectedPosition) {
     SelectorParseException actualException = Assertions.assertThrows(
       SelectorParseException.class,
-      () -> SelectorParser.parse(StringView.of(input.text))
+      () -> SelectorParser.parse(InputView.of(input.text))
     );
 
     Assertions.assertEquals(expectedError, actualException.error, input.text);

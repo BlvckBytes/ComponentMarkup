@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -787,19 +787,19 @@ public class ExpressionParserTests {
     );
   }
 
-  protected static Token token(Object value, StringView subView) {
+  protected static Token token(Object value, InputView subView) {
     return ExpressionTokenizerTests.makeToken(value, subView);
   }
 
-  protected static TerminalNode templateLiteral(StringView raw, List<InterpolationMember> members) {
+  protected static TerminalNode templateLiteral(InputView raw, List<InterpolationMember> members) {
     return new TerminalNode(new TemplateLiteralToken(raw, members));
   }
 
-  public static TerminalNode templateLiteral(StringView raw, InterpolationMember... members) {
+  public static TerminalNode templateLiteral(InputView raw, InterpolationMember... members) {
     return new TerminalNode(new TemplateLiteralToken(raw, Arrays.asList(members)));
   }
 
-  public static TerminalNode terminal(Object value, StringView subView) {
+  public static TerminalNode terminal(Object value, InputView subView) {
     Token token = ExpressionTokenizerTests.makeToken(value, subView);
 
     if (!(token instanceof TerminalToken))
@@ -829,7 +829,7 @@ public class ExpressionParserTests {
     ExpressionNode actualNode;
 
     try {
-      actualNode = ExpressionParser.parse(StringView.of(input.text), null);
+      actualNode = ExpressionParser.parse(InputView.of(input.text), null);
     } catch (ExpressionTokenizeException e) {
       for (String line : ErrorScreen.make(input.text, e.position, e.getErrorMessage()))
         System.out.println(line);
@@ -850,7 +850,7 @@ public class ExpressionParserTests {
   }
 
   private void makeCasePlain(String expression) {
-    ExpressionNode actualNode = ExpressionParser.parse(StringView.of(expression), null);
+    ExpressionNode actualNode = ExpressionParser.parse(InputView.of(expression), null);
 
     Assertions.assertNotNull(actualNode, "Expected the parse-result to be non-null");
     Assertions.assertEquals(expression, actualNode.toExpression());

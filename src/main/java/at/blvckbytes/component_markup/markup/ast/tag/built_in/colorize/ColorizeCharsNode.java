@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.OutputBuilder;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -22,9 +22,9 @@ import java.util.function.Function;
 public class ColorizeCharsNode extends ColorizeNode {
 
   public ColorizeCharsNode(
-    StringView tagName,
+    InputView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
@@ -61,7 +61,7 @@ public class ColorizeCharsNode extends ColorizeNode {
         nodeContents = node.textValue.substring(beginIndex, charIndex + 1);
       }
 
-      TextNode charNode = new TextNode(StringView.EMPTY, nodeContents);
+      TextNode charNode = new TextNode(InputView.EMPTY, nodeContents);
 
       if (nodeStyle != null)
         charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);

@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.test_utils.Environment;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -406,7 +406,7 @@ public class ExpressionInterpreterTests {
     if (environment == null)
       environment = new Environment();
 
-    ExpressionNode node = ExpressionParser.parse(StringView.of(expression), null);
+    ExpressionNode node = ExpressionParser.parse(InputView.of(expression), null);
     Assertions.assertEquals(Jsonifier.jsonify(expectedResult), Jsonifier.jsonify(ExpressionInterpreter.interpret(node, environment)));
   }
 }

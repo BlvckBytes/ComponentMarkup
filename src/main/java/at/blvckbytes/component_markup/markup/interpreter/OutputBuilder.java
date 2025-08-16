@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class OutputBuilder {
 
   public void onBreak() {
     if (breakString != null) {
-      onText(new TextNode(StringView.EMPTY, breakString), null, false);
+      onText(new TextNode(InputView.EMPTY, breakString), null, false);
       return;
     }
 

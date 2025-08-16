@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.expression.ast;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class TransformerNode extends ExpressionNode {
 
@@ -18,12 +18,12 @@ public class TransformerNode extends ExpressionNode {
   }
 
   @Override
-  public StringView getFirstMemberPositionProvider() {
+  public InputView getFirstMemberPositionProvider() {
     return wrapped.getFirstMemberPositionProvider();
   }
 
   @Override
-  public StringView getLastMemberPositionProvider() {
+  public InputView getLastMemberPositionProvider() {
     return wrapped.getLastMemberPositionProvider();
   }
 

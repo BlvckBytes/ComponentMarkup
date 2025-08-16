@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.test_utils.Environment;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -608,7 +608,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
 
     MarkupNode node = MarkupParser.parse(
-      StringView.of("<bold><gold>I am a markup-value!"),
+      InputView.of("<bold><gold>I am a markup-value!"),
       BuiltInTagRegistry.INSTANCE
     );
 
@@ -652,7 +652,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
 
     MarkupNode firstNode = MarkupParser.parse(
-      StringView.of("<bold><gold>I am the first!"),
+      InputView.of("<bold><gold>I am the first!"),
       BuiltInTagRegistry.INSTANCE
     );
 
@@ -674,7 +674,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
 
     MarkupNode secondNode = MarkupParser.parse(
-      StringView.of("<italic><red>I am the second!"),
+      InputView.of("<italic><red>I am the second!"),
       BuiltInTagRegistry.INSTANCE
     );
 

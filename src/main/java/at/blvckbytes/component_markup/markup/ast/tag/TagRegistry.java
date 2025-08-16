@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -22,7 +22,7 @@ public abstract class TagRegistry {
     this.registeredClasses = new HashSet<>();
   }
 
-  public @Nullable TagDefinition locateTag(StringView name) {
+  public @Nullable TagDefinition locateTag(InputView name) {
     List<TagDefinition> candidates = new ArrayList<>();
 
     for (TagDefinition definition : tagDefinitions) {

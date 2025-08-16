@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.Map;
 
@@ -23,12 +23,12 @@ public class MapNode extends ExpressionNode {
   }
 
   @Override
-  public StringView getFirstMemberPositionProvider() {
+  public InputView getFirstMemberPositionProvider() {
     return openingBracket.raw;
   }
 
   @Override
-  public StringView getLastMemberPositionProvider() {
+  public InputView getLastMemberPositionProvider() {
     return closingBracket.raw;
   }
 

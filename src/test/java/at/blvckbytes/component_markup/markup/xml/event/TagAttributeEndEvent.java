@@ -5,13 +5,13 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class TagAttributeEndEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
 
-  public TagAttributeEndEvent(StringView name) {
+  public TagAttributeEndEvent(InputView name) {
     this.name = name;
   }
 }

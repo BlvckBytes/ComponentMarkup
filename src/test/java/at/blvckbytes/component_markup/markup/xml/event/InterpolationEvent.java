@@ -5,14 +5,14 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class InterpolationEvent implements XmlEvent {
 
-  public final StringView expression;
+  public final InputView expression;
   public final String expressionBuildResult;
 
-  public InterpolationEvent(StringView expression, String expressionBuildResult) {
+  public InterpolationEvent(InputView expression, String expressionBuildResult) {
     this.expression = expression;
     this.expressionBuildResult = expressionBuildResult;
   }

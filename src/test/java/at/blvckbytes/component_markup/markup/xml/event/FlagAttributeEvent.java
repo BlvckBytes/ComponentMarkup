@@ -5,14 +5,14 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class FlagAttributeEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
   public final String nameBuildResult;
 
-  public FlagAttributeEvent(StringView name, String nameBuildResult) {
+  public FlagAttributeEvent(InputView name, String nameBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
   }

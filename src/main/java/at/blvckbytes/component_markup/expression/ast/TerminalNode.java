@@ -13,7 +13,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.TemplateLiteral
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
@@ -44,8 +44,8 @@ public class TerminalNode extends ExpressionNode {
       StringBuilder result = new StringBuilder();
 
       for (InterpolationMember member : ((TemplateLiteralToken) token).members) {
-        if (member instanceof StringView) {
-          result.append(((StringView) member).buildString());
+        if (member instanceof InputView) {
+          result.append(((InputView) member).buildString());
           continue;
         }
 
@@ -65,12 +65,12 @@ public class TerminalNode extends ExpressionNode {
 
 
   @Override
-  public StringView getFirstMemberPositionProvider() {
+  public InputView getFirstMemberPositionProvider() {
     return token.raw;
   }
 
   @Override
-  public StringView getLastMemberPositionProvider() {
+  public InputView getLastMemberPositionProvider() {
     return token.raw;
   }
 

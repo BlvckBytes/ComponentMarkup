@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.*;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -30,7 +30,7 @@ public class ExpressionParser {
     return parser.parseExpression(null);
   }
 
-  public static @Nullable ExpressionNode parse(StringView value, @Nullable TokenOutput tokenOutput) {
+  public static @Nullable ExpressionNode parse(InputView value, @Nullable TokenOutput tokenOutput) {
     ExpressionTokenizer tokenizer = new ExpressionTokenizer(value, tokenOutput);
     ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
     ExpressionNode result = parser.parseExpression(null);

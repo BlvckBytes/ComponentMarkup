@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 
-public class StringView implements InterpolationMember {
+public class InputView implements InterpolationMember {
 
-  public static final StringView EMPTY = new StringView("", new BitFlagArray(1), false, 0, 0);
+  public static final InputView EMPTY = new InputView("", new BitFlagArray(1), false, 0, 0);
 
   @JsonifyIgnore
   public final String contents;
@@ -34,7 +34,7 @@ public class StringView implements InterpolationMember {
   @JsonifyIgnore
   private @Nullable String buildStringCache;
 
-  private StringView(
+  private InputView(
     String contents,
     BitFlagArray removeIndices,
     boolean lowercase,
@@ -64,12 +64,12 @@ public class StringView implements InterpolationMember {
     charIndex = startInclusive - 1;
   }
 
-  public StringView setLowercase() {
+  public InputView setLowercase() {
     lowercase = true;
     return this;
   }
 
-  public StringView setBuildFlags(EnumSet<SubstringFlag> flags) {
+  public InputView setBuildFlags(EnumSet<SubstringFlag> flags) {
     if (flags == null)
       throw new IllegalStateException("Provided illegal null-value for build-flags");
 
@@ -80,11 +80,11 @@ public class StringView implements InterpolationMember {
     return this;
   }
 
-  public static StringView of(String contents) {
-    return new StringView(contents, new BitFlagArray(contents.length()), false, 0, contents.length());
+  public static InputView of(String contents) {
+    return new InputView(contents, new BitFlagArray(contents.length()), false, 0, contents.length());
   }
 
-  public static StringView of(String... lines) {
+  public static InputView of(String... lines) {
     StringBuilder result = new StringBuilder();
 
     for (String line : lines) {
@@ -94,24 +94,24 @@ public class StringView implements InterpolationMember {
       result.append(line);
     }
 
-    return StringView.of(result.toString());
+    return InputView.of(result.toString());
   }
 
-  public StringView buildSubViewRelative(int startInclusive) {
+  public InputView buildSubViewRelative(int startInclusive) {
     return buildSubViewAbsolute(
       startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),
       endExclusive
     );
   }
 
-  public StringView buildSubViewRelative(int startInclusive, int endExclusive) {
+  public InputView buildSubViewRelative(int startInclusive, int endExclusive) {
     return buildSubViewAbsolute(
       startInclusive + (startInclusive < 0 ? this.endExclusive : this.startInclusive),
       endExclusive + (endExclusive < 0 ? this.endExclusive : this.startInclusive)
     );
   }
 
-  public StringView buildSubViewAbsolute(int startInclusive, int endExclusive) {
+  public InputView buildSubViewAbsolute(int startInclusive, int endExclusive) {
     if (startInclusive < this.startInclusive || startInclusive >= this.endExclusive)
       throw new IllegalStateException("Start-inclusive " + startInclusive + " out of this view's range: [" + this.startInclusive + ";" + this.endExclusive + ")");
 
@@ -121,10 +121,10 @@ public class StringView implements InterpolationMember {
     if (endExclusive < startInclusive)
       throw new IllegalStateException("End " + endExclusive + " lies before start " + startInclusive);
 
-    return new StringView(contents, removeIndices, lowercase, startInclusive, endExclusive);
+    return new InputView(contents, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
-  public StringView addIndexToBeRemoved(int index) {
+  public InputView addIndexToBeRemoved(int index) {
     if (index < startInclusive || index >= endExclusive)
       throw new IllegalStateException("Index " + index + " out of this view's range: [" + startInclusive + ";" + endExclusive + ")");
 

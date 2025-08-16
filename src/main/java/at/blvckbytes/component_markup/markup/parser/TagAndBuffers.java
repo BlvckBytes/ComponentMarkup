@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,9 +21,9 @@ import java.util.logging.Level;
 public class TagAndBuffers implements ParserChildItem {
 
   public final @Nullable TagDefinition tag;
-  public final @Nullable StringView tagName;
+  public final @Nullable InputView tagName;
   public final @Nullable TagAndBuffers parent;
-  public final @Nullable StringView positionProvider;
+  public final @Nullable InputView positionProvider;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
@@ -36,18 +36,18 @@ public class TagAndBuffers implements ParserChildItem {
   public ConditionType ifConditionType = ConditionType.NONE;
   public @Nullable ExpressionNode useCondition;
 
-  public @Nullable StringView forAttribute;
+  public @Nullable InputView forAttribute;
   public @Nullable ExpressionNode forIterable;
   public @Nullable MarkupNode forSeparator;
   public @Nullable MarkupNode forEmpty;
   public @Nullable ExpressionNode forReversed;
-  public @Nullable StringView forIterationVariable;
+  public @Nullable InputView forIterationVariable;
 
   public @Nullable ExpressionNode whenInput;
-  public @Nullable StringView whenIsValue;
+  public @Nullable InputView whenIsValue;
   public boolean isWhenOther;
 
-  public TagAndBuffers(@NotNull StringView positionProvider) {
+  public TagAndBuffers(@NotNull InputView positionProvider) {
     this.tag = null;
     this.tagName = null;
     this.parent = null;
@@ -55,7 +55,7 @@ public class TagAndBuffers implements ParserChildItem {
     this.positionProvider = positionProvider;
   }
 
-  public TagAndBuffers(@NotNull TagDefinition tag, @NotNull StringView tagName, @Nullable TagAndBuffers parent) {
+  public TagAndBuffers(@NotNull TagDefinition tag, @NotNull InputView tagName, @Nullable TagAndBuffers parent) {
     this.tag = tag;
     this.tagName = tagName;
     this.parent = parent;

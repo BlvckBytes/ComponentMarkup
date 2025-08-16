@@ -13,7 +13,7 @@ import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -24,13 +24,13 @@ public abstract class MarkupNode {
   public @Nullable ExpressionNode ifCondition;
   public @Nullable ExpressionNode useCondition;
 
-  public final StringView positionProvider;
+  public final InputView positionProvider;
 
   public @Nullable List<MarkupNode> children;
   public @Nullable LinkedHashSet<LetBinding> letBindings;
 
   public MarkupNode(
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
@@ -67,7 +67,7 @@ public abstract class MarkupNode {
       if (this.ifCondition == null)
         this.ifCondition = other.ifCondition;
       else
-        this.ifCondition = new InfixOperationNode(this.ifCondition, new InfixOperatorToken(StringView.EMPTY, InfixOperator.CONJUNCTION), other.ifCondition, null);
+        this.ifCondition = new InfixOperationNode(this.ifCondition, new InfixOperatorToken(InputView.EMPTY, InfixOperator.CONJUNCTION), other.ifCondition, null);
     }
 
     if (other.letBindings != null && !other.letBindings.isEmpty()) {

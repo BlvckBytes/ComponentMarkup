@@ -10,20 +10,20 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParseException
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
 import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class MarkupParseException extends RuntimeException implements ErrorMessage {
 
-  private @Nullable StringView rootView;
+  private @Nullable InputView rootView;
 
   public final int position;
   public final MarkupParseError error;
   public final String[] messagePlaceholders;
 
-  public MarkupParseException(StringView positionProvider, MarkupParseError error, String... messagePlaceholders) {
+  public MarkupParseException(InputView positionProvider, MarkupParseError error, String... messagePlaceholders) {
     this(positionProvider.startInclusive, error, messagePlaceholders);
   }
 
@@ -86,7 +86,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     return position;
   }
 
-  public MarkupParseException setRootView(StringView rootView) {
+  public MarkupParseException setRootView(InputView rootView) {
     if (this.rootView != null)
       throw new IllegalStateException("Root-view was already set");
 

@@ -30,7 +30,7 @@ import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class MarkupParser implements XmlEventConsumer {
     RESERVED_OPERATOR_NAMES.add("null");
   }
 
-  private final StringView rootView;
+  private final InputView rootView;
   private final @Nullable TokenOutput tokenOutput;
   private final TagRegistry tagRegistry;
   private final Stack<TagAndBuffers> tagStack;
@@ -60,7 +60,7 @@ public class MarkupParser implements XmlEventConsumer {
   private MarkupNode result;
 
   private MarkupParser(
-    StringView rootView,
+    InputView rootView,
     @Nullable TokenOutput tokenOutput,
     TagRegistry tagRegistry,
     int initialPosition,
@@ -71,7 +71,7 @@ public class MarkupParser implements XmlEventConsumer {
     this.tagRegistry = tagRegistry;
     this.tagStack = new Stack<>();
     this.isSubParser = isSubParser;
-    this.result = new TextNode(StringView.EMPTY, "");
+    this.result = new TextNode(InputView.EMPTY, "");
 
     this.tagStack.push(new TagAndBuffers(rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(initialPosition, initialPosition)));
   }
@@ -81,7 +81,7 @@ public class MarkupParser implements XmlEventConsumer {
   // ================================================================================
 
   @Override
-  public void onTagOpenBegin(StringView tagName) {
+  public void onTagOpenBegin(InputView tagName) {
     if (subtreeParser != null) {
       subtreeParser.onTagOpenBegin(tagName);
       return;
@@ -103,7 +103,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onStringAttribute(StringView name, StringView value) {
+  public void onStringAttribute(InputView name, InputView value) {
     if (subtreeParser != null) {
       subtreeParser.onStringAttribute(name, value);
       return;
@@ -132,7 +132,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTemplateLiteralAttribute(StringView name, TerminalNode value) {
+  public void onTemplateLiteralAttribute(InputView name, TerminalNode value) {
     if (subtreeParser != null) {
       subtreeParser.onTemplateLiteralAttribute(name, value);
       return;
@@ -157,7 +157,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onLongAttribute(StringView name, StringView raw, long value) {
+  public void onLongAttribute(InputView name, InputView raw, long value) {
     if (subtreeParser != null) {
       subtreeParser.onLongAttribute(name, raw, value);
       return;
@@ -186,7 +186,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onDoubleAttribute(StringView name, StringView raw, double value) {
+  public void onDoubleAttribute(InputView name, InputView raw, double value) {
     if (subtreeParser != null) {
       subtreeParser.onDoubleAttribute(name, raw, value);
       return;
@@ -215,7 +215,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
+  public void onBooleanAttribute(InputView name, InputView raw, boolean value) {
     if (subtreeParser != null) {
       subtreeParser.onBooleanAttribute(name, raw, value);
       return;
@@ -244,7 +244,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onNullAttribute(StringView name, StringView raw) {
+  public void onNullAttribute(InputView name, InputView raw) {
     if (subtreeParser != null) {
       subtreeParser.onNullAttribute(name, raw);
       return;
@@ -270,7 +270,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagAttributeBegin(StringView name, int valueBeginPosition) {
+  public void onTagAttributeBegin(InputView name, int valueBeginPosition) {
     if (subtreeParser != null) {
       subtreeParser.onTagAttributeBegin(name, valueBeginPosition);
       return;
@@ -280,7 +280,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagAttributeEnd(StringView name) {
+  public void onTagAttributeEnd(InputView name) {
     if (subtreeParser == null)
       throw new IllegalStateException("Expected there to be a subtree-parser");
 
@@ -312,7 +312,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onFlagAttribute(StringView name) {
+  public void onFlagAttribute(InputView name) {
     if (subtreeParser != null) {
       subtreeParser.onFlagAttribute(name);
       return;
@@ -339,7 +339,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagOpenEnd(StringView tagName, boolean wasSelfClosing) {
+  public void onTagOpenEnd(InputView tagName, boolean wasSelfClosing) {
     if (subtreeParser != null) {
       subtreeParser.onTagOpenEnd(tagName, wasSelfClosing);
       return;
@@ -367,7 +367,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onText(StringView text) {
+  public void onText(InputView text) {
     if (subtreeParser != null) {
       subtreeParser.onText(text);
       return;
@@ -377,7 +377,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onInterpolation(ExpressionNode expression, StringView raw) {
+  public void onInterpolation(ExpressionNode expression, InputView raw) {
     if (subtreeParser != null) {
       subtreeParser.onInterpolation(expression, raw);
       return;
@@ -387,7 +387,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   @Override
-  public void onTagClose(@Nullable StringView tagName, int pointyPosition) {
+  public void onTagClose(@Nullable InputView tagName, int pointyPosition) {
     if (subtreeParser != null) {
       subtreeParser.onTagClose(tagName, pointyPosition);
       return;
@@ -484,7 +484,7 @@ public class MarkupParser implements XmlEventConsumer {
               && parseError.error == MarkupParseError.MISSING_MANDATORY_ATTRIBUTE
               && tokenOutput.outputFlags.contains(OutputFlag.ALLOW_MISSING_ATTRIBUTES)
           )
-            result = new TextNode(StringView.EMPTY, "<error>");
+            result = new TextNode(InputView.EMPTY, "<error>");
           else
             throw parseError;
         }
@@ -499,11 +499,11 @@ public class MarkupParser implements XmlEventConsumer {
   // Public API
   // ================================================================================
 
-  public static MarkupNode parse(StringView rootView, TagRegistry tagRegistry) {
+  public static MarkupNode parse(InputView rootView, TagRegistry tagRegistry) {
     return parse(rootView, tagRegistry, null);
   }
 
-  public static MarkupNode parse(StringView rootView, TagRegistry tagRegistry, @Nullable TokenOutput tokenOutput) {
+  public static MarkupNode parse(InputView rootView, TagRegistry tagRegistry, @Nullable TokenOutput tokenOutput) {
     // The initial position, which will also be applied to the outermost implicit
     // container, is the zero-sentinel (unreachable by user-input)
     MarkupParser parser = new MarkupParser(rootView, tokenOutput, tagRegistry, rootView.startInclusive, false);
@@ -548,7 +548,7 @@ public class MarkupParser implements XmlEventConsumer {
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, attributeName.finalName.buildSubViewRelative(0, 3));
 
-      StringView iterationVariable = null;
+      InputView iterationVariable = null;
 
       if (attributeName.finalName.length() > 4) {
         iterationVariable = attributeName.finalName.buildSubViewRelative(4);
@@ -575,7 +575,7 @@ public class MarkupParser implements XmlEventConsumer {
     }
 
     if (attributeName.finalName.startsWith("let-", true)) {
-      StringView bindingName = attributeName.finalName.buildSubViewRelative(4);
+      InputView bindingName = attributeName.finalName.buildSubViewRelative(4);
 
       if (tokenOutput != null) {
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, attributeName.finalName.buildSubViewRelative(0, 3));
@@ -816,7 +816,7 @@ public class MarkupParser implements XmlEventConsumer {
     currentLayer.attributeMap.add(attribute);
   }
 
-  private boolean isInvalidIdentifier(StringView identifier, boolean expression) {
+  private boolean isInvalidIdentifier(InputView identifier, boolean expression) {
     int length = identifier.length();
 
     if (length == 0)
@@ -844,7 +844,7 @@ public class MarkupParser implements XmlEventConsumer {
     return false;
   }
 
-  private ExpressionNode parseExpression(StringView value) {
+  private ExpressionNode parseExpression(InputView value) {
     try {
       ExpressionNode expression = ExpressionParser.parse(value, tokenOutput);
 

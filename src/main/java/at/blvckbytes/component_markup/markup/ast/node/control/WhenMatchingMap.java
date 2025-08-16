@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.node.control;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,9 +20,9 @@ public class WhenMatchingMap {
 
   // Only kept for test-matching, as to compare against real views
   // This is not ideal, but I need to move on now...
-  private final List<StringView> views = new ArrayList<>();
+  private final List<InputView> views = new ArrayList<>();
 
-  public @Nullable MarkupNode put(StringView value, MarkupNode node) {
+  public @Nullable MarkupNode put(InputView value, MarkupNode node) {
     views.add(value);
     return caseByValue.put(value.buildString().toLowerCase(), node);
   }

@@ -5,16 +5,16 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class StringAttributeEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
   public final String nameBuildResult;
-  public final StringView value;
+  public final InputView value;
   public final String rawBuildResult;
 
-  public StringAttributeEvent(StringView name, StringView value, String nameBuildResult, String rawBuildResult) {
+  public StringAttributeEvent(InputView name, InputView value, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.value = value;

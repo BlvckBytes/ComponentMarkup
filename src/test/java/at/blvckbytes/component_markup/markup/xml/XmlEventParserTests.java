@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.xml;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParserTests;
 import at.blvckbytes.component_markup.markup.xml.event.*;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -942,7 +942,7 @@ public class XmlEventParserTests {
     XmlParseException thrownException = null;
 
     try {
-      XmlEventParser.parse(StringView.of(input.text), actualEventsJoiner);
+      XmlEventParser.parse(InputView.of(input.text), actualEventsJoiner);
     } catch (XmlParseException exception) {
       thrownException = exception;
     }

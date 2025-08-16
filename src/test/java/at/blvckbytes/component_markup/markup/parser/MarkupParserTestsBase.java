@@ -19,7 +19,7 @@ import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.Tuple;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
@@ -31,9 +31,9 @@ import java.util.List;
 public abstract class MarkupParserTestsBase {
 
   protected static NodeWrapper<ForLoopNode> forLoop(
-    StringView forAttribute,
+    InputView forAttribute,
     ExpressionNode iterable,
-    @Nullable StringView iterationVariable,
+    @Nullable InputView iterationVariable,
     NodeWrapper<?> wrappedBody,
     @Nullable NodeWrapper<?> wrappedSeparator,
     @Nullable ExpressionNode reversed,
@@ -51,14 +51,14 @@ public abstract class MarkupParserTestsBase {
     ));
   }
 
-  protected static List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> whenMap(Object... items) {
-    List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> result = new ArrayList<>();
+  protected static List<Tuple<InputView, NodeWrapper<? extends MarkupNode>>> whenMap(Object... items) {
+    List<Tuple<InputView, NodeWrapper<? extends MarkupNode>>> result = new ArrayList<>();
 
     if (items.length % 2 != 0)
       throw new IllegalStateException("Expected an even number of items");
 
     for (int i = 0; i < items.length; i += 2) {
-      StringView key = (StringView) items[i];
+      InputView key = (InputView) items[i];
       NodeWrapper<?> value = (NodeWrapper<?>) items[i + 1];
       result.add(new Tuple<>(key, value));
     }
@@ -67,14 +67,14 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static NodeWrapper<WhenMatchingNode> when(
-    StringView positionProvider,
+    InputView positionProvider,
     ExpressionNode input,
     @Nullable NodeWrapper<?> wrappedFallback,
-    List<Tuple<StringView, NodeWrapper<? extends MarkupNode>>> wrappedCases
+    List<Tuple<InputView, NodeWrapper<? extends MarkupNode>>> wrappedCases
   ) {
     WhenMatchingMap cases = new WhenMatchingMap();
 
-    for (Tuple<StringView, NodeWrapper<? extends MarkupNode>> entry : wrappedCases)
+    for (Tuple<InputView, NodeWrapper<? extends MarkupNode>> entry : wrappedCases)
       cases.put(entry.first, entry.second.get());
 
     return new NodeWrapper<>(new WhenMatchingNode(positionProvider, input, cases, wrappedFallback == null ? null : wrappedFallback.get()));
@@ -90,27 +90,27 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new IfElseIfElseNode(conditions, wrappedFallback == null ? null : wrappedFallback.get()));
   }
 
-  protected static ExpressionNode bool(StringView raw, boolean value) {
+  protected static ExpressionNode bool(InputView raw, boolean value) {
     return ImmediateExpression.ofBoolean(raw, value);
   }
 
-  protected static ExpressionNode string(StringView value) {
+  protected static ExpressionNode string(InputView value) {
     return ImmediateExpression.ofString(value, value.buildString());
   }
 
-  protected static ExpressionNode expr(StringView expression) {
+  protected static ExpressionNode expr(InputView expression) {
     return ExpressionParser.parse(expression, null);
   }
 
-  protected static NodeWrapper<ContainerNode> container(StringView positionProvider) {
+  protected static NodeWrapper<ContainerNode> container(InputView positionProvider) {
     return new NodeWrapper<>(new ContainerNode(positionProvider, new ArrayList<>(), new LinkedHashSet<>()));
   }
 
-  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(StringView expression) {
+  protected static NodeWrapper<ExpressionDrivenNode> exprDriven(InputView expression) {
     return new NodeWrapper<>(new ExpressionDrivenNode(expr(expression)));
   }
 
-  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, StringView positionProvider, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
+  protected static NodeWrapper<TranslateNode> translate(ExpressionNode key, InputView positionProvider, @Nullable ExpressionNode fallback, NodeWrapper<?>... wrappedWiths) {
     List<MarkupNode> withs = new ArrayList<>();
 
     for (NodeWrapper<?> wrappedWith : wrappedWiths)
@@ -128,16 +128,16 @@ public abstract class MarkupParserTestsBase {
     };
   }
 
-  protected static NodeWrapper<InterpolationNode> interpolation(StringView expression) {
+  protected static NodeWrapper<InterpolationNode> interpolation(InputView expression) {
     return new NodeWrapper<>(new InterpolationNode(expr(expression)));
   }
 
-  protected static NodeWrapper<TextNode> text(StringView value) {
+  protected static NodeWrapper<TextNode> text(InputView value) {
     return new NodeWrapper<>(new TextNode(value, value.buildString()));
   }
 
   protected static void makeCase(TextWithSubViews input, NodeWrapper<?> wrappedExpectedNode) {
-    MarkupNode actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
+    MarkupNode actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
     Assertions.assertEquals(Jsonifier.jsonify(wrappedExpectedNode.get()), Jsonifier.jsonify(actualNode));
   }
 }

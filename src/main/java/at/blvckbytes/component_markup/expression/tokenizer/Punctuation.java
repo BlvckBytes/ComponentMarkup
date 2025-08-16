@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public enum Punctuation implements EnumToken {
   OPENING_PARENTHESIS('('),
@@ -31,7 +31,7 @@ public enum Punctuation implements EnumToken {
   }
 
   @Override
-  public Token create(StringView raw) {
+  public Token create(InputView raw) {
     return new PunctuationToken(raw, this);
   }
 

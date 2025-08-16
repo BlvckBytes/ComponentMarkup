@@ -5,16 +5,16 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.Objects;
 
 public abstract class LetBinding {
 
-  public final StringView name;
+  public final InputView name;
   public final String bindingName;
 
-  public LetBinding(StringView name) {
+  public LetBinding(InputView name) {
     this.name = name;
     this.bindingName = name.buildString();
   }

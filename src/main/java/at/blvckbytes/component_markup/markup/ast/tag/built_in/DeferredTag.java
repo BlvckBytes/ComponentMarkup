@@ -15,7 +15,7 @@ import at.blvckbytes.component_markup.markup.interpreter.MarkupInterpreter;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,13 +29,13 @@ public class DeferredTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(StringView tagName) {
+  public boolean matchName(InputView tagName) {
     return tagName.contentEquals("deferred", true);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull StringView tagName,
+    @NotNull InputView tagName,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children

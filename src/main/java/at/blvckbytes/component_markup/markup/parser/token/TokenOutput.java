@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.parser.token;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.List;
 public class TokenOutput {
 
   private @Nullable HierarchicalToken[] tokenByCharIndex;
-  private StringView input;
+  private InputView input;
   private final List<HierarchicalToken> result = new ArrayList<>();
   private boolean hasEnded;
 
@@ -25,7 +25,7 @@ public class TokenOutput {
     this.outputFlags = outputFlags;
   }
 
-  public void onInitialization(StringView input) {
+  public void onInitialization(InputView input) {
     if (tokenByCharIndex != null)
       throw new IllegalStateException("Do not call TokenOutput#onInitialization more than once");
 
@@ -89,7 +89,7 @@ public class TokenOutput {
     emitToken(type, input.buildSubViewAbsolute(position, position + 1));
   }
 
-  public void emitToken(TokenType type, StringView value) {
+  public void emitToken(TokenType type, InputView value) {
     validateTokenIndex(type, value);
 
     HierarchicalToken newToken = new HierarchicalToken(type, value);
@@ -127,7 +127,7 @@ public class TokenOutput {
     tokenByCharIndex[value.startInclusive] = newToken;
   }
 
-  private void validateTokenIndex(TokenType type, StringView value) {
+  private void validateTokenIndex(TokenType type, InputView value) {
     if (tokenByCharIndex == null)
       throw new IllegalStateException("Do not emit tokens before calling TokenOutput#onInitialization");
 

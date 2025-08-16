@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.Punctuation;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -453,7 +453,7 @@ public class ExpressionParserErrorTests {
     ExpressionParseException thrownException = null;
 
     try {
-      ExpressionParser.parse(StringView.of(input.text),  null);
+      ExpressionParser.parse(InputView.of(input.text),  null);
     } catch (ExpressionParseException exception) {
       thrownException = exception;
     }

@@ -7,38 +7,38 @@ package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public interface XmlEventConsumer {
 
-  void onTagOpenBegin(StringView tagName);
+  void onTagOpenBegin(InputView tagName);
 
-  void onStringAttribute(StringView name, StringView value);
+  void onStringAttribute(InputView name, InputView value);
 
-  void onTemplateLiteralAttribute(StringView name, TerminalNode value);
+  void onTemplateLiteralAttribute(InputView name, TerminalNode value);
 
-  void onLongAttribute(StringView name, StringView raw, long value);
+  void onLongAttribute(InputView name, InputView raw, long value);
 
-  void onDoubleAttribute(StringView name, StringView raw, double value);
+  void onDoubleAttribute(InputView name, InputView raw, double value);
 
-  void onBooleanAttribute(StringView name, StringView raw, boolean value);
+  void onBooleanAttribute(InputView name, InputView raw, boolean value);
 
-  void onNullAttribute(StringView name, StringView raw);
+  void onNullAttribute(InputView name, InputView raw);
 
-  void onTagAttributeBegin(StringView name, int valueBeginPosition);
+  void onTagAttributeBegin(InputView name, int valueBeginPosition);
 
-  void onTagAttributeEnd(StringView name);
+  void onTagAttributeEnd(InputView name);
 
-  void onFlagAttribute(StringView name);
+  void onFlagAttribute(InputView name);
 
-  void onTagOpenEnd(StringView tagName, boolean wasSelfClosing);
+  void onTagOpenEnd(InputView tagName, boolean wasSelfClosing);
 
-  void onText(StringView text);
+  void onText(InputView text);
 
-  void onInterpolation(ExpressionNode expression, StringView raw);
+  void onInterpolation(ExpressionNode expression, InputView raw);
 
-  void onTagClose(@Nullable StringView tagName, int pointyPosition);
+  void onTagClose(@Nullable InputView tagName, int pointyPosition);
 
   void onInputEnd();
 

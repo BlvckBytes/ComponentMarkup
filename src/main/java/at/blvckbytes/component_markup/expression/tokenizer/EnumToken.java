@@ -6,11 +6,11 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public interface EnumToken {
 
-  Token create(StringView raw);
+  Token create(InputView raw);
 
   int getLength();
 

@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -77,7 +77,7 @@ public enum InfixOperator implements EnumToken {
   }
 
   @Override
-  public Token create(StringView raw) {
+  public Token create(InputView raw) {
     return new InfixOperatorToken(raw, this);
   }
 

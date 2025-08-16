@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PunctuationToken;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class SubstringNode extends ExpressionNode {
@@ -36,12 +36,12 @@ public class SubstringNode extends ExpressionNode {
   }
 
   @Override
-  public StringView getFirstMemberPositionProvider() {
+  public InputView getFirstMemberPositionProvider() {
     return operand.getFirstMemberPositionProvider();
   }
 
   @Override
-  public StringView getLastMemberPositionProvider() {
+  public InputView getLastMemberPositionProvider() {
     return closingBracket.raw;
   }
 

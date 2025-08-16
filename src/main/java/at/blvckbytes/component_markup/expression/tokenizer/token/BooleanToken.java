@@ -6,14 +6,14 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class BooleanToken extends TerminalToken {
 
   public final boolean value;
 
-  public BooleanToken(StringView raw, boolean value) {
+  public BooleanToken(InputView raw, boolean value) {
     super(raw);
 
     this.value = value;

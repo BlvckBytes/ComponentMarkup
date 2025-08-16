@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.platform.PackedColor;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -16,14 +16,14 @@ import java.util.Stack;
 
 public abstract class ColorizeNodeState {
 
-  public final StringView tagName;
+  public final InputView tagName;
   public final double phase;
   public final EnumSet<ColorizeFlag> flags;
   public final int initialSubtreeDepth;
 
   private final Stack<List<Object>> injectedComponentsStack;
 
-  public ColorizeNodeState(StringView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
+  public ColorizeNodeState(InputView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
     this.tagName = tagName;
     this.initialSubtreeDepth = initialSubtreeDepth;
     this.phase = phase;

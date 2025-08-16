@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class BranchingNode extends ExpressionNode {
@@ -33,12 +33,12 @@ public class BranchingNode extends ExpressionNode {
   }
 
   @Override
-  public StringView getFirstMemberPositionProvider() {
+  public InputView getFirstMemberPositionProvider() {
     return condition.getFirstMemberPositionProvider();
   }
 
   @Override
-  public StringView getLastMemberPositionProvider() {
+  public InputView getLastMemberPositionProvider() {
     if (branchFalse == null)
       return branchTrue.getLastMemberPositionProvider();
 

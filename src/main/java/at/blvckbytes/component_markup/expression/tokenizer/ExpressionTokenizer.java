@@ -22,13 +22,13 @@ public class ExpressionTokenizer {
   private @Nullable Stack<Token> pendingStack;
   private boolean isNextPendingPeek;
 
-  private final StringView input;
+  private final InputView input;
   private final @Nullable TokenOutput tokenOutput;
   private boolean dashIsPrefix;
 
   public boolean allowPeekingClosingCurly;
 
-  public ExpressionTokenizer(StringView input, @Nullable TokenOutput tokenOutput) {
+  public ExpressionTokenizer(InputView input, @Nullable TokenOutput tokenOutput) {
     this.input = input;
     this.tokenOutput = tokenOutput;
 
@@ -86,7 +86,7 @@ public class ExpressionTokenizer {
           members.add(interpolationExpression);
 
           if (tokenOutput != null) {
-            StringView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
+            InputView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
             tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
           }
 
@@ -130,7 +130,7 @@ public class ExpressionTokenizer {
 
     int rawEndInclusive = input.getPosition();
 
-    StringView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
+    InputView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
 
     if (quoteChar != '`')
       return new StringToken(rawContents, rawContents.buildSubViewRelative(1, -1).buildString());
@@ -194,7 +194,7 @@ public class ExpressionTokenizer {
     if (beginInclusive < 0)
       throw new IllegalStateException("Expected to only be called if peekChar(0) != 0 or ' ' or '.'");
 
-    StringView raw = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
+    InputView raw = input.buildSubViewAbsolute(beginInclusive, endInclusive + 1);
     String value = raw.buildString();
 
     switch (value) {
@@ -258,7 +258,7 @@ public class ExpressionTokenizer {
     if (_peekChar(0) == '.') {
       // Range-operator encountered
       if (_peekChar(1) == '.') {
-        StringView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
+        InputView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
         return new LongToken(value, Long.parseLong(value.buildString()));
       }
 
@@ -267,12 +267,12 @@ public class ExpressionTokenizer {
       if (collectSubsequentDigitsAndGetFirstIndex() < 0)
         throw new ExpressionTokenizeException(startInclusive, ExpressionTokenizeError.EXPECTED_DECIMAL_DIGITS);
 
-      StringView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
+      InputView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
       return new DoubleToken(value, Double.parseDouble(value.buildString()));
     }
 
-    StringView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
+    InputView value = input.buildSubViewAbsolute(startInclusive, lastDigitIndex + 1);
 
     return new LongToken(value, Long.parseLong(value.buildString()));
   }
@@ -293,7 +293,7 @@ public class ExpressionTokenizer {
     if (collectSubsequentDigitsAndGetFirstIndex() < 0)
       throw new IllegalStateException("Unreachable: checked for a digit's presence ahead of time");
 
-    StringView rawValue = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
+    InputView rawValue = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
     return new DoubleToken(rawValue, Double.parseDouble(rawValue.buildString()));
   }

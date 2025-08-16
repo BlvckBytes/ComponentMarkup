@@ -26,7 +26,7 @@ import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -337,7 +337,7 @@ public class MarkupInterpreter implements Interpreter {
       return;
 
     if (!(value instanceof MarkupNode)) {
-      interpret(new TextNode(StringView.EMPTY, String.valueOf(value)));
+      interpret(new TextNode(InputView.EMPTY, String.valueOf(value)));
       return;
     }
 
@@ -506,7 +506,7 @@ public class MarkupInterpreter implements Interpreter {
       if (interpolationValue instanceof MarkupNode)
         interpolatedNode = (MarkupNode) interpolationValue;
       else
-        interpolatedNode = new TextNode(StringView.EMPTY, environment.getValueInterpreter().asString(interpolationValue));
+        interpolatedNode = new TextNode(InputView.EMPTY, environment.getValueInterpreter().asString(interpolationValue));
 
       NodeStyle nodeStyle = ((InterpolationNode) node).getStyle();
 

@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -32,7 +32,7 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> let(StringView name, ExpressionNode expression) {
+  public NodeWrapper<T> let(InputView name, ExpressionNode expression) {
     if(node.letBindings == null)
       node.letBindings = new LinkedHashSet<>();
 
@@ -50,7 +50,7 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> color(StringView color) {
+  public NodeWrapper<T> color(InputView color) {
     return color(ImmediateExpression.ofString(color, color.buildString()));
   }
 
@@ -62,7 +62,7 @@ public class NodeWrapper<T extends MarkupNode> {
     return this;
   }
 
-  public NodeWrapper<T> font(StringView font) {
+  public NodeWrapper<T> font(InputView font) {
     return font(ImmediateExpression.ofString(font, font.buildString()));
   }
 

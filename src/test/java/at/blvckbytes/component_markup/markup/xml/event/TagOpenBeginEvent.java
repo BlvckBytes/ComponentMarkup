@@ -5,14 +5,14 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class TagOpenBeginEvent implements XmlEvent {
 
-  public final StringView tagName;
+  public final InputView tagName;
   public final String tagNameBuildResult;
 
-  public TagOpenBeginEvent(StringView tagName, String tagNameBuildResult) {
+  public TagOpenBeginEvent(InputView tagName, String tagNameBuildResult) {
     this.tagName = tagName;
     this.tagNameBuildResult = tagNameBuildResult;
   }

@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.platform.selector;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public enum TargetType {
     this.character = character;
   }
 
-  public static @Nullable TargetType ofName(StringView name) {
+  public static @Nullable TargetType ofName(InputView name) {
     if (name.length() != 1)
       return null;
 

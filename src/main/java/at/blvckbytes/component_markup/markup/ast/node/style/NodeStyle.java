@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeStyle {
@@ -78,7 +78,7 @@ public class NodeStyle {
     if (thisValue == null)
       return otherValue;
 
-    return new InfixOperationNode(thisValue, new InfixOperatorToken(StringView.EMPTY, InfixOperator.DISJUNCTION), otherValue, null);
+    return new InfixOperationNode(thisValue, new InfixOperatorToken(InputView.EMPTY, InfixOperator.DISJUNCTION), otherValue, null);
   }
 
   public boolean hasNonNullProperties() {

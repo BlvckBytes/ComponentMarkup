@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.rainbow;
 
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.EnumSet;
 
@@ -15,7 +15,7 @@ public class RainbowNodeState extends ColorizeNodeState {
 
   private static final RainbowGenerator rainbowGenerator = new RainbowGenerator();
 
-  public RainbowNodeState(StringView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
+  public RainbowNodeState(InputView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
     super(tagName, initialSubtreeDepth, phase, flags);
   }
 

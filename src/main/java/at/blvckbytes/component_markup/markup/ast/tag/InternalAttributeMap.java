@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribu
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +20,11 @@ import java.util.*;
 
 public class InternalAttributeMap implements AttributeMap {
 
-  private final StringView tagName;
+  private final InputView tagName;
 
   private final Map<String, List<Attribute>> attributeMap;
 
-  public InternalAttributeMap(StringView tagName) {
+  public InternalAttributeMap(InputView tagName) {
     this.attributeMap = new HashMap<>();
     this.tagName = tagName;
   }

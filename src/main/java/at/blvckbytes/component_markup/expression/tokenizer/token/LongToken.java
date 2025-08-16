@@ -6,14 +6,14 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class LongToken extends TerminalToken {
 
   public final long value;
 
-  public LongToken(StringView raw, long value) {
+  public LongToken(InputView raw, long value) {
     super(raw);
 
     this.value = value;

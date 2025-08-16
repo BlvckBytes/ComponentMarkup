@@ -9,14 +9,14 @@ import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient.GradientNodeState;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.EnumSet;
 
 public class TransitionNodeState extends GradientNodeState {
 
   public TransitionNodeState(
-    StringView tagName,
+    InputView tagName,
     int initialSubtreeDepth,
     ExpressionList colors,
     ExpressionList offsets,

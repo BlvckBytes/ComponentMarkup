@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.platform.selector;
 
 import at.blvckbytes.component_markup.platform.selector.argument.ArgumentValue;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ public enum SortCriterion implements ArgumentValue {
     return false;
   }
 
-  public static @Nullable SortCriterion ofName(StringView name) {
+  public static @Nullable SortCriterion ofName(InputView name) {
     switch (name.buildString()) {
       case "nearest":
         return NEAREST;

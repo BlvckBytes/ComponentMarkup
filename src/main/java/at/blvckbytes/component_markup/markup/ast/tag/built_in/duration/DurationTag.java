@@ -14,7 +14,7 @@ import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.TemporaryMemberEnvironment;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,13 +28,13 @@ public class DurationTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(StringView tagName) {
+  public boolean matchName(InputView tagName) {
     return tagName.contentEquals("duration", true);
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull StringView tagName,
+    @NotNull InputView tagName,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -75,12 +75,12 @@ public class DurationTag extends TagDefinition {
           continue;
 
         if (didEmit)
-          interpreter.interpret(separator == null ? new TextNode(StringView.EMPTY, " ") : separator, null);
+          interpreter.interpret(separator == null ? new TextNode(InputView.EMPTY, " ") : separator, null);
 
         didEmit = true;
 
         if (unitRenderer == null) {
-          interpreter.interpret(new TextNode(StringView.EMPTY, String.valueOf(unitValue) + requestedUnit.character), null);
+          interpreter.interpret(new TextNode(InputView.EMPTY, String.valueOf(unitValue) + requestedUnit.character), null);
           continue;
         }
 

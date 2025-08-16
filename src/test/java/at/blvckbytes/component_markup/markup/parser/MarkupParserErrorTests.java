@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -868,7 +868,7 @@ public class MarkupParserErrorTests {
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
-      () -> MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE)
+      () -> MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE)
     );
 
     List<String> screenLines = exception.makeErrorScreen();
@@ -880,7 +880,7 @@ public class MarkupParserErrorTests {
     Throwable thrownError = null;
 
     try {
-      MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
+      MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (Throwable e) {
       thrownError = e;
     }

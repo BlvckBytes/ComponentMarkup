@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.ast.node.control;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ForLoopNode extends MarkupNode {
 
-  public final StringView forAttribute;
+  public final InputView forAttribute;
   public final ExpressionNode iterable;
   public final @Nullable String iterationVariable;
   public final MarkupNode body;
@@ -29,9 +29,9 @@ public class ForLoopNode extends MarkupNode {
   public @Nullable List<LetBinding> letBindingsAfterForAttribute;
 
   public ForLoopNode(
-    StringView forAttribute,
+    InputView forAttribute,
     ExpressionNode iterable,
-    @Nullable StringView iterationVariable,
+    @Nullable InputView iterationVariable,
     MarkupNode body,
     @Nullable MarkupNode separator,
     @Nullable MarkupNode empty,

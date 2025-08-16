@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.xml;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,9 +24,9 @@ public class TextWithSubViews {
   }
 
   public final String text;
-  private final StringView rootView;
-  private final StringView initialView;
-  private final List<StringView> subViews;
+  private final InputView rootView;
+  private final InputView initialView;
+  private final List<InputView> subViews;
 
   public TextWithSubViews(String... lines) {
     this.subViews = new ArrayList<>();
@@ -93,7 +93,7 @@ public class TextWithSubViews {
       );
     }
 
-    this.rootView = StringView.of(text);
+    this.rootView = InputView.of(text);
     this.initialView = rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(0, 0);
 
     for (ViewIndices indices : indicesInOrder)
@@ -104,11 +104,11 @@ public class TextWithSubViews {
     this.rootView.addIndexToBeRemoved(position);
   }
 
-  public StringView initialView() {
+  public InputView initialView() {
     return initialView;
   }
 
-  public @NotNull StringView subView(int index) {
+  public @NotNull InputView subView(int index) {
     if (index < 0)
       throw new IllegalStateException("Cannot request negative indices");
 

@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.platform.selector;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.selector.argument.*;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +64,7 @@ public class SelectorParserTests {
   public void shouldSupportQuotesInUnquotedStrings() {
     TextWithSubViews text = new TextWithSubViews("@`e´[`name´=`pre`\\´\"post´]");
 
-    StringView value = text.subView(2);
+    InputView value = text.subView(2);
 
     value.addIndexToBeRemoved(text.subView(3).startInclusive);
 
@@ -84,7 +84,7 @@ public class SelectorParserTests {
   public void shouldSupportQuotesInQuotedStrings() {
     TextWithSubViews text = new TextWithSubViews("@`e´[`name´=`\"pre`\\´\"post\"´]");
 
-    StringView value = text.subView(2);
+    InputView value = text.subView(2);
 
     value.addIndexToBeRemoved(text.subView(3).startInclusive);
 
@@ -233,7 +233,7 @@ public class SelectorParserTests {
   }
 
   private void makeCase(TextWithSubViews input, TargetSelector expectedSelector) {
-    TargetSelector actualSelector = SelectorParser.parse(StringView.of(input.text));
+    TargetSelector actualSelector = SelectorParser.parse(InputView.of(input.text));
     Assertions.assertEquals(Jsonifier.jsonify(expectedSelector), Jsonifier.jsonify(actualSelector));
   }
 }

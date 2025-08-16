@@ -26,21 +26,21 @@ public class XmlEventParser {
 
   private final XmlEventConsumer consumer;
   private final TokenOutput tokenOutput;
-  private final StringView input;
+  private final InputView input;
   private final ExpressionTokenizer expressionTokenizer;
 
-  private XmlEventParser(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+  private XmlEventParser(InputView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     this.consumer = consumer;
     this.tokenOutput = tokenOutput;
     this.input = input;
     this.expressionTokenizer = new ExpressionTokenizer(input, tokenOutput);
   }
 
-  public static void parse(StringView input, XmlEventConsumer consumer) {
+  public static void parse(InputView input, XmlEventConsumer consumer) {
     new XmlEventParser(input, consumer, null).parseInput(false);
   }
 
-  public static void parse(StringView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+  public static void parse(InputView input, XmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
     new XmlEventParser(input, consumer, tokenOutput).parseInput(false);
   }
 
@@ -93,7 +93,7 @@ public class XmlEventParser {
         if (interpolationExpression == null)
           throw new XmlParseException(XmlParseError.EMPTY_INTERPOLATION, startInclusive);
 
-        StringView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
+        InputView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
 
         if (tokenOutput != null)
           tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
@@ -161,7 +161,7 @@ public class XmlEventParser {
       consumer.onInputEnd();
   }
 
-  private void emitText(StringView text, @Nullable EnumSet<SubstringFlag> flags) {
+  private void emitText(InputView text, @Nullable EnumSet<SubstringFlag> flags) {
     if (flags != null)
       text.setBuildFlags(flags);
 
@@ -176,7 +176,7 @@ public class XmlEventParser {
       tokenOutput.emitToken(TokenType.MARKUP__PLAIN_TEXT, text);
   }
 
-  private @Nullable StringView tryParseIdentifier() {
+  private @Nullable InputView tryParseIdentifier() {
     if (!isIdentifierChar(input.peekChar(0)))
       return null;
 
@@ -190,7 +190,7 @@ public class XmlEventParser {
     return input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
   }
 
-  private void parseAndEmitStringAttributeValue(StringView attributeName) {
+  private void parseAndEmitStringAttributeValue(InputView attributeName) {
     // By calling into expression-syntax for strings, we also inherit the ability to have
     // template-literals as direct attribute-values without having to bind them separately, all
     // while avoiding duplicate string-parser logic; win-win!
@@ -236,7 +236,7 @@ public class XmlEventParser {
     return peekedChar == '>' || (peekedChar == '/' && input.peekChar(1) == '>');
   }
 
-  private void parseNumericAttributeValue(StringView attributeName) {
+  private void parseNumericAttributeValue(InputView attributeName) {
     int startInclusive = -1;
 
     if (input.peekChar(0) == '-') {
@@ -278,7 +278,7 @@ public class XmlEventParser {
     if (!doesEndOrHasTrailingWhiteSpaceOrTagTermination())
       throw new XmlParseException(XmlParseError.MALFORMED_NUMBER, startInclusive);
 
-    StringView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
+    InputView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__NUMBER, value);
@@ -303,7 +303,7 @@ public class XmlEventParser {
     input.consumeWhitespace(tokenOutput);
 
     // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
-    StringView attributeName = tryParseIdentifier();
+    InputView attributeName = tryParseIdentifier();
 
     if (attributeName == null) {
       if (input.peekChar(0) == '"') {
@@ -382,7 +382,7 @@ public class XmlEventParser {
 
       default: {
         int beginPosition = input.getPosition() + 1;
-        StringView valueIdentifier = tryParseIdentifier();
+        InputView valueIdentifier = tryParseIdentifier();
 
         if (valueIdentifier == null)
           throw new XmlParseException(XmlParseError.MISSING_ATTRIBUTE_VALUE, attributeName.startInclusive);
@@ -460,7 +460,7 @@ public class XmlEventParser {
 
     input.consumeWhitespace(tokenOutput);
 
-    StringView tagName = tryParseIdentifier();
+    InputView tagName = tryParseIdentifier();
 
     if (wasClosingTag) {
       if (input.nextChar() != '>')

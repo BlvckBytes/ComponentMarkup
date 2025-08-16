@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribu
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -75,6 +75,6 @@ public class MarkupList {
     if (value instanceof MarkupNode)
       return (MarkupNode) value;
 
-    return new TextNode(StringView.EMPTY, String.valueOf(value));
+    return new TextNode(InputView.EMPTY, String.valueOf(value));
   }
 }

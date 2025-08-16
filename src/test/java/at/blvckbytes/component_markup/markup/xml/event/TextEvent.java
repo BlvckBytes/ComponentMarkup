@@ -5,14 +5,14 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class TextEvent implements XmlEvent {
 
-  public final StringView text;
+  public final InputView text;
   public final String textBuildResult;
 
-  public TextEvent(StringView text, String textBuildResult) {
+  public TextEvent(InputView text, String textBuildResult) {
     this.text = text;
     this.textBuildResult = textBuildResult;
   }

@@ -6,15 +6,15 @@
 package at.blvckbytes.component_markup.markup.xml.event;
 
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class TemplateLiteralAttributeEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
   public final String nameBuildResult;
   public final TerminalNode value;
 
-  public TemplateLiteralAttributeEvent(StringView name, TerminalNode value, String nameBuildResult) {
+  public TemplateLiteralAttributeEvent(InputView name, TerminalNode value, String nameBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.value = value;

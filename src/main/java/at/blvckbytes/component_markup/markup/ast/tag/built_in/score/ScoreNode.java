@@ -13,7 +13,7 @@ import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -29,7 +29,7 @@ public class ScoreNode extends DeferredNode<ScoreParameter> {
     ExpressionNode name,
     ExpressionNode objective,
     @Nullable ExpressionNode value,
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(positionProvider, letBindings);

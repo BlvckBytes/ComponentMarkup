@@ -5,15 +5,15 @@
 
 package at.blvckbytes.component_markup.platform.selector.argument;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class StringValue implements ArgumentValue {
 
-  public final StringView raw;
+  public final InputView raw;
   public final String value;
   public final boolean negated;
 
-  public StringValue(StringView raw, String value, boolean negated) {
+  public StringValue(InputView raw, String value, boolean negated) {
     this.raw = raw;
     this.value = value;
     this.negated = negated;

@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,74 +20,74 @@ public class XmlEventJoiner implements XmlEventConsumer {
   private final List<XmlEvent> events = new ArrayList<>();
 
   @Override
-  public void onTagOpenBegin(StringView tagName) {
+  public void onTagOpenBegin(InputView tagName) {
     events.add(new TagOpenBeginEvent(tagName, tagName.buildString()));
   }
 
   @Override
-  public void onStringAttribute(StringView name, StringView value) {
+  public void onStringAttribute(InputView name, InputView value) {
     events.add(new StringAttributeEvent(name, value, name.buildString(), value.buildString()));
   }
 
   @Override
-  public void onTemplateLiteralAttribute(StringView name, TerminalNode value) {
+  public void onTemplateLiteralAttribute(InputView name, TerminalNode value) {
     events.add(new TemplateLiteralAttributeEvent(name, value, name.buildString()));
   }
 
   @Override
-  public void onLongAttribute(StringView name, StringView raw, long value) {
+  public void onLongAttribute(InputView name, InputView raw, long value) {
     events.add(new LongAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
-  public void onDoubleAttribute(StringView name, StringView raw, double value) {
+  public void onDoubleAttribute(InputView name, InputView raw, double value) {
     events.add(new DoubleAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
-  public void onBooleanAttribute(StringView name, StringView raw, boolean value) {
+  public void onBooleanAttribute(InputView name, InputView raw, boolean value) {
     events.add(new BooleanAttributeEvent(name, raw, value, name.buildString(), raw.buildString()));
   }
 
   @Override
-  public void onNullAttribute(StringView name, StringView raw) {
+  public void onNullAttribute(InputView name, InputView raw) {
     events.add(new NullAttributeEvent(name, raw, name.buildString(), raw.buildString()));
   }
 
   @Override
-  public void onTagOpenEnd(StringView tagName, boolean wasSelfClosing) {
+  public void onTagOpenEnd(InputView tagName, boolean wasSelfClosing) {
     events.add(new TagOpenEndEvent(tagName, wasSelfClosing));
   }
 
   @Override
-  public void onTagAttributeBegin(StringView name, int valueBeginPosition) {
+  public void onTagAttributeBegin(InputView name, int valueBeginPosition) {
     events.add(new TagAttributeBeginEvent(name, valueBeginPosition, name.buildString()));
   }
 
   @Override
-  public void onTagAttributeEnd(StringView name) {
+  public void onTagAttributeEnd(InputView name) {
     events.add(new TagAttributeEndEvent(name));
   }
 
   @Override
-  public void onFlagAttribute(StringView name) {
+  public void onFlagAttribute(InputView name) {
     events.add(new FlagAttributeEvent(name, name.buildString()));
   }
 
   @Override
-  public void onText(StringView text) {
+  public void onText(InputView text) {
     events.add(new TextEvent(text, text.buildString()));
   }
 
   @Override
-  public void onInterpolation(ExpressionNode expression, StringView raw) {
+  public void onInterpolation(ExpressionNode expression, InputView raw) {
     // Not going to test for the expression at this point, because that's
     // already taken care of plenty higher up the stack.
     events.add(new InterpolationEvent(raw, raw.buildString()));
   }
 
   @Override
-  public void onTagClose(@Nullable StringView tagName, int pointyPosition) {
+  public void onTagClose(@Nullable InputView tagName, int pointyPosition) {
     events.add(new TagCloseEvent(tagName, pointyPosition, tagName == null ? null : tagName.buildString()));
   }
 

@@ -8,13 +8,13 @@ package at.blvckbytes.component_markup.expression.tokenizer.token;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.OperatorFlag;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class InfixOperatorToken extends Token {
 
   public final InfixOperator operator;
 
-  public InfixOperatorToken(StringView raw, InfixOperator operator) {
+  public InfixOperatorToken(InputView raw, InfixOperator operator) {
     super(raw);
 
     this.operator = operator;

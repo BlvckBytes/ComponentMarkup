@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.platform.selector.argument;
 
 import at.blvckbytes.component_markup.platform.selector.SelectorParseError;
 import at.blvckbytes.component_markup.platform.selector.SortCriterion;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -291,7 +291,7 @@ public enum ArgumentName {
     };
   }
 
-  public static @Nullable ArgumentName ofName(StringView name) {
+  public static @Nullable ArgumentName ofName(InputView name) {
     switch (name.buildString()) {
       case "x":
         return START_X;

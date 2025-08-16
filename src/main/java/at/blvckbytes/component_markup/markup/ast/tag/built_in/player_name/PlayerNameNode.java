@@ -14,7 +14,7 @@ import at.blvckbytes.component_markup.markup.interpreter.*;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -29,7 +29,7 @@ public class PlayerNameNode extends DeferredNode<PlayerNameParameter> {
   public PlayerNameNode(
     @Nullable ExpressionNode displayName,
     @Nullable MarkupNode renderer,
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
     super(positionProvider, letBindings);

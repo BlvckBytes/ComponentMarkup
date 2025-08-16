@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.expression.tokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -393,7 +393,7 @@ public class ExpressionTokenizerTests {
     ExpressionTokenizeException thrownException = null;
 
     try {
-      ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
+      ExpressionTokenizer tokenizer = new ExpressionTokenizer(InputView.of(input.text), null);
 
       while (tokenizer.peekToken() != null)
         tokenizer.nextToken();
@@ -408,7 +408,7 @@ public class ExpressionTokenizerTests {
     assertEquals(expectedPosition, thrownException.position, "Encountered mismatch on thrown error beginIndex");
   }
 
-  public static Token makeToken(Object value, StringView subView) {
+  public static Token makeToken(Object value, InputView subView) {
     Token token;
 
     if (value instanceof Boolean)
@@ -459,7 +459,7 @@ public class ExpressionTokenizerTests {
 
   private static void makeCase(TextWithSubViews input, Object... expectedValuesAndViews) {
     List<Token> actualTokens = new ArrayList<>();
-    ExpressionTokenizer tokenizer = new ExpressionTokenizer(StringView.of(input.text), null);
+    ExpressionTokenizer tokenizer = new ExpressionTokenizer(InputView.of(input.text), null);
 
     while (tokenizer.peekToken() != null)
       actualTokens.add(tokenizer.nextToken());
@@ -480,7 +480,7 @@ public class ExpressionTokenizerTests {
 
     for (int valueIndex = 0; valueIndex < expectedValuesAndViews.length; valueIndex += 2) {
       Object expectedValue = expectedValuesAndViews[valueIndex];
-      StringView expectedView = (StringView) expectedValuesAndViews[valueIndex + 1];
+      InputView expectedView = (InputView) expectedValuesAndViews[valueIndex + 1];
 
       if (expectedTokensString.length() != 0)
         expectedTokensString.append('\n');

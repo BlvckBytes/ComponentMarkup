@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.platform.AnsiStyleColor;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,13 +25,13 @@ public class ImmediateColorTag extends TagDefinition {
   }
 
   @Override
-  public boolean matchName(StringView tagName) {
+  public boolean matchName(InputView tagName) {
     return tagNameToColor(tagName) != null;
   }
 
   @Override
   public @NotNull MarkupNode createNode(
-    @NotNull StringView tagName,
+    @NotNull InputView tagName,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
@@ -46,7 +46,7 @@ public class ImmediateColorTag extends TagDefinition {
     return wrapper;
   }
 
-  private @Nullable ExpressionNode tagNameToColor(StringView tagName) {
+  private @Nullable ExpressionNode tagNameToColor(InputView tagName) {
     int nameLength = tagName.length();
 
     if (nameLength == 0)

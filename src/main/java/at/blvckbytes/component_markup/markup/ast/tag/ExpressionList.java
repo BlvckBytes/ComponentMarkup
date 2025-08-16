@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,14 +67,14 @@ public class ExpressionList {
       return ImmediateExpression.ofNull();
 
     if (value instanceof Double || value instanceof Float)
-      return ImmediateExpression.ofDouble(StringView.EMPTY, ((Number) value).doubleValue());
+      return ImmediateExpression.ofDouble(InputView.EMPTY, ((Number) value).doubleValue());
 
     if (value instanceof Number)
-      return ImmediateExpression.ofLong(StringView.EMPTY, ((Number) value).longValue());
+      return ImmediateExpression.ofLong(InputView.EMPTY, ((Number) value).longValue());
 
     if (value instanceof Boolean)
-      return ImmediateExpression.ofBoolean(StringView.EMPTY, (boolean) value);
+      return ImmediateExpression.ofBoolean(InputView.EMPTY, (boolean) value);
 
-    return ImmediateExpression.ofString(StringView.EMPTY, String.valueOf(value));
+    return ImmediateExpression.ofString(InputView.EMPTY, String.valueOf(value));
   }
 }

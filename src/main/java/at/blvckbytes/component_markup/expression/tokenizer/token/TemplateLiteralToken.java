@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.expression.tokenizer.token;
 import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class TemplateLiteralToken extends TerminalToken {
 
   public final List<InterpolationMember> members;
 
-  public TemplateLiteralToken(StringView raw, List<InterpolationMember> members) {
+  public TemplateLiteralToken(InputView raw, List<InterpolationMember> members) {
     super(raw);
 
     this.members = members;

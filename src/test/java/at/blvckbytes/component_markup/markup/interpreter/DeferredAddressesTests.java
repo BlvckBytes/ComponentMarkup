@@ -15,7 +15,7 @@ import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.test_utils.Environment;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ public class DeferredAddressesTests {
   }
 
   private void makeCase(TextWithSubViews input, @Nullable AddressTreeBuilder expectedDeferredAddresses) {
-    MarkupNode ast = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
+    MarkupNode ast = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
 
     ComponentOutput output = MarkupInterpreter.interpret(
       componentConstructor,

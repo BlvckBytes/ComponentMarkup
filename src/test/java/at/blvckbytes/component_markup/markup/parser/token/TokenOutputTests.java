@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.ListBuilder;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class TokenOutputTests {
     );
 
     makeSequenceCase(
-      StringView.of(text.text),
+      InputView.of(text.text),
       new ListBuilder<>(HierarchicalToken.class)
         .add(
           new HierarchicalToken(TokenType.MARKUP__COMMENT, text.subView(0))
@@ -67,7 +67,7 @@ public class TokenOutputTests {
     );
 
     makeHierarchicalCase(
-      StringView.of(text.text),
+      InputView.of(text.text),
       new ListBuilder<>(HierarchicalToken.class)
         .add(
           new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT))
@@ -125,7 +125,7 @@ public class TokenOutputTests {
     TextWithSubViews text = new TextWithSubViews(finalLines);
 
     makeHierarchicalCase(
-      StringView.of(text.text),
+      InputView.of(text.text),
       new ListBuilder<>(HierarchicalToken.class)
         .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
         .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase())) // "red"
@@ -156,7 +156,7 @@ public class TokenOutputTests {
       /* 106 */ "`<´`/´`>´"
     );
 
-    StringView rootView = StringView.of(text.text);
+    InputView rootView = InputView.of(text.text);
 
     makeSequenceCase(
       rootView,
@@ -399,7 +399,7 @@ public class TokenOutputTests {
     );
   }
 
-  private void addWhitespace(StringView rootView, StringView predecessor, ListBuilder<? extends Token> output) {
+  private void addWhitespace(InputView rootView, InputView predecessor, ListBuilder<? extends Token> output) {
     int textLength = rootView.contents.length();
     boolean foundFirstWhitespace = false;
 
@@ -415,7 +415,7 @@ public class TokenOutputTests {
 
       foundFirstWhitespace = true;
 
-      StringView charView = rootView.buildSubViewAbsolute(charIndex, charIndex + 1);
+      InputView charView = rootView.buildSubViewAbsolute(charIndex, charIndex + 1);
 
       if (output.type == HierarchicalToken.class)
         output.add(new HierarchicalToken(TokenType.ANY__WHITESPACE, charView));
@@ -429,7 +429,7 @@ public class TokenOutputTests {
   }
 
   private void makeSequenceCase(
-    StringView rootView,
+    InputView rootView,
     ListBuilder<HierarchicalToken> expectedHierarchicalTokens,
     ListBuilder<Token> expectedSequenceTokens
   ) {
@@ -444,7 +444,7 @@ public class TokenOutputTests {
     Assertions.assertEquals(Jsonifier.jsonify(expectedSequenceTokens.getResult()), Jsonifier.jsonify(actualSequenceTokens));
   }
 
-  private List<HierarchicalToken> makeHierarchicalCase(StringView rootView, ListBuilder<HierarchicalToken> expectedHierarchicalTokens) {
+  private List<HierarchicalToken> makeHierarchicalCase(InputView rootView, ListBuilder<HierarchicalToken> expectedHierarchicalTokens) {
     TokenOutput tokenOutput = new TokenOutput(EnumSet.noneOf(OutputFlag.class));
 
     try {

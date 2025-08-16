@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.util.JsonifyGetter;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public abstract class ExpressionNode implements InterpolationMember {
 
@@ -24,10 +24,10 @@ public abstract class ExpressionNode implements InterpolationMember {
   }
 
   @JsonifyGetter
-  public abstract StringView getFirstMemberPositionProvider();
+  public abstract InputView getFirstMemberPositionProvider();
 
   @JsonifyGetter
-  public abstract StringView getLastMemberPositionProvider();
+  public abstract InputView getLastMemberPositionProvider();
 
   public abstract String toExpression();
 

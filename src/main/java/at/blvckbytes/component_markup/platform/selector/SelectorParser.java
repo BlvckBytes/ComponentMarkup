@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.platform.selector.argument.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ public class SelectorParser {
 
   private static final ArgumentValue RANGE_VALUE_SENTINEL = () -> false;
 
-  public static @NotNull TargetSelector parse(StringView input) {
+  public static @NotNull TargetSelector parse(InputView input) {
     input.consumeWhitespace(null);
 
     if (input.nextChar() != '@')
@@ -43,7 +43,7 @@ public class SelectorParser {
     while ((upcomingChar = input.peekChar(0)) != 0 && upcomingChar != '[' && !Character.isWhitespace(upcomingChar))
       input.nextChar();
 
-    StringView rawTarget = input.buildSubViewAbsolute(typeBegin, input.getPosition() + 1).setLowercase();
+    InputView rawTarget = input.buildSubViewAbsolute(typeBegin, input.getPosition() + 1).setLowercase();
     TargetType target = TargetType.ofName(rawTarget);
 
     if (target == null)
@@ -65,7 +65,7 @@ public class SelectorParser {
     return new TargetSelector(target, rawTarget, arguments);
   }
 
-  private static List<ArgumentEntry> parseArguments(StringView input) {
+  private static List<ArgumentEntry> parseArguments(InputView input) {
     List<ArgumentEntry> result = new ArrayList<>();
 
     while (input.peekChar(0) != 0) {
@@ -91,7 +91,7 @@ public class SelectorParser {
       while ((peekedChar = input.peekChar(0)) >= 'a' && peekedChar <= 'z' || peekedChar >= 'A' && peekedChar <= 'Z')
         input.nextChar();
 
-      StringView rawName = input.buildSubViewAbsolute(nameBegin, input.getPosition() + 1).setLowercase();
+      InputView rawName = input.buildSubViewAbsolute(nameBegin, input.getPosition() + 1).setLowercase();
       ArgumentName name = ArgumentName.ofName(rawName);
 
       if (name == null)
@@ -153,7 +153,7 @@ public class SelectorParser {
     return result;
   }
 
-  private static ArgumentValue parseArgumentValue(StringView input, ArgumentName name, int nameBegin) {
+  private static ArgumentValue parseArgumentValue(InputView input, ArgumentName name, int nameBegin) {
     char firstChar = input.peekChar(0);
 
     if (firstChar == '"' || firstChar == '!' && input.peekChar(1) == '"') {
@@ -204,7 +204,7 @@ public class SelectorParser {
         }
       }
 
-      StringView contents = input.buildSubViewAbsolute(startIndex, input.getPosition() + 1);
+      InputView contents = input.buildSubViewAbsolute(startIndex, input.getPosition() + 1);
 
       if (name.acceptedValue == AcceptedValue.SORT_CRITERION) {
         SortCriterion sortCriterion = SortCriterion.ofName(contents);
@@ -274,7 +274,7 @@ public class SelectorParser {
     return validateRange(new NumericRangeValue(firstNumber, (NumericValue) currentValue));
   }
 
-  private static boolean isUpcomingCharInvalidNumberTermination(StringView input) {
+  private static boolean isUpcomingCharInvalidNumberTermination(InputView input) {
     char upcomingChar = input.peekChar(0);
 
     if (upcomingChar == 0)
@@ -286,7 +286,7 @@ public class SelectorParser {
     return upcomingChar != ',' && upcomingChar != ']' && !Character.isWhitespace(upcomingChar);
   }
 
-  private static @Nullable ArgumentValue parseNumberOrRangeOperator(StringView input) {
+  private static @Nullable ArgumentValue parseNumberOrRangeOperator(InputView input) {
     ExpressionTokenizer expressionTokenizer = new ExpressionTokenizer(input, null);
 
     char upcomingChar = input.peekChar(0);
@@ -318,7 +318,7 @@ public class SelectorParser {
     if (valueBeginPosition < 0)
       valueBeginPosition = input.getPosition() + 1;
 
-    StringView rawValue = null;
+    InputView rawValue = null;
     Number value = null;
 
     if (upcomingChar >= '0' && upcomingChar <= '9') {

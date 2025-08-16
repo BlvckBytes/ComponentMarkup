@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class MarkupLetBinding extends LetBinding {
 
@@ -15,7 +15,7 @@ public class MarkupLetBinding extends LetBinding {
 
   public MarkupLetBinding(
     MarkupNode markup,
-    StringView name,
+    InputView name,
     boolean capture
   ) {
     super(name);

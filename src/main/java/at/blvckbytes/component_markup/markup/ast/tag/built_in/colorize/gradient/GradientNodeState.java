@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeN
 import at.blvckbytes.component_markup.platform.AnsiStyleColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.platform.PackedColor;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -22,7 +22,7 @@ public class GradientNodeState extends ColorizeNodeState {
   private final GradientGenerator gradientGenerator;
 
   public GradientNodeState(
-    StringView tagName,
+    InputView tagName,
     int initialSubtreeDepth,
     ExpressionList colors,
     ExpressionList offsets,

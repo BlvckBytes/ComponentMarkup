@@ -6,13 +6,13 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public abstract class Token {
 
-  public final StringView raw;
+  public final InputView raw;
 
-  protected Token(StringView raw) {
+  protected Token(InputView raw) {
     this.raw = raw;
   }
 

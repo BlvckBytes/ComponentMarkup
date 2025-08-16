@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ErrorScreen {
 
-  public static List<String> make(StringView view, String message) {
+  public static List<String> make(InputView view, String message) {
     return make(view.contents, view.startInclusive, message);
   }
 

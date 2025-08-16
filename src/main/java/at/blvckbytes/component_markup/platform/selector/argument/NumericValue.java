@@ -5,11 +5,11 @@
 
 package at.blvckbytes.component_markup.platform.selector.argument;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class NumericValue implements ArgumentValue {
 
-  public final StringView raw;
+  public final InputView raw;
   public final Number value;
 
   public final boolean isDouble;
@@ -17,7 +17,7 @@ public class NumericValue implements ArgumentValue {
   public final boolean isNegated;
 
   public NumericValue(
-    StringView raw,
+    InputView raw,
     Number value,
     boolean isDouble,
     boolean isNegative,

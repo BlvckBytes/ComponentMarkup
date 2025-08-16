@@ -5,17 +5,17 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class DoubleAttributeEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
   public final String nameBuildResult;
-  public final StringView raw;
+  public final InputView raw;
   public final String rawBuildResult;
   public final double value;
 
-  public DoubleAttributeEvent(StringView name, StringView raw, double value, String nameBuildResult, String rawBuildResult) {
+  public DoubleAttributeEvent(InputView name, InputView raw, double value, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.raw = raw;

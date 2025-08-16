@@ -5,12 +5,12 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TerminalToken extends Token {
 
-  protected TerminalToken(StringView raw) {
+  protected TerminalToken(InputView raw) {
     super(raw);
   }
 

@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.parser.token;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class HierarchicalToken extends Token {
 
   private @Nullable List<HierarchicalToken> children;
 
-  public HierarchicalToken(TokenType type, StringView value) {
+  public HierarchicalToken(TokenType type, InputView value) {
     super(type, value);
   }
 

@@ -5,18 +5,18 @@
 
 package at.blvckbytes.component_markup.markup.xml.event;
 
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class LongAttributeEvent implements XmlEvent {
 
-  public final StringView name;
+  public final InputView name;
   public final String nameBuildResult;
-  public final StringView raw;
+  public final InputView raw;
   public final String rawBuildResult;
 
   public final long value;
 
-  public LongAttributeEvent(StringView name, StringView raw, long value, String nameBuildResult, String rawBuildResult) {
+  public LongAttributeEvent(InputView name, InputView raw, long value, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.raw = raw;

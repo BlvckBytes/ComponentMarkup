@@ -17,7 +17,7 @@ import at.blvckbytes.component_markup.platform.PackedColor;
 import at.blvckbytes.component_markup.platform.SlotType;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -97,7 +97,7 @@ public abstract class InterpreterTestsBase {
     MarkupNode actualNode;
 
     try {
-      actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
+      actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (MarkupParseException e) {
       System.out.println(String.join("\n", e.makeErrorScreen()));
       Assertions.fail("Threw an error:", e);
@@ -216,7 +216,7 @@ public abstract class InterpreterTestsBase {
     MarkupNode actualNode;
 
     try {
-      actualNode = MarkupParser.parse(StringView.of(input.text), BuiltInTagRegistry.INSTANCE);
+      actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
     } catch (MarkupParseException e) {
       System.out.println(String.join("\n", e.makeErrorScreen()));
       Assertions.fail("Threw an error:", e);

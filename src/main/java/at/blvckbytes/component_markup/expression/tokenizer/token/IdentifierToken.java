@@ -6,14 +6,14 @@
 package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class IdentifierToken extends TerminalToken {
 
   public final String identifier;
 
-  public IdentifierToken(StringView raw, String identifier) {
+  public IdentifierToken(InputView raw, String identifier) {
     super(raw);
 
     this.identifier = identifier;

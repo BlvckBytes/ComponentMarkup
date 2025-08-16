@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.util.StringView;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -22,9 +22,9 @@ import java.util.function.Function;
 public class ColorizeMonochromeNode extends ColorizeNode {
 
   public ColorizeMonochromeNode(
-    StringView tagName,
+    InputView tagName,
     Function<Interpreter, ColorizeNodeState> stateCreator,
-    StringView positionProvider,
+    InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
   ) {
