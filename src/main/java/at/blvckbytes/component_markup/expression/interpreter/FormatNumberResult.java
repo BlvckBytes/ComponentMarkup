@@ -7,12 +7,12 @@ package at.blvckbytes.component_markup.expression.interpreter;
 
 import java.util.EnumSet;
 
-public class FormatDateResult {
+public class FormatNumberResult {
 
   public final String formattedString;
-  public final EnumSet<FormatDateWarning> warnings;
+  public final EnumSet<FormatNumberWarning> warnings;
 
-  public FormatDateResult(String formattedString, EnumSet<FormatDateWarning> warnings) {
+  public FormatNumberResult(String formattedString, EnumSet<FormatNumberWarning> warnings) {
     this.formattedString = formattedString;
     this.warnings = warnings;
   }

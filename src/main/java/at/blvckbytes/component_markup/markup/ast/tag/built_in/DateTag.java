@@ -56,17 +56,17 @@ public class DateTag extends TagDefinition {
         value == null ? System.currentTimeMillis() : interpreter.evaluateAsLong(value)
       );
 
-      if (result.errors.contains(FormatDateWarning.INVALID_FORMAT) && evaluatedFormat != null) {
+      if (result.warnings.contains(FormatDateWarning.INVALID_FORMAT) && evaluatedFormat != null) {
         for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered"))
           LoggerProvider.log(Level.WARNING, line, false);
       }
 
-      if (result.errors.contains(FormatDateWarning.INVALID_LOCALE) && locale != null) {
+      if (result.warnings.contains(FormatDateWarning.INVALID_LOCALE) && locale != null) {
         for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
           LoggerProvider.log(Level.WARNING, line, false);
       }
 
-      if (result.errors.contains(FormatDateWarning.INVALID_TIMEZONE) && zone != null) {
+      if (result.warnings.contains(FormatDateWarning.INVALID_TIMEZONE) && zone != null) {
         for (String line : ErrorScreen.make(zone.getFirstMemberPositionProvider(), "Invalid zone encountered"))
           LoggerProvider.log(Level.WARNING, line, false);
       }

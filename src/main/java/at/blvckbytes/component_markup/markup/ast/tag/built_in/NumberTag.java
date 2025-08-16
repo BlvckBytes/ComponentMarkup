@@ -6,46 +6,21 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.interpreter.FormatNumberResult;
+import at.blvckbytes.component_markup.expression.interpreter.FormatNumberWarning;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.AsciiCasing;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class NumberTag extends TagDefinition {
-
-  private static final String ROUNDING_MODES_STRING = Arrays.stream(RoundingMode.values())
-    .map(Enum::name)
-    .collect(Collectors.joining(", "));
-
-  private static final Map<String, Locale> LOCALE_BY_NAME_LOWER;
-
-  static {
-    LOCALE_BY_NAME_LOWER = new HashMap<>();
-
-    for (Locale locale : Locale.getAvailableLocales()) {
-      String localeName = locale.toString();
-
-      for (int i = 0; i < localeName.length(); ++i) {
-        if (!Character.isWhitespace(localeName.charAt(i))) {
-          LOCALE_BY_NAME_LOWER.put(AsciiCasing.lower(localeName), locale);
-          break;
-        }
-      }
-    }
-  }
 
   public NumberTag() {
     super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
@@ -83,54 +58,32 @@ public class NumberTag extends TagDefinition {
           number = Math.abs(number.longValue());
       }
 
-      if (format != null) {
-        // This conversion is really not ideal, but I believe that it's more efficient on
-        // the large-scale than to make the whole system operate on big-decimals. This kind of
-        // precision should only matter when it comes to displaying values.
-        BigDecimal bigDecimal;
+      String formatString;
 
-        if (number instanceof Double)
-          bigDecimal = new BigDecimal(Double.toString(number.doubleValue()));
-        else if (number instanceof Float)
-          bigDecimal = new BigDecimal(Float.toString(number.floatValue()));
-        else
-          bigDecimal = new BigDecimal(number.longValue());
+      if (format != null && (formatString = interpreter.evaluateAsStringOrNull(format)) != null) {
+        FormatNumberResult result = interpreter.getEnvironment().interpretationPlatform.formatNumber(
+          formatString,
+          rounding == null ? null : interpreter.evaluateAsStringOrNull(rounding),
+          locale == null ? null : interpreter.evaluateAsStringOrNull(locale),
+          number
+        );
 
-        try {
-          String pattern = interpreter.evaluateAsString(format);
-
-          // TODO: Consider caching this format
-          DecimalFormat decimalFormat = new DecimalFormat(pattern);
-
-          if (rounding != null) {
-            try {
-              String modeName = interpreter.evaluateAsString(rounding);
-              decimalFormat.setRoundingMode(RoundingMode.valueOf(AsciiCasing.upper(modeName)));
-            } catch (Throwable e) {
-              for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered; choose one of " + ROUNDING_MODES_STRING))
-                LoggerProvider.log(Level.WARNING, line, false);
-            }
-          }
-
-          if (locale != null) {
-            String localeName = interpreter.evaluateAsString(locale);
-            Locale formatLocale = LOCALE_BY_NAME_LOWER.get(AsciiCasing.lower(localeName));
-
-            // TODO: Consider caching this format
-            if (formatLocale != null)
-              decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(formatLocale));
-
-            else {
-              for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered"))
-                LoggerProvider.log(Level.WARNING, line, false);
-            }
-          }
-
-          return decimalFormat.format(bigDecimal);
-        } catch (Throwable e) {
-          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid decimal-format encountered: " + e.getMessage()))
+        if (result.warnings.contains(FormatNumberWarning.INVALID_FORMAT)) {
+          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered"))
             LoggerProvider.log(Level.WARNING, line, false);
         }
+
+        if (result.warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null) {
+          for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered"))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
+
+        if (result.warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null) {
+          for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered"))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
+
+        return result.formattedString;
       }
 
       return String.valueOf(number);

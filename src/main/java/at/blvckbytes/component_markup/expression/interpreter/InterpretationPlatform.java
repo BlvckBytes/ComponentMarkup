@@ -28,4 +28,6 @@ public interface InterpretationPlatform {
 
   FormatDateResult formatDate(String format, @Nullable String locale, @Nullable String timeZone, long timestamp);
 
+  FormatNumberResult formatNumber(String format, @Nullable String roundingMode, @Nullable String locale, Number number);
+
 }
