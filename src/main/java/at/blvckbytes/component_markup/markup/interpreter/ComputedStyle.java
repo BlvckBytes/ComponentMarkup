@@ -49,8 +49,16 @@ public class ComputedStyle {
     return Objects.equals(font, other.font);
   }
 
-  public static boolean hasEffect(@Nullable ComputedStyle style) {
-    return style != null && style.hasEffect();
+  public static @Nullable ComputedStyle addMissing(@Nullable ComputedStyle styleToExtend, @Nullable ComputedStyle addition) {
+    if (styleToExtend == null && addition == null)
+      return null;
+
+    if (styleToExtend == null)
+      return addition.copy();
+
+    styleToExtend.addMissing(addition);
+
+    return styleToExtend;
   }
 
   public boolean hasEffect() {

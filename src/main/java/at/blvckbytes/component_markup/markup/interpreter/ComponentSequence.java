@@ -349,18 +349,20 @@ public class ComponentSequence {
     if (
       !isInitial
         && this.nonTerminal == null
-        && !ComputedStyle.hasEffect(this.membersEqualStyle)
-        && !ComputedStyle.hasEffect(this.computedStyle)
+        && (this.membersEqualStyle == null || !this.membersEqualStyle.hasEffect())
+        && (this.computedStyle == null || !this.computedStyle.reset)
         && (textCreationHandler == null)
     ) {
       if (memberEntries != null) {
         for (MemberAndStyle memberAndStyle : memberEntries)
-          parentSequence.addMember(memberAndStyle.member, memberAndStyle.style);
+          parentSequence.addMember(memberAndStyle.member, ComputedStyle.addMissing(memberAndStyle.style, this.computedStyle));
 
         this.memberEntries.clear();
       }
 
       if (bufferedTexts != null) {
+        this.bufferedTextsStyle = ComputedStyle.addMissing(this.bufferedTextsStyle, this.computedStyle);
+
         for (String bufferedText : bufferedTexts)
           parentSequence.addBufferedText(bufferedText, bufferedTextsStyle, textCreationHandler);
 

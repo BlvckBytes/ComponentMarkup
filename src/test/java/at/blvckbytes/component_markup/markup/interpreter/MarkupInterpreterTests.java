@@ -454,17 +454,16 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       new JsonObjectBuilder()
         .string("text", "")
         .string("color", "red")
-        .bool("bold", true)
         .array("extra", extra -> (
           extra
             .object(item -> (
               item
+                .bool("bold", true)
                 .string("text", "I am bold and red!")
             ))
             .object(item -> (
               item
                 .string("text", "I am just red!")
-                .bool("bold", false)
             ))
         ))
     );
@@ -1145,9 +1144,9 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   @Test
   public void shouldOnlyAppendForSeparatorWhenIterationWasSuccessful() {
     TextWithSubViews text = new TextWithSubViews(
-      "<container",
+      "<red",
       "  *for-name=\"['A', 'B', 'C', 'D']\"",
-      "  +for-separator=', '",
+      "  *for-separator={<red>,<space/>}",
       "  *if=\"name neq 'B'\"",
       ">#{loop.index + 1} {name}"
     );
@@ -1157,6 +1156,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
+        .string("color", "red")
         .string("text", "#1 A, #3 C, #4 D")
     );
   }
