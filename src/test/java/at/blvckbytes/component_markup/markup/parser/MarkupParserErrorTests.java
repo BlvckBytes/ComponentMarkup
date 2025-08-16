@@ -5,8 +5,8 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;

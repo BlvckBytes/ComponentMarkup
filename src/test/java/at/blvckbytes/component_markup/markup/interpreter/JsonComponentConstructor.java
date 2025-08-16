@@ -6,8 +6,8 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
 import at.blvckbytes.component_markup.platform.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
@@ -17,7 +17,9 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;

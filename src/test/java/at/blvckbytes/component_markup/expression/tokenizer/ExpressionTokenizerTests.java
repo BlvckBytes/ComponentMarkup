@@ -5,9 +5,9 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer;
 
+import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
-import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.util.StringView;
 import org.junit.jupiter.api.Test;
 

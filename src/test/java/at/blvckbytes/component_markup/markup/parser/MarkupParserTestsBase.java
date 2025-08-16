@@ -5,25 +5,28 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.markup.ast.node.control.*;
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
-import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.markup.ast.node.ExpressionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
+import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.test_utils.Tuple;
 import at.blvckbytes.component_markup.util.StringView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 public abstract class MarkupParserTestsBase {
 

@@ -5,7 +5,6 @@
 
 package at.blvckbytes.component_markup.markup.interpreter.tag;
 
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.interpreter.InterpreterTestsBase;
 import at.blvckbytes.component_markup.markup.interpreter.JsonObjectBuilder;
 import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;

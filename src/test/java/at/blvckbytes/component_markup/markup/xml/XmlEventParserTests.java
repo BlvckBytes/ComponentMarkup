@@ -6,14 +6,14 @@
 package at.blvckbytes.component_markup.markup.xml;
 
 import at.blvckbytes.component_markup.expression.parser.ExpressionParserTests;
-import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.markup.xml.event.*;
+import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.StringView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class XmlEventParserTests {
 
