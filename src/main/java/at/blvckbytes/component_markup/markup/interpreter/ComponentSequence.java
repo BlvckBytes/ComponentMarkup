@@ -412,11 +412,7 @@ public class ComponentSequence {
     ComputedStyle styleToApply;
 
     // If there's an equal style on all elements, its properties prevail over the container's
-    if (this.membersEqualStyle != null) {
-      styleToApply = this.membersEqualStyle;
-      styleToApply.addMissing(this.computedStyle);
-    } else
-      styleToApply = this.computedStyle;
+    styleToApply = ComputedStyle.addMissing(membersEqualStyle, computedStyle);
 
     if (styleToApply != null) {
       if (membersCommonStyle != null) {
@@ -640,13 +636,7 @@ public class ComponentSequence {
   }
 
   public ComponentSequence makeChildSequence(MarkupNode childNode) {
-    ComputedStyle childParentStyle = this.computedStyle;
-
-    if (childParentStyle != null)
-      childParentStyle.addMissing(this.parentStyle);
-    else
-      childParentStyle = this.parentStyle;
-
+    ComputedStyle childParentStyle = ComputedStyle.addMissing(computedStyle, parentStyle);
     return new ComponentSequence(recipient, childParentStyle, childNode, false, slotContext, resetContext, componentConstructor, interpreter);
   }
 
@@ -686,14 +676,7 @@ public class ComponentSequence {
 
     appendResetPropertiesIfApplicable(this.computedStyle, parentStyle);
 
-    ComputedStyle selfAndParentStyle = this.computedStyle;
-
-    if (selfAndParentStyle != null)
-      selfAndParentStyle.addMissing(parentStyle);
-    else
-      selfAndParentStyle = parentStyle;
-
-    this.selfAndParentStyle = selfAndParentStyle;
+    this.selfAndParentStyle = ComputedStyle.addMissing(this.computedStyle, this.parentStyle);
   }
 
   private void appendResetPropertiesIfApplicable(@Nullable ComputedStyle style, @Nullable ComputedStyle parentStyle) {
