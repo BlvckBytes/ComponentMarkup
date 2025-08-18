@@ -16,6 +16,8 @@ import java.util.UUID;
 
 public interface ComponentConstructor {
 
+  boolean doesSupport(PlatformFeature feature);
+
   // ================================================================================
   // SlotContext
   // ================================================================================

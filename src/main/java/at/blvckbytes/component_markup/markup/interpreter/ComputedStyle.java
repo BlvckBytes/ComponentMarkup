@@ -10,14 +10,8 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
-import at.blvckbytes.component_markup.platform.AnsiStyleColor;
-import at.blvckbytes.component_markup.platform.ComponentConstructor;
-import at.blvckbytes.component_markup.platform.PackedColor;
-import at.blvckbytes.component_markup.platform.SlotContext;
-import at.blvckbytes.component_markup.util.JsonifyGetter;
-import at.blvckbytes.component_markup.util.LoggerProvider;
-import at.blvckbytes.component_markup.util.TriState;
-import at.blvckbytes.component_markup.util.TriStateBitFlags;
+import at.blvckbytes.component_markup.platform.*;
+import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -262,12 +256,19 @@ public class ComputedStyle {
     if (style == null)
       return null;
 
+    ComponentConstructor componentConstructor = interpreter.getComponentConstructor();
+
     ComputedStyle result = null;
 
     if (style.color != null) {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
 
       if (colorString != null) {
+        if (!componentConstructor.doesSupport(PlatformFeature.COLOR)) {
+          for (String line : ErrorScreen.make(style.color.getFirstMemberPositionProvider(), "Custom colors are not supported on this platform"))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
+
         long packedColor = PackedColor.tryParse(colorString);
 
         if (packedColor != PackedColor.NULL_SENTINEL) {
@@ -285,12 +286,15 @@ public class ComputedStyle {
       if (result != null && result.packedColor != PackedColor.NULL_SENTINEL)
         packedColor = result.packedColor;
 
+      ExpressionNode firstNonNullValue = null;
       int opacity = 63;
 
       if (style.shadowColor != null) {
         String colorString = interpreter.evaluateAsStringOrNull(style.shadowColor);
 
         if (colorString != null) {
+          firstNonNullValue = style.shadowColor;
+
           long parsedPackedColor = PackedColor.tryParse(colorString);
 
           if (parsedPackedColor != PackedColor.NULL_SENTINEL)
@@ -301,22 +305,42 @@ public class ComputedStyle {
       if (style.shadowColorOpacity != null) {
         Double opacityValue = interpreter.evaluateAsDoubleOrNull(style.shadowColorOpacity);
 
-        if (opacityValue != null)
+        if (opacityValue != null) {
+          if (firstNonNullValue == null)
+            firstNonNullValue = style.shadowColorOpacity;
+
           opacity = (int) Math.round((opacityValue / 100.0) * 255);
+        }
       }
 
-      if (result == null)
-        result = new ComputedStyle();
+      if (firstNonNullValue != null) {
+        if (!componentConstructor.doesSupport(PlatformFeature.SHADOW_COLOR)) {
+          for (String line : ErrorScreen.make(firstNonNullValue.getFirstMemberPositionProvider(), "Custom shadow-colors are not supported on this platform"))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
 
-      result.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
-      result.packedShadowColorOpacity = opacity;
+        if (result == null)
+          result = new ComputedStyle();
+
+        result.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
+        result.packedShadowColorOpacity = opacity;
+      }
     }
 
     if (style.font != null) {
-      if (result == null)
-        result = new ComputedStyle();
+      String font = interpreter.evaluateAsStringOrNull(style.font);
 
-      result.font = interpreter.evaluateAsStringOrNull(style.font);
+      if (font != null) {
+        if (!componentConstructor.doesSupport(PlatformFeature.FONT)) {
+          for (String line : ErrorScreen.make(style.font.getFirstMemberPositionProvider(), "Custom fonts are not supported on this platform"))
+            LoggerProvider.log(Level.WARNING, line, false);
+        }
+
+        if (result == null)
+          result = new ComputedStyle();
+
+        result.font = font;
+      }
     }
 
     if (style.reset != null) {
@@ -336,6 +360,11 @@ public class ComputedStyle {
 
       if (value == TriState.NULL)
         continue;
+
+      if (!componentConstructor.doesSupport(format.feature)) {
+        for (String line : ErrorScreen.make(formatExpression.getFirstMemberPositionProvider(), "The " + format.name().toLowerCase() + "-format is not supported on this platform"))
+          LoggerProvider.log(Level.WARNING, line, false);
+      }
 
       if (result == null)
         result = new ComputedStyle();

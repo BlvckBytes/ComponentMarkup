@@ -43,6 +43,11 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
+  public boolean doesSupport(PlatformFeature feature) {
+    return true;
+  }
+
+  @Override
   public SlotContext getSlotContext(SlotType slot) {
     return SlotContext.getForSlot(slot);
   }
