@@ -29,7 +29,7 @@ public class ComputedStyle {
 
   public boolean doStylesEqual(@Nullable ComputedStyle other) {
     if (other == null)
-      return !hasEffect();
+      return hasNoEffect();
 
     if (packedColor != other.packedColor)
       return false;
@@ -55,40 +55,20 @@ public class ComputedStyle {
     return styleToExtend;
   }
 
-  public boolean hasEffect() {
+  public boolean hasNoEffect() {
     if (this.packedColor != PackedColor.NULL_SENTINEL)
-      return true;
+      return false;
 
     if (this.packedShadowColor != PackedColor.NULL_SENTINEL)
-      return true;
+      return false;
 
     if (this.font != null)
-      return true;
+      return false;
 
     if (!TriStateBitFlags.isAllNulls(formats))
-      return true;
+      return false;
 
-    return this.reset;
-  }
-
-  public ComputedStyle setFormat(Format format, TriState value) {
-    this.formats = TriStateBitFlags.write(formats, format.ordinal(), value);
-    return this;
-  }
-
-  public ComputedStyle setFont(@Nullable String font) {
-    this.font = font;
-    return this;
-  }
-
-  public ComputedStyle setColor(long packedColor) {
-    this.packedColor = packedColor;
-    return this;
-  }
-
-  public ComputedStyle setShadowColor(long packedShadowColor) {
-    this.packedShadowColor = packedShadowColor;
-    return this;
+    return !this.reset;
   }
 
   public void addMissing(@Nullable ComputedStyle other) {
@@ -432,6 +412,7 @@ public class ComputedStyle {
   }
 
   @JsonifyGetter
+  @SuppressWarnings("unused")
   public String readableFormats() {
     StringJoiner result = new StringJoiner(", ");
 
@@ -444,11 +425,13 @@ public class ComputedStyle {
   }
 
   @JsonifyGetter
+  @SuppressWarnings("unused")
   public String readableColor() {
     return readablePackedColor(this.packedColor);
   }
 
   @JsonifyGetter
+  @SuppressWarnings("unused")
   public String readableShadowColor() {
     return readablePackedColor(this.packedShadowColor);
   }

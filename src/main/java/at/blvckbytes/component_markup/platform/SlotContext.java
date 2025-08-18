@@ -10,6 +10,8 @@ import at.blvckbytes.component_markup.markup.interpreter.ComputedStyle;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
 
+import java.util.function.Supplier;
+
 public class SlotContext {
 
   private static final long DEFAULT_COLOR = AnsiStyleColor.WHITE.packedColor;
@@ -19,29 +21,31 @@ public class SlotContext {
 
   private static final SlotContext SLOT_CHAT = new SlotContext(
     '\n',
-    applyCommonDefaults(new ComputedStyle())
+    applyCommonDefaults(ComputedStyle::new)
   );
 
   private static final SlotContext SLOT_ENTITY_NAME = new SlotContext(
     ' ',
-    applyCommonDefaults(
-      new ComputedStyle()
-        .setFormat(Format.ITALIC, TriState.TRUE)
-    )
+    applyCommonDefaults(() -> {
+      ComputedStyle style = new ComputedStyle();
+      style.formats = TriStateBitFlags.write(style.formats, Format.ITALIC.ordinal(), TriState.TRUE);
+      return style;
+    })
   );
 
   private static final SlotContext SLOT_ITEM_LORE = new SlotContext(
     '\0',
-    applyCommonDefaults(
-      new ComputedStyle()
-        .setColor(AnsiStyleColor.DARK_PURPLE.packedColor)
-        .setFormat(Format.ITALIC, TriState.TRUE)
-    )
+    applyCommonDefaults(() -> {
+      ComputedStyle style = new ComputedStyle();
+      style.formats = TriStateBitFlags.write(style.formats, Format.ITALIC.ordinal(), TriState.TRUE);
+      style.packedColor = AnsiStyleColor.DARK_PURPLE.packedColor;
+      return style;
+    })
   );
 
   private static final SlotContext SLOT_SINGLE_LINE_CHAT = new SlotContext(
     ' ',
-    applyCommonDefaults(new ComputedStyle())
+    applyCommonDefaults(ComputedStyle::new)
   );
 
   public final char breakChar;
@@ -68,7 +72,9 @@ public class SlotContext {
     return SLOT_CHAT;
   }
 
-  private static ComputedStyle applyCommonDefaults(ComputedStyle input) {
+  private static ComputedStyle applyCommonDefaults(Supplier<ComputedStyle> inputSupplier) {
+    ComputedStyle input = inputSupplier.get();
+
     if (input.packedColor == PackedColor.NULL_SENTINEL)
       input.packedColor = DEFAULT_COLOR;
 

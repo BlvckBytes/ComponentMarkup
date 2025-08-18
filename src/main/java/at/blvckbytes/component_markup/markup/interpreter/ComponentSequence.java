@@ -375,7 +375,7 @@ public class ComponentSequence {
     if (
       !isInitial
         && this.nonTerminal == null
-        && (this.membersEqualStyle == null || !this.membersEqualStyle.hasEffect())
+        && (this.membersEqualStyle == null || this.membersEqualStyle.hasNoEffect())
         && (this.computedStyle == null || !this.computedStyle.reset)
         && (textCreationHandler == null)
     ) {
