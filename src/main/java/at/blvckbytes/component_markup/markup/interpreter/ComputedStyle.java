@@ -24,6 +24,7 @@ public class ComputedStyle {
   public long packedShadowColor = PackedColor.NULL_SENTINEL;
   public int packedShadowColorOpacity;
   public @Nullable String font;
+  public @Nullable InputView fontPosition;
   public int formats;
   public boolean reset;
 
@@ -81,8 +82,10 @@ public class ComputedStyle {
     if (this.packedShadowColor == PackedColor.NULL_SENTINEL)
       this.packedShadowColor = other.packedShadowColor;
 
-    if (this.font == null)
+    if (this.font == null) {
       this.font = other.font;
+      this.fontPosition = other.fontPosition;
+    }
 
     if (TriStateBitFlags.isAllNulls(this.formats)) {
       this.formats = other.formats;
@@ -189,8 +192,10 @@ public class ComputedStyle {
     }
 
     if (this.font == null) {
-      if (mask.font != null && !mask.font.equals(defaultStyle.font))
+      if (mask.font != null && !mask.font.equals(defaultStyle.font)) {
         this.font = defaultStyle.font;
+        this.fontPosition = null;
+      }
     }
 
     // Nothing to set to default or no default value provided
@@ -222,6 +227,7 @@ public class ComputedStyle {
     result.packedColor = this.packedColor;
     result.packedShadowColor = this.packedShadowColor;
     result.font = this.font;
+    result.fontPosition = this.fontPosition;
     result.formats = this.formats;
     result.reset = this.reset;
     return result;
@@ -320,6 +326,7 @@ public class ComputedStyle {
           result = new ComputedStyle();
 
         result.font = font;
+        result.fontPosition = style.font.getFirstMemberPositionProvider();
       }
     }
 
@@ -366,9 +373,15 @@ public class ComputedStyle {
 
     if (font != null && componentConstructor.doesSupport(PlatformFeature.FONT)) {
       componentConstructor.setFont(component, font);
-      // TODO: Would be very helpful to print a full error-screen a this point, but
-      //       the position-provider has been unwrapped a long time ago...
-//      PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_FONT_NAME, null, font);
+
+      if (fontPosition != null)
+        PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_FONT_NAME, fontPosition, font);
+      else {
+        PlatformWarning.logIfEmitted(
+          PlatformWarning.MALFORMED_FONT_NAME,
+          () -> LoggerProvider.log(Level.WARNING, "Encountered invalid default font-value: \"" + font + "\"")
+        );
+      }
     }
 
     if (TriStateBitFlags.isAllNulls(formats))

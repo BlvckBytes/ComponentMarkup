@@ -32,7 +32,15 @@ public enum PlatformWarning {
     localSets.get().add(warning);
   }
 
+  public static void logIfEmitted(PlatformWarning warning, Runnable handler) {
+    if (localSets.get().contains(warning))
+      handler.run();
+  }
+
   public static void logIfEmitted(PlatformWarning warning, InputView position, String value) {
+    if (!localSets.get().contains(warning))
+      return;
+
     for (String line : ErrorScreen.make(position, warning.message + ": \"" + value + "\""))
       LoggerProvider.log(Level.WARNING, line, false);
   }
