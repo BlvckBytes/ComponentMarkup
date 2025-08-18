@@ -121,4 +121,10 @@ public interface ComponentConstructor {
    */
   Object shallowCopyIncludingMemberLists(Object component);
 
+  /**
+   * Makes the child inherit the styles/actions of its parent, such that all properties of
+   * the parent it itself didn't specify are added to its own reference.
+   */
+  void inheritProperties(Object parent, Object child);
+
 }

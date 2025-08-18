@@ -506,6 +506,11 @@ public class JsonComponentConstructor implements ComponentConstructor {
     return copy;
   }
 
+  @Override
+  public void inheritProperties(Object parent, Object child) {
+    throw new UnsupportedOperationException();
+  }
+
   private JsonArray copyArray(JsonArray input) {
     JsonArray result = new JsonArray();
 

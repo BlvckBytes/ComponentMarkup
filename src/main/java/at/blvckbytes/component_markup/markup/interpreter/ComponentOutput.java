@@ -56,8 +56,16 @@ public class ComponentOutput {
           continue;
         }
 
-        // TODO: Support multi-component results
-        result.set(componentIndex + resultOffset, renderedComponents.get(0));
+        for (Object renderedComponent : renderedComponents) {
+          // The deferred component may have been modified and now needs to hand its
+          // properties down to the results of calling the deferred renderer.
+          componentConstructor.inheritProperties(component, renderedComponent);
+
+          // TODO: Support multi-component results
+          result.set(componentIndex + resultOffset, renderedComponent);
+          break;
+        }
+
         continue;
       }
 
