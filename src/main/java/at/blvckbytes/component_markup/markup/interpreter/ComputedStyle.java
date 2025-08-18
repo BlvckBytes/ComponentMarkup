@@ -376,14 +376,20 @@ public class ComputedStyle {
   }
 
   public void applyStyles(Object component, ComponentConstructor componentConstructor) {
-    if (packedColor != PackedColor.NULL_SENTINEL)
+    PlatformWarning.clear();
+
+    if (packedColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(PlatformFeature.COLOR))
       componentConstructor.setColor(component, packedColor);
 
-    if (packedShadowColor != PackedColor.NULL_SENTINEL)
+    if (packedShadowColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(PlatformFeature.SHADOW_COLOR))
       componentConstructor.setShadowColor(component, packedShadowColor);
 
-    if (font != null)
+    if (font != null && componentConstructor.doesSupport(PlatformFeature.FONT)) {
       componentConstructor.setFont(component, font);
+      // TODO: Would be very helpful to print a full error-screen a this point, but
+      //       the position-provider has been unwrapped a long time ago...
+//      PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_FONT_NAME, null, font);
+    }
 
     if (TriStateBitFlags.isAllNulls(formats))
       return;
@@ -393,6 +399,9 @@ public class ComputedStyle {
 
       // As of now, there's no need to ever remove formats again, so don't call into the constructor
       if (state == TriState.NULL)
+        continue;
+
+      if (!componentConstructor.doesSupport(format.feature))
         continue;
 
       switch (format) {
