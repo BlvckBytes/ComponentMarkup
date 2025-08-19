@@ -63,7 +63,7 @@ public interface ComponentConstructor {
 
   void setHoverItemAction(
     Object component,
-    @Nullable String material,
+    String material,
     @Nullable Integer count,
     @Nullable Object name,
     @Nullable List<Object> lore,

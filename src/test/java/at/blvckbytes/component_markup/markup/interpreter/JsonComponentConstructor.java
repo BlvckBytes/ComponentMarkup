@@ -151,7 +151,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   @Override
   public void setHoverItemAction(
     Object component,
-    @Nullable String material,
+    String material,
     @Nullable Integer count,
     @Nullable Object name,
     @Nullable List<Object> lore,
@@ -160,8 +160,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();
 
-    if (material != null)
-      contentsObject.addProperty("id", material);
+    contentsObject.addProperty("id", material);
 
     if (count != null)
       contentsObject.addProperty("count", count);

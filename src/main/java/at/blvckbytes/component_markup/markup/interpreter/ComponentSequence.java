@@ -25,6 +25,8 @@ import java.util.logging.Level;
 
 public class ComponentSequence {
 
+  private static final String DEFAULT_MATERIAL = "minecraft:stone";
+
   private final @Nullable PlatformEntity recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
@@ -688,10 +690,19 @@ public class ComponentSequence {
         }
       }
 
+      if (material == null)
+        material = DEFAULT_MATERIAL;
+
       componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
 
       if (itemHoverNode.material != null)
         PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), material);
+      else {
+        PlatformWarning.logIfEmitted(
+          PlatformWarning.MALFORMED_MATERIAL,
+          () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
+        );
+      }
 
       return;
     }

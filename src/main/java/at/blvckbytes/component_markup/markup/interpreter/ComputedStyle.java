@@ -379,7 +379,7 @@ public class ComputedStyle {
       else {
         PlatformWarning.logIfEmitted(
           PlatformWarning.MALFORMED_FONT_NAME,
-          () -> LoggerProvider.log(Level.WARNING, "Encountered invalid default font-value: \"" + font + "\"")
+          () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default font-value: \"" + font + "\"")
         );
       }
     }
