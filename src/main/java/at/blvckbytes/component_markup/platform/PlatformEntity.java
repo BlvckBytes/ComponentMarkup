@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
+import at.blvckbytes.component_markup.platform.coordinates.Coordinates;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -30,6 +31,10 @@ public abstract class PlatformEntity implements DirectFieldAccess {
 
   public abstract String world();
 
+  public Coordinates location() {
+    return new Coordinates(x(), y(), z(), world());
+  }
+
   @Override
   public @Nullable Object accessField(String rawIdentifier) {
     switch (rawIdentifier) {
@@ -47,6 +52,8 @@ public abstract class PlatformEntity implements DirectFieldAccess {
         return z();
       case "world":
         return world();
+      case "location":
+        return location();
       default:
         return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
     }
