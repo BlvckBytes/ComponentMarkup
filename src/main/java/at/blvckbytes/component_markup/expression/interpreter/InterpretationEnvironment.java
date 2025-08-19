@@ -20,6 +20,10 @@ public class InterpretationEnvironment {
 
   public final InterpretationPlatform interpretationPlatform;
 
+  public InterpretationEnvironment() {
+    this(new HashMap<>(), DEFAULT_INTERPRETER, JavaInterpretationPlatform.INSTANCE);
+  }
+
   public InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter, InterpretationPlatform interpretationPlatform) {
     this.variables = variables;
     this.valueInterpreter = valueInterpreter;

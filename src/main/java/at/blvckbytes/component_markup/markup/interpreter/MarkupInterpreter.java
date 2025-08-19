@@ -69,6 +69,11 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
+  public @Nullable PlatformEntity getRecipient() {
+    return recipient;
+  }
+
+  @Override
   public TemporaryMemberEnvironment getEnvironment() {
     return environment;
   }
