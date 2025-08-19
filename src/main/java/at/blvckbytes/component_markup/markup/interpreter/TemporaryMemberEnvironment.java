@@ -97,28 +97,4 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   public ValueInterpreter getValueInterpreter() {
     return baseEnvironment.getValueInterpreter();
   }
-
-  public InterpretationEnvironment snapshot() {
-    InterpretationEnvironment snapshot = this.baseEnvironment.copy();
-
-    Set<String> encounteredNames = new HashSet<>();
-
-    for (int scopeIndex = scopeStack.size() - 1; scopeIndex >= 0; --scopeIndex) {
-      Map<String, Object> scopeVariables = scopeStack.get(scopeIndex);
-
-      for (String scopeVariableName : scopeVariables.keySet()) {
-        if (!encounteredNames.add(scopeVariableName))
-          continue;
-
-        Object scopeVariableValue = scopeVariables.get(scopeVariableName);
-
-        if (scopeVariableValue instanceof InternalCopyable)
-          scopeVariableValue = ((InternalCopyable) scopeVariableValue).copy();
-
-        snapshot.withVariable(scopeVariableName, scopeVariableValue);
-      }
-    }
-
-    return snapshot;
-  }
 }
