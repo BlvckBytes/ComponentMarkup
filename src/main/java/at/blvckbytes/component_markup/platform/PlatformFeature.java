@@ -8,7 +8,6 @@ package at.blvckbytes.component_markup.platform;
 public enum PlatformFeature {
   KEY_COMPONENT,
   TRANSLATE_COMPONENT,
-  DEFERRED_COMPONENT,
   CHANGE_PAGE_ACTION,
   COPY_TO_CLIPBOARD_ACTION,
   OPEN_FILE_ACTION,

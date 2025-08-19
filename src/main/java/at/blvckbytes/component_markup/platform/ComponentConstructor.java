@@ -5,9 +5,6 @@
 
 package at.blvckbytes.component_markup.platform;
 
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.markup.ast.node.terminal.RendererParameter;
-import at.blvckbytes.component_markup.markup.ast.node.terminal.DeferredRenderer;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,13 +30,6 @@ public interface ComponentConstructor {
   Object createKeyComponent(String key);
 
   Object createTranslateComponent(String key, List<Object> with, @Nullable String fallback);
-
-  DeferredComponent createDeferredComponent(
-    DeferredRenderer<?> renderer,
-    RendererParameter parameter,
-    InterpretationEnvironment environmentSnapshot,
-    SlotContext slotContext
-  );
 
   // ================================================================================
   // Click-Action
@@ -101,30 +91,8 @@ public interface ComponentConstructor {
   void setItalicFormat(Object component, TriState value);
 
   // ================================================================================
-  // Members
+  // Children
   // ================================================================================
 
-  /**
-   * @return Non-null value (component; either equal to input or clone if that was necessary
-   * or more efficient to swap out the members via) iif the slot was valid on this component
-   */
-  @Nullable Object setMembers(Object component, MembersSlot slot, @Nullable List<Object> children);
-
-  /**
-   * @return Non-null value iif the slot was valid on this component
-   */
-  @Nullable List<Object> getMembers(Object component, MembersSlot slot);
-
-  /**
-   * Creates a shallow copy of the given component which also copies all member-lists
-   * such that they can be safely manipulated.
-   */
-  Object shallowCopyIncludingMemberLists(Object component);
-
-  /**
-   * Makes the child inherit the styles/actions of its parent, such that all properties of
-   * the parent it itself didn't specify are added to its own reference.
-   */
-  void inheritProperties(Object parent, Object child);
-
+  void setChildren(Object component, @Nullable List<Object> children);
 }

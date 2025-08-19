@@ -26,7 +26,6 @@ public class OutputBuilder {
   private final @Nullable String breakString;
 
   private final List<Object> result;
-  private @Nullable AddressTree deferredAddresses;
 
   private final Stack<ComponentSequence> sequencesStack;
 
@@ -84,19 +83,9 @@ public class OutputBuilder {
         CombinationResult combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
         if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
-
           // Apply the highest-up style manually now, without any further simplifying calculations
           if (combinationResult.styleToApply != null)
             combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor);
-
-          if (combinationResult.deferredAddresses != null) {
-            if (deferredAddresses == null)
-              deferredAddresses = new AddressTree();
-
-            int deferredIndex = result.size();
-
-            deferredAddresses.put(deferredIndex, combinationResult.deferredAddresses);
-          }
 
           result.add(combinationResult.component);
         }
@@ -108,7 +97,7 @@ public class OutputBuilder {
     }
   }
 
-  public ComponentOutput build() {
+  public List<Object> build() {
     combineAllSequencesAndResult();
 
     if (result.isEmpty())
@@ -116,6 +105,6 @@ public class OutputBuilder {
 
     sequencesStack.clear();
 
-    return new ComponentOutput(result, deferredAddresses, componentConstructor);
+    return result;
   }
 }

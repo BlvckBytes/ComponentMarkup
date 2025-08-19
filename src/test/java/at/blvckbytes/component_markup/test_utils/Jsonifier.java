@@ -7,7 +7,6 @@ package at.blvckbytes.component_markup.test_utils;
 
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
-import at.blvckbytes.component_markup.util.IntList;
 import at.blvckbytes.component_markup.util.JsonifyGetter;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
 import at.blvckbytes.component_markup.util.LoggerProvider;
@@ -129,15 +128,6 @@ public abstract class Jsonifier {
 
     if (item instanceof Enum<?>)
       return new JsonPrimitive(((Enum<?>) item).name());
-
-    if (item instanceof IntList) {
-      JsonArray result = new JsonArray();
-
-      for (int index = 0; index < ((IntList) item).getSize(); ++index)
-        result.add(jsonifyObject(null, ((IntList) item).get(index)));
-
-      return result;
-    }
 
     if (item instanceof Collection<?>) {
       JsonArray result = new JsonArray();

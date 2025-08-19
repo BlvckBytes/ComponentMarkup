@@ -14,12 +14,6 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.duration.DurationT
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverEntityTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverItemTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverTextTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.BlockNbtTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.EntityNbtTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.nbt.StorageNbtTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.player_name.PlayerNameTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.score.ScoreTag;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.selector.SelectorTag;
 
 public class BuiltInTagRegistry extends TagRegistry {
 
@@ -37,9 +31,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new HoverEntityTag());
     register(new HoverItemTag());
     register(new HoverTextTag());
-    register(new BlockNbtTag());
-    register(new EntityNbtTag());
-    register(new StorageNbtTag());
     register(new BreakTag());
     register(new ContainerTag());
     register(new StyleTag());
@@ -47,17 +38,13 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new ImmediateFormatTag());
     register(new InsertTag());
     register(new KeyTag());
-    register(new ScoreTag());
-    register(new SelectorTag());
     register(new TranslateTag());
     register(new GradientTag());
     register(new RainbowTag());
     register(new TransitionTag());
     register(new ResetTag());
     register(new SpaceTag());
-    register(new PlayerNameTag());
     register(new NumberTag());
-    register(new DeferredTag());
     register(new DateTag());
     register(new DurationTag());
   }

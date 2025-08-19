@@ -110,7 +110,7 @@ public abstract class InterpreterTestsBase {
       null,
       componentConstructor.getSlotContext(slot),
       actualNode
-    ).unprocessedComponents;
+    );
 
     JsonArray actualArray = new JsonArray();
 
@@ -241,7 +241,7 @@ public abstract class InterpreterTestsBase {
       null,
       componentConstructor.getSlotContext(slot),
       actualNode
-    ).unprocessedComponents;
+    );
 
     JsonArray actualJson = new JsonArray();
 

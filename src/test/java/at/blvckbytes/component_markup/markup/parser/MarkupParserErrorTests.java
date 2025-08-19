@@ -506,11 +506,6 @@ public class MarkupParserErrorTests {
       MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
       "<hover-item material=\"first\" `material´=\"second\">"
     );
-
-    makeErrorCase(
-      MarkupParseError.MULTIPLE_NON_MULTI_ATTRIBUTE,
-      "<block-nbt coordinates=\"a\" path=\"b\" interpret `interpret´=false/>"
-    );
   }
 
   @Test
@@ -626,12 +621,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMissingMandatoryAttributes() {
     makeErrorCase(
       MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
-      "<`score´ />"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MISSING_MANDATORY_ATTRIBUTE,
-      "<`score´ name=\"hello\"/>"
+      "<`key´ />"
     );
   }
 
