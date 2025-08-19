@@ -22,7 +22,7 @@ import java.util.logging.Level;
 
 public class PlayerNameTag extends TagDefinition {
 
-  protected PlayerNameTag() {
+  public PlayerNameTag() {
     super(TagClosing.SELF_CLOSE, TagPriority.NORMAL);
   }
 

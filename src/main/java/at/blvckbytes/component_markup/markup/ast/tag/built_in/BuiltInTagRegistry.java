@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.TagRegistry;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.click.*;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient.GradientTag;
@@ -14,10 +15,26 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.duration.DurationT
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverEntityTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverItemTag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.hover.HoverTextTag;
+import at.blvckbytes.component_markup.markup.parser.MarkupParser;
+import at.blvckbytes.component_markup.util.InputView;
 
 public class BuiltInTagRegistry extends TagRegistry {
 
   public static final TagRegistry INSTANCE = new BuiltInTagRegistry();
+  public static final MarkupNode DEFAULT_SELECTOR_RENDERER;
+
+  static {
+    DEFAULT_SELECTOR_RENDERER = MarkupParser.parse(
+      InputView.of(
+        "<container",
+        "  *for-entity=\"selector_result\"",
+        "  *for-separator={ <gray>,<space/> }",
+        "  *for-empty={ <red>The selector yielded no results! }",
+        ">{entity.name}"
+      ),
+      BuiltInTagRegistry.INSTANCE
+    );
+  }
 
   protected BuiltInTagRegistry() {
     super();
@@ -48,5 +65,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new NumberTag());
     register(new DateTag());
     register(new DurationTag());
+    register(new SelectorTag());
   }
 }
