@@ -21,11 +21,11 @@ public class CoordinateParserTests {
 
   @Test
   public void shouldParseCoordinatesWithWorld() {
-    TextWithSubViews text = new TextWithSubViews("12 .4 -551.2 `my_world´");
-    makeCase(text, new Coordinates(12, .4, -551.2, text.subView(0)));
+    TextWithSubViews text = new TextWithSubViews("12 .4 -551.2 my_world");
+    makeCase(text, new Coordinates(12, .4, -551.2, "my_world"));
 
-    text = new TextWithSubViews("12 .4 -551.2 `my_world´   ");
-    makeCase(text, new Coordinates(12, .4, -551.2, text.subView(0)));
+    text = new TextWithSubViews("12 .4 -551.2 my_world   ");
+    makeCase(text, new Coordinates(12, .4, -551.2, "my_world"));
   }
 
   private void makeCase(TextWithSubViews input, Coordinates expectedCoordinates) {

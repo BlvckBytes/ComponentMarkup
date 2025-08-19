@@ -21,10 +21,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
-import at.blvckbytes.component_markup.platform.ComponentConstructor;
-import at.blvckbytes.component_markup.platform.PlatformEntity;
-import at.blvckbytes.component_markup.platform.SlotContext;
-import at.blvckbytes.component_markup.platform.SlotType;
+import at.blvckbytes.component_markup.platform.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.TriState;
@@ -37,6 +34,7 @@ import java.util.logging.Level;
 public class MarkupInterpreter implements Interpreter {
 
   private final ComponentConstructor componentConstructor;
+  private final DataProvider dataProvider;
   private final TemporaryMemberEnvironment environment;
   private final @Nullable PlatformEntity recipient;
 
@@ -46,10 +44,12 @@ public class MarkupInterpreter implements Interpreter {
 
   private MarkupInterpreter(
     ComponentConstructor componentConstructor,
+    DataProvider dataProvider,
     InterpretationEnvironment baseEnvironment,
     @Nullable PlatformEntity recipient
   ) {
     this.componentConstructor = componentConstructor;
+    this.dataProvider = dataProvider;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.recipient = recipient;
 
@@ -60,11 +60,12 @@ public class MarkupInterpreter implements Interpreter {
 
   public static List<Object> interpret(
     ComponentConstructor componentConstructor,
+    DataProvider dataProvider,
     InterpretationEnvironment baseEnvironment,
     @Nullable PlatformEntity recipient,
     SlotContext slotContext, MarkupNode node
   ) {
-    return new MarkupInterpreter(componentConstructor, baseEnvironment, recipient)
+    return new MarkupInterpreter(componentConstructor, dataProvider, baseEnvironment, recipient)
       .interpretSubtree(node, slotContext);
   }
 
@@ -227,6 +228,11 @@ public class MarkupInterpreter implements Interpreter {
   @Override
   public ComponentConstructor getComponentConstructor() {
     return componentConstructor;
+  }
+
+  @Override
+  public DataProvider getDataProvider() {
+    return dataProvider;
   }
 
   @Override

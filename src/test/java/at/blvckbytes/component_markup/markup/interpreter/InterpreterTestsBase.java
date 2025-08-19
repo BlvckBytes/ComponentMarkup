@@ -106,6 +106,7 @@ public abstract class InterpreterTestsBase {
 
     List<Object> components = MarkupInterpreter.interpret(
       componentConstructor,
+      null,
       environment,
       null,
       componentConstructor.getSlotContext(slot),
@@ -237,6 +238,7 @@ public abstract class InterpreterTestsBase {
 
     List<Object> resultItems = MarkupInterpreter.interpret(
       componentConstructor,
+      null,
       baseEnvironment,
       null,
       componentConstructor.getSlotContext(slot),

@@ -5,9 +5,10 @@
 
 package at.blvckbytes.component_markup.platform.coordinates;
 
+import at.blvckbytes.component_markup.ErrorMessage;
 import at.blvckbytes.component_markup.util.InputView;
 
-public class CoordinatesParseException extends RuntimeException {
+public class CoordinatesParseException extends RuntimeException implements ErrorMessage {
 
   public final InputView input;
   public final int position;
@@ -17,5 +18,10 @@ public class CoordinatesParseException extends RuntimeException {
     this.input = input;
     this.position = Math.max(0, position);
     this.error = error;
+  }
+
+  @Override
+  public String getErrorMessage() {
+    return error.message;
   }
 }

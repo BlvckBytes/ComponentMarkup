@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.platform.DataProvider;
 import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,8 @@ public interface Interpreter {
   OutputBuilder getCurrentBuilder();
 
   ComponentConstructor getComponentConstructor();
+
+  DataProvider getDataProvider();
 
   int getCurrentSubtreeDepth();
 

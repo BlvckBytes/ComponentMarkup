@@ -6,10 +6,8 @@
 package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
-import at.blvckbytes.component_markup.platform.selector.TargetSelector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.UUID;
 
 public abstract class PlatformEntity implements DirectFieldAccess {
@@ -30,7 +28,7 @@ public abstract class PlatformEntity implements DirectFieldAccess {
 
   public abstract int z();
 
-  public abstract List<PlatformEntity> executeSelector(TargetSelector selector);
+  public abstract String world();
 
   @Override
   public @Nullable Object accessField(String rawIdentifier) {
@@ -47,6 +45,8 @@ public abstract class PlatformEntity implements DirectFieldAccess {
         return y();
       case "z":
         return z();
+      case "world":
+        return world();
       default:
         return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
     }

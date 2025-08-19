@@ -59,7 +59,7 @@ public class CoordinatesParser {
     if (input.peekChar(0) != 0)
       throw new CoordinatesParseException(input, input.getPosition() + 1, CoordinatesParseError.EXPECTED_END_AFTER_WORLD_NAME);
 
-    return new Coordinates(xCoordinate, yCoordinate, zCoordinate, world);
+    return new Coordinates(xCoordinate, yCoordinate, zCoordinate, world == null ? null : world.buildString());
   }
 
   private static @Nullable Double parseNumber(InputView input) {
