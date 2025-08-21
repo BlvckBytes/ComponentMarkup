@@ -38,7 +38,8 @@ public class ScoreTag extends TagDefinition {
     ExpressionNode name = attributes.getMandatoryExpressionNode("name");
     ExpressionNode objective = attributes.getMandatoryExpressionNode("objective");
     ExpressionNode type = attributes.getOptionalExpressionNode("type");
-    ExpressionNode value = attributes.getOptionalExpressionNode("value");
+    ExpressionNode fallback = attributes.getOptionalExpressionNode("fallback");
+    ExpressionNode override = attributes.getOptionalExpressionNode("override");
     MarkupNode renderer = attributes.getOptionalMarkupNode("renderer");
 
     return new FunctionDrivenNode(tagName, interpreter -> {
@@ -58,11 +59,14 @@ public class ScoreTag extends TagDefinition {
       PlatformWarning.logIfEmitted(PlatformWarning.MISSING_SCORE_TYPE, objective.getFirstMemberPositionProvider(), objectiveValue);
 
       if (scoreValue == null) {
-        if (value != null)
-          scoreValue = interpreter.evaluateAsStringOrNull(value);
+        if (fallback != null)
+          scoreValue = interpreter.evaluateAsStringOrNull(fallback);
         else
           PlatformWarning.logIfEmitted(PlatformWarning.UNKNOWN_OBJECTIVE, objective.getFirstMemberPositionProvider(), objectiveValue);
       }
+
+      if (override != null)
+        scoreValue = interpreter.evaluateAsStringOrNull(override);
 
       if (scoreValue == null)
         scoreValue = 0;
