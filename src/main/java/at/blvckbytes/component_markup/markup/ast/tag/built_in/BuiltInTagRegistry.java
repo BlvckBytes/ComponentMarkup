@@ -66,5 +66,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new DateTag());
     register(new DurationTag());
     register(new SelectorTag());
+    register(new ScoreTag());
   }
 }

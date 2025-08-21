@@ -377,7 +377,7 @@ public class ComputedStyle {
       if (fontPosition != null)
         PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_FONT_NAME, fontPosition, font);
       else {
-        PlatformWarning.logIfEmitted(
+        PlatformWarning.callIfEmitted(
           PlatformWarning.MALFORMED_FONT_NAME,
           () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default font-value: \"" + font + "\"")
         );

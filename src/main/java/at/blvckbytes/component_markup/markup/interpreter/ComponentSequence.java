@@ -540,7 +540,7 @@ public class ComponentSequence {
       if (itemHoverNode.material != null)
         PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), material);
       else {
-        PlatformWarning.logIfEmitted(
+        PlatformWarning.callIfEmitted(
           PlatformWarning.MALFORMED_MATERIAL,
           () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
         );

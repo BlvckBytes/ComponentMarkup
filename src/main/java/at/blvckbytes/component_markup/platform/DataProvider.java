@@ -15,4 +15,6 @@ public interface DataProvider {
 
   List<PlatformEntity> executeSelector(TargetSelector selector, Coordinates origin, @Nullable PlatformEntity self);
 
+  @Nullable Object resolveScore(String name, String objective, @Nullable String type);
+
 }
