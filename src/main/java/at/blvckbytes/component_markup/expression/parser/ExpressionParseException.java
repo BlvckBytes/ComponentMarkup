@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.expression.parser;
 
 import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.MessagePlaceholders;
 
 public class ExpressionParseException extends RuntimeException implements ErrorMessage {
 
@@ -21,6 +22,6 @@ public class ExpressionParseException extends RuntimeException implements ErrorM
 
   @Override
   public String getErrorMessage() {
-    return error.messageBuilder.apply(messagePlaceholders);
+    return error.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders));
   }
 }

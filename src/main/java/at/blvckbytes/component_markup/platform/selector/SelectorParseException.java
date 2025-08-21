@@ -7,6 +7,7 @@ package at.blvckbytes.component_markup.platform.selector;
 
 import at.blvckbytes.component_markup.ErrorMessage;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.MessagePlaceholders;
 
 public class SelectorParseException extends RuntimeException implements ErrorMessage {
 
@@ -28,6 +29,6 @@ public class SelectorParseException extends RuntimeException implements ErrorMes
 
   @Override
   public String getErrorMessage() {
-    return error.messageBuilder.apply(messagePlaceholders);
+    return error.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders));
   }
 }

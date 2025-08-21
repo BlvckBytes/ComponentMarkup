@@ -11,6 +11,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeExc
 import at.blvckbytes.component_markup.markup.xml.XmlParseException;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.MessagePlaceholders;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -70,7 +71,7 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
         return ((ExpressionTokenizeException) getCause()).getErrorMessage();
 
       default:
-        return this.error.messageBuilder.apply(messagePlaceholders);
+        return this.error.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders));
     }
   }
 
