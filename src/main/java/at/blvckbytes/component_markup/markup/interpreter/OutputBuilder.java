@@ -31,15 +31,14 @@ public class OutputBuilder {
 
   public OutputBuilder(
     @Nullable PlatformEntity recipient,
-    ComponentConstructor componentConstructor,
     MarkupInterpreter interpreter,
     SlotContext slotContext,
     SlotContext resetContext
   ) {
-    this.componentConstructor = componentConstructor;
+    this.componentConstructor = interpreter.getComponentConstructor();
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(recipient, slotContext, resetContext, componentConstructor, interpreter));
+    this.sequencesStack.push(ComponentSequence.initial(recipient, slotContext, resetContext, interpreter));
     this.result = new ArrayList<>();
   }
 

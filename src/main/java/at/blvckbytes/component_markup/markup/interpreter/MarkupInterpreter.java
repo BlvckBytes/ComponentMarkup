@@ -33,8 +33,7 @@ import java.util.logging.Level;
 
 public class MarkupInterpreter implements Interpreter {
 
-  private final ComponentConstructor componentConstructor;
-  private final DataProvider dataProvider;
+  private final PlatformImplementation platformImplementation;
   private final TemporaryMemberEnvironment environment;
   private final @Nullable PlatformEntity recipient;
 
@@ -43,29 +42,26 @@ public class MarkupInterpreter implements Interpreter {
   private final SlotContext resetContext;
 
   private MarkupInterpreter(
-    ComponentConstructor componentConstructor,
-    DataProvider dataProvider,
+    PlatformImplementation platformImplementation,
     InterpretationEnvironment baseEnvironment,
     @Nullable PlatformEntity recipient
   ) {
-    this.componentConstructor = componentConstructor;
-    this.dataProvider = dataProvider;
+    this.platformImplementation = platformImplementation;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
     this.recipient = recipient;
 
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
-    this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
+    this.resetContext = platformImplementation.getComponentConstructor().getSlotContext(SlotType.CHAT);
   }
 
   public static List<Object> interpret(
-    ComponentConstructor componentConstructor,
-    DataProvider dataProvider,
+    PlatformImplementation platformImplementation,
     InterpretationEnvironment baseEnvironment,
     @Nullable PlatformEntity recipient,
     SlotContext slotContext, MarkupNode node
   ) {
-    return new MarkupInterpreter(componentConstructor, dataProvider, baseEnvironment, recipient)
+    return new MarkupInterpreter(platformImplementation, baseEnvironment, recipient)
       .interpretSubtree(node, slotContext);
   }
 
@@ -215,7 +211,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder(recipient, componentConstructor, this, slotContext, resetContext));
+    builderStack.push(new OutputBuilder(recipient, this, slotContext, resetContext));
     interpret(node);
     return builderStack.pop().build();
   }
@@ -227,12 +223,12 @@ public class MarkupInterpreter implements Interpreter {
 
   @Override
   public ComponentConstructor getComponentConstructor() {
-    return componentConstructor;
+    return platformImplementation.getComponentConstructor();
   }
 
   @Override
   public DataProvider getDataProvider() {
-    return dataProvider;
+    return platformImplementation.getDataProvider();
   }
 
   @Override

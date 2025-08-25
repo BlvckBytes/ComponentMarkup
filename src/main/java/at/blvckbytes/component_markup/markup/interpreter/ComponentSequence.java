@@ -574,17 +574,16 @@ public class ComponentSequence {
 
   public ComponentSequence makeChildSequence(MarkupNode childNode) {
     ComputedStyle childParentStyle = ComputedStyle.addMissing(computedStyle, parentStyle);
-    return new ComponentSequence(recipient, childParentStyle, childNode, false, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, childParentStyle, childNode, false, slotContext, resetContext, interpreter);
   }
 
   public static ComponentSequence initial(
     @Nullable PlatformEntity recipient,
     SlotContext slotContext,
     SlotContext resetContext,
-    ComponentConstructor componentConstructor,
     MarkupInterpreter interpreter
   ) {
-    return new ComponentSequence(recipient, slotContext.defaultStyle, null, true, slotContext, resetContext, componentConstructor, interpreter);
+    return new ComponentSequence(recipient, slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
   }
 
   private ComponentSequence(
@@ -594,7 +593,6 @@ public class ComponentSequence {
     boolean isInitial,
     SlotContext slotContext,
     SlotContext resetContext,
-    ComponentConstructor componentConstructor,
     MarkupInterpreter interpreter
   ) {
     this.recipient = recipient;
@@ -602,7 +600,7 @@ public class ComponentSequence {
     this.slotContext = slotContext;
     this.resetContext = resetContext;
     this.memberEntries = new ArrayList<>();
-    this.componentConstructor = componentConstructor;
+    this.componentConstructor = interpreter.getComponentConstructor();
     this.interpreter = interpreter;
     this.nonTerminal = doesNonTerminalHaveEffect(nonTerminal) ? nonTerminal : null;
 
