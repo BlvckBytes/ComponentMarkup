@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.ErrorMessage;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
-import at.blvckbytes.component_markup.markup.xml.XmlParseException;
+import at.blvckbytes.component_markup.markup.cml.CmlParseException;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.MessagePlaceholders;
@@ -34,11 +34,11 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = messagePlaceholders;
   }
 
-  public MarkupParseException(XmlParseException xmlException) {
-    super(xmlException);
+  public MarkupParseException(CmlParseException cmlException) {
+    super(cmlException);
 
-    this.position = xmlException.position;
-    this.error = MarkupParseError.XML_PARSE_ERROR;
+    this.position = cmlException.position;
+    this.error = MarkupParseError.CML_PARSE_ERROR;
     this.messagePlaceholders = new String[0];
   }
 
@@ -61,8 +61,8 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   @Override
   public String getErrorMessage() {
     switch (this.error) {
-      case XML_PARSE_ERROR:
-        return ((XmlParseException) getCause()).getErrorMessage();
+      case CML_PARSE_ERROR:
+        return ((CmlParseException) getCause()).getErrorMessage();
 
       case EXPRESSION_PARSE_ERROR:
         return ((ExpressionParseException) getCause()).getErrorMessage();

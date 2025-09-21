@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml.event;
+package at.blvckbytes.component_markup.markup.cml.event;
 
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
-public class TagCloseEvent implements XmlEvent {
+public class TagCloseEvent implements CmlEvent {
 
   public final @Nullable InputView tagName;
   public final @Nullable String tagNameBuildResult;

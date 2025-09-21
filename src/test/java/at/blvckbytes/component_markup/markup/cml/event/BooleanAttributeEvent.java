@@ -3,20 +3,20 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml.event;
+package at.blvckbytes.component_markup.markup.cml.event;
 
 import at.blvckbytes.component_markup.util.InputView;
 
-public class LongAttributeEvent implements XmlEvent {
+public class BooleanAttributeEvent implements CmlEvent {
 
   public final InputView name;
   public final String nameBuildResult;
   public final InputView raw;
   public final String rawBuildResult;
 
-  public final long value;
+  public final boolean value;
 
-  public LongAttributeEvent(InputView name, InputView raw, long value, String nameBuildResult, String rawBuildResult) {
+  public BooleanAttributeEvent(InputView name, InputView raw, boolean value, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.raw = raw;

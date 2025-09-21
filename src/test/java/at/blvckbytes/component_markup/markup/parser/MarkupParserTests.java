@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.parser;
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
+import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.util.SubstringFlag;
 import org.junit.jupiter.api.Test;
 

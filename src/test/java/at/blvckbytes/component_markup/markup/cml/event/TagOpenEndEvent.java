@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml.event;
+package at.blvckbytes.component_markup.markup.cml.event;
 
 import at.blvckbytes.component_markup.util.InputView;
 
-public class TagOpenEndEvent implements XmlEvent {
+public class TagOpenEndEvent implements CmlEvent {
 
   public final InputView tagName;
   public final boolean wasSelfClosing;

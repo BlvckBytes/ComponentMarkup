@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.platform.selector;
 
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
+import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

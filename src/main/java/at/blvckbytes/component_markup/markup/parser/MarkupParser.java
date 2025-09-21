@@ -27,9 +27,9 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.DummyTag;
 import at.blvckbytes.component_markup.markup.parser.token.OutputFlag;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
-import at.blvckbytes.component_markup.markup.xml.XmlEventParser;
-import at.blvckbytes.component_markup.markup.xml.XmlParseException;
+import at.blvckbytes.component_markup.markup.cml.CmlEventConsumer;
+import at.blvckbytes.component_markup.markup.cml.CmlEventParser;
+import at.blvckbytes.component_markup.markup.cml.CmlParseException;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-public class MarkupParser implements XmlEventConsumer {
+public class MarkupParser implements CmlEventConsumer {
 
   public static final Set<String> RESERVED_OPERATOR_NAMES;
 
@@ -77,7 +77,7 @@ public class MarkupParser implements XmlEventConsumer {
   }
 
   // ================================================================================
-  // XML Event-Consumer
+  // CML Event-Consumer
   // ================================================================================
 
   @Override
@@ -512,9 +512,9 @@ public class MarkupParser implements XmlEventConsumer {
       tokenOutput.onInitialization(rootView);
 
     try {
-      XmlEventParser.parse(rootView, parser, tokenOutput);
-    } catch (XmlParseException xmlException) {
-      throw new MarkupParseException(xmlException).setRootView(rootView);
+      CmlEventParser.parse(rootView, parser, tokenOutput);
+    } catch (CmlParseException cmlException) {
+      throw new MarkupParseException(cmlException).setRootView(rootView);
     } catch (MarkupParseException markupParseException) {
       markupParseException.setRootView(rootView);
       throw markupParseException;

@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
+import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -206,9 +206,9 @@ public class MarkupParserErrorTests {
       "<container `_a_b´=\"one\">"
     );
 
-    // This will be caught by the xml-parser first; still - for completeness
+    // This will be caught by the cml-parser first; still - for completeness
     makeErrorCase(
-      MarkupParseError.XML_PARSE_ERROR,
+      MarkupParseError.CML_PARSE_ERROR,
       "<container `0abc´=\"one\">"
     );
 

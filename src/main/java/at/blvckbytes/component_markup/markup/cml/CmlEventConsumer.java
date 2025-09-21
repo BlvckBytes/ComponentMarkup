@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml;
+package at.blvckbytes.component_markup.markup.cml;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
-public interface XmlEventConsumer {
+public interface CmlEventConsumer {
 
   void onTagOpenBegin(InputView tagName);
 

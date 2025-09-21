@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml.event;
+package at.blvckbytes.component_markup.markup.cml.event;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.markup.xml.XmlEventConsumer;
+import at.blvckbytes.component_markup.markup.cml.CmlEventConsumer;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
@@ -15,9 +15,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XmlEventJoiner implements XmlEventConsumer {
+public class CmlEventJoiner implements CmlEventConsumer {
 
-  private final List<XmlEvent> events = new ArrayList<>();
+  private final List<CmlEvent> events = new ArrayList<>();
 
   @Override
   public void onTagOpenBegin(InputView tagName) {
@@ -100,7 +100,7 @@ public class XmlEventJoiner implements XmlEventConsumer {
   public String toString() {
     StringBuilder eventsString = new StringBuilder();
 
-    for (XmlEvent event : events) {
+    for (CmlEvent event : events) {
       if (eventsString.length() > 0)
         eventsString.append('\n');
 

@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml.event;
+package at.blvckbytes.component_markup.markup.cml.event;
 
 import at.blvckbytes.component_markup.util.InputView;
 
-public class DoubleAttributeEvent implements XmlEvent {
+public class LongAttributeEvent implements CmlEvent {
 
   public final InputView name;
   public final String nameBuildResult;
   public final InputView raw;
   public final String rawBuildResult;
-  public final double value;
 
-  public DoubleAttributeEvent(InputView name, InputView raw, double value, String nameBuildResult, String rawBuildResult) {
+  public final long value;
+
+  public LongAttributeEvent(InputView name, InputView raw, long value, String nameBuildResult, String rawBuildResult) {
     this.name = name;
     this.nameBuildResult = nameBuildResult;
     this.raw = raw;

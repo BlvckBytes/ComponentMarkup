@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.markup.xml.TextWithSubViews;
+import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.AnsiStyleColor;
 import at.blvckbytes.component_markup.platform.PackedColor;
 import at.blvckbytes.component_markup.platform.SlotType;

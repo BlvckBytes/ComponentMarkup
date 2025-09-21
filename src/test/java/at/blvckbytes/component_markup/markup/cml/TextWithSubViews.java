@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml;
+package at.blvckbytes.component_markup.markup.cml;
 
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;

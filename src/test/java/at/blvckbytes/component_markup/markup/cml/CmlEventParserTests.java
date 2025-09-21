@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.markup.xml;
+package at.blvckbytes.component_markup.markup.cml;
 
 import at.blvckbytes.component_markup.expression.parser.ExpressionParserTests;
-import at.blvckbytes.component_markup.markup.xml.event.*;
+import at.blvckbytes.component_markup.markup.cml.event.*;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.SubstringFlag;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class XmlEventParserTests {
+public class CmlEventParserTests {
 
   // ================================================================================
   // Event-sequence tests
@@ -577,7 +577,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_TAG,
+      CmlParseError.UNTERMINATED_TAG,
       text.subView(0).startInclusive,
       new TagOpenBeginEvent(text.subView(1), "red")
     );
@@ -591,7 +591,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_TAG,
+      CmlParseError.UNTERMINATED_TAG,
       text.subView(0).startInclusive
     );
   }
@@ -609,7 +609,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_MARKUP_VALUE,
+      CmlParseError.UNTERMINATED_MARKUP_VALUE,
       text.subView(2).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagAttributeBeginEvent(text.subView(1), text.subView(2).startInclusive, "my-attr"),
@@ -688,7 +688,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_INTERPOLATION,
+      CmlParseError.UNTERMINATED_INTERPOLATION,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
@@ -700,7 +700,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_INTERPOLATION,
+      CmlParseError.UNTERMINATED_INTERPOLATION,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
@@ -712,7 +712,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNTERMINATED_INTERPOLATION,
+      CmlParseError.UNTERMINATED_INTERPOLATION,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
@@ -721,29 +721,29 @@ public class XmlEventParserTests {
 
   @Test
   public void shouldThrowOnMalformedNumbers() {
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "-");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "--");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, ".5.5");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "- 5.5");
-    makeMalformedAttributeValueCase(XmlParseError.MALFORMED_NUMBER, "5AB");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, ".");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, "-");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, "--");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, ".5.5");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, "- 5.5");
+    makeMalformedAttributeValueCase(CmlParseError.MALFORMED_NUMBER, "5AB");
   }
 
   @Test
   public void shouldThrowOnUnsupportedAttributeValues() {
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "tru");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "truea");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "fals");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "falsea");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nul");
-    makeMalformedAttributeValueCase(XmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nulla");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "abc");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "tru");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "truea");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "fals");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "falsea");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nul");
+    makeMalformedAttributeValueCase(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, "nulla");
   }
 
   @Test
   public void shouldThrowOnMissingTagName() {
     TextWithSubViews text = new TextWithSubViews("`<´>");
-    makeCase(text, XmlParseError.MISSING_TAG_NAME, text.subView(0).startInclusive);
+    makeCase(text, CmlParseError.MISSING_TAG_NAME, text.subView(0).startInclusive);
   }
 
   @Test
@@ -763,7 +763,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
+      CmlParseError.EXPECTED_ATTRIBUTE_KEY,
       text.subView(2).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new FlagAttributeEvent(text.subView(1), "my-attr")
@@ -773,7 +773,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.EXPECTED_ATTRIBUTE_KEY,
+      CmlParseError.EXPECTED_ATTRIBUTE_KEY,
       text.subView(2).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red"),
       new FlagAttributeEvent(text.subView(1), "my-attr")
@@ -786,7 +786,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.UNESCAPED_CURLY,
+      CmlParseError.UNESCAPED_CURLY,
       text.subView(0).startInclusive
     );
   }
@@ -794,16 +794,16 @@ public class XmlEventParserTests {
   @Test
   public void shouldThrowOnMalformedComments() {
     TextWithSubViews text = new TextWithSubViews("`<!-- Hello, world´");
-    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
+    makeCase(text, CmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
     text = new TextWithSubViews("`<!-- Hello, world -´");
-    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
+    makeCase(text, CmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
     text = new TextWithSubViews("`<!-- Hello, world ->´");
-    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
+    makeCase(text, CmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
 
     text = new TextWithSubViews("`<!-- Hello, world --´");
-    makeCase(text, XmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
+    makeCase(text, CmlParseError.MALFORMED_COMMENT, text.subView(0).startInclusive);
   }
 
   @Test
@@ -812,7 +812,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.EMPTY_INTERPOLATION,
+      CmlParseError.EMPTY_INTERPOLATION,
       text.subView(1).startInclusive,
       new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "hello ")
     );
@@ -821,7 +821,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.EMPTY_INTERPOLATION,
+      CmlParseError.EMPTY_INTERPOLATION,
       text.subView(1).startInclusive,
       new TextEvent(text.subView(0).setBuildFlags(SubstringFlag.FIRST_TEXT), "hello ")
     );
@@ -849,7 +849,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      CmlParseError.MISSING_ATTRIBUTE_VALUE,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red")
     );
@@ -858,7 +858,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      CmlParseError.MISSING_ATTRIBUTE_VALUE,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red")
     );
@@ -867,7 +867,7 @@ public class XmlEventParserTests {
 
     makeCase(
       text,
-      XmlParseError.MISSING_ATTRIBUTE_VALUE,
+      CmlParseError.MISSING_ATTRIBUTE_VALUE,
       text.subView(1).startInclusive,
       new TagOpenBeginEvent(text.subView(0), "red")
     );
@@ -921,7 +921,7 @@ public class XmlEventParserTests {
     );
   }
 
-  private void makeMalformedAttributeValueCase(XmlParseError expectedError, String valueExpression) {
+  private void makeMalformedAttributeValueCase(CmlParseError expectedError, String valueExpression) {
     TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 
     makeCase(
@@ -932,18 +932,18 @@ public class XmlEventParserTests {
     );
   }
 
-  private static void makeCase(TextWithSubViews input, XmlEvent... expectedEvents) {
+  private static void makeCase(TextWithSubViews input, CmlEvent... expectedEvents) {
     makeCase(input, null, -1, expectedEvents);
   }
 
-  private static void makeCase(TextWithSubViews input, @Nullable XmlParseError expectedError, int expectedPosition, XmlEvent... expectedEvents) {
-    XmlEventJoiner actualEventsJoiner = new XmlEventJoiner();
+  private static void makeCase(TextWithSubViews input, @Nullable CmlParseError expectedError, int expectedPosition, CmlEvent... expectedEvents) {
+    CmlEventJoiner actualEventsJoiner = new CmlEventJoiner();
 
-    XmlParseException thrownException = null;
+    CmlParseException thrownException = null;
 
     try {
-      XmlEventParser.parse(InputView.of(input.text), actualEventsJoiner);
-    } catch (XmlParseException exception) {
+      CmlEventParser.parse(InputView.of(input.text), actualEventsJoiner);
+    } catch (CmlParseException exception) {
       thrownException = exception;
     }
 
@@ -964,7 +964,7 @@ public class XmlEventParserTests {
       if (expectedEventIndex != 0)
         expectedEventsString.append('\n');
 
-      XmlEvent expectedEvent = expectedEvents[expectedEventIndex];
+      CmlEvent expectedEvent = expectedEvents[expectedEventIndex];
 
       expectedEventsString.append(Jsonifier.jsonify(expectedEvent));
     }
