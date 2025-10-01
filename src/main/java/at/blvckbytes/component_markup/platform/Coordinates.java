@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.platform.coordinates;
+package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import org.jetbrains.annotations.Nullable;

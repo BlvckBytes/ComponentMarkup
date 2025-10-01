@@ -227,11 +227,6 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   @Override
-  public DataProvider getDataProvider() {
-    return platformImplementation.getDataProvider();
-  }
-
-  @Override
   public int getCurrentSubtreeDepth() {
     return builderStack.size() - 1;
   }

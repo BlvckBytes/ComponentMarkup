@@ -6,7 +6,6 @@
 package at.blvckbytes.component_markup.platform;
 
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
-import at.blvckbytes.component_markup.platform.coordinates.Coordinates;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;

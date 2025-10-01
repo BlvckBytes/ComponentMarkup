@@ -9,6 +9,4 @@ public interface PlatformImplementation {
 
   ComponentConstructor getComponentConstructor();
 
-  DataProvider getDataProvider();
-
 }

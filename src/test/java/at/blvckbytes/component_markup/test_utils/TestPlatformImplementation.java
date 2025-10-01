@@ -21,11 +21,6 @@ public class TestPlatformImplementation implements PlatformImplementation {
     return componentConstructor;
   }
 
-  @Override
-  public DataProvider getDataProvider() {
-    throw new UnsupportedOperationException();
-  }
-
   public static SlotContext getSlotContext(SlotType slot) {
     return INSTANCE.getComponentConstructor().getSlotContext(slot);
   }
