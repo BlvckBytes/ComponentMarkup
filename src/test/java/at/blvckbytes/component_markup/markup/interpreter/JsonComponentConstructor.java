@@ -284,13 +284,9 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setChildren(Object component, List<Object> children) {
-    if (children == null) {
-      ((JsonObject) component).remove("extra");
-      return;
-    }
-
-    JsonArray extra = new JsonArray();
+  public void addChildren(Object component, List<Object> children) {
+    JsonElement existingChildren = ((JsonObject) component).get("extra");
+    JsonArray extra = existingChildren == null ? new JsonArray() : (JsonArray) existingChildren;
 
     for (Object child : children)
       extra.add((JsonObject) child);

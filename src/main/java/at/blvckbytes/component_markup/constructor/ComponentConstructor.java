@@ -94,7 +94,14 @@ public interface ComponentConstructor {
   // Children
   // ================================================================================
 
+  /**
+   * Called once a component has been fully constructed and no more changes are to be
+   * made. Since Adventure is deeply immutable and thereby enforces builders, this stage
+   * would call the build method, as to end up with a final component to pass on.
+   * @param component Component to be finalised, as created by the corresponding creation-methods.
+   * @return Finalised component, ready to be used wherever applicable.
+   */
   Object finaliseComponent(Object component);
 
-  void setChildren(Object component, List<Object> children);
+  void addChildren(Object component, List<Object> children);
 }

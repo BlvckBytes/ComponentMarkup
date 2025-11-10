@@ -311,7 +311,7 @@ public class ComponentSequence {
         members.add(componentConstructor.finaliseComponent(memberEntry.member));
       }
 
-      componentConstructor.setChildren(result, members);
+      componentConstructor.addChildren(result, members);
     }
 
     possiblyApplyNonTerminal(result);
