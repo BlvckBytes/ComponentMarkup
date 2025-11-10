@@ -250,11 +250,6 @@ public class ComputedStyle {
       String colorString = interpreter.evaluateAsStringOrNull(style.color);
 
       if (colorString != null) {
-        if (!componentConstructor.doesSupport(PlatformFeature.COLOR)) {
-          for (String line : ErrorScreen.make(style.color.getFirstMemberPositionProvider(), "Custom colors are not supported on this platform"))
-            LoggerProvider.log(Level.WARNING, line, false);
-        }
-
         long packedColor = PackedColor.tryParse(colorString);
 
         if (packedColor != PackedColor.NULL_SENTINEL) {
@@ -348,11 +343,6 @@ public class ComputedStyle {
       if (value == TriState.NULL)
         continue;
 
-      if (!componentConstructor.doesSupport(format.feature)) {
-        for (String line : ErrorScreen.make(formatExpression.getFirstMemberPositionProvider(), "The " + format.name().toLowerCase() + "-format is not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
-      }
-
       if (result == null)
         result = new ComputedStyle();
 
@@ -365,7 +355,7 @@ public class ComputedStyle {
   public void applyStyles(Object component, ComponentConstructor componentConstructor) {
     PlatformWarning.clear();
 
-    if (packedColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(PlatformFeature.COLOR))
+    if (packedColor != PackedColor.NULL_SENTINEL)
       componentConstructor.setColor(component, packedColor);
 
     if (packedShadowColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(PlatformFeature.SHADOW_COLOR))
@@ -392,9 +382,6 @@ public class ComputedStyle {
 
       // As of now, there's no need to ever remove formats again, so don't call into the constructor
       if (state == TriState.NULL)
-        continue;
-
-      if (!componentConstructor.doesSupport(format.feature))
         continue;
 
       switch (format) {

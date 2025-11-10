@@ -8,16 +8,12 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PackedColor;
-import at.blvckbytes.component_markup.platform.PlatformFeature;
-import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Stack;
-import java.util.logging.Level;
 
 public abstract class ColorizeNodeState {
 
@@ -77,11 +73,6 @@ public abstract class ColorizeNodeState {
       return injectedComponentsStack.empty();
 
     ComponentConstructor componentConstructor = interpreter.getComponentConstructor();
-
-    if (!componentConstructor.doesSupport(PlatformFeature.COLOR)) {
-      for (String line : ErrorScreen.make(tagName, "Custom colors are not supported on this platform"))
-        LoggerProvider.log(Level.WARNING, line, false);
-    }
 
     int length = injectedComponents.size();
 
