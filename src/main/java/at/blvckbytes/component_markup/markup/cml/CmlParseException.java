@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.cml;
 
-import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorMessage;
 
 public class CmlParseException extends RuntimeException implements ErrorMessage {
 

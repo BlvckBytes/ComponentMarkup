@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.cml;
 
-import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorMessage;
 
 public enum CmlParseError implements ErrorMessage {
   UNTERMINATED_INTERPOLATION("This placeholder misses its closing-bracket: }"),

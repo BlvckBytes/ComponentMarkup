@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorMessage;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.markup.cml.CmlParseException;

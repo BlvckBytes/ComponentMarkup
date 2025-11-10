@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup;
+package at.blvckbytes.component_markup.util;
 
 public interface ErrorMessage {
 

@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorMessage;
 import at.blvckbytes.component_markup.util.MessagePlaceholders;
 
 public class ExpressionTokenizeException extends RuntimeException implements ErrorMessage {

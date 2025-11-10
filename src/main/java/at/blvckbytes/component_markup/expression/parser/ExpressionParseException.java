@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.expression.parser;
 
-import at.blvckbytes.component_markup.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorMessage;
 import at.blvckbytes.component_markup.util.MessagePlaceholders;
 
 public class ExpressionParseException extends RuntimeException implements ErrorMessage {
