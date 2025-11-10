@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.markup.interpreter.tag;
 import at.blvckbytes.component_markup.markup.interpreter.InterpreterTestsBase;
 import at.blvckbytes.component_markup.markup.interpreter.JsonObjectBuilder;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
-import at.blvckbytes.component_markup.platform.SlotType;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.test_utils.Environment;
 import org.junit.jupiter.api.Test;
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.platform;
+package at.blvckbytes.component_markup.constructor;
 
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface ComponentConstructor {
 
-  boolean doesSupport(PlatformFeature feature);
+  boolean doesSupport(ConstructorFeature feature);
 
   // ================================================================================
   // SlotContext

@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
-import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import org.jetbrains.annotations.Nullable;
 
 public class CombinationResult {

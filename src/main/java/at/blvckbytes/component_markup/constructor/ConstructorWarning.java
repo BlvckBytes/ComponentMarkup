@@ -2,7 +2,7 @@
  * Copyright (c) 2025, BlvckBytes
  * SPDX-License-Identifier: MIT
  */
-package at.blvckbytes.component_markup.platform;
+package at.blvckbytes.component_markup.constructor;
 
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
@@ -13,7 +13,7 @@ import java.util.EnumSet;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-public enum PlatformWarning {
+public enum ConstructorWarning {
   MALFORMED_MATERIAL(args -> "The string \"" + args.get(0) + " does not represent a valid material-value"),
   MALFORMED_ENTITY_TYPE(args -> "The string \"" + args.get(0) + "\" does not represent a valid entity-type-value"),
   MALFORMED_FONT_NAME(args -> "The font-name \"" + args.get(0) + "\" is malformed"),
@@ -24,25 +24,25 @@ public enum PlatformWarning {
   UNKNOWN_OBJECTIVE(args -> "The objective \"" + args.get(0) + "\" is not known to the server"),
   ;
 
-  private static final ThreadLocal<EnumSet<PlatformWarning>> localSets = ThreadLocal.withInitial(() -> EnumSet.noneOf(PlatformWarning.class));
+  private static final ThreadLocal<EnumSet<ConstructorWarning>> localSets = ThreadLocal.withInitial(() -> EnumSet.noneOf(ConstructorWarning.class));
 
   public final Function<MessagePlaceholders, String> messageBuilder;
 
-  PlatformWarning(Function<MessagePlaceholders, String> messageBuilder) {
+  ConstructorWarning(Function<MessagePlaceholders, String> messageBuilder) {
     this.messageBuilder = messageBuilder;
   }
 
   @SuppressWarnings("unused")
-  public static void emit(PlatformWarning warning) {
+  public static void emit(ConstructorWarning warning) {
     localSets.get().add(warning);
   }
 
-  public static void callIfEmitted(PlatformWarning warning, Runnable handler) {
+  public static void callIfEmitted(ConstructorWarning warning, Runnable handler) {
     if (localSets.get().contains(warning))
       handler.run();
   }
 
-  public static void logIfEmitted(PlatformWarning warning, InputView position, String... messagePlaceholders) {
+  public static void logIfEmitted(ConstructorWarning warning, InputView position, String... messagePlaceholders) {
     if (!localSets.get().contains(warning))
       return;
 

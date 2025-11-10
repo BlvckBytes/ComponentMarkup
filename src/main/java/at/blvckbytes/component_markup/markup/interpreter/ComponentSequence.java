@@ -13,7 +13,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.EntityHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
-import at.blvckbytes.component_markup.platform.*;
+import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public class ComponentSequence {
     if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
 
-      if (componentConstructor.doesSupport(PlatformFeature.KEY_COMPONENT))
+      if (componentConstructor.doesSupport(ConstructorFeature.KEY_COMPONENT))
         result = componentConstructor.createKeyComponent(key);
 
       else {
@@ -98,7 +98,7 @@ public class ComponentSequence {
       if (translateNode.fallback != null)
         fallback = interpreter.evaluateAsStringOrNull(translateNode.fallback);
 
-      if (componentConstructor.doesSupport(PlatformFeature.TRANSLATE_COMPONENT))
+      if (componentConstructor.doesSupport(ConstructorFeature.TRANSLATE_COMPONENT))
         result = componentConstructor.createTranslateComponent(key, with, fallback);
 
       else {
@@ -338,7 +338,7 @@ public class ComponentSequence {
   }
 
   private void possiblyApplyNonTerminal(Object result) {
-    PlatformWarning.clear();
+    ConstructorWarning.clear();
 
     if (nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminal;
@@ -347,7 +347,7 @@ public class ComponentSequence {
 
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
-          if (!componentConstructor.doesSupport(PlatformFeature.COPY_TO_CLIPBOARD_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.COPY_TO_CLIPBOARD_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action copy-to-clipboard is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
             return;
@@ -357,7 +357,7 @@ public class ComponentSequence {
           return;
 
         case SUGGEST_COMMAND:
-          if (!componentConstructor.doesSupport(PlatformFeature.SUGGEST_COMMAND_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.SUGGEST_COMMAND_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action suggest-command is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
             return;
@@ -367,7 +367,7 @@ public class ComponentSequence {
           return;
 
         case RUN_COMMAND:
-          if (!componentConstructor.doesSupport(PlatformFeature.RUN_COMMAND_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.RUN_COMMAND_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action run-command is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
             return;
@@ -377,18 +377,18 @@ public class ComponentSequence {
           return;
 
         case CHANGE_PAGE:
-          if (!componentConstructor.doesSupport(PlatformFeature.CHANGE_PAGE_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.CHANGE_PAGE_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action change-page is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
             return;
           }
 
           componentConstructor.setClickChangePageAction(result, value);
-          PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), value);
+          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), value);
           return;
 
         case OPEN_FILE:
-          if (!componentConstructor.doesSupport(PlatformFeature.OPEN_FILE_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_FILE_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action open-file is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
           }
@@ -397,14 +397,14 @@ public class ComponentSequence {
           return;
 
         case OPEN_URL: {
-          if (!componentConstructor.doesSupport(PlatformFeature.OPEN_URL_ACTION)) {
+          if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_URL_ACTION)) {
             for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action open-url is not supported on this platform"))
               LoggerProvider.log(Level.WARNING, line, false);
             return;
           }
 
           componentConstructor.setClickOpenUrlAction(result, value);
-          PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), value);
+          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), value);
           return;
         }
 
@@ -416,7 +416,7 @@ public class ComponentSequence {
     }
 
     if (nonTerminal instanceof InsertNode) {
-      if (!componentConstructor.doesSupport(PlatformFeature.INSERT_ACTION)) {
+      if (!componentConstructor.doesSupport(ConstructorFeature.INSERT_ACTION)) {
         for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The insert-action is not supported on this platform"))
           LoggerProvider.log(Level.WARNING, line, false);
         return;
@@ -429,7 +429,7 @@ public class ComponentSequence {
     }
 
     if (nonTerminal instanceof EntityHoverNode) {
-      if (!componentConstructor.doesSupport(PlatformFeature.HOVER_ENTITY_ACTION)) {
+      if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ENTITY_ACTION)) {
         for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-entity-action is not supported on this platform"))
           LoggerProvider.log(Level.WARNING, line, false);
         return;
@@ -467,12 +467,12 @@ public class ComponentSequence {
         nameComponent = nameOutput.get(0);
 
       componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
-      PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), type);
+      ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), type);
       return;
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
-      if (!componentConstructor.doesSupport(PlatformFeature.HOVER_ITEM_ACTION)) {
+      if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ITEM_ACTION)) {
         for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-item-action is not supported on this platform"))
           LoggerProvider.log(Level.WARNING, line, false);
         return;
@@ -537,10 +537,10 @@ public class ComponentSequence {
       componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
 
       if (itemHoverNode.material != null)
-        PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), material);
+        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), material);
       else {
-        PlatformWarning.callIfEmitted(
-          PlatformWarning.MALFORMED_MATERIAL,
+        ConstructorWarning.callIfEmitted(
+          ConstructorWarning.MALFORMED_MATERIAL,
           () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
         );
       }
@@ -549,7 +549,7 @@ public class ComponentSequence {
     }
 
     if (nonTerminal instanceof TextHoverNode) {
-      if (!componentConstructor.doesSupport(PlatformFeature.HOVER_TEXT_ACTION)) {
+      if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_TEXT_ACTION)) {
         for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-text-action is not supported on this platform"))
           LoggerProvider.log(Level.WARNING, line, false);
         return;

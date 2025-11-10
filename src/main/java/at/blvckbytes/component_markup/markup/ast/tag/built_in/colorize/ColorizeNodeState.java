@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize;
 
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.platform.ComponentConstructor;
+import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.util.InputView;
 

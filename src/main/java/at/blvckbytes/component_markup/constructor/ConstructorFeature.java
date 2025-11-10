@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.platform;
+package at.blvckbytes.component_markup.constructor;
 
-public enum PlatformFeature {
+public enum ConstructorFeature {
   KEY_COMPONENT,
   TRANSLATE_COMPONENT,
   CHANGE_PAGE_ACTION,

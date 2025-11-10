@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
-import at.blvckbytes.component_markup.platform.*;
+import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.*;
 import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
@@ -297,7 +297,7 @@ public class ComputedStyle {
       }
 
       if (firstNonNullValue != null) {
-        if (!componentConstructor.doesSupport(PlatformFeature.SHADOW_COLOR)) {
+        if (!componentConstructor.doesSupport(ConstructorFeature.SHADOW_COLOR)) {
           for (String line : ErrorScreen.make(firstNonNullValue.getFirstMemberPositionProvider(), "Custom shadow-colors are not supported on this platform"))
             LoggerProvider.log(Level.WARNING, line, false);
         }
@@ -314,7 +314,7 @@ public class ComputedStyle {
       String font = interpreter.evaluateAsStringOrNull(style.font);
 
       if (font != null) {
-        if (!componentConstructor.doesSupport(PlatformFeature.FONT)) {
+        if (!componentConstructor.doesSupport(ConstructorFeature.FONT)) {
           for (String line : ErrorScreen.make(style.font.getFirstMemberPositionProvider(), "Custom fonts are not supported on this platform"))
             LoggerProvider.log(Level.WARNING, line, false);
         }
@@ -355,22 +355,22 @@ public class ComputedStyle {
   }
 
   public void applyStyles(Object component, ComponentConstructor componentConstructor) {
-    PlatformWarning.clear();
+    ConstructorWarning.clear();
 
     if (packedColor != PackedColor.NULL_SENTINEL)
       componentConstructor.setColor(component, packedColor);
 
-    if (packedShadowColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(PlatformFeature.SHADOW_COLOR))
+    if (packedShadowColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(ConstructorFeature.SHADOW_COLOR))
       componentConstructor.setShadowColor(component, packedShadowColor);
 
-    if (font != null && componentConstructor.doesSupport(PlatformFeature.FONT)) {
+    if (font != null && componentConstructor.doesSupport(ConstructorFeature.FONT)) {
       componentConstructor.setFont(component, font);
 
       if (fontPosition != null)
-        PlatformWarning.logIfEmitted(PlatformWarning.MALFORMED_FONT_NAME, fontPosition, font);
+        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_FONT_NAME, fontPosition, font);
       else {
-        PlatformWarning.callIfEmitted(
-          PlatformWarning.MALFORMED_FONT_NAME,
+        ConstructorWarning.callIfEmitted(
+          ConstructorWarning.MALFORMED_FONT_NAME,
           () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default font-value: \"" + font + "\"")
         );
       }

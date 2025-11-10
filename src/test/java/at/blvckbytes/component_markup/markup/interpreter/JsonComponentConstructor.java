@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
-import at.blvckbytes.component_markup.platform.*;
+import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
@@ -24,7 +24,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public boolean doesSupport(PlatformFeature feature) {
+  public boolean doesSupport(ConstructorFeature feature) {
     return true;
   }
 

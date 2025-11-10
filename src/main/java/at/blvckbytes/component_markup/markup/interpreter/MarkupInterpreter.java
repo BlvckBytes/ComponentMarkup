@@ -21,7 +21,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
-import at.blvckbytes.component_markup.platform.*;
+import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.TriState;
