@@ -84,7 +84,7 @@ public class OutputBuilder {
           if (combinationResult.styleToApply != null)
             combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor);
 
-          result.add(combinationResult.component);
+          result.add(componentConstructor.finaliseComponent(combinationResult.component));
         }
 
         break;

@@ -78,7 +78,7 @@ public interface ComponentConstructor {
 
   void setShadowColor(Object component, long packedColor);
 
-  void setFont(Object component, @Nullable String font);
+  void setFont(Object component, String font);
 
   void setObfuscatedFormat(Object component, TriState value);
 
@@ -94,5 +94,7 @@ public interface ComponentConstructor {
   // Children
   // ================================================================================
 
-  void setChildren(Object component, @Nullable List<Object> children);
+  Object finaliseComponent(Object component);
+
+  void setChildren(Object component, List<Object> children);
 }

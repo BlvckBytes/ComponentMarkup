@@ -308,7 +308,7 @@ public class ComponentSequence {
           memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
         }
 
-        members.add(memberEntry.member);
+        members.add(componentConstructor.finaliseComponent(memberEntry.member));
       }
 
       componentConstructor.setChildren(result, members);

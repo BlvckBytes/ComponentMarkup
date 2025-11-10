@@ -236,12 +236,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   }
 
   @Override
-  public void setFont(Object component, @Nullable String font) {
-    if (font == null) {
-      ((JsonObject) component).remove("font");
-      return;
-    }
-
+  public void setFont(Object component, String font) {
     ((JsonObject) component).addProperty("font", font);
   }
 
@@ -270,6 +265,11 @@ public class JsonComponentConstructor implements ComponentConstructor {
     setFormat(component, "italic", value);
   }
 
+  @Override
+  public Object finaliseComponent(Object component) {
+    return component;
+  }
+
   private void setFormat(Object component, String formatKey, TriState value) {
     if (value == TriState.NULL) {
       ((JsonObject) component).remove(formatKey);
@@ -284,7 +284,7 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setChildren(Object component, @Nullable List<Object> children) {
+  public void setChildren(Object component, List<Object> children) {
     if (children == null) {
       ((JsonObject) component).remove("extra");
       return;
