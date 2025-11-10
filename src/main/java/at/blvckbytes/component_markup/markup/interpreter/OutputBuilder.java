@@ -8,7 +8,6 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.platform.ComponentConstructor;
-import at.blvckbytes.component_markup.platform.PlatformEntity;
 import at.blvckbytes.component_markup.platform.SlotContext;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
@@ -30,7 +29,6 @@ public class OutputBuilder {
   private final Stack<ComponentSequence> sequencesStack;
 
   public OutputBuilder(
-    @Nullable PlatformEntity recipient,
     MarkupInterpreter interpreter,
     SlotContext slotContext,
     SlotContext resetContext
@@ -38,7 +36,7 @@ public class OutputBuilder {
     this.componentConstructor = interpreter.getComponentConstructor();
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
-    this.sequencesStack.push(ComponentSequence.initial(recipient, slotContext, resetContext, interpreter));
+    this.sequencesStack.push(ComponentSequence.initial(slotContext, resetContext, interpreter));
     this.result = new ArrayList<>();
   }
 

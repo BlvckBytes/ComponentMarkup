@@ -35,7 +35,6 @@ public class MarkupInterpreter implements Interpreter {
 
   private final PlatformImplementation platformImplementation;
   private final TemporaryMemberEnvironment environment;
-  private final @Nullable PlatformEntity recipient;
 
   private final InterceptorStack interceptors;
   private final Stack<OutputBuilder> builderStack;
@@ -43,12 +42,10 @@ public class MarkupInterpreter implements Interpreter {
 
   private MarkupInterpreter(
     PlatformImplementation platformImplementation,
-    InterpretationEnvironment baseEnvironment,
-    @Nullable PlatformEntity recipient
+    InterpretationEnvironment baseEnvironment
   ) {
     this.platformImplementation = platformImplementation;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
-    this.recipient = recipient;
 
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
@@ -58,16 +55,10 @@ public class MarkupInterpreter implements Interpreter {
   public static List<Object> interpret(
     PlatformImplementation platformImplementation,
     InterpretationEnvironment baseEnvironment,
-    @Nullable PlatformEntity recipient,
     SlotContext slotContext, MarkupNode node
   ) {
-    return new MarkupInterpreter(platformImplementation, baseEnvironment, recipient)
+    return new MarkupInterpreter(platformImplementation, baseEnvironment)
       .interpretSubtree(node, slotContext);
-  }
-
-  @Override
-  public @Nullable PlatformEntity getRecipient() {
-    return recipient;
   }
 
   @Override
@@ -211,7 +202,7 @@ public class MarkupInterpreter implements Interpreter {
   }
 
   public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder(recipient, this, slotContext, resetContext));
+    builderStack.push(new OutputBuilder(this, slotContext, resetContext));
     interpret(node);
     return builderStack.pop().build();
   }

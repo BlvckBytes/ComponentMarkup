@@ -105,7 +105,6 @@ public abstract class InterpreterTestsBase {
     List<Object> components = MarkupInterpreter.interpret(
       TestPlatformImplementation.INSTANCE,
       environment,
-      null,
       TestPlatformImplementation.getSlotContext(slot),
       actualNode
     );
@@ -236,7 +235,6 @@ public abstract class InterpreterTestsBase {
     List<Object> resultItems = MarkupInterpreter.interpret(
       TestPlatformImplementation.INSTANCE,
       baseEnvironment,
-      null,
       TestPlatformImplementation.getSlotContext(slot),
       actualNode
     );

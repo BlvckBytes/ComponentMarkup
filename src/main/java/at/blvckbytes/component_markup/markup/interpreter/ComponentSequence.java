@@ -27,7 +27,6 @@ public class ComponentSequence {
 
   private static final String DEFAULT_MATERIAL = "minecraft:stone";
 
-  private final @Nullable PlatformEntity recipient;
   private final SlotContext slotContext;
   private final SlotContext resetContext;
   private final MarkupInterpreter interpreter;
@@ -574,20 +573,18 @@ public class ComponentSequence {
 
   public ComponentSequence makeChildSequence(MarkupNode childNode) {
     ComputedStyle childParentStyle = ComputedStyle.addMissing(computedStyle, parentStyle);
-    return new ComponentSequence(recipient, childParentStyle, childNode, false, slotContext, resetContext, interpreter);
+    return new ComponentSequence(childParentStyle, childNode, false, slotContext, resetContext, interpreter);
   }
 
   public static ComponentSequence initial(
-    @Nullable PlatformEntity recipient,
     SlotContext slotContext,
     SlotContext resetContext,
     MarkupInterpreter interpreter
   ) {
-    return new ComponentSequence(recipient, slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
+    return new ComponentSequence(slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
   }
 
   private ComponentSequence(
-    @Nullable PlatformEntity recipient,
     ComputedStyle parentStyle,
     @Nullable MarkupNode nonTerminal,
     boolean isInitial,
@@ -595,7 +592,6 @@ public class ComponentSequence {
     SlotContext resetContext,
     MarkupInterpreter interpreter
   ) {
-    this.recipient = recipient;
     this.parentStyle = parentStyle;
     this.slotContext = slotContext;
     this.resetContext = resetContext;
