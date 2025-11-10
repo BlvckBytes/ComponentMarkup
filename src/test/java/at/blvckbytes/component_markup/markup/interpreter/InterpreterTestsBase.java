@@ -12,9 +12,9 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.platform.AnsiStyleColor;
+import at.blvckbytes.component_markup.platform.ComponentConstructor;
 import at.blvckbytes.component_markup.platform.PackedColor;
 import at.blvckbytes.component_markup.platform.SlotType;
-import at.blvckbytes.component_markup.test_utils.TestPlatformImplementation;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
@@ -39,6 +39,7 @@ import java.util.logging.Level;
 public abstract class InterpreterTestsBase {
 
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+  private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
 
   @SuppressWarnings("SameParameterValue")
   protected void makeRecordedCase(
@@ -103,9 +104,9 @@ public abstract class InterpreterTestsBase {
     }
 
     List<Object> components = MarkupInterpreter.interpret(
-      TestPlatformImplementation.INSTANCE,
+      componentConstructor,
       environment,
-      TestPlatformImplementation.getSlotContext(slot),
+      componentConstructor.getSlotContext(slot),
       actualNode
     );
 
@@ -157,7 +158,7 @@ public abstract class InterpreterTestsBase {
 
     try {
       File renderFile = new File(caseFolder, "render.png");
-      BufferedImage image = ChatRenderer.render(components, TestPlatformImplementation.getSlotContext(slot));
+      BufferedImage image = ChatRenderer.render(components, componentConstructor.getSlotContext(slot));
       ImageIO.write(image, "png", renderFile);
     } catch (Exception e) {
       Assertions.fail("Could not render/write image:", e);
@@ -233,9 +234,9 @@ public abstract class InterpreterTestsBase {
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
     List<Object> resultItems = MarkupInterpreter.interpret(
-      TestPlatformImplementation.INSTANCE,
+      componentConstructor,
       baseEnvironment,
-      TestPlatformImplementation.getSlotContext(slot),
+      componentConstructor.getSlotContext(slot),
       actualNode
     );
 

@@ -33,7 +33,7 @@ import java.util.logging.Level;
 
 public class MarkupInterpreter implements Interpreter {
 
-  private final PlatformImplementation platformImplementation;
+  private final ComponentConstructor componentConstructor;
   private final TemporaryMemberEnvironment environment;
 
   private final InterceptorStack interceptors;
@@ -41,23 +41,23 @@ public class MarkupInterpreter implements Interpreter {
   private final SlotContext resetContext;
 
   private MarkupInterpreter(
-    PlatformImplementation platformImplementation,
+    ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment
   ) {
-    this.platformImplementation = platformImplementation;
+    this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
 
     this.interceptors = new InterceptorStack(this);
     this.builderStack = new Stack<>();
-    this.resetContext = platformImplementation.getComponentConstructor().getSlotContext(SlotType.CHAT);
+    this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
   }
 
   public static List<Object> interpret(
-    PlatformImplementation platformImplementation,
+    ComponentConstructor componentConstructor,
     InterpretationEnvironment baseEnvironment,
     SlotContext slotContext, MarkupNode node
   ) {
-    return new MarkupInterpreter(platformImplementation, baseEnvironment)
+    return new MarkupInterpreter(componentConstructor, baseEnvironment)
       .interpretSubtree(node, slotContext);
   }
 
@@ -214,7 +214,7 @@ public class MarkupInterpreter implements Interpreter {
 
   @Override
   public ComponentConstructor getComponentConstructor() {
-    return platformImplementation.getComponentConstructor();
+    return componentConstructor;
   }
 
   @Override
