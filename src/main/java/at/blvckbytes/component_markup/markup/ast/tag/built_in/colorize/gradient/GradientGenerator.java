@@ -5,8 +5,8 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.gradient;
 
-import at.blvckbytes.component_markup.platform.AnsiStyleColor;
-import at.blvckbytes.component_markup.platform.PackedColor;
+import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 
 import java.util.Arrays;
 

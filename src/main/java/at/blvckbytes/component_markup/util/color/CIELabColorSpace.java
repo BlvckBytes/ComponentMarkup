@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.platform;
+package at.blvckbytes.component_markup.util.color;
 
 /*
   Credits to: https://stackoverflow.com/a/77687937

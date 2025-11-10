@@ -9,6 +9,8 @@ import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.interpreter.ComputedStyle;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.TriStateBitFlags;
+import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 
 import java.util.function.Supplier;
 

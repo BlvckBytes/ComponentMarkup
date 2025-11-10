@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-package at.blvckbytes.component_markup.platform;
+package at.blvckbytes.component_markup.util.color;
 
 import at.blvckbytes.component_markup.util.AsciiCasing;
 import org.jetbrains.annotations.Nullable;

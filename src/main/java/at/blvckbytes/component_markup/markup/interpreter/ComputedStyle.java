@@ -12,6 +12,8 @@ import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.platform.*;
 import at.blvckbytes.component_markup.util.*;
+import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

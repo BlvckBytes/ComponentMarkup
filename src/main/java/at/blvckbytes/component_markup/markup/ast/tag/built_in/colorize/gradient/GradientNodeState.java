@@ -9,9 +9,9 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeFlag;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.colorize.ColorizeNodeState;
-import at.blvckbytes.component_markup.platform.AnsiStyleColor;
+import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
-import at.blvckbytes.component_markup.platform.PackedColor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.util.InputView;
 
 import java.util.EnumSet;

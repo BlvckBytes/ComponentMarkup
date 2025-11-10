@@ -7,6 +7,8 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.platform.*;
 import at.blvckbytes.component_markup.util.TriState;
+import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
