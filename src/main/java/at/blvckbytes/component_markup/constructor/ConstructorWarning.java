@@ -19,9 +19,6 @@ public enum ConstructorWarning {
   MALFORMED_FONT_NAME(args -> "The font-name \"" + args.get(0) + "\" is malformed"),
   MALFORMED_URL(args -> "The url \"" + args.get(0) + "\" is malformed"),
   MALFORMED_PAGE_VALUE(args -> "The string \"" + args.get(0) + "\" does not represent a valid page-value"),
-  MISSING_SCORE_TYPE(args -> "The score \"" + args.get(0) + "\" requires an explicit type"),
-  MALFORMED_SCORE_TYPE(args -> "The string \"" + args.get(0) + "\" does not represent a valid score-type"),
-  UNKNOWN_OBJECTIVE(args -> "The objective \"" + args.get(0) + "\" is not known to the server"),
   ;
 
   private static final ThreadLocal<EnumSet<ConstructorWarning>> localSets = ThreadLocal.withInitial(() -> EnumSet.noneOf(ConstructorWarning.class));
