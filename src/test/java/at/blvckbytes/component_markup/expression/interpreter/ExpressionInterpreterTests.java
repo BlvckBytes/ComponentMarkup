@@ -7,7 +7,6 @@ package at.blvckbytes.component_markup.expression.interpreter;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
-import at.blvckbytes.component_markup.test_utils.Environment;
 import at.blvckbytes.component_markup.test_utils.Jsonifier;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +23,7 @@ public class ExpressionInterpreterTests {
   public void shouldTransformUpperCase() {
     makeCase(
       "'before ' & upper(my_string) & ' after'",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("my_string", "helLo, woRld"),
       "before HELLO, WORLD after"
     );
@@ -34,7 +33,7 @@ public class ExpressionInterpreterTests {
   public void shouldTransformLowerCase() {
     makeCase(
       "'before ' & lower(my_string) & ' after'",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("my_string", "helLo, woRld"),
       "before hello, world after"
     );
@@ -44,7 +43,7 @@ public class ExpressionInterpreterTests {
   public void shouldTransformTrim() {
     makeCase(
       "'before ' & trim(my_string) & ' test'",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("my_string", "  Hello, World  "),
       "before Hello, World test"
     );
@@ -54,7 +53,7 @@ public class ExpressionInterpreterTests {
   public void shouldTransformReverse() {
     makeCase(
       "'before ' & reverse(my_string) & ' test'",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("my_string", "Hello, World"),
       "before dlroW ,olleH test"
     );
@@ -66,13 +65,13 @@ public class ExpressionInterpreterTests {
 
     makeCase(
       "'hello' split null",
-      new Environment(),
+      new InterpretationEnvironment(),
       result
     );
 
     makeCase(
       "'hello' split ''",
-      new Environment(),
+      new InterpretationEnvironment(),
       result
     );
   }
@@ -81,14 +80,14 @@ public class ExpressionInterpreterTests {
   public void shouldSplitStringWithDelimiter() {
     makeCase(
       "'first second third' split ' '",
-      new Environment(),
+      new InterpretationEnvironment(),
       Arrays.asList("first", "second", "third")
     );
   }
 
   @Test
   public void shouldSplitStringWithRegex() {
-    InterpretationEnvironment environment = new Environment()
+    InterpretationEnvironment environment = new InterpretationEnvironment()
       .withVariable("input", "first0second1third2fourth");
 
     makeCase(
@@ -106,7 +105,7 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldSubstringInAllPermutations() {
-    InterpretationEnvironment environment = new Environment()
+    InterpretationEnvironment environment = new InterpretationEnvironment()
       .withVariable("input", "ABCDEFGHIJ");
 
     // Full string
@@ -183,7 +182,7 @@ public class ExpressionInterpreterTests {
 
   @Test
   public void shouldRepeatAString() {
-    makeCase("'hello' ** 5", new Environment(), "hellohellohellohellohello");
+    makeCase("'hello' ** 5", new InterpretationEnvironment(), "hellohellohellohellohello");
   }
 
   @Test
@@ -233,14 +232,14 @@ public class ExpressionInterpreterTests {
 
     makeCase(
       expression,
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", true),
       "first"
     );
 
     makeCase(
       expression,
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", false),
       "second"
     );
@@ -252,14 +251,14 @@ public class ExpressionInterpreterTests {
 
     makeCase(
       expression,
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", true),
       "first"
     );
 
     makeCase(
       expression,
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", false),
       null
     );
@@ -269,7 +268,7 @@ public class ExpressionInterpreterTests {
   public void shouldHandleSimpleInterpolations() {
     makeCase(
       "`hello {a} world \\` {b} :)!`",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", 5)
         .withVariable("b", 6),
       "hello 5 world ` 6 :)!"
@@ -280,7 +279,7 @@ public class ExpressionInterpreterTests {
   public void shouldHandleComplexInterpolation() {
     makeCase(
       "`hello {`pre {c} {d} post`} world \\` {b} :)!`",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", 5)
         .withVariable("b", 6)
         .withVariable("c", 7)
@@ -293,33 +292,33 @@ public class ExpressionInterpreterTests {
   public void shouldGenerateRanges() {
     makeCase(
       "1..1",
-      new Environment(),
+      new InterpretationEnvironment(),
       Collections.singletonList(1)
     );
 
     makeCase(
       "1..5",
-      new Environment(),
+      new InterpretationEnvironment(),
       Arrays.asList(1, 2, 3, 4, 5)
     );
 
     makeCase(
       "4..a",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", 10),
       Arrays.asList(4, 5, 6, 7, 8, 9, 10)
     );
 
     makeCase(
       "a..10",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", 4),
       Arrays.asList(4, 5, 6, 7, 8, 9, 10)
     );
 
     makeCase(
       "a..b",
-      new Environment()
+      new InterpretationEnvironment()
         .withVariable("a", 4)
         .withVariable("b", 10),
       Arrays.asList(4, 5, 6, 7, 8, 9, 10)
@@ -399,12 +398,12 @@ public class ExpressionInterpreterTests {
   }
 
   private void makeCase(String expression, Object expectedResult) {
-    makeCase(expression, new Environment(), expectedResult);
+    makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
 
   private void makeCase(String expression, @Nullable InterpretationEnvironment environment, Object expectedResult) {
     if (environment == null)
-      environment = new Environment();
+      environment = new InterpretationEnvironment();
 
     ExpressionNode node = ExpressionParser.parse(InputView.of(expression), null);
     Assertions.assertEquals(Jsonifier.jsonify(expectedResult), Jsonifier.jsonify(ExpressionInterpreter.interpret(node, environment)));

@@ -5,11 +5,11 @@
 
 package at.blvckbytes.component_markup.markup.interpreter.tag;
 
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.interpreter.InterpreterTestsBase;
 import at.blvckbytes.component_markup.markup.interpreter.JsonObjectBuilder;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.constructor.SlotType;
-import at.blvckbytes.component_markup.test_utils.Environment;
 import org.junit.jupiter.api.Test;
 
 public class DateTagTests extends InterpreterTestsBase {
@@ -22,7 +22,7 @@ public class DateTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new Environment(),
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "2025-08-08 16:22:22")
@@ -37,7 +37,7 @@ public class DateTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new Environment(),
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "07.08.2025 04:22:22")
@@ -52,7 +52,7 @@ public class DateTagTests extends InterpreterTestsBase {
 
     makeCase(
       text,
-      new Environment(),
+      new InterpretationEnvironment(),
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "2025-08-06 06:23:14")
