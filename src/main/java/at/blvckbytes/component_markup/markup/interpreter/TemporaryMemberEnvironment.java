@@ -22,7 +22,7 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   private final Stack<Map<String, Object>> scopeStack;
 
   public TemporaryMemberEnvironment(InterpretationEnvironment baseEnvironment) {
-    super(new HashMap<>(), baseEnvironment.getValueInterpreter(), baseEnvironment.interpretationPlatform);
+    super(new HashMap<>(), baseEnvironment.getValueInterpreter(), baseEnvironment.interpretationPlatform, baseEnvironment.context);
 
     this.baseEnvironment = baseEnvironment;
     this.scopeStack = new Stack<>();

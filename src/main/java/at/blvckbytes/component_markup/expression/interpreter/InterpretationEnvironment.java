@@ -19,15 +19,26 @@ public class InterpretationEnvironment {
   protected ValueInterpreter valueInterpreter;
 
   public final InterpretationPlatform interpretationPlatform;
+  public final Object context;
 
   public InterpretationEnvironment() {
-    this(new HashMap<>(), DEFAULT_INTERPRETER, JavaInterpretationPlatform.INSTANCE);
+    this(null);
   }
 
-  public InterpretationEnvironment(Map<String, Object> variables, ValueInterpreter valueInterpreter, InterpretationPlatform interpretationPlatform) {
+  public InterpretationEnvironment(Object context) {
+    this(new HashMap<>(), DEFAULT_INTERPRETER, JavaInterpretationPlatform.INSTANCE, context);
+  }
+
+  public InterpretationEnvironment(
+    Map<String, Object> variables,
+    ValueInterpreter valueInterpreter,
+    InterpretationPlatform interpretationPlatform,
+    Object context
+  ) {
     this.variables = variables;
     this.valueInterpreter = valueInterpreter;
     this.interpretationPlatform = interpretationPlatform;
+    this.context = context;
   }
 
   public Set<String> getNames() {
@@ -62,6 +73,6 @@ public class InterpretationEnvironment {
   }
 
   public InterpretationEnvironment copy() {
-    return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter, interpretationPlatform);
+    return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter, interpretationPlatform, context);
   }
 }
