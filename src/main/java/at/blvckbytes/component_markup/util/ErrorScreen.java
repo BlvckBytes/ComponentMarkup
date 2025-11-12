@@ -11,30 +11,26 @@ import java.util.List;
 public class ErrorScreen {
 
   public static List<String> make(InputView view, String message) {
-    return make(view.contents, view.startInclusive, message, 1);
+    return make(view, view.startInclusive, message);
   }
 
-  public static List<String> make(String contents, int position, String message) {
-    return make(contents, position, message, 1);
-  }
-
-  public static List<String> make(String contents, int position, String message, int initialLineCounter) {
+  public static List<String> make(InputView view, int position, String message) {
     List<String> result = new ArrayList<>();
 
-    int inputLength = contents.length();
-    int lineCounter = initialLineCounter;
+    int inputLength = view.contents.length();
+    int lineCounter = view.lineNumber;
 
     for (int index = 0; index < inputLength; ++index) {
-      if (contents.charAt(index) == '\n')
+      if (view.contents.charAt(index) == '\n')
         ++lineCounter;
     }
 
     int maxLineNumberDigits = (lineCounter + 9) / 10;
-    int nextLineNumber = initialLineCounter;
+    int nextLineNumber = view.lineNumber;
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
-      char currentChar = contents.charAt(index);
+      char currentChar = view.contents.charAt(index);
 
       if (currentChar == '\r')
         continue;
@@ -46,7 +42,7 @@ public class ErrorScreen {
           ++index;
 
         String lineNumber = padLeft(nextLineNumber++, maxLineNumberDigits) + ": ";
-        String lineContents = contents.substring(lineBegin, index);
+        String lineContents = view.contents.substring(lineBegin, index);
 
         result.add(lineNumber + lineContents);
 

@@ -828,14 +828,16 @@ public class ExpressionParserTests {
   private void makeCase(TextWithSubViews input, @Nullable ExpressionNode expectedNode) {
     ExpressionNode actualNode;
 
+    InputView inputView = InputView.of(input.text);
+
     try {
-      actualNode = ExpressionParser.parse(InputView.of(input.text), null);
+      actualNode = ExpressionParser.parse(inputView, null);
     } catch (ExpressionTokenizeException e) {
-      for (String line : ErrorScreen.make(input.text, e.position, e.getErrorMessage()))
+      for (String line : ErrorScreen.make(inputView, e.position, e.getErrorMessage()))
         System.out.println(line);
       throw e;
     } catch (ExpressionParseException e) {
-      for (String line : ErrorScreen.make(input.text, e.position, e.getErrorMessage()))
+      for (String line : ErrorScreen.make(inputView, e.position, e.getErrorMessage()))
         System.out.println(line);
       throw e;
     }

@@ -113,7 +113,7 @@ public class DurationTag extends TagDefinition {
 
         LoggerProvider.log(Level.WARNING, "Falling back to \"s\"; the following parse-error occurred:", false);
 
-        for (String line : ErrorScreen.make(unitsString, charIndex, "Encountered unknown unit: " + c))
+        for (String line : ErrorScreen.make(InputView.of(unitsString), charIndex, "Encountered unknown unit: " + c))
           LoggerProvider.log(Level.WARNING, line, false);
 
         return Collections.singletonList(DurationUnit.SECONDS);

@@ -99,13 +99,9 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
   }
 
   public List<String> makeErrorScreen() {
-    return makeErrorScreen(1);
-  }
-
-  public List<String> makeErrorScreen(int initialLineCounter) {
     if (rootView == null)
       throw new IllegalStateException("Have not been provided with a reference to the root-view");
 
-    return ErrorScreen.make(rootView.contents, getCharIndex(), getErrorMessage(), initialLineCounter);
+    return ErrorScreen.make(rootView, getCharIndex(), getErrorMessage());
   }
 }

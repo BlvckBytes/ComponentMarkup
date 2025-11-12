@@ -15,7 +15,9 @@ import java.util.EnumSet;
 
 public class InputView implements InterpolationMember {
 
-  public static final InputView EMPTY = new InputView("", new BitFlagArray(1), false, 0, 0);
+  public static final InputView EMPTY = new InputView("", 1, new BitFlagArray(1), false, 0, 0);
+
+  public final int lineNumber;
 
   @JsonifyIgnore
   public final String contents;
@@ -36,12 +38,14 @@ public class InputView implements InterpolationMember {
 
   private InputView(
     String contents,
+    int lineNumber,
     BitFlagArray removeIndices,
     boolean lowercase,
     int startInclusive,
     int endExclusive
   ) {
     this.contents = contents;
+    this.lineNumber = lineNumber;
     this.removeIndices = removeIndices;
     this.lowercase = lowercase;
 
@@ -81,7 +85,11 @@ public class InputView implements InterpolationMember {
   }
 
   public static InputView of(String contents) {
-    return new InputView(contents, new BitFlagArray(contents.length()), false, 0, contents.length());
+    return of(contents, 1);
+  }
+
+  public static InputView of(String contents, int lineNumber) {
+    return new InputView(contents, lineNumber, new BitFlagArray(contents.length()), false, 0, contents.length());
   }
 
   public static InputView of(String... lines) {
@@ -121,7 +129,7 @@ public class InputView implements InterpolationMember {
     if (endExclusive < startInclusive)
       throw new IllegalStateException("End " + endExclusive + " lies before start " + startInclusive);
 
-    return new InputView(contents, removeIndices, lowercase, startInclusive, endExclusive);
+    return new InputView(contents, lineNumber, removeIndices, lowercase, startInclusive, endExclusive);
   }
 
   public InputView addIndexToBeRemoved(int index) {
