@@ -11,14 +11,18 @@ import java.util.List;
 public class ErrorScreen {
 
   public static List<String> make(InputView view, String message) {
-    return make(view.contents, view.startInclusive, message);
+    return make(view.contents, view.startInclusive, message, 1);
   }
 
   public static List<String> make(String contents, int position, String message) {
+    return make(contents, position, message, 1);
+  }
+
+  public static List<String> make(String contents, int position, String message, int initialLineCounter) {
     List<String> result = new ArrayList<>();
 
     int inputLength = contents.length();
-    int lineCounter = 1;
+    int lineCounter = initialLineCounter;
 
     for (int index = 0; index < inputLength; ++index) {
       if (contents.charAt(index) == '\n')
@@ -26,7 +30,7 @@ public class ErrorScreen {
     }
 
     int maxLineNumberDigits = (lineCounter + 9) / 10;
-    int nextLineNumber = 1;
+    int nextLineNumber = initialLineCounter;
     int lineBegin = 0;
 
     for (int index = 0; index < inputLength; ++index) {
