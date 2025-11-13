@@ -35,9 +35,9 @@ public class GradientTag extends ColorizeTag {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ExpressionList colors = attributes.getMandatoryExpressionList("color");
-    ExpressionList offsets = attributes.getOptionalExpressionList("offset");
-    ExpressionList zIndices = attributes.getOptionalExpressionList("z-index");
+    ExpressionList colors = attributes.getMandatoryExpressionList("color", "c");
+    ExpressionList offsets = attributes.getOptionalExpressionList("offset", "o");
+    ExpressionList zIndices = attributes.getOptionalExpressionList("z-index", "z");
     ColorizeAttributes baseAttributes = getBaseAttributes(attributes);
 
     return new ColorizeCharsNode(

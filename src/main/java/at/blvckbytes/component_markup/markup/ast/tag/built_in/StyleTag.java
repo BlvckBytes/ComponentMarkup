@@ -59,7 +59,7 @@ public class StyleTag extends TagDefinition {
     if ((expression = attributes.getOptionalExpressionNode("font")) != null)
       style.font = expression;
 
-    if ((expression = attributes.getOptionalExpressionNode("color")) != null)
+    if ((expression = attributes.getOptionalExpressionNode("color", "c")) != null)
       style.color = expression;
 
     if ((expression = attributes.getOptionalExpressionNode("shadow")) != null)
