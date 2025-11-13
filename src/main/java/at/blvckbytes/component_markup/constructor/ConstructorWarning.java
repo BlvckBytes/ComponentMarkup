@@ -4,14 +4,12 @@
  */
 package at.blvckbytes.component_markup.constructor;
 
-import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.MessagePlaceholders;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
 import java.util.EnumSet;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 public enum ConstructorWarning {
   MALFORMED_MATERIAL(args -> "The string \"" + args.get(0) + " does not represent a valid material-value"),
@@ -39,12 +37,9 @@ public enum ConstructorWarning {
       handler.run();
   }
 
-  public static void logIfEmitted(ConstructorWarning warning, InputView position, String... messagePlaceholders) {
-    if (!localSets.get().contains(warning))
-      return;
-
-    for (String line : ErrorScreen.make(position, warning.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders))))
-      LoggerProvider.log(Level.WARNING, line, false);
+  public static void logIfEmitted(ConstructorWarning warning, InputView position, InterpreterLogger logger, String... messagePlaceholders) {
+    if (localSets.get().contains(warning))
+      logger.logErrorScreen(position, warning.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders)));
   }
 
   public static void clear() {

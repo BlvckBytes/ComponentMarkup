@@ -7,7 +7,7 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -34,7 +34,7 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
 
   public void endScope() {
     if (scopeStack.empty()) {
-      LoggerProvider.log(Level.WARNING, "Tried to end a scope on an empty scope-stack");
+      GlobalLogger.log(Level.WARNING, "Tried to end a scope on an empty scope-stack");
       return;
     }
 
@@ -43,7 +43,7 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
 
   public void setScopeVariable(String name, Object value) {
     if (scopeStack.empty()) {
-      LoggerProvider.log(Level.WARNING, "Tried to set a scope-variable outside of having begun a scope");
+      GlobalLogger.log(Level.WARNING, "Tried to set a scope-variable outside of having begun a scope");
       return;
     }
 

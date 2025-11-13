@@ -14,8 +14,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.constructor.*;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,9 +65,7 @@ public class ComponentSequence<B, C> {
 
       else {
         result = componentConstructor.createTextComponent(key);
-
-         for (String line : ErrorScreen.make(node.positionProvider, "Key-components are not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(node.positionProvider, "Key-components are not supported on this platform");
       }
     }
 
@@ -79,14 +76,8 @@ public class ComponentSequence<B, C> {
 
       List<C> with = new ArrayList<>();
 
-      for (MarkupNode withNode : translateNode.with.get(interpreter)) {
-        List<C> withOutput = interpreter.interpretSubtree(
-          withNode,
-          componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-        );
-
-        with.add(withOutput.get(0));
-      }
+      for (MarkupNode withNode : translateNode.with.get(interpreter))
+        with.add(interpreter.interpretSubtree(withNode, SlotType.SINGLE_LINE_CHAT).get(0));
 
       String fallback = null;
 
@@ -98,14 +89,12 @@ public class ComponentSequence<B, C> {
 
       else {
         result = componentConstructor.createTextComponent(key);
-
-        for (String line : ErrorScreen.make(node.positionProvider, "Translate-components are not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(node.positionProvider, "Translate-components are not supported on this platform");
       }
     }
 
     else
-      LoggerProvider.log(Level.WARNING, "Unknown unit-node: " + node.getClass());
+      GlobalLogger.log(Level.WARNING, "Encountered unknown unit-node: " + node.getClass());
 
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
@@ -303,7 +292,7 @@ public class ComponentSequence<B, C> {
       for (MemberAndStyle<B> memberEntry : memberEntries) {
         if (memberEntry.style != null) {
           memberEntry.style.subtractStylesOnEquality(membersEqualStyle, true);
-          memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
+          memberEntry.style.applyStyles(memberEntry.member, componentConstructor, interpreter.getLogger());
         }
 
         members.add(componentConstructor.finalizeComponent(memberEntry.member));
@@ -346,8 +335,7 @@ public class ComponentSequence<B, C> {
       switch (clickNode.action) {
         case COPY_TO_CLIPBOARD:
           if (!componentConstructor.doesSupport(ConstructorFeature.COPY_TO_CLIPBOARD_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action copy-to-clipboard is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action copy-to-clipboard is not supported on this platform");
             return;
           }
 
@@ -356,8 +344,7 @@ public class ComponentSequence<B, C> {
 
         case SUGGEST_COMMAND:
           if (!componentConstructor.doesSupport(ConstructorFeature.SUGGEST_COMMAND_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action suggest-command is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action suggest-command is not supported on this platform");
             return;
           }
 
@@ -366,8 +353,7 @@ public class ComponentSequence<B, C> {
 
         case RUN_COMMAND:
           if (!componentConstructor.doesSupport(ConstructorFeature.RUN_COMMAND_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action run-command is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action run-command is not supported on this platform");
             return;
           }
 
@@ -376,19 +362,18 @@ public class ComponentSequence<B, C> {
 
         case CHANGE_PAGE:
           if (!componentConstructor.doesSupport(ConstructorFeature.CHANGE_PAGE_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action change-page is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action change-page is not supported on this platform");
             return;
           }
 
           componentConstructor.setClickChangePageAction(result, value);
-          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), value);
+          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
           return;
 
         case OPEN_FILE:
           if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_FILE_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action open-file is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action open-file is not supported on this platform");
+            return;
           }
 
           componentConstructor.setClickOpenFileAction(result, value);
@@ -396,18 +381,17 @@ public class ComponentSequence<B, C> {
 
         case OPEN_URL: {
           if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_URL_ACTION)) {
-            for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The click-action open-url is not supported on this platform"))
-              LoggerProvider.log(Level.WARNING, line, false);
+            interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action open-url is not supported on this platform");
             return;
           }
 
           componentConstructor.setClickOpenUrlAction(result, value);
-          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), value);
+          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
           return;
         }
 
         default:
-          LoggerProvider.log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
+          GlobalLogger.log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
       return;
@@ -415,8 +399,7 @@ public class ComponentSequence<B, C> {
 
     if (nonTerminal instanceof InsertNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.INSERT_ACTION)) {
-        for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The insert-action is not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The insert-action is not supported on this platform");
         return;
       }
 
@@ -428,8 +411,7 @@ public class ComponentSequence<B, C> {
 
     if (nonTerminal instanceof EntityHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ENTITY_ACTION)) {
-        for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-entity-action is not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-entity-action is not supported on this platform");
         return;
       }
 
@@ -437,42 +419,25 @@ public class ComponentSequence<B, C> {
       String type = interpreter.evaluateAsString(entityHoverNode.type);
       String id = interpreter.evaluateAsString(entityHoverNode.id);
 
-      List<C> nameOutput;
-
-      if (entityHoverNode.name != null) {
-        nameOutput = interpreter.interpretSubtree(
-          entityHoverNode.name,
-          componentConstructor.getSlotContext(SlotType.ENTITY_NAME)
-        );
-      }
-      else
-        nameOutput = null;
+      C nameComponent = entityHoverNode.name == null ? null : interpreter.interpretSubtree(entityHoverNode.name, SlotType.ENTITY_NAME).get(0);
 
       UUID uuid;
 
       try {
         uuid = UUID.fromString(id);
       } catch (Throwable e) {
-        for (String line : ErrorScreen.make(entityHoverNode.id.getFirstMemberPositionProvider(), "Encountered malformed UUID: \"" + id + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        interpreter.getLogger().logErrorScreen(entityHoverNode.id.getFirstMemberPositionProvider(), "Encountered malformed UUID: \"" + id + "\"");
         return;
       }
 
-      C nameComponent = null;
-
-      if (nameOutput != null && !nameOutput.isEmpty())
-        nameComponent = nameOutput.get(0);
-
       componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
-      ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), type);
+      ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), interpreter.getLogger(), type);
       return;
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ITEM_ACTION)) {
-        for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-item-action is not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-item-action is not supported on this platform");
         return;
       }
 
@@ -485,44 +450,10 @@ public class ComponentSequence<B, C> {
       else
         material = null;
 
-      Integer count;
-
-      if (itemHoverNode.amount != null)
-        count = (int) interpreter.evaluateAsLong(itemHoverNode.amount);
-      else
-        count = null;
-
-      List<C> nameOutput;
-
-      if (itemHoverNode.name != null) {
-        nameOutput = interpreter.interpretSubtree(
-          itemHoverNode.name,
-          componentConstructor.getSlotContext(SlotType.ITEM_NAME)
-        );
-      } else
-        nameOutput = null;
-
-      List<C> loreComponents;
-
-      if (itemHoverNode.lore != null) {
-        loreComponents = interpreter.interpretSubtree(
-          itemHoverNode.lore,
-          componentConstructor.getSlotContext(SlotType.ITEM_LORE)
-        );
-      } else
-        loreComponents = null;
-
-      boolean hideProperties;
-
-      if (itemHoverNode.hideProperties != null)
-        hideProperties = interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
-      else
-        hideProperties = false;
-
-      C nameComponent = null;
-
-      if (nameOutput != null && !nameOutput.isEmpty())
-        nameComponent = nameOutput.get(0);
+      Integer count = itemHoverNode.amount == null ? null : (int) interpreter.evaluateAsLong(itemHoverNode.amount);
+      List<C> loreComponents = itemHoverNode.lore == null ? null : interpreter.interpretSubtree(itemHoverNode.lore, SlotType.ITEM_LORE);
+      boolean hideProperties = itemHoverNode.hideProperties != null && interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
+      C nameComponent = itemHoverNode.name == null ? null : interpreter.interpretSubtree(itemHoverNode.name, SlotType.ITEM_NAME).get(0);
 
       if (material == null)
         material = DEFAULT_MATERIAL;
@@ -530,11 +461,11 @@ public class ComponentSequence<B, C> {
       componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
 
       if (itemHoverNode.material != null)
-        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), material);
+        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), interpreter.getLogger(), material);
       else {
         ConstructorWarning.callIfEmitted(
           ConstructorWarning.MALFORMED_MATERIAL,
-          () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
+          () -> GlobalLogger.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
         );
       }
 
@@ -543,22 +474,13 @@ public class ComponentSequence<B, C> {
 
     if (nonTerminal instanceof TextHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_TEXT_ACTION)) {
-        for (String line : ErrorScreen.make(nonTerminal.positionProvider, "The hover-text-action is not supported on this platform"))
-          LoggerProvider.log(Level.WARNING, line, false);
+        interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-text-action is not supported on this platform");
         return;
       }
 
       TextHoverNode textHoverNode = (TextHoverNode) nonTerminal;
 
-      List<C> textOutput = interpreter.interpretSubtree(
-        textHoverNode.value,
-        componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
-      );
-
-      if (textOutput.isEmpty())
-        return;
-
-      C textComponent = textOutput.get(0);
+      C textComponent = interpreter.interpretSubtree(textHoverNode.value, SlotType.SINGLE_LINE_CHAT).get(0);
 
       componentConstructor.setHoverTextAction(result, textComponent);
     }

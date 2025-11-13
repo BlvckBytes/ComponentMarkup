@@ -1,14 +1,9 @@
-/*
- * Copyright (c) 2025, BlvckBytes
- * SPDX-License-Identifier: MIT
- */
-
-package at.blvckbytes.component_markup.util;
+package at.blvckbytes.component_markup.util.logging;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LoggerProvider {
+public class GlobalLogger {
 
   private static Logger logger = Logger.getAnonymousLogger();
 
@@ -31,6 +26,6 @@ public class LoggerProvider {
   }
 
   public static void set(Logger logger) {
-    LoggerProvider.logger = logger;
+    GlobalLogger.logger = logger;
   }
 }

@@ -12,14 +12,11 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.TemporaryMemberEnvironment;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.logging.Level;
 
 public class DurationTag extends TagDefinition {
 
@@ -108,14 +105,7 @@ public class DurationTag extends TagDefinition {
       DurationUnit unit = DurationUnit.fromChar(c);
 
       if (unit == null) {
-        for (String line : ErrorScreen.make(units.getFirstMemberPositionProvider(), "Could not parse this units-string"))
-          LoggerProvider.log(Level.WARNING, line, false);
-
-        LoggerProvider.log(Level.WARNING, "Falling back to \"s\"; the following parse-error occurred:", false);
-
-        for (String line : ErrorScreen.make(InputView.of(unitsString), charIndex, "Encountered unknown unit: " + c))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        interpreter.getLogger().logErrorScreen(units.getFirstMemberPositionProvider(), "Could not parse this units-string (unknown unit \"" + c + "\"); falling back to \"s\"");
         return Collections.singletonList(DurationUnit.SECONDS);
       }
 

@@ -10,8 +10,8 @@ import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -322,7 +322,7 @@ public class TagAndBuffers implements ParserChildItem {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;
 
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagName.buildString() + "> via " + tag.getClass() + "#createNode", thrownError);
+      GlobalLogger.log(Level.SEVERE, "An error occurred while trying to instantiate <" + tagName.buildString() + "> via " + tag.getClass() + "#createNode", thrownError);
 
       result = new TextNode(tagName, "<error>");
     }

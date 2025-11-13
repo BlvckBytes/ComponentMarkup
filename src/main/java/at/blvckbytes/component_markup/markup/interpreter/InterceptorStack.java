@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -36,7 +36,7 @@ public class InterceptorStack<B> {
       return interceptor.interceptInterpretation(node, interpreter);
     } catch (Throwable thrownError) {
       String className = interceptor.getClass().getName();
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
+      GlobalLogger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#interceptInterpretation", thrownError);
       return InterceptionResult.DO_PROCESS;
     }
   }
@@ -92,7 +92,7 @@ public class InterceptorStack<B> {
           entry.interceptor.afterInterpretation(node, interpreter);
         } catch (Throwable thrownError) {
           String className = entry.interceptor.getClass().getName();
-          LoggerProvider.log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
+          GlobalLogger.log(Level.SEVERE, "An error occurred while trying to call " + className + "#afterInterpretation", thrownError);
         }
       }
 

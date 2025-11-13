@@ -14,9 +14,9 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import at.blvckbytes.component_markup.util.DeepIterator;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.TriState;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
@@ -29,23 +29,23 @@ public class ExpressionInterpreter {
 
   private ExpressionInterpreter() {}
 
-  public static @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment) {
+  public static @Nullable Object interpret(@Nullable ExpressionNode expression, InterpretationEnvironment environment, InterpreterLogger logger) {
     if (expression == null)
       return null;
 
     if (expression instanceof TerminalNode)
-      return ((TerminalNode) expression).getValue(environment);
+      return ((TerminalNode) expression).getValue(environment, logger);
 
     ValueInterpreter valueInterpreter = environment.getValueInterpreter();
 
     if (expression instanceof TransformerNode) {
       TransformerNode node = (TransformerNode) expression;
-      return node.transformer.transform(interpret(node.wrapped, environment), environment);
+      return node.transformer.transform(interpret(node.wrapped, environment, logger), environment);
     }
 
     if (expression instanceof PrefixOperationNode) {
       PrefixOperationNode node = (PrefixOperationNode) expression;
-      Object operandValue = interpret(node.operand, environment);
+      Object operandValue = interpret(node.operand, environment, logger);
 
       if (operandValue == null)
         return null;
@@ -149,14 +149,14 @@ public class ExpressionInterpreter {
         }
 
         default:
-          LoggerProvider.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
+          GlobalLogger.log(Level.WARNING, "Unimplemented prefix-operator: " + prefixOperator);
           return null;
       }
     }
 
     if (expression instanceof InfixOperationNode) {
       InfixOperationNode node = (InfixOperationNode) expression;
-      Object lhsValue = interpret(node.lhs, environment);
+      Object lhsValue = interpret(node.lhs, environment, logger);
 
       InfixOperator infixOperator = node.operatorToken.operator;
       ArithmeticOperator arithmeticOperator = ArithmeticOperator.fromInfix(infixOperator);
@@ -175,12 +175,12 @@ public class ExpressionInterpreter {
         }
 
         if (rhsValue == null)
-          rhsValue = interpret(node.rhs, environment);
+          rhsValue = interpret(node.rhs, environment, logger);
 
-        return performSubscripting(node.operatorToken, lhsValue, rhsValue, isRhsIdentifier, environment);
+        return performSubscripting(node.operatorToken, lhsValue, rhsValue, isRhsIdentifier, environment, logger);
       }
 
-      Object rhsValue = interpret(node.rhs, environment);
+      Object rhsValue = interpret(node.rhs, environment, logger);
 
       if (arithmeticOperator != null) {
         Number lhs = valueInterpreter.asLongOrDouble(lhsValue);
@@ -204,9 +204,7 @@ public class ExpressionInterpreter {
           String[] result = environment.interpretationPlatform.split(input, delimiter, infixOperator == InfixOperator.REGEX_SPLIT);
 
           if (result == null) {
-            for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\""))
-              LoggerProvider.log(Level.WARNING, line, false);
-
+            logger.logErrorScreen(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + delimiter + "\"");
             return Collections.emptyList();
           }
 
@@ -273,7 +271,7 @@ public class ExpressionInterpreter {
           return lhsValue != null ? lhsValue : rhsValue;
 
         case SUBSCRIPTING:
-          return performSubscripting(node.operatorToken, lhsValue, rhsValue, false, environment);
+          return performSubscripting(node.operatorToken, lhsValue, rhsValue, false, environment, logger);
 
         case IN:
           return checkContains(rhsValue, lhsValue, valueInterpreter);
@@ -285,9 +283,7 @@ public class ExpressionInterpreter {
           TriState result = environment.interpretationPlatform.matchesPattern(input, patternString);
 
           if (result == TriState.NULL) {
-            for (String line : ErrorScreen.make(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + patternString + "\""))
-              LoggerProvider.log(Level.WARNING, line, false);
-
+            logger.logErrorScreen(node.rhs.getFirstMemberPositionProvider(), "Encountered malformed pattern: \"" + patternString + "\"");
             return false;
           }
 
@@ -295,7 +291,7 @@ public class ExpressionInterpreter {
         }
 
         default:
-          LoggerProvider.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
+          GlobalLogger.log(Level.WARNING, "Unimplemented infix-operator: " + infixOperator);
           return null;
       }
     }
@@ -303,18 +299,18 @@ public class ExpressionInterpreter {
     if (expression instanceof BranchingNode) {
       BranchingNode node = (BranchingNode) expression;
 
-      if (valueInterpreter.asBoolean(interpret(node.condition, environment)))
-        return interpret(node.branchTrue, environment);
+      if (valueInterpreter.asBoolean(interpret(node.condition, environment, logger)))
+        return interpret(node.branchTrue, environment, logger);
 
-      return interpret(node.branchFalse, environment);
+      return interpret(node.branchFalse, environment, logger);
     }
 
     if (expression instanceof SubstringNode) {
       SubstringNode node = (SubstringNode) expression;
 
       return performSubstring(
-        valueInterpreter.asString(interpret(node.operand, environment)),
-        node, environment
+        valueInterpreter.asString(interpret(node.operand, environment, logger)),
+        node, environment, logger
       );
     }
 
@@ -324,7 +320,7 @@ public class ExpressionInterpreter {
       List<Object> result = new ArrayList<>();
 
       for (ExpressionNode item : node.items)
-        result.add(interpret(item, environment));
+        result.add(interpret(item, environment, logger));
 
       return result;
     }
@@ -335,12 +331,12 @@ public class ExpressionInterpreter {
       Map<String, Object> result = new LinkedHashMap<>();
 
       for (Map.Entry<String, ExpressionNode> item : node.items.entrySet())
-        result.put(item.getKey(), interpret(item.getValue(), environment));
+        result.put(item.getKey(), interpret(item.getValue(), environment, logger));
 
       return result;
     }
 
-    LoggerProvider.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
+    GlobalLogger.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
   }
 
@@ -356,16 +352,15 @@ public class ExpressionInterpreter {
     @Nullable Object source,
     @Nullable Object key,
     boolean isKeyIdentifierName,
-    InterpretationEnvironment environment
+    InterpretationEnvironment environment,
+    InterpreterLogger logger
   ) {
     if (source == null)
       return null;
 
     if (source instanceof Map<?, ?>) {
       if (isKeyIdentifierName) {
-        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
         return null;
       }
 
@@ -374,9 +369,7 @@ public class ExpressionInterpreter {
 
     if (source instanceof List<?>) {
       if (isKeyIdentifierName) {
-        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
         return null;
       }
 
@@ -399,9 +392,7 @@ public class ExpressionInterpreter {
 
     if (source.getClass().isArray()) {
       if (isKeyIdentifierName) {
-        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
         return null;
       }
 
@@ -416,9 +407,7 @@ public class ExpressionInterpreter {
 
     if (source instanceof String) {
       if (isKeyIdentifierName) {
-        for (String line : ErrorScreen.make(operatorToken.raw, "Could not locate field \"" + key + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
         return null;
       }
 
@@ -443,7 +432,7 @@ public class ExpressionInterpreter {
         return accessResult;
     }
 
-    LoggerProvider.log(Level.WARNING, "Don't know how to access field " + stringKey + " of " + source.getClass());
+    GlobalLogger.log(Level.WARNING, "Don't know how to access field " + stringKey + " of " + source.getClass());
     return null;
   }
 
@@ -461,6 +450,7 @@ public class ExpressionInterpreter {
   private static @Nullable Long decideSubstringIndex(
     String input,
     InterpretationEnvironment environment,
+    InterpreterLogger logger,
     ExpressionNode node,
     boolean firstIndex
   ) {
@@ -489,17 +479,17 @@ public class ExpressionInterpreter {
       return (long) index;
     }
 
-    return environment.getValueInterpreter().asLong(interpret(node, environment));
+    return environment.getValueInterpreter().asLong(interpret(node, environment, logger));
   }
 
-  private static String performSubstring(String input, SubstringNode node, InterpretationEnvironment environment) {
+  private static String performSubstring(String input, SubstringNode node, InterpretationEnvironment environment, InterpreterLogger logger) {
     int len = input.length();
 
     if (len == 0)
       return "";
 
-    @Nullable Long lowerBound = decideSubstringIndex(input, environment, node.lowerBound, true);
-    @Nullable Long upperBound = decideSubstringIndex(input, environment, node.upperBound, false);
+    @Nullable Long lowerBound = decideSubstringIndex(input, environment, logger, node.lowerBound, true);
+    @Nullable Long upperBound = decideSubstringIndex(input, environment, logger, node.upperBound, false);
 
     long beginIndex = (lowerBound == null) ? 0 : (lowerBound < 0 ? len + lowerBound : lowerBound);
     long endIndex = (upperBound == null) ? len - 1 : (upperBound < 0 ? len + upperBound : upperBound);

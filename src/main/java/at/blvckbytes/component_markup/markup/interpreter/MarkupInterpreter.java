@@ -22,10 +22,11 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.constructor.*;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.OnceRunnable;
 import at.blvckbytes.component_markup.util.TriState;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +37,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   private final ComponentConstructor<B, C> componentConstructor;
   private final TemporaryMemberEnvironment environment;
+  private final InterpreterLogger logger;
 
   private final InterceptorStack<B> interceptors;
   private final Stack<OutputBuilder<B, C>> builderStack;
@@ -43,10 +45,12 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   private MarkupInterpreter(
     ComponentConstructor<B, C> componentConstructor,
-    InterpretationEnvironment baseEnvironment
+    InterpretationEnvironment baseEnvironment,
+    InterpreterLogger logger
   ) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
+    this.logger = logger;
 
     this.interceptors = new InterceptorStack<>(this);
     this.builderStack = new Stack<>();
@@ -54,12 +58,14 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   }
 
   public static <B, C> List<C> interpret(
-    ComponentConstructor<B, C> componentConstructor,
+    MarkupNode node,
+    SlotType slotType,
     InterpretationEnvironment baseEnvironment,
-    SlotContext slotContext, MarkupNode node
+    ComponentConstructor<B, C> componentConstructor,
+    InterpreterLogger logger
   ) {
-    return new MarkupInterpreter<>(componentConstructor, baseEnvironment)
-      .interpretSubtree(node, slotContext);
+    return new MarkupInterpreter<>(componentConstructor, baseEnvironment, logger)
+      .interpretSubtree(node, slotType);
   }
 
   @Override
@@ -79,15 +85,18 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   @Override
   public @Nullable String evaluateAsStringOrNull(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return null;
+
     try {
-      Object result = ExpressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment, logger);
 
       if (result == null)
         return null;
 
       return environment.getValueInterpreter().asString(result);
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a string", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a string", e);
       return null;
     }
   }
@@ -104,15 +113,18 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   @Override
   public @Nullable Long evaluateAsLongOrNull(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return null;
+
     try {
-      Object result = ExpressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment, logger);
 
       if (result == null)
         return null;
 
       return environment.getValueInterpreter().asLong(result);
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a long", e);
       return null;
     }
   }
@@ -129,15 +141,18 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   @Override
   public @Nullable Double evaluateAsDoubleOrNull(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return null;
+
     try {
-      Object result = ExpressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment, logger);
 
       if (result == null)
         return null;
 
       return environment.getValueInterpreter().asDouble(result);
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a double", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a double", e);
       return null;
     }
   }
@@ -154,15 +169,18 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   @Override
   public @Nullable Number evaluateAsLongOrDoubleOrNull(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return null;
+
     try {
-      Object result = ExpressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment, logger);
 
       if (result == null)
         return null;
 
       return environment.getValueInterpreter().asLongOrDouble(result);
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a long or double", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a long or double", e);
       return null;
     }
   }
@@ -179,31 +197,37 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   @Override
   public TriState evaluateAsTriState(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return TriState.NULL;
+
     try {
-      Object result = ExpressionInterpreter.interpret(expression, environment);
+      Object result = ExpressionInterpreter.interpret(expression, environment, logger);
 
       if (result == null)
         return TriState.NULL;
 
       return environment.getValueInterpreter().asBoolean(result) ? TriState.TRUE : TriState.FALSE;
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a boolean", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a boolean", e);
       return null;
     }
   }
 
   @Override
   public @Nullable Object evaluateAsPlainObject(@Nullable ExpressionNode expression) {
+    if (expression == null)
+      return null;
+
     try {
-      return ExpressionInterpreter.interpret(expression, environment);
+      return ExpressionInterpreter.interpret(expression, environment, logger);
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to interpret an expression as a plain object", e);
+      logger.logErrorScreen(expression.getFirstMemberPositionProvider(), "An error occurred while trying to interpret an expression as a plain object", e);
       return null;
     }
   }
 
-  public List<C> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder<>(this, slotContext, resetContext));
+  public List<C> interpretSubtree(MarkupNode node, SlotType slotType) {
+    builderStack.push(new OutputBuilder<>(this, componentConstructor.getSlotContext(slotType), resetContext));
     interpret(node);
     return builderStack.pop().build();
   }
@@ -223,9 +247,14 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     return builderStack.size() - 1;
   }
 
+  @Override
+  public InterpreterLogger getLogger() {
+    return logger;
+  }
+
   private void interpretWhenMatching(WhenMatchingNode node) {
     if (node.matchingMap.isEmpty())
-      LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
+      GlobalLogger.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     Object result = evaluateAsPlainObject(node.input);
 
@@ -246,7 +275,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   private void interpretIfElseIfElse(IfElseIfElseNode node) {
     if (node.conditions.isEmpty())
-      LoggerProvider.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
+      GlobalLogger.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     for (MarkupNode conditional : node.conditions) {
       if (conditional.ifCondition == null) {
@@ -315,7 +344,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         value = captureBinding.capturedValue;
         name = captureBinding.capturedName;
       } else {
-        LoggerProvider.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
+        GlobalLogger.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
         continue;
       }
 

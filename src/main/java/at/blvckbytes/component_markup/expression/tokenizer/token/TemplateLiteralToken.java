@@ -7,8 +7,8 @@ package at.blvckbytes.component_markup.expression.tokenizer.token;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class TemplateLiteralToken extends TerminalToken {
 
   @Override
   public @Nullable Object getPlainValue() {
-    LoggerProvider.log(Level.WARNING, "Tried to get the plain-value of a template-literal token");
+    GlobalLogger.log(Level.WARNING, "Tried to get the plain-value of a template-literal token");
     return null;
   }
 

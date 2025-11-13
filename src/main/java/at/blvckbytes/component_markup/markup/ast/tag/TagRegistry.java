@@ -5,8 +5,8 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag;
 
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -30,7 +30,7 @@ public abstract class TagRegistry {
         if (definition.matchName(name))
           candidates.add(definition);
       } catch (Throwable thrownError) {
-        LoggerProvider.log(Level.SEVERE, "An error occurred while trying to match via " + definition.getClass() + "#matchName", thrownError);
+        GlobalLogger.log(Level.SEVERE, "An error occurred while trying to match via " + definition.getClass() + "#matchName", thrownError);
       }
     }
 

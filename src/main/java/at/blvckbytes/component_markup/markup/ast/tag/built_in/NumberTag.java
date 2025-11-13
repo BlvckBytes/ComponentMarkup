@@ -10,14 +10,11 @@ import at.blvckbytes.component_markup.expression.interpreter.FormatNumberWarning
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.logging.Level;
 
 public class NumberTag extends TagDefinition {
 
@@ -66,20 +63,14 @@ public class NumberTag extends TagDefinition {
         EnumSet<FormatNumberWarning> warnings = EnumSet.noneOf(FormatNumberWarning.class);
         String formattedString = interpreter.getEnvironment().interpretationPlatform.formatNumber(formatString, roundingString, localeString, number, warnings);
 
-        if (warnings.contains(FormatNumberWarning.INVALID_FORMAT)) {
-          for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered: \"" + formatString + "\""))
-            LoggerProvider.log(Level.WARNING, line, false);
-        }
+        if (warnings.contains(FormatNumberWarning.INVALID_FORMAT))
+          interpreter.getLogger().logErrorScreen(format.getFirstMemberPositionProvider(), "Invalid number-format pattern encountered: \"" + formatString + "\"");
 
-        if (warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null) {
-          for (String line : ErrorScreen.make(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered: \"" + roundingString + "\""))
-            LoggerProvider.log(Level.WARNING, line, false);
-        }
+        if (warnings.contains(FormatNumberWarning.INVALID_ROUNDING_MODE) && rounding != null)
+          interpreter.getLogger().logErrorScreen(rounding.getFirstMemberPositionProvider(), "Invalid rounding-mode encountered: \"" + roundingString + "\"");
 
-        if (warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null) {
-          for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered: \"" + localeString + "\""))
-            LoggerProvider.log(Level.WARNING, line, false);
-        }
+        if (warnings.contains(FormatNumberWarning.INVALID_LOCALE) && locale != null)
+          interpreter.getLogger().logErrorScreen(locale.getFirstMemberPositionProvider(), "Invalid locale-value encountered: \"" + localeString + "\"");
 
         return formattedString;
       }

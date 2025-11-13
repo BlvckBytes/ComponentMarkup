@@ -9,8 +9,8 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import at.blvckbytes.component_markup.constructor.SlotContext;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 public class OutputBuilder<B, C> {
 
+  private final MarkupInterpreter<B, C> interpreter;
   private final ComponentConstructor<B, C> componentConstructor;
   private final @Nullable String breakString;
 
@@ -33,6 +34,7 @@ public class OutputBuilder<B, C> {
     SlotContext slotContext,
     SlotContext resetContext
   ) {
+    this.interpreter = interpreter;
     this.componentConstructor = interpreter.getComponentConstructor();
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
@@ -56,7 +58,7 @@ public class OutputBuilder<B, C> {
   @SuppressWarnings("UnusedReturnValue")
   public @Nullable B onNonTerminalEnd(@Nullable Runnable preFinalize) {
     if (sequencesStack.isEmpty()) {
-      LoggerProvider.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
+      GlobalLogger.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
       return null;
     }
 
@@ -82,7 +84,7 @@ public class OutputBuilder<B, C> {
         if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
           // Apply the highest-up style manually now, without any further simplifying calculations
           if (combinationResult.styleToApply != null)
-            combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor);
+            combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor, interpreter.getLogger());
 
           result.add(componentConstructor.finalizeComponent(combinationResult.component));
         }

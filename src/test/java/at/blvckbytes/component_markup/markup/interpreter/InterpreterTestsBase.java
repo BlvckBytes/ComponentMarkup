@@ -11,13 +11,14 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
+import at.blvckbytes.component_markup.test_utils.NullInterpreterLogger;
 import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -73,7 +74,7 @@ public abstract class InterpreterTestsBase {
         break;
       } catch (NoSuchMethodException ignored) {
       } catch (Exception e) {
-        LoggerProvider.log(Level.SEVERE, "Could not access method", e);
+        GlobalLogger.log(Level.SEVERE, "Could not access method", e);
       }
     }
 
@@ -104,10 +105,11 @@ public abstract class InterpreterTestsBase {
     }
 
     List<JsonObject> components = MarkupInterpreter.interpret(
-      componentConstructor,
+      actualNode,
+      slot,
       environment,
-      componentConstructor.getSlotContext(slot),
-      actualNode
+      componentConstructor,
+      NullInterpreterLogger.INSTANCE
     );
 
     JsonArray actualArray = new JsonArray();
@@ -118,7 +120,7 @@ public abstract class InterpreterTestsBase {
     String actualJson = gsonInstance.toJson(actualArray);
 
     if (componentsFile.exists()) {
-      LoggerProvider.log(Level.INFO, "Found data for case " + testCaseName, false);
+      GlobalLogger.log(Level.INFO, "Found data for case " + testCaseName, false);
 
       String expectedJson;
 
@@ -146,7 +148,7 @@ public abstract class InterpreterTestsBase {
       return;
     }
 
-    LoggerProvider.log(Level.INFO, "Writing initial data for case " + testCaseName, false);
+    GlobalLogger.log(Level.INFO, "Writing initial data for case " + testCaseName, false);
 
     try (
       FileWriter writer = new FileWriter(componentsFile)
@@ -234,10 +236,11 @@ public abstract class InterpreterTestsBase {
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
     List<JsonObject> resultItems = MarkupInterpreter.interpret(
-      componentConstructor,
+      actualNode,
+      slot,
       baseEnvironment,
-      componentConstructor.getSlotContext(slot),
-      actualNode
+      componentConstructor,
+      NullInterpreterLogger.INSTANCE
     );
 
     JsonArray actualJson = new JsonArray();

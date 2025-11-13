@@ -10,16 +10,13 @@ import at.blvckbytes.component_markup.expression.interpreter.FormatDateWarning;
 import at.blvckbytes.component_markup.markup.ast.node.FunctionDrivenNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
-import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.logging.Level;
 
 public class DateTag extends TagDefinition {
 
@@ -60,20 +57,14 @@ public class DateTag extends TagDefinition {
         warnings
       );
 
-      if (warnings.contains(FormatDateWarning.INVALID_FORMAT) && evaluatedFormat != null) {
-        for (String line : ErrorScreen.make(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered: \"" + formatString + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-      }
+      if (warnings.contains(FormatDateWarning.INVALID_FORMAT) && evaluatedFormat != null)
+        interpreter.getLogger().logErrorScreen(format.getFirstMemberPositionProvider(), "Invalid format-pattern encountered: \"" + formatString + "\"");
 
-      if (warnings.contains(FormatDateWarning.INVALID_LOCALE) && locale != null) {
-        for (String line : ErrorScreen.make(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered: \"" + localeString + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-      }
+      if (warnings.contains(FormatDateWarning.INVALID_LOCALE) && locale != null)
+        interpreter.getLogger().logErrorScreen(locale.getFirstMemberPositionProvider(), "Malformed locale-value encountered: \"" + localeString + "\"");
 
-      if (warnings.contains(FormatDateWarning.INVALID_TIMEZONE) && zone != null) {
-        for (String line : ErrorScreen.make(zone.getFirstMemberPositionProvider(), "Invalid zone encountered: \"" + zoneString + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-      }
+      if (warnings.contains(FormatDateWarning.INVALID_TIMEZONE) && zone != null)
+        interpreter.getLogger().logErrorScreen(zone.getFirstMemberPositionProvider(), "Invalid zone encountered: \"" + zoneString + "\"");
 
       return formattedString;
     });

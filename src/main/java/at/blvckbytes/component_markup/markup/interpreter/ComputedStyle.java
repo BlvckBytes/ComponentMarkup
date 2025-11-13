@@ -14,6 +14,8 @@ import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.*;
 import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -297,16 +299,16 @@ public class ComputedStyle {
       }
 
       if (firstNonNullValue != null) {
-        if (!componentConstructor.doesSupport(ConstructorFeature.SHADOW_COLOR)) {
-          for (String line : ErrorScreen.make(firstNonNullValue.getFirstMemberPositionProvider(), "Custom shadow-colors are not supported on this platform"))
-            LoggerProvider.log(Level.WARNING, line, false);
+        if (!componentConstructor.doesSupport(ConstructorFeature.SHADOW_COLOR))
+          interpreter.getLogger().logErrorScreen(firstNonNullValue.getFirstMemberPositionProvider(), "Custom shadow-colors are not supported on this platform");
+
+        else {
+          if (result == null)
+            result = new ComputedStyle();
+
+          result.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
+          result.packedShadowColorOpacity = opacity;
         }
-
-        if (result == null)
-          result = new ComputedStyle();
-
-        result.packedShadowColor = PackedColor.setClampedA(packedColor, opacity);
-        result.packedShadowColorOpacity = opacity;
       }
     }
 
@@ -314,16 +316,16 @@ public class ComputedStyle {
       String font = interpreter.evaluateAsStringOrNull(style.font);
 
       if (font != null) {
-        if (!componentConstructor.doesSupport(ConstructorFeature.FONT)) {
-          for (String line : ErrorScreen.make(style.font.getFirstMemberPositionProvider(), "Custom fonts are not supported on this platform"))
-            LoggerProvider.log(Level.WARNING, line, false);
+        if (!componentConstructor.doesSupport(ConstructorFeature.FONT))
+          interpreter.getLogger().logErrorScreen(style.font.getFirstMemberPositionProvider(), "Custom fonts are not supported on this platform");
+
+        else {
+          if (result == null)
+            result = new ComputedStyle();
+
+          result.font = font;
+          result.fontPosition = style.font.getFirstMemberPositionProvider();
         }
-
-        if (result == null)
-          result = new ComputedStyle();
-
-        result.font = font;
-        result.fontPosition = style.font.getFirstMemberPositionProvider();
       }
     }
 
@@ -354,7 +356,7 @@ public class ComputedStyle {
     return result;
   }
 
-  public <B> void applyStyles(B component, ComponentConstructor<B, ?> componentConstructor) {
+  public <B> void applyStyles(B component, ComponentConstructor<B, ?> componentConstructor, InterpreterLogger logger) {
     ConstructorWarning.clear();
 
     if (packedColor != PackedColor.NULL_SENTINEL)
@@ -367,11 +369,11 @@ public class ComputedStyle {
       componentConstructor.setFont(component, font);
 
       if (fontPosition != null)
-        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_FONT_NAME, fontPosition, font);
+        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_FONT_NAME, fontPosition, logger, font);
       else {
         ConstructorWarning.callIfEmitted(
           ConstructorWarning.MALFORMED_FONT_NAME,
-          () -> LoggerProvider.log(Level.WARNING, "Encountered an invalid default font-value: \"" + font + "\"")
+          () -> GlobalLogger.log(Level.WARNING, "Encountered an invalid default font-value: \"" + font + "\"")
         );
       }
     }
@@ -408,7 +410,7 @@ public class ComputedStyle {
           break;
 
         default:
-          LoggerProvider.log(Level.WARNING, "Encountered unknown format: " + format.name());
+          GlobalLogger.log(Level.WARNING, "Encountered unknown format: " + format.name());
       }
     }
   }

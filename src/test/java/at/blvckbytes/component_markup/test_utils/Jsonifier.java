@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.ExpressionList;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupList;
 import at.blvckbytes.component_markup.util.JsonifyGetter;
 import at.blvckbytes.component_markup.util.JsonifyIgnore;
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +61,7 @@ public abstract class Jsonifier {
           field.setAccessible(true);
           result.add(fieldName, jsonifyObject(field.getType(), field.get(instance)));
         } catch (Exception e) {
-          LoggerProvider.log(Level.WARNING, "Could not access field " + fieldName + " of " + currentClass, e);
+          GlobalLogger.log(Level.WARNING, "Could not access field " + fieldName + " of " + currentClass, e);
         }
       }
 
@@ -75,7 +75,7 @@ public abstract class Jsonifier {
           continue;
 
         if (method.getParameterCount() > 0)
-          LoggerProvider.log(Level.WARNING, "Method " + method + " requires parameters and thus isn't a valid " + annotationClass);
+          GlobalLogger.log(Level.WARNING, "Method " + method + " requires parameters and thus isn't a valid " + annotationClass);
 
         String methodName = method.getName();
 
@@ -83,7 +83,7 @@ public abstract class Jsonifier {
           method.setAccessible(true);
           result.add(methodName, jsonifyObject(method.getReturnType(), method.invoke(instance)));
         } catch (Exception e) {
-          LoggerProvider.log(Level.WARNING, "Could not access method " + methodName + " of " + currentClass, e);
+          GlobalLogger.log(Level.WARNING, "Could not access method " + methodName + " of " + currentClass, e);
         }
       }
 

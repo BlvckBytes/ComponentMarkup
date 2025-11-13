@@ -11,9 +11,9 @@ import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
 import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TemplateLiteralToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
@@ -26,14 +26,12 @@ public class TerminalNode extends ExpressionNode {
     this.token = token;
   }
 
-  public @Nullable Object getValue(InterpretationEnvironment environment) {
+  public @Nullable Object getValue(InterpretationEnvironment environment, InterpreterLogger logger) {
     if (token instanceof IdentifierToken) {
       String variableName = (String) token.getPlainValue();
 
       if (!environment.doesVariableExist(variableName)) {
-        for (String line : ErrorScreen.make(token.raw, "Could not locate variable \"" + variableName + "\""))
-          LoggerProvider.log(Level.WARNING, line, false);
-
+        logger.logErrorScreen(token.raw, "Could not locate variable \"" + variableName + "\"");
         return null;
       }
 
@@ -50,11 +48,11 @@ public class TerminalNode extends ExpressionNode {
         }
 
         if (member instanceof ExpressionNode) {
-          result.append(ExpressionInterpreter.interpret((ExpressionNode) member, environment));
+          result.append(ExpressionInterpreter.interpret((ExpressionNode) member, environment, logger));
           continue;
         }
 
-        LoggerProvider.log(Level.WARNING, "Encountered unknown interpolation-member: " + (member == null ? null : member.getClass()));
+        GlobalLogger.log(Level.WARNING, "Encountered unknown interpolation-member: " + (member == null ? null : member.getClass()));
       }
 
       return result.toString();
