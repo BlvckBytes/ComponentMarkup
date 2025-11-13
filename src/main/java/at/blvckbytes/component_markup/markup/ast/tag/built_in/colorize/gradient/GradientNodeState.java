@@ -29,7 +29,7 @@ public class GradientNodeState extends ColorizeNodeState {
     ExpressionList zIndices,
     double phase,
     EnumSet<ColorizeFlag> flags,
-    Interpreter interpreter
+    Interpreter<?, ?> interpreter
   ) {
     super(tagName, initialSubtreeDepth, phase, flags);
 
@@ -40,7 +40,7 @@ public class GradientNodeState extends ColorizeNodeState {
     );
   }
 
-  private long[] evaluateZIndices(ExpressionList zIndices, Interpreter interpreter) {
+  private long[] evaluateZIndices(ExpressionList zIndices, Interpreter<?, ?> interpreter) {
     List<ExpressionNode> offsetList = zIndices.get(interpreter);
 
     long[] result = new long[offsetList.size()];
@@ -51,7 +51,7 @@ public class GradientNodeState extends ColorizeNodeState {
     return result;
   }
 
-  private double[] evaluateOffsets(ExpressionList offsets, Interpreter interpreter) {
+  private double[] evaluateOffsets(ExpressionList offsets, Interpreter<?, ?> interpreter) {
     List<ExpressionNode> offsetList = offsets.get(interpreter);
 
     double[] result = new double[offsetList.size()];
@@ -62,7 +62,7 @@ public class GradientNodeState extends ColorizeNodeState {
     return result;
   }
 
-  private long[] evaluatePackedColors(ExpressionList colors, Interpreter interpreter) {
+  private long[] evaluatePackedColors(ExpressionList colors, Interpreter<?, ?> interpreter) {
     List<ExpressionNode> colorList = colors.get(interpreter);
     long[] result = new long[colorList.size()];
 

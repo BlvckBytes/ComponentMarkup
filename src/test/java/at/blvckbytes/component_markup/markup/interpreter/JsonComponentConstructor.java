@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class JsonComponentConstructor implements ComponentConstructor {
+public class JsonComponentConstructor implements ComponentConstructor<JsonObject, JsonObject> {
 
   // ================================================================================
   // SlotContext
@@ -38,29 +38,29 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public Object createTextComponent(String text) {
+  public JsonObject createTextComponent(String text) {
     JsonObject component = new JsonObject();
     component.addProperty("text", text);
     return component;
   }
 
   @Override
-  public Object createKeyComponent(String key) {
+  public JsonObject createKeyComponent(String key) {
     JsonObject component = new JsonObject();
     component.addProperty("keybind", key);
     return component;
   }
 
   @Override
-  public Object createTranslateComponent(String key, List<Object> with, @Nullable String fallback) {
+  public JsonObject createTranslateComponent(String key, List<JsonObject> with, @Nullable String fallback) {
     JsonObject component = new JsonObject();
     component.addProperty("translate", key);
 
     if (!with.isEmpty()) {
       JsonArray withArray = new JsonArray();
 
-      for (Object withItem : with)
-        withArray.add((JsonObject) withItem);
+      for (JsonObject withItem : with)
+        withArray.add(withItem);
 
       component.add("with", withArray);
     }
@@ -76,42 +76,42 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setClickChangePageAction(Object component, String value) {
+  public void setClickChangePageAction(JsonObject component, String value) {
     setClickAction(component, "change_page", value);
   }
 
   @Override
-  public void setClickCopyToClipboardAction(Object component, String value) {
+  public void setClickCopyToClipboardAction(JsonObject component, String value) {
     setClickAction(component, "copy_to_clipboard", value);
   }
 
   @Override
-  public void setClickOpenFileAction(Object component, String value) {
+  public void setClickOpenFileAction(JsonObject component, String value) {
     setClickAction(component, "open_file", value);
   }
 
   @Override
-  public void setClickOpenUrlAction(Object component, String value) {
+  public void setClickOpenUrlAction(JsonObject component, String value) {
     setClickAction(component, "open_url", value);
   }
 
   @Override
-  public void setClickRunCommandAction(Object component, String value) {
+  public void setClickRunCommandAction(JsonObject component, String value) {
     setClickAction(component, "run_command", value);
   }
 
   @Override
-  public void setClickSuggestCommandAction(Object component, String value) {
+  public void setClickSuggestCommandAction(JsonObject component, String value) {
     setClickAction(component, "suggest_command", value);
   }
 
-  private void setClickAction(Object component, String action, String value) {
+  private void setClickAction(JsonObject component, String action, String value) {
     JsonObject eventObject = new JsonObject();
 
     eventObject.addProperty("value", value);
     eventObject.addProperty("action", action);
 
-    ((JsonObject) component).add("clickEvent", eventObject);
+    component.add("clickEvent", eventObject);
   }
 
   // ================================================================================
@@ -120,11 +120,11 @@ public class JsonComponentConstructor implements ComponentConstructor {
 
   @Override
   public void setHoverItemAction(
-    Object component,
+    JsonObject component,
     String material,
     @Nullable Integer count,
-    @Nullable Object name,
-    @Nullable List<Object> lore,
+    @Nullable JsonObject name,
+    @Nullable List<JsonObject> lore,
     boolean hideFlags
   ) {
     JsonObject eventObject = new JsonObject();
@@ -141,13 +141,13 @@ public class JsonComponentConstructor implements ComponentConstructor {
       JsonObject tagObject = new JsonObject();
 
       if (name != null)
-        tagObject.add("name", (JsonObject) name);
+        tagObject.add("name", name);
 
       if (lore != null) {
         JsonArray loreArray = new JsonArray();
 
-        for (Object loreItem : lore)
-          loreArray.add((JsonElement) loreItem);
+        for (JsonObject loreItem : lore)
+          loreArray.add(loreItem);
 
         tagObject.add("lore", loreArray);
       }
@@ -158,21 +158,21 @@ public class JsonComponentConstructor implements ComponentConstructor {
     eventObject.addProperty("action", "show_item");
     eventObject.add("contents", contentsObject);
 
-    ((JsonObject) component).add("hoverEvent", eventObject);
+    component.add("hoverEvent", eventObject);
   }
 
   @Override
-  public void setHoverTextAction(Object component, Object text) {
+  public void setHoverTextAction(JsonObject component, JsonObject text) {
     JsonObject eventObject = new JsonObject();
 
     eventObject.addProperty("action", "show_text");
-    eventObject.add("contents", (JsonObject) text);
+    eventObject.add("contents", text);
 
-    ((JsonObject) component).add("hoverEvent", eventObject);
+    component.add("hoverEvent", eventObject);
   }
 
   @Override
-  public void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name) {
+  public void setHoverEntityAction(JsonObject component, String type, UUID id, @Nullable JsonObject name) {
     JsonObject eventObject = new JsonObject();
     JsonObject contentsObject = new JsonObject();
 
@@ -180,12 +180,12 @@ public class JsonComponentConstructor implements ComponentConstructor {
     contentsObject.addProperty("id", id.toString());
 
     if (name != null)
-      contentsObject.add("name", (JsonObject) name);
+      contentsObject.add("name", name);
 
     eventObject.addProperty("action", "show_entity");
     eventObject.add("contents", contentsObject);
 
-    ((JsonObject) component).add("hoverEvent", eventObject);
+    component.add("hoverEvent", eventObject);
   }
 
   // ================================================================================
@@ -193,8 +193,8 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setInsertAction(Object component, String value) {
-    ((JsonObject) component).addProperty("insertion", value);
+  public void setInsertAction(JsonObject component, String value) {
+    component.addProperty("insertion", value);
   }
 
   // ================================================================================
@@ -202,81 +202,81 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void setColor(Object component, long packedColor) {
+  public void setColor(JsonObject component, long packedColor) {
     if (packedColor == PackedColor.NULL_SENTINEL) {
-      ((JsonObject) component).remove("color");
+      component.remove("color");
       return;
     }
 
     AnsiStyleColor ansiColor;
 
     if ((ansiColor = AnsiStyleColor.fromColor(packedColor)) != null) {
-      ((JsonObject) component).addProperty("color", ansiColor.name);
+      component.addProperty("color", ansiColor.name);
       return;
     }
 
-    ((JsonObject) component).addProperty("color", PackedColor.asNonAlphaHex(packedColor));
+    component.addProperty("color", PackedColor.asNonAlphaHex(packedColor));
   }
 
   @Override
-  public void setShadowColor(Object component, long packedColor) {
+  public void setShadowColor(JsonObject component, long packedColor) {
     if (packedColor == PackedColor.NULL_SENTINEL) {
-      ((JsonObject) component).remove("shadow_color");
+      component.remove("shadow_color");
       return;
     }
 
     AnsiStyleColor ansiColor;
 
     if ((ansiColor = AnsiStyleColor.fromColor(packedColor)) != null) {
-      ((JsonObject) component).addProperty("shadow_color", ansiColor.name);
+      component.addProperty("shadow_color", ansiColor.name);
       return;
     }
 
-    ((JsonObject) component).addProperty("shadow_color", PackedColor.asAlphaHex(packedColor));
+    component.addProperty("shadow_color", PackedColor.asAlphaHex(packedColor));
   }
 
   @Override
-  public void setFont(Object component, String font) {
-    ((JsonObject) component).addProperty("font", font);
+  public void setFont(JsonObject component, String font) {
+    component.addProperty("font", font);
   }
 
   @Override
-  public void setObfuscatedFormat(Object component, TriState value) {
+  public void setObfuscatedFormat(JsonObject component, TriState value) {
     setFormat(component, "obfuscated", value);
   }
 
   @Override
-  public void setBoldFormat(Object component, TriState value) {
+  public void setBoldFormat(JsonObject component, TriState value) {
     setFormat(component, "bold", value);
   }
 
   @Override
-  public void setStrikethroughFormat(Object component, TriState value) {
+  public void setStrikethroughFormat(JsonObject component, TriState value) {
     setFormat(component, "strikethrough", value);
   }
 
   @Override
-  public void setUnderlinedFormat(Object component, TriState value) {
+  public void setUnderlinedFormat(JsonObject component, TriState value) {
     setFormat(component, "underlined", value);
   }
 
   @Override
-  public void setItalicFormat(Object component, TriState value) {
+  public void setItalicFormat(JsonObject component, TriState value) {
     setFormat(component, "italic", value);
   }
 
   @Override
-  public Object finaliseComponent(Object component) {
+  public JsonObject finaliseComponent(JsonObject component) {
     return component;
   }
 
-  private void setFormat(Object component, String formatKey, TriState value) {
+  private void setFormat(JsonObject component, String formatKey, TriState value) {
     if (value == TriState.NULL) {
-      ((JsonObject) component).remove(formatKey);
+      component.remove(formatKey);
       return;
     }
 
-    ((JsonObject) component).addProperty(formatKey, value == TriState.TRUE);
+    component.addProperty(formatKey, value == TriState.TRUE);
   }
 
   // ================================================================================
@@ -284,13 +284,13 @@ public class JsonComponentConstructor implements ComponentConstructor {
   // ================================================================================
 
   @Override
-  public void addChildren(Object component, List<Object> children) {
-    JsonElement existingChildren = ((JsonObject) component).get("extra");
+  public void addChildren(JsonObject component, List<JsonObject> children) {
+    JsonElement existingChildren = component.get("extra");
     JsonArray extra = existingChildren == null ? new JsonArray() : (JsonArray) existingChildren;
 
-    for (Object child : children)
-      extra.add((JsonObject) child);
+    for (JsonObject child : children)
+      extra.add(child);
 
-    ((JsonObject) component).add("extra", extra);
+    component.add("extra", extra);
   }
 }

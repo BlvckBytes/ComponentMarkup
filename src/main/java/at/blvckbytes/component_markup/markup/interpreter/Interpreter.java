@@ -12,7 +12,7 @@ import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface Interpreter {
+public interface Interpreter<B, C> {
 
   TemporaryMemberEnvironment getEnvironment();
 
@@ -42,9 +42,9 @@ public interface Interpreter {
 
   boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin);
 
-  OutputBuilder getCurrentBuilder();
+  OutputBuilder<B, C> getCurrentBuilder();
 
-  ComponentConstructor getComponentConstructor();
+  ComponentConstructor<B, C> getComponentConstructor();
 
   int getCurrentSubtreeDepth();
 

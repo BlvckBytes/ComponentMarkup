@@ -122,7 +122,7 @@ public abstract class MarkupParserTestsBase {
   private static MarkupList toMarkupList(List<MarkupNode> markupNodes) {
     return new MarkupList(Collections.emptyList()) {
       @Override
-      public List<MarkupNode> get(Interpreter interpreter) {
+      public List<MarkupNode> get(Interpreter<?, ?> interpreter) {
         return markupNodes;
       }
     };

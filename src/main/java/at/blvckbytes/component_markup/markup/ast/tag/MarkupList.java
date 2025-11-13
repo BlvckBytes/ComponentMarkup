@@ -38,7 +38,7 @@ public class MarkupList {
     this.attributes.add(attribute);
   }
 
-  public List<MarkupNode> get(Interpreter interpreter) {
+  public List<MarkupNode> get(Interpreter<?, ?> interpreter) {
     List<MarkupNode> result = new ArrayList<>(attributes.size());
 
     for (Attribute attribute : attributes) {

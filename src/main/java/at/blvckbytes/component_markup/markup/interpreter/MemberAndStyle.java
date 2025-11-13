@@ -7,12 +7,12 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
-public class MemberAndStyle {
+public class MemberAndStyle<B> {
 
-  public final Object member;
+  public final B member;
   public final @Nullable ComputedStyle style;
 
-  public MemberAndStyle(Object member, @Nullable ComputedStyle style) {
+  public MemberAndStyle(B member, @Nullable ComputedStyle style) {
     this.member = member;
     this.style = style;
   }

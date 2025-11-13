@@ -94,7 +94,7 @@ public class DurationTag extends TagDefinition {
     });
   }
 
-  private List<DurationUnit> parseUnitsString(Interpreter interpreter, ExpressionNode units) {
+  private List<DurationUnit> parseUnitsString(Interpreter<?, ?> interpreter, ExpressionNode units) {
     List<DurationUnit> result = new ArrayList<>();
 
     String unitsString = interpreter.evaluateAsString(units);

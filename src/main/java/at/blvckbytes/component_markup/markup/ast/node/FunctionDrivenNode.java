@@ -12,9 +12,9 @@ import java.util.function.Function;
 
 public class FunctionDrivenNode extends MarkupNode {
 
-  public final Function<Interpreter, Object> function;
+  public final Function<Interpreter<?, ?>, Object> function;
 
-  public FunctionDrivenNode(InputView positionProvider, Function<Interpreter, Object> function) {
+  public FunctionDrivenNode(InputView positionProvider, Function<Interpreter<?, ?>, Object> function) {
     super(positionProvider, null, null);
 
     this.function = function;

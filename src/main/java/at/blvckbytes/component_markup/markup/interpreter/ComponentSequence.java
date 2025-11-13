@@ -23,19 +23,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-public class ComponentSequence {
+public class ComponentSequence<B, C> {
 
   private static final String DEFAULT_MATERIAL = "minecraft:stone";
 
   private final SlotContext slotContext;
   private final SlotContext resetContext;
-  private final MarkupInterpreter interpreter;
-  private final ComponentConstructor componentConstructor;
+  private final MarkupInterpreter<B, C> interpreter;
+  private final ComponentConstructor<B, C> componentConstructor;
 
   private final @Nullable MarkupNode nonTerminal;
   private final boolean isInitial;
 
-  private @Nullable List<MemberAndStyle> memberEntries;
+  private @Nullable List<MemberAndStyle<B>> memberEntries;
 
   // Style-properties which are equal amongst all members
   // E.g.: if all members are bold, that style may be hoisted up
@@ -47,16 +47,16 @@ public class ComponentSequence {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
-  private Consumer<Object> textCreationHandler;
+  private Consumer<B> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
   private final ComputedStyle parentStyle;
   private final ComputedStyle selfAndParentStyle;
 
-  public void onUnit(UnitNode node, @Nullable Consumer<Object> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
-    Object result = null;
+    B result = null;
 
     if (node instanceof KeyNode) {
       String key = interpreter.evaluateAsString(((KeyNode) node).key);
@@ -77,16 +77,17 @@ public class ComponentSequence {
 
       String key = interpreter.evaluateAsString(translateNode.key);
 
-      List<Object> with = new ArrayList<>();
+      List<C> with = new ArrayList<>();
 
       for (MarkupNode withNode : translateNode.with.get(interpreter)) {
-        List<Object> withOutput = interpreter.interpretSubtree(
+        List<C> withOutput = interpreter.interpretSubtree(
           withNode,
           componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
         );
 
+        // TODO: Isn't it guaranteed non-empty?
         if (withOutput.isEmpty()) {
-          with.add(componentConstructor.createTextComponent(""));
+          with.add(componentConstructor.finaliseComponent(componentConstructor.createTextComponent("")));
           continue;
         }
 
@@ -121,11 +122,11 @@ public class ComponentSequence {
       creationHandler.accept(result);
   }
 
-  public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
-      Object result = componentConstructor.createTextComponent(node.textValue);
+      B result = componentConstructor.createTextComponent(node.textValue);
 
       addMember(result, nodeStyle);
 
@@ -138,7 +139,7 @@ public class ComponentSequence {
     addBufferedText(node.textValue, nodeStyle, creationHandler);
   }
 
-  private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<Object> creationHandler) {
+  private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<B> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
@@ -183,7 +184,7 @@ public class ComponentSequence {
 
     int bufferSize = bufferedTexts.size();
 
-    Object result;
+    B result;
 
     if (bufferSize == 1)
       result = componentConstructor.createTextComponent(bufferedTexts.get(0));
@@ -209,8 +210,8 @@ public class ComponentSequence {
     bufferedTextsStyle = null;
   }
 
-  public Object addSequence(ComponentSequence sequence) {
-    CombinationResult result = sequence.combineOrBubbleUpAndClearMembers(this);
+  public B addSequence(ComponentSequence<B, C> sequence) {
+    CombinationResult<B> result = sequence.combineOrBubbleUpAndClearMembers(this);
 
     if (result == CombinationResult.NO_OP_SENTINEL)
       return componentConstructor.createTextComponent("");
@@ -220,7 +221,7 @@ public class ComponentSequence {
     return result.component;
   }
 
-  private void addMember(Object member, @Nullable ComputedStyle memberStyle) {
+  private void addMember(B member, @Nullable ComputedStyle memberStyle) {
     concatAndInstantiateBufferedTexts();
 
     if (this.memberEntries == null)
@@ -244,10 +245,10 @@ public class ComponentSequence {
     else
       this.membersCommonStyle.subtractStylesOnCommonality(memberStyle, false);
 
-    this.memberEntries.add(new MemberAndStyle(member, memberStyle));
+    this.memberEntries.add(new MemberAndStyle<>(member, memberStyle));
   }
 
-  public @NotNull CombinationResult combineOrBubbleUpAndClearMembers(ComponentSequence parentSequence) {
+  public @NotNull CombinationResult<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
@@ -260,7 +261,7 @@ public class ComponentSequence {
         && (textCreationHandler == null)
     ) {
       if (memberEntries != null) {
-        for (MemberAndStyle memberAndStyle : memberEntries)
+        for (MemberAndStyle<B> memberAndStyle : memberEntries)
           parentSequence.addMember(memberAndStyle.member, ComputedStyle.addMissing(memberAndStyle.style, this.computedStyle));
 
         this.memberEntries.clear();
@@ -280,7 +281,8 @@ public class ComponentSequence {
       this.membersEqualStyle = null;
       this.membersCommonStyle = null;
 
-      return CombinationResult.NO_OP_SENTINEL;
+      //noinspection unchecked
+      return (CombinationResult<B>) CombinationResult.NO_OP_SENTINEL;
     }
 
     concatAndInstantiateBufferedTexts();
@@ -288,20 +290,20 @@ public class ComponentSequence {
     if (this.memberEntries == null || this.memberEntries.isEmpty())
       return CombinationResult.empty(componentConstructor);
 
-    Object result;
+    B result;
 
     // Apply no styles, as they're all kept in the common-style
     if (memberEntries.size() == 1) {
-      MemberAndStyle onlyMember = memberEntries.get(0);
+      MemberAndStyle<B> onlyMember = memberEntries.get(0);
       result = onlyMember.member;
     }
 
     else {
       result = componentConstructor.createTextComponent("");
 
-      List<Object> members = new ArrayList<>();
+      List<C> members = new ArrayList<>();
 
-      for (MemberAndStyle memberEntry : memberEntries) {
+      for (MemberAndStyle<B> memberEntry : memberEntries) {
 
         if (memberEntry.style != null) {
           memberEntry.style.subtractStylesOnEquality(membersEqualStyle, true);
@@ -334,10 +336,10 @@ public class ComponentSequence {
     this.membersEqualStyle = null;
     this.membersCommonStyle = null;
 
-    return new CombinationResult(result, styleToApply);
+    return new CombinationResult<>(result, styleToApply);
   }
 
-  private void possiblyApplyNonTerminal(Object result) {
+  private void possiblyApplyNonTerminal(B result) {
     ConstructorWarning.clear();
 
     if (nonTerminal instanceof ClickNode) {
@@ -439,7 +441,7 @@ public class ComponentSequence {
       String type = interpreter.evaluateAsString(entityHoverNode.type);
       String id = interpreter.evaluateAsString(entityHoverNode.id);
 
-      List<Object> nameOutput;
+      List<C> nameOutput;
 
       if (entityHoverNode.name != null) {
         nameOutput = interpreter.interpretSubtree(
@@ -461,7 +463,7 @@ public class ComponentSequence {
         return;
       }
 
-      Object nameComponent = null;
+      C nameComponent = null;
 
       if (nameOutput != null && !nameOutput.isEmpty())
         nameComponent = nameOutput.get(0);
@@ -494,7 +496,7 @@ public class ComponentSequence {
       else
         count = null;
 
-      List<Object> nameOutput;
+      List<C> nameOutput;
 
       if (itemHoverNode.name != null) {
         nameOutput = interpreter.interpretSubtree(
@@ -504,7 +506,7 @@ public class ComponentSequence {
       } else
         nameOutput = null;
 
-      List<Object> loreOutput;
+      List<C> loreOutput;
 
       if (itemHoverNode.lore != null) {
         loreOutput = interpreter.interpretSubtree(
@@ -521,13 +523,14 @@ public class ComponentSequence {
       else
         hideProperties = false;
 
-      Object nameComponent = null;
+      C nameComponent = null;
 
       if (nameOutput != null && !nameOutput.isEmpty())
         nameComponent = nameOutput.get(0);
 
-      List<Object> loreComponents = null;
+      List<C> loreComponents = null;
 
+      // TODO: Isn't it guaranteed non-empty?
       if (loreOutput != null && !loreOutput.isEmpty())
         loreComponents = loreOutput;
 
@@ -557,7 +560,7 @@ public class ComponentSequence {
 
       TextHoverNode textHoverNode = (TextHoverNode) nonTerminal;
 
-      List<Object> textOutput = interpreter.interpretSubtree(
+      List<C> textOutput = interpreter.interpretSubtree(
         textHoverNode.value,
         componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
       );
@@ -565,23 +568,23 @@ public class ComponentSequence {
       if (textOutput.isEmpty())
         return;
 
-      Object textComponent = textOutput.get(0);
+      C textComponent = textOutput.get(0);
 
       componentConstructor.setHoverTextAction(result, textComponent);
     }
   }
 
-  public ComponentSequence makeChildSequence(MarkupNode childNode) {
+  public ComponentSequence<B, C> makeChildSequence(MarkupNode childNode) {
     ComputedStyle childParentStyle = ComputedStyle.addMissing(computedStyle, parentStyle);
-    return new ComponentSequence(childParentStyle, childNode, false, slotContext, resetContext, interpreter);
+    return new ComponentSequence<>(childParentStyle, childNode, false, slotContext, resetContext, interpreter);
   }
 
-  public static ComponentSequence initial(
+  public static <B, C> ComponentSequence<B, C> initial(
     SlotContext slotContext,
     SlotContext resetContext,
-    MarkupInterpreter interpreter
+    MarkupInterpreter<B, C> interpreter
   ) {
-    return new ComponentSequence(slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
+    return new ComponentSequence<>(slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
   }
 
   private ComponentSequence(
@@ -590,7 +593,7 @@ public class ComponentSequence {
     boolean isInitial,
     SlotContext slotContext,
     SlotContext resetContext,
-    MarkupInterpreter interpreter
+    MarkupInterpreter<B, C> interpreter
   ) {
     this.parentStyle = parentStyle;
     this.slotContext = slotContext;

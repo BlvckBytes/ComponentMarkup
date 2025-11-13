@@ -8,19 +8,19 @@ package at.blvckbytes.component_markup.markup.interpreter;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import org.jetbrains.annotations.Nullable;
 
-public class CombinationResult {
+public class CombinationResult<B> {
 
-  public static final CombinationResult NO_OP_SENTINEL = new CombinationResult(null, null);
+  public static final CombinationResult<?> NO_OP_SENTINEL = new CombinationResult<>(null, null);
 
-  public final Object component;
+  public final B component;
   public final @Nullable ComputedStyle styleToApply;
 
-  public CombinationResult(Object component, @Nullable ComputedStyle styleToApply) {
+  public CombinationResult(B component, @Nullable ComputedStyle styleToApply) {
     this.component = component;
     this.styleToApply = styleToApply;
   }
 
-  public static CombinationResult empty(ComponentConstructor componentConstructor) {
-    return new CombinationResult(componentConstructor.createTextComponent(""), null);
+  public static <B, C> CombinationResult<B> empty(ComponentConstructor<B, C> componentConstructor) {
+    return new CombinationResult<>(componentConstructor.createTextComponent(""), null);
   }
 }

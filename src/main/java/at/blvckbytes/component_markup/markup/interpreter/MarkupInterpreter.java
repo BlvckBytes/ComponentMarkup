@@ -31,33 +31,33 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 
-public class MarkupInterpreter implements Interpreter {
+public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
-  private final ComponentConstructor componentConstructor;
+  private final ComponentConstructor<B, C> componentConstructor;
   private final TemporaryMemberEnvironment environment;
 
-  private final InterceptorStack interceptors;
-  private final Stack<OutputBuilder> builderStack;
+  private final InterceptorStack<B> interceptors;
+  private final Stack<OutputBuilder<B, C>> builderStack;
   private final SlotContext resetContext;
 
   private MarkupInterpreter(
-    ComponentConstructor componentConstructor,
+    ComponentConstructor<B, C> componentConstructor,
     InterpretationEnvironment baseEnvironment
   ) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
 
-    this.interceptors = new InterceptorStack(this);
+    this.interceptors = new InterceptorStack<>(this);
     this.builderStack = new Stack<>();
     this.resetContext = componentConstructor.getSlotContext(SlotType.CHAT);
   }
 
-  public static List<Object> interpret(
-    ComponentConstructor componentConstructor,
+  public static <B, C> List<C> interpret(
+    ComponentConstructor<B, C> componentConstructor,
     InterpretationEnvironment baseEnvironment,
     SlotContext slotContext, MarkupNode node
   ) {
-    return new MarkupInterpreter(componentConstructor, baseEnvironment)
+    return new MarkupInterpreter<>(componentConstructor, baseEnvironment)
       .interpretSubtree(node, slotContext);
   }
 
@@ -201,19 +201,19 @@ public class MarkupInterpreter implements Interpreter {
     }
   }
 
-  public List<Object> interpretSubtree(MarkupNode node, SlotContext slotContext) {
-    builderStack.push(new OutputBuilder(this, slotContext, resetContext));
+  public List<C> interpretSubtree(MarkupNode node, SlotContext slotContext) {
+    builderStack.push(new OutputBuilder<>(this, slotContext, resetContext));
     interpret(node);
     return builderStack.pop().build();
   }
 
   @Override
-  public OutputBuilder getCurrentBuilder() {
+  public OutputBuilder<B, C> getCurrentBuilder() {
     return builderStack.peek();
   }
 
   @Override
-  public ComponentConstructor getComponentConstructor() {
+  public ComponentConstructor<B, C> getComponentConstructor() {
     return componentConstructor;
   }
 
@@ -480,7 +480,7 @@ public class MarkupInterpreter implements Interpreter {
       return;
     }
 
-    OutputBuilder builder = getCurrentBuilder();
+    OutputBuilder<B, C> builder = getCurrentBuilder();
 
     if (node instanceof BreakNode) {
       builder.onBreak();

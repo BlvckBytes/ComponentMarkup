@@ -11,7 +11,7 @@ import at.blvckbytes.component_markup.util.LoggerProvider;
 import java.util.*;
 import java.util.logging.Level;
 
-public class InterceptorStack {
+public class InterceptorStack<B> {
 
   private static class InterceptorEntry {
     InterpreterInterceptor interceptor;
@@ -23,10 +23,10 @@ public class InterceptorStack {
     }
   }
 
-  private final Interpreter interpreter;
+  private final Interpreter<B, ?> interpreter;
   private final Stack<InterceptorEntry> interceptorStack;
 
-  public InterceptorStack(Interpreter interpreter) {
+  public InterceptorStack(Interpreter<B, ?> interpreter) {
     this.interpreter = interpreter;
     this.interceptorStack = new Stack<>();
   }

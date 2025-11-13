@@ -27,13 +27,13 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   private final ThreadLocal<@Nullable ColorizeNodeState> threadLocalState = ThreadLocal.withInitial(() -> null);
 
   @JsonifyIgnore
-  private final Function<Interpreter, ColorizeNodeState> stateCreator;
+  private final Function<Interpreter<?, ?>, ColorizeNodeState> stateCreator;
 
   public final InputView tagName;
 
   public ColorizeNode(
     InputView tagName,
-    Function<Interpreter, ColorizeNodeState> stateCreator,
+    Function<Interpreter<?, ?>, ColorizeNodeState> stateCreator,
     InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
@@ -44,7 +44,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     this.stateCreator = stateCreator;
   }
 
-  private ColorizeNodeState getState(Interpreter interpreter) {
+  private ColorizeNodeState getState(Interpreter<?, ?> interpreter) {
     ColorizeNodeState state;
 
     if ((state = threadLocalState.get()) != null)
@@ -56,12 +56,12 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     return state;
   }
 
-  protected abstract boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter interpreter);
+  protected abstract boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
 
-  protected abstract boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter);
+  protected abstract boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
 
   @Override
-  public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter interpreter) {
+  public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter<?, ?> interpreter) {
     ColorizeNodeState state = getState(interpreter);
 
     if (interpreter.getCurrentSubtreeDepth() > state.initialSubtreeDepth && !state.flags.contains(ColorizeFlag.DEEP))
@@ -100,7 +100,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   }
 
   @Override
-  public void afterInterpretation(MarkupNode node, Interpreter interpreter) {
+  public void afterInterpretation(MarkupNode node, Interpreter<?, ?> interpreter) {
     ColorizeNodeState state = getState(interpreter);
 
     if (!(node instanceof ColorizeNode && state.doesTargetNode((ColorizeNode) node)))
@@ -111,7 +111,7 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
   }
 
   @Override
-  public void onSkippedByChild(MarkupNode node, Interpreter interpreter, InterceptionResult priorResult) {
+  public void onSkippedByChild(MarkupNode node, Interpreter<?, ?> interpreter, InterceptionResult priorResult) {
     if (priorResult == InterceptionResult.DO_PROCESS_AND_CALL_AFTER)
       getState(interpreter).discard();
   }

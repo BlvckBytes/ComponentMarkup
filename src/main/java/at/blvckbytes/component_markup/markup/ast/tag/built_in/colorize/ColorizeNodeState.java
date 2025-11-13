@@ -66,13 +66,13 @@ public abstract class ColorizeNodeState {
     injectedComponentsStack.pop();
   }
 
-  public boolean endAndGetIfStackIsEmpty(Interpreter interpreter) {
+  public <B> boolean endAndGetIfStackIsEmpty(Interpreter<B, ?> interpreter) {
     List<Object> injectedComponents = injectedComponentsStack.pop();
 
     if (injectedComponents == null)
       return injectedComponentsStack.empty();
 
-    ComponentConstructor componentConstructor = interpreter.getComponentConstructor();
+    ComponentConstructor<B, ?> componentConstructor = interpreter.getComponentConstructor();
 
     int length = injectedComponents.size();
 
@@ -81,8 +81,15 @@ public abstract class ColorizeNodeState {
 
       long color = getPackedColor(index, length);
 
-      if (color != PackedColor.NULL_SENTINEL)
-        componentConstructor.setColor(injectedComponent, color);
+      if (color != PackedColor.NULL_SENTINEL) {
+        // Sorry, but I'm not carrying generics all the way through the project just to avoid
+        // this little unchecked cast. The main reason as to why I added them to the ComponentConstructor
+        // is that they make public APIs friendlier and catch missing calls to finalize within the
+        // interpreter and output-builder; noting more, nothing less. They will never be perfect.
+
+        //noinspection unchecked
+        componentConstructor.setColor((B) injectedComponent, color);
+      }
     }
 
     return injectedComponentsStack.empty();

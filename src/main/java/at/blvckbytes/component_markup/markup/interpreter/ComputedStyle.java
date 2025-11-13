@@ -235,7 +235,7 @@ public class ComputedStyle {
     return result;
   }
 
-  public static @Nullable ComputedStyle computeFor(MarkupNode node, Interpreter interpreter) {
+  public static @Nullable ComputedStyle computeFor(MarkupNode node, Interpreter<?, ?> interpreter) {
     if (!(node instanceof StyledNode))
       return null;
 
@@ -244,7 +244,7 @@ public class ComputedStyle {
     if (style == null)
       return null;
 
-    ComponentConstructor componentConstructor = interpreter.getComponentConstructor();
+    ComponentConstructor<?, ?> componentConstructor = interpreter.getComponentConstructor();
 
     ComputedStyle result = null;
 
@@ -354,7 +354,7 @@ public class ComputedStyle {
     return result;
   }
 
-  public void applyStyles(Object component, ComponentConstructor componentConstructor) {
+  public <B> void applyStyles(B component, ComponentConstructor<B, ?> componentConstructor) {
     ConstructorWarning.clear();
 
     if (packedColor != PackedColor.NULL_SENTINEL)

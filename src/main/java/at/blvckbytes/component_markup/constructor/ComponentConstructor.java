@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public interface ComponentConstructor {
+public interface ComponentConstructor<B, C> {
 
   boolean doesSupport(ConstructorFeature feature);
 
@@ -25,70 +25,70 @@ public interface ComponentConstructor {
   // TerminalNode
   // ================================================================================
 
-  Object createTextComponent(String text);
+  B createTextComponent(String text);
 
-  Object createKeyComponent(String key);
+  B createKeyComponent(String key);
 
-  Object createTranslateComponent(String key, List<Object> with, @Nullable String fallback);
+  B createTranslateComponent(String key, List<C> with, @Nullable String fallback);
 
   // ================================================================================
   // Click-Action
   // ================================================================================
 
-  void setClickChangePageAction(Object component, String value);
+  void setClickChangePageAction(B component, String value);
 
-  void setClickCopyToClipboardAction(Object component, String value);
+  void setClickCopyToClipboardAction(B component, String value);
 
-  void setClickOpenFileAction(Object component, String value);
+  void setClickOpenFileAction(B component, String value);
 
-  void setClickOpenUrlAction(Object component, String value);
+  void setClickOpenUrlAction(B component, String value);
 
-  void setClickRunCommandAction(Object component, String value);
+  void setClickRunCommandAction(B component, String value);
 
-  void setClickSuggestCommandAction(Object component, String value);
+  void setClickSuggestCommandAction(B component, String value);
 
   // ================================================================================
   // Hover-Action
   // ================================================================================
 
   void setHoverItemAction(
-    Object component,
+    B component,
     String material,
     @Nullable Integer count,
-    @Nullable Object name,
-    @Nullable List<Object> lore,
+    @Nullable C name,
+    @Nullable List<C> lore,
     boolean hideProperties
   );
 
-  void setHoverTextAction(Object component, Object text);
+  void setHoverTextAction(B component, C text);
 
-  void setHoverEntityAction(Object component, String type, UUID id, @Nullable Object name);
+  void setHoverEntityAction(B component, String type, UUID id, @Nullable C name);
 
   // ================================================================================
   // Insert-Action
   // ================================================================================
 
-  void setInsertAction(Object component, String value);
+  void setInsertAction(B component, String value);
 
   // ================================================================================
   // Styling
   // ================================================================================
 
-  void setColor(Object component, long packedColor);
+  void setColor(B component, long packedColor);
 
-  void setShadowColor(Object component, long packedColor);
+  void setShadowColor(B component, long packedColor);
 
-  void setFont(Object component, String font);
+  void setFont(B component, String font);
 
-  void setObfuscatedFormat(Object component, TriState value);
+  void setObfuscatedFormat(B component, TriState value);
 
-  void setBoldFormat(Object component, TriState value);
+  void setBoldFormat(B component, TriState value);
 
-  void setStrikethroughFormat(Object component, TriState value);
+  void setStrikethroughFormat(B component, TriState value);
 
-  void setUnderlinedFormat(Object component, TriState value);
+  void setUnderlinedFormat(B component, TriState value);
 
-  void setItalicFormat(Object component, TriState value);
+  void setItalicFormat(B component, TriState value);
 
   // ================================================================================
   // Children
@@ -101,7 +101,7 @@ public interface ComponentConstructor {
    * @param component Component to be finalised, as created by the corresponding creation-methods.
    * @return Finalised component, ready to be used wherever applicable.
    */
-  Object finaliseComponent(Object component);
+  C finaliseComponent(B component);
 
-  void addChildren(Object component, List<Object> children);
+  void addChildren(B component, List<C> children);
 }

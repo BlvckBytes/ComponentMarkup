@@ -36,7 +36,7 @@ public class ExpressionList {
     this.attributes.add(attribute);
   }
 
-  public List<ExpressionNode> get(Interpreter interpreter) {
+  public List<ExpressionNode> get(Interpreter<?, ?> interpreter) {
     List<ExpressionNode> result = new ArrayList<>(attributes.size());
 
     for (ExpressionAttribute attribute : attributes) {

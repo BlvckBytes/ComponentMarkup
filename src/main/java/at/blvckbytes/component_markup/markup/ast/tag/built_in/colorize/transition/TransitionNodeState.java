@@ -23,7 +23,7 @@ public class TransitionNodeState extends GradientNodeState {
     ExpressionList zIndices,
     double phase,
     EnumSet<ColorizeFlag> flags,
-    Interpreter interpreter
+    Interpreter<?, ?> interpreter
   ) {
     super(tagName, initialSubtreeDepth, colors, offsets, zIndices, phase, flags, interpreter);
   }

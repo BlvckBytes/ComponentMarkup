@@ -23,7 +23,7 @@ public class ColorizeMonochromeNode extends ColorizeNode {
 
   public ColorizeMonochromeNode(
     InputView tagName,
-    Function<Interpreter, ColorizeNodeState> stateCreator,
+    Function<Interpreter<?, ?>, ColorizeNodeState> stateCreator,
     InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
@@ -32,13 +32,13 @@ public class ColorizeMonochromeNode extends ColorizeNode {
   }
 
   @Override
-  protected boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter interpreter) {
+  protected boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
     interpreter.getCurrentBuilder().onText(node, state::addInjected, false);
     return false;
   }
 
   @Override
-  protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter) {
+  protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
     interpreter.getCurrentBuilder().onUnit(node, state::addInjected);
     return false;
   }

@@ -19,17 +19,17 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-public class OutputBuilder {
+public class OutputBuilder<B, C> {
 
-  private final ComponentConstructor componentConstructor;
+  private final ComponentConstructor<B, C> componentConstructor;
   private final @Nullable String breakString;
 
-  private final List<Object> result;
+  private final List<C> result;
 
-  private final Stack<ComponentSequence> sequencesStack;
+  private final Stack<ComponentSequence<B, C>> sequencesStack;
 
   public OutputBuilder(
-    MarkupInterpreter interpreter,
+    MarkupInterpreter<B, C> interpreter,
     SlotContext slotContext,
     SlotContext resetContext
   ) {
@@ -54,30 +54,30 @@ public class OutputBuilder {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public @Nullable Object onNonTerminalEnd() {
+  public @Nullable B onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
       LoggerProvider.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
       return null;
     }
 
-    ComponentSequence sequence = sequencesStack.pop();
+    ComponentSequence<B, C> sequence = sequencesStack.pop();
     return sequencesStack.peek().addSequence(sequence);
   }
 
-  public void onText(TextNode node, @Nullable Consumer<Object> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
   }
 
-  public void onUnit(UnitNode node, @Nullable Consumer<Object> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 
   private void combineAllSequencesAndResult() {
     for (int index = sequencesStack.size() - 1; index >= 0; --index) {
-      ComponentSequence sequence = sequencesStack.get(index);
+      ComponentSequence<B, C> sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        CombinationResult combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
+        CombinationResult<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
         if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
           // Apply the highest-up style manually now, without any further simplifying calculations
@@ -94,11 +94,11 @@ public class OutputBuilder {
     }
   }
 
-  public List<Object> build() {
+  public List<C> build() {
     combineAllSequencesAndResult();
 
     if (result.isEmpty())
-      result.add(componentConstructor.createTextComponent(""));
+      result.add(componentConstructor.finaliseComponent(componentConstructor.createTextComponent("")));
 
     sequencesStack.clear();
 

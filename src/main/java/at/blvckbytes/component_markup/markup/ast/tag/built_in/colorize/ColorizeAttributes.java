@@ -37,11 +37,11 @@ public class ColorizeAttributes {
     this.mergeInner = mergeInner;
   }
 
-  public double getPhase(Interpreter interpreter) {
+  public double getPhase(Interpreter<?, ?> interpreter) {
     return this.phase == null ? 0 : interpreter.evaluateAsDouble(this.phase);
   }
 
-  public EnumSet<ColorizeFlag> getFlags(Interpreter interpreter) {
+  public EnumSet<ColorizeFlag> getFlags(Interpreter<?, ?> interpreter) {
     EnumSet<ColorizeFlag> result = EnumSet.noneOf(ColorizeFlag.class);
 
     if (this.deep != null && interpreter.evaluateAsTriState(this.deep) == TriState.TRUE)

@@ -39,7 +39,7 @@ import java.util.logging.Level;
 public abstract class InterpreterTestsBase {
 
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-  private static final ComponentConstructor componentConstructor = new JsonComponentConstructor();
+  private static final ComponentConstructor<JsonObject, JsonObject> componentConstructor = new JsonComponentConstructor();
 
   @SuppressWarnings("SameParameterValue")
   protected void makeRecordedCase(
@@ -103,7 +103,7 @@ public abstract class InterpreterTestsBase {
       return;
     }
 
-    List<Object> components = MarkupInterpreter.interpret(
+    List<JsonObject> components = MarkupInterpreter.interpret(
       componentConstructor,
       environment,
       componentConstructor.getSlotContext(slot),
@@ -112,8 +112,8 @@ public abstract class InterpreterTestsBase {
 
     JsonArray actualArray = new JsonArray();
 
-    for (Object component : components)
-      actualArray.add((JsonElement) component);
+    for (JsonObject component : components)
+      actualArray.add(component);
 
     String actualJson = gsonInstance.toJson(actualArray);
 
@@ -233,7 +233,7 @@ public abstract class InterpreterTestsBase {
     else
       throw new IllegalStateException("Unknown json-builder: " + expectedResult.getClass());
 
-    List<Object> resultItems = MarkupInterpreter.interpret(
+    List<JsonObject> resultItems = MarkupInterpreter.interpret(
       componentConstructor,
       baseEnvironment,
       componentConstructor.getSlotContext(slot),
@@ -242,8 +242,8 @@ public abstract class InterpreterTestsBase {
 
     JsonArray actualJson = new JsonArray();
 
-    for (Object resultItem : resultItems)
-      actualJson.add((JsonElement) resultItem);
+    for (JsonObject resultItem : resultItems)
+      actualJson.add(resultItem);
 
     Assertions.assertEquals(
       gsonInstance.toJson(sortKeysRecursively(expectedJson)),

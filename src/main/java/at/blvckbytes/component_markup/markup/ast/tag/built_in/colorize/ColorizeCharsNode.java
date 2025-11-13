@@ -23,7 +23,7 @@ public class ColorizeCharsNode extends ColorizeNode {
 
   public ColorizeCharsNode(
     InputView tagName,
-    Function<Interpreter, ColorizeNodeState> stateCreator,
+    Function<Interpreter<?, ?>, ColorizeNodeState> stateCreator,
     InputView positionProvider,
     @Nullable List<MarkupNode> children,
     @Nullable LinkedHashSet<LetBinding> letBindings
@@ -32,8 +32,8 @@ public class ColorizeCharsNode extends ColorizeNode {
   }
 
   @Override
-  protected boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter interpreter) {
-    OutputBuilder builder = interpreter.getCurrentBuilder();
+  protected boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
+    OutputBuilder<?, ?> builder = interpreter.getCurrentBuilder();
     NodeStyle nodeStyle = node.getStyle();
 
     boolean skipWhitespace = state.flags.contains(ColorizeFlag.SKIP_WHITESPACE);
@@ -74,7 +74,7 @@ public class ColorizeCharsNode extends ColorizeNode {
   }
 
   @Override
-  protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter interpreter) {
+  protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
     interpreter.getCurrentBuilder().onUnit(node, state::addInjected);
     return false;
   }
