@@ -11,4 +11,5 @@ public enum SlotType {
   ITEM_NAME,
   ITEM_LORE,
   SINGLE_LINE_CHAT,
+  INVENTORY_TITLE,
 }

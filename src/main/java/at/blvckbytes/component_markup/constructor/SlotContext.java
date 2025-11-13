@@ -26,6 +26,15 @@ public class SlotContext {
     applyCommonDefaults(ComputedStyle::new)
   );
 
+  private static final SlotContext SLOT_INVENTORY_TITLE = new SlotContext(
+    ' ',
+    applyCommonDefaults(() -> {
+      ComputedStyle style = new ComputedStyle();
+      style.packedColor = AnsiStyleColor.DARK_GRAY.packedColor;
+      return style;
+    })
+  );
+
   private static final SlotContext SLOT_ENTITY_NAME = new SlotContext(
     ' ',
     applyCommonDefaults(() -> {
@@ -69,6 +78,9 @@ public class SlotContext {
 
       case SINGLE_LINE_CHAT:
         return SLOT_SINGLE_LINE_CHAT;
+
+      case INVENTORY_TITLE:
+        return SLOT_INVENTORY_TITLE;
     }
 
     return SLOT_CHAT;
