@@ -25,7 +25,7 @@ public class ErrorScreen {
         ++lineCounter;
     }
 
-    int maxLineNumberDigits = (lineCounter + 9) / 10;
+    int maxLineNumberDigits = (lineCounter == 0) ? 1 : (int) Math.log10(lineCounter) + 1;
     int nextLineNumber = view.lineNumber;
     int lineBegin = 0;
 

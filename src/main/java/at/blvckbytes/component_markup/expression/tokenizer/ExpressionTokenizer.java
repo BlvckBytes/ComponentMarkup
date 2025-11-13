@@ -22,7 +22,7 @@ public class ExpressionTokenizer {
   private @Nullable Stack<Token> pendingStack;
   private boolean isNextPendingPeek;
 
-  private final InputView input;
+  public final InputView input;
   private final @Nullable TokenOutput tokenOutput;
   private boolean dashIsPrefix;
 

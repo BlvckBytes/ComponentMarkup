@@ -26,21 +26,29 @@ public class ExpressionParser {
   }
 
   public static @Nullable ExpressionNode parseWithoutTrailingCheck(ExpressionTokenizer tokenizer, @Nullable TokenOutput tokenOutput) {
-    ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
-    return parser.parseExpression(null);
+    try {
+      ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
+      return parser.parseExpression(null);
+    } catch (ExpressionParseException e) {
+      throw e.setRootView(tokenizer.input);
+    }
   }
 
   public static @Nullable ExpressionNode parse(InputView value, @Nullable TokenOutput tokenOutput) {
-    ExpressionTokenizer tokenizer = new ExpressionTokenizer(value, tokenOutput);
-    ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
-    ExpressionNode result = parser.parseExpression(null);
+    try {
+      ExpressionTokenizer tokenizer = new ExpressionTokenizer(value, tokenOutput);
+      ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
+      ExpressionNode result = parser.parseExpression(null);
 
-    Token trailingToken;
+      Token trailingToken;
 
-    if ((trailingToken = tokenizer.peekToken()) != null)
-      throw new ExpressionParseException(trailingToken.raw.startInclusive, ExpressionParserError.EXPECTED_EOS);
+      if ((trailingToken = tokenizer.peekToken()) != null)
+        throw new ExpressionParseException(trailingToken.raw.startInclusive, ExpressionParserError.EXPECTED_EOS);
 
-    return result;
+      return result;
+    } catch (ExpressionParseException e) {
+      throw e.setRootView(value);
+    }
   }
 
   private ExpressionNode patchInfixIfApplicable(InfixOperationNode node) {
