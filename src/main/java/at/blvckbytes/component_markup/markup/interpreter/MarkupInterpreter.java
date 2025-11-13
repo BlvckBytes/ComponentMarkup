@@ -24,6 +24,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.LoggerProvider;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.OnceRunnable;
 import at.blvckbytes.component_markup.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -433,20 +434,31 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
     boolean hasBeenRendered = false;
 
+    // Interceptors may inject content, as - for example - the rainbow-colorizer does; it can only
+    // know which colors to apply once its scope completed. The issue with calling #handleAfter
+    // past the stage of completing the non-terminal on the OutputBuilder is that the latter will
+    // have finalized all members already; since we may be working with a platform that enforces
+    // immutable components, modifying the builder-references as kept by the interceptor-state will no
+    // longer have an effect on the final output, since the injected components have already been built.
+    // Thus, this very much application-specific "hook" has been introduced, as to close the scope
+    // of the interceptor before the stage of finalizing all members of the non-terminal. This is
+    // *not* a hack, but simply the cost that comes with trying to stay platform-agnostic.
+    OnceRunnable callAfter = doNotUse ? null : new OnceRunnable(() -> interceptors.handleAfter(node));
+
     if (node.ifCondition == null || evaluateAsBoolean(node.ifCondition)) {
-      _interpret(node);
+      _interpret(node, callAfter);
       hasBeenRendered = true;
     }
 
     environment.endScope();
 
-    if (!doNotUse)
-      interceptors.handleAfter(node);
+    if (callAfter != null)
+      callAfter.run();
 
     return hasBeenRendered;
   }
 
-  private void _interpret(MarkupNode node) {
+  private void _interpret(MarkupNode node, @Nullable Runnable preFinalize) {
     // The for-loop introduces temporary variables itself, so only introduce bindings after the fact
     // such that they have immediate access to said references; it does not make sense to define a
     // let-binding on the very same node a *for attribute is employed on *and* use said binding as
@@ -533,7 +545,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       for (MarkupNode child : node.children)
         interpret(child);
 
-      builder.onNonTerminalEnd();
+      builder.onNonTerminalEnd(preFinalize);
     }
   }
 }

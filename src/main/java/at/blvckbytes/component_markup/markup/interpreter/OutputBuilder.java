@@ -54,14 +54,14 @@ public class OutputBuilder<B, C> {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public @Nullable B onNonTerminalEnd() {
+  public @Nullable B onNonTerminalEnd(@Nullable Runnable preFinalize) {
     if (sequencesStack.isEmpty()) {
       LoggerProvider.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
       return null;
     }
 
     ComponentSequence<B, C> sequence = sequencesStack.pop();
-    return sequencesStack.peek().addSequence(sequence);
+    return sequencesStack.peek().addSequence(sequence, preFinalize);
   }
 
   public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
@@ -77,7 +77,7 @@ public class OutputBuilder<B, C> {
       ComponentSequence<B, C> sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        CombinationResult<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
+        CombinationResult<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null, null);
 
         if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
           // Apply the highest-up style manually now, without any further simplifying calculations
@@ -90,7 +90,7 @@ public class OutputBuilder<B, C> {
         break;
       }
 
-      sequencesStack.get(index - 1).addSequence(sequence);
+      sequencesStack.get(index - 1).addSequence(sequence, null);
     }
   }
 

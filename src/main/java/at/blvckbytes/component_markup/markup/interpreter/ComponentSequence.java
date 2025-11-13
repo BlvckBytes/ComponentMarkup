@@ -204,8 +204,8 @@ public class ComponentSequence<B, C> {
     bufferedTextsStyle = null;
   }
 
-  public B addSequence(ComponentSequence<B, C> sequence) {
-    CombinationResult<B> result = sequence.combineOrBubbleUpAndClearMembers(this);
+  public B addSequence(ComponentSequence<B, C> sequence, @Nullable Runnable preFinalize) {
+    CombinationResult<B> result = sequence.combineOrBubbleUpAndClearMembers(this, preFinalize);
 
     if (result == CombinationResult.NO_OP_SENTINEL)
       return componentConstructor.createTextComponent("");
@@ -242,7 +242,7 @@ public class ComponentSequence<B, C> {
     this.memberEntries.add(new MemberAndStyle<>(member, memberStyle));
   }
 
-  public @NotNull CombinationResult<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence) {
+  public @NotNull CombinationResult<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence, @Nullable Runnable preFinalize) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
@@ -295,10 +295,12 @@ public class ComponentSequence<B, C> {
     else {
       result = componentConstructor.createTextComponent("");
 
+      if (preFinalize != null)
+        preFinalize.run();
+
       List<C> members = new ArrayList<>();
 
       for (MemberAndStyle<B> memberEntry : memberEntries) {
-
         if (memberEntry.style != null) {
           memberEntry.style.subtractStylesOnEquality(membersEqualStyle, true);
           memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
