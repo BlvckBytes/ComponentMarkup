@@ -266,7 +266,7 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
   }
 
   @Override
-  public JsonObject finaliseComponent(JsonObject component) {
+  public JsonObject finalizeComponent(JsonObject component) {
     return component;
   }
 

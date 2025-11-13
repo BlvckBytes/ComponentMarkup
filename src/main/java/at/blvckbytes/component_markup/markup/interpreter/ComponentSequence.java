@@ -85,12 +85,6 @@ public class ComponentSequence<B, C> {
           componentConstructor.getSlotContext(SlotType.SINGLE_LINE_CHAT)
         );
 
-        // TODO: Isn't it guaranteed non-empty?
-        if (withOutput.isEmpty()) {
-          with.add(componentConstructor.finaliseComponent(componentConstructor.createTextComponent("")));
-          continue;
-        }
-
         with.add(withOutput.get(0));
       }
 
@@ -310,7 +304,7 @@ public class ComponentSequence<B, C> {
           memberEntry.style.applyStyles(memberEntry.member, componentConstructor);
         }
 
-        members.add(componentConstructor.finaliseComponent(memberEntry.member));
+        members.add(componentConstructor.finalizeComponent(memberEntry.member));
       }
 
       componentConstructor.addChildren(result, members);
@@ -506,15 +500,15 @@ public class ComponentSequence<B, C> {
       } else
         nameOutput = null;
 
-      List<C> loreOutput;
+      List<C> loreComponents;
 
       if (itemHoverNode.lore != null) {
-        loreOutput = interpreter.interpretSubtree(
+        loreComponents = interpreter.interpretSubtree(
           itemHoverNode.lore,
           componentConstructor.getSlotContext(SlotType.ITEM_LORE)
         );
       } else
-        loreOutput = null;
+        loreComponents = null;
 
       boolean hideProperties;
 
@@ -527,12 +521,6 @@ public class ComponentSequence<B, C> {
 
       if (nameOutput != null && !nameOutput.isEmpty())
         nameComponent = nameOutput.get(0);
-
-      List<C> loreComponents = null;
-
-      // TODO: Isn't it guaranteed non-empty?
-      if (loreOutput != null && !loreOutput.isEmpty())
-        loreComponents = loreOutput;
 
       if (material == null)
         material = DEFAULT_MATERIAL;

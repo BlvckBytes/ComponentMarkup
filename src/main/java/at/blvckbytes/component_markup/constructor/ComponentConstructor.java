@@ -11,6 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * @param <B> Component(B)uilder - Useful as an intermediate if components are immutable, seeing how
+ *            the construction-process inherently depends on in-place alteration; simply let
+ *            {@link ComponentConstructor#finalizeComponent(Object)} be a passthrough if the
+ *            components on your platform are already mutable.
+ * @param <C> (C)omponent - The final, platform-specific result, not to be altered any further.
+ */
 public interface ComponentConstructor<B, C> {
 
   boolean doesSupport(ConstructorFeature feature);
@@ -98,10 +105,10 @@ public interface ComponentConstructor<B, C> {
    * Called once a component has been fully constructed and no more changes are to be
    * made. Since Adventure is deeply immutable and thereby enforces builders, this stage
    * would call the build method, as to end up with a final component to pass on.
-   * @param component Component to be finalised, as created by the corresponding creation-methods.
-   * @return Finalised component, ready to be used wherever applicable.
+   * @param component Component to be finalized, as created by the corresponding creation-methods.
+   * @return Finalized component, ready to be used wherever applicable.
    */
-  C finaliseComponent(B component);
+  C finalizeComponent(B component);
 
   void addChildren(B component, List<C> children);
 }

@@ -84,7 +84,7 @@ public class OutputBuilder<B, C> {
           if (combinationResult.styleToApply != null)
             combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor);
 
-          result.add(componentConstructor.finaliseComponent(combinationResult.component));
+          result.add(componentConstructor.finalizeComponent(combinationResult.component));
         }
 
         break;
@@ -98,7 +98,7 @@ public class OutputBuilder<B, C> {
     combineAllSequencesAndResult();
 
     if (result.isEmpty())
-      result.add(componentConstructor.finaliseComponent(componentConstructor.createTextComponent("")));
+      result.add(componentConstructor.finalizeComponent(componentConstructor.createTextComponent("")));
 
     sequencesStack.clear();
 
