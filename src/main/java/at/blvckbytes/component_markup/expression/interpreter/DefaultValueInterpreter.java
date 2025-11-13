@@ -87,23 +87,39 @@ public class DefaultValueInterpreter implements ValueInterpreter {
       return null;
 
     if (value instanceof Iterable<?>) {
-      Iterator<?> iterator = ((Iterable<?>) value).iterator();
+      StringBuilder result = new StringBuilder("[");
 
-      if (!iterator.hasNext())
-        return null;
+      for (Object o : (Iterable<?>) value) {
+        if (result.length() > 1)
+          result.append(", ");
 
-      return asStringOrNull(iterator.next());
+        result.append(asStringOrNull(o));
+      }
+
+      return result.append(']').toString();
     }
 
     if (value.getClass().isArray()) {
-      if (Array.getLength(value) == 0)
-        return null;
+      int arrayLength = Array.getLength(value);
+      StringBuilder result = new StringBuilder("[");
 
-      return asStringOrNull(Array.get(value, 0));
+      for (int i = 0; i < arrayLength; ++i) {
+        if (i != 0)
+          result.append(", ");
+
+        result.append(asStringOrNull(Array.get(value, i)));
+      }
+
+      return result.append(']').toString();
     }
 
     if (value instanceof Map<?, ?>)
       return asStringOrNull(((Map<?, ?>) value).entrySet());
+
+    if (value instanceof Map.Entry<?, ?>) {
+      Map.Entry<?, ?> entry = (Map.Entry<?, ?>) value;
+      return asStringOrNull(entry.getKey()) + "=" + asStringOrNull(entry.getValue());
+    }
 
     return value.toString();
   }

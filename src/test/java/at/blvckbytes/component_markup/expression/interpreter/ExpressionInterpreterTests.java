@@ -397,6 +397,17 @@ public class ExpressionInterpreterTests {
     makeCase("`{{a: {b: 'world'}}['a']['b']}`", null, "world");
   }
 
+  @Test
+  public void shouldStringifyArraysAndMapsProperly() {
+    makeCase("[1, 2, 3, 4, 5] & ''", "[1, 2, 3, 4, 5]");
+    makeCase("{a: 1, b: 2, c: 3} & ''", "[a=1, b=2, c=3]");
+  }
+
+  @Test
+  public void shouldStringifyConcatenatedRangesProperly() {
+    makeCase("1..3 & 5..8", "[1, 2, 3][5, 6, 7, 8]");
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
