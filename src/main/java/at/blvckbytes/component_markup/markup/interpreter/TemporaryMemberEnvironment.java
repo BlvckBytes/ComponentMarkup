@@ -50,6 +50,7 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
     scopeStack.peek().put(name, value);
   }
 
+  @Override
   public void forEachKnownName(Consumer<String> handler) {
     Set<String> encounteredNames = new HashSet<>();
 
@@ -60,10 +61,10 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
       }
     }
 
-    for (String baseName : baseEnvironment.getNames()) {
+    baseEnvironment.forEachKnownName(baseName -> {
       if (encounteredNames.add(baseName))
         handler.accept(baseName);
-    }
+    });
   }
 
   @Override

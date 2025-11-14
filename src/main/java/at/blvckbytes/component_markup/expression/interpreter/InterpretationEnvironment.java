@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
 public class InterpretationEnvironment {
 
@@ -41,10 +41,6 @@ public class InterpretationEnvironment {
     this.context = context;
   }
 
-  public Set<String> getNames() {
-    return variables.keySet();
-  }
-
   public @Nullable Object getVariableValue(String name) {
     return variables.get(name);
   }
@@ -53,17 +49,16 @@ public class InterpretationEnvironment {
     return variables.containsKey(name);
   }
 
+  public void forEachKnownName(Consumer<String> handler) {
+    variables.keySet().forEach(handler);
+  }
+
   public ValueInterpreter getValueInterpreter() {
     return valueInterpreter;
   }
 
   public InterpretationEnvironment withVariable(String name, Object value) {
     this.variables.put(name, value);
-    return this;
-  }
-
-  public InterpretationEnvironment removeVariable(String name) {
-    this.variables.remove(name);
     return this;
   }
 
