@@ -426,10 +426,21 @@ public class ExpressionInterpreter {
     String stringKey = environment.getValueInterpreter().asString(key);
 
     if (source instanceof DirectFieldAccess) {
-      Object accessResult = ((DirectFieldAccess) source).accessField(stringKey);
+      DirectFieldAccess directFieldAccess = (DirectFieldAccess) source;
+      Object accessResult = directFieldAccess.accessField(stringKey);
 
       if (accessResult != DirectFieldAccess.UNKNOWN_FIELD_SENTINEL)
         return accessResult;
+
+      Set<String> availableFields = directFieldAccess.getAvailableFields();
+
+      String choicesString = "";
+
+      if (availableFields != null && !availableFields.isEmpty())
+        choicesString = "; choose one of: " + String.join(", ", availableFields);
+
+      logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + stringKey + "\"" + choicesString);
+      return null;
     }
 
     GlobalLogger.log(Level.WARNING, "Don't know how to access field " + stringKey + " of " + source.getClass());

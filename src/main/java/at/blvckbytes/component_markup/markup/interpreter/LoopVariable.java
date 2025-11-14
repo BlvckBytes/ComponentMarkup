@@ -7,6 +7,8 @@ package at.blvckbytes.component_markup.markup.interpreter;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public class LoopVariable implements InternalCopyable, DirectFieldAccess {
 
   public int index;
@@ -57,5 +59,10 @@ public class LoopVariable implements InternalCopyable, DirectFieldAccess {
       default:
         return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
     }
+  }
+
+  @Override
+  public @Nullable Set<String> getAvailableFields() {
+    return null;
   }
 }
