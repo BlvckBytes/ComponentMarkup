@@ -737,6 +737,37 @@ public class ExpressionParserTests {
     );
   }
 
+  @Test
+  public void shouldParseTernaryWithinSubscripting() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`lut´`.´`textures´`[´`current_page´ `<´ `number_pages´ `then´ `\"ARROW_RIGHT\"´ `else´ `\"ARROW_RIGHT_RED\"´`]´"
+    );
+
+    makeCase(
+      text,
+      infix(
+        infix(
+          terminal("lut", text.subView(0)),
+          token(InfixOperator.MEMBER, text.subView(1)),
+          terminal("textures", text.subView(2))
+        ),
+        token(InfixOperator.SUBSCRIPTING, text.subView(3)),
+        branching(
+          infix(
+            terminal("current_page", text.subView(4)),
+            token(InfixOperator.LESS_THAN, text.subView(5)),
+            terminal("number_pages", text.subView(6))
+          ),
+          token(InfixOperator.BRANCHING_THEN, text.subView(7)),
+          terminal("\"ARROW_RIGHT\"", text.subView(8)),
+          token(InfixOperator.BRANCHING_ELSE, text.subView(9)),
+          terminal("\"ARROW_RIGHT_RED\"", text.subView(10))
+        ),
+        token(Punctuation.CLOSING_BRACKET, text.subView(11))
+      )
+    );
+  }
+
   protected static ExpressionNode array(
     Token openingBracket,
     Token closingBracket,

@@ -119,7 +119,7 @@ public class ExpressionParser {
 
     tokenizer.nextToken();
 
-    ExpressionNode rhs = parseExpression(upcomingOperator);
+    ExpressionNode rhs = parseExpression(upcomingOperator == InfixOperator.SUBSCRIPTING ? null : upcomingOperator);
 
     if (rhs == null) {
       if (upcomingOperator == InfixOperator.SUBSCRIPTING) {
