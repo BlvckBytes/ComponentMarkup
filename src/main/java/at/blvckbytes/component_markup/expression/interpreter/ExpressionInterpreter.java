@@ -358,14 +358,8 @@ public class ExpressionInterpreter {
     if (source == null)
       return null;
 
-    if (source instanceof Map<?, ?>) {
-      if (isKeyIdentifierName) {
-        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
-        return null;
-      }
-
+    if (source instanceof Map<?, ?>)
       return ((Map<?, ?>) source).get(key);
-    }
 
     if (source instanceof List<?>) {
       if (isKeyIdentifierName) {
