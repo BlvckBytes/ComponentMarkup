@@ -70,4 +70,15 @@ public class InterpretationEnvironment {
   public InterpretationEnvironment copy() {
     return new InterpretationEnvironment(new HashMap<>(variables), valueInterpreter, interpretationPlatform, context);
   }
+
+  public InterpretationEnvironment inheritFrom(InterpretationEnvironment other, boolean allowShadowing) {
+    other.forEachKnownName(otherName -> {
+      if (doesVariableExist(otherName) && !allowShadowing)
+        return;
+
+      this.variables.put(otherName, other.getVariableValue(otherName));
+    });
+
+    return this;
+  }
 }
