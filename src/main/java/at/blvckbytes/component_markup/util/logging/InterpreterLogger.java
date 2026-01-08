@@ -6,11 +6,18 @@
 package at.blvckbytes.component_markup.util.logging;
 
 import at.blvckbytes.component_markup.util.InputView;
+import org.jetbrains.annotations.Nullable;
 
 public interface InterpreterLogger {
 
-  void logErrorScreen(InputView positionProvider, String message);
+  default void logErrorScreen(InputView positionProvider, String message) {
+    log(positionProvider, positionProvider.getPosition(), message, null);
+  }
 
-  void logErrorScreen(InputView positionProvider, String message, Throwable e);
+  default void logErrorScreen(InputView positionProvider, String message, Throwable e) {
+    log(positionProvider, positionProvider.getPosition(), message, null);
+  }
+
+  void log(InputView view, int position, String message, @Nullable Throwable e);
 
 }
