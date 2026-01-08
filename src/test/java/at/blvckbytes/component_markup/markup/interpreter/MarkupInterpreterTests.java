@@ -15,6 +15,7 @@ import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -1174,6 +1175,22 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       new JsonObjectBuilder()
         .string("text", "Hello, world")
         .string("color", "#E8871E")
+    );
+  }
+
+  @Test
+  public void shouldHandlePrefixOperatorOnMemberAccess() {
+    TextWithSubViews text = new TextWithSubViews(
+      "{len(lut.textures)}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("lut", Collections.singletonMap("textures", Arrays.asList("a", "b", "c"))),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "3")
     );
   }
 }

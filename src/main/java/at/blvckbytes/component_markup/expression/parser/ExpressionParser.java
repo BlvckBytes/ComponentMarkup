@@ -411,7 +411,8 @@ public class ExpressionParser {
       operatorToken = (PrefixOperatorToken) upcomingToken;
     }
 
-    ExpressionNode operand = parseArrayExpression();
+    boolean hasParens = operatorToken.operator.flags.contains(OperatorFlag.PARENS);
+    ExpressionNode operand = hasParens ? parseExpression(null) : parseArrayExpression();
 
     if (operand == null) {
       throw new ExpressionParseException(
