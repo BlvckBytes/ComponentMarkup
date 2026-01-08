@@ -126,6 +126,22 @@ public class ExpressionInterpreter {
           return result;
         }
 
+        case LEN: {
+          if (operandValue instanceof Map<?, ?>)
+            return ((Map<?, ?>) operandValue).size();
+
+          if (operandValue instanceof Collection<?>)
+            return ((Collection<?>) operandValue).size();
+
+          if (operandValue instanceof String)
+            return ((String) operandValue).length();
+
+          if (operandValue.getClass().isArray())
+            return Array.getLength(operandValue);
+
+          return -1;
+        }
+
         case SUM:
         case AVG: {
           if (!(operandValue instanceof Iterable<?>))

@@ -381,6 +381,16 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldCalculateLength() {
+    makeCase("len(\"\")", 0);
+    makeCase("len(\"Hello, world!\")", 13);
+    makeCase("len([])", 0);
+    makeCase("len([1, 2])", 2);
+    makeCase("len({})", 0);
+    makeCase("len({a: 5, b: 3, c: 1})", 3);
+  }
+
+  @Test
   public void shouldCalculateSumValueDeep() {
     makeCase("sum([8], [[21, 4], 3, 3], 5, 8, 2)", null, 54.0);
   }

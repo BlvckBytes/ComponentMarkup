@@ -32,6 +32,7 @@ public enum PrefixOperator implements EnumToken {
   MIN        ("min",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   AVG        ("avg",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   SUM        ("sum",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
+  LEN        ("len",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   ;
 
   public static final Set<String> RESERVED_NAMES;
