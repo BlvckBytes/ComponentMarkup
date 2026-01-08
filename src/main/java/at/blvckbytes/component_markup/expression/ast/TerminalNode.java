@@ -16,7 +16,6 @@ import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.StringJoiner;
 import java.util.logging.Level;
 
 public class TerminalNode extends ExpressionNode {
@@ -32,9 +31,16 @@ public class TerminalNode extends ExpressionNode {
       String variableName = (String) token.getPlainValue();
 
       if (!environment.doesVariableExist(variableName)) {
-        StringJoiner knownNamesJoiner = new StringJoiner(", ");
-        environment.forEachKnownName(knownNamesJoiner::add);
-        logger.logErrorScreen(token.raw, "Could not locate variable \"" + variableName + "\"; choose one of: " + knownNamesJoiner);
+        StringBuilder knownNames = new StringBuilder();
+
+        environment.forEachKnownName(name -> {
+          if (knownNames.length() != 0)
+            knownNames.append(", ");
+
+          knownNames.append(name);
+        });
+
+        logger.logErrorScreen(token.raw, "Could not locate variable \"" + variableName + "\"; choose one of: " + knownNames);
         return null;
       }
 
