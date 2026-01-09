@@ -313,7 +313,10 @@ public class ComponentSequence<B, C> {
       componentConstructor.addChildren(result, members);
     }
 
-    possiblyApplyNonTerminal(result);
+    Consumer<B> nonTerminalClosure = getNonTerminalApplyClosure();
+
+    if (nonTerminalClosure != null)
+      nonTerminalClosure.accept(result);
 
     ComputedStyle styleToApply;
 
@@ -336,9 +339,7 @@ public class ComponentSequence<B, C> {
     return new CombinationResult<>(result, styleToApply);
   }
 
-  private void possiblyApplyNonTerminal(B result) {
-    ConstructorWarning.clear();
-
+  private @Nullable Consumer<B> getNonTerminalApplyClosure() {
     if (nonTerminal instanceof ClickNode) {
       ClickNode clickNode = (ClickNode) nonTerminal;
 
@@ -348,83 +349,83 @@ public class ComponentSequence<B, C> {
         case COPY_TO_CLIPBOARD:
           if (!componentConstructor.doesSupport(ConstructorFeature.COPY_TO_CLIPBOARD_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action copy-to-clipboard is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickCopyToClipboardAction(result, value);
-          return;
+          return result -> componentConstructor.setClickCopyToClipboardAction(result, value);
 
         case SUGGEST_COMMAND:
           if (!componentConstructor.doesSupport(ConstructorFeature.SUGGEST_COMMAND_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action suggest-command is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickSuggestCommandAction(result, value);
-          return;
+          return result -> componentConstructor.setClickSuggestCommandAction(result, value);
 
         case RUN_COMMAND:
           if (!componentConstructor.doesSupport(ConstructorFeature.RUN_COMMAND_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action run-command is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickRunCommandAction(result, value);
-          return;
+          return result -> componentConstructor.setClickRunCommandAction(result, value);
 
         case CHANGE_PAGE:
           if (!componentConstructor.doesSupport(ConstructorFeature.CHANGE_PAGE_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action change-page is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickChangePageAction(result, value);
-          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
-          return;
+          return result -> {
+            ConstructorWarning.clear();
+            componentConstructor.setClickChangePageAction(result, value);
+            ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_PAGE_VALUE, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
+          };
 
         case OPEN_FILE:
           if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_FILE_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action open-file is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickOpenFileAction(result, value);
-          return;
+          return result -> componentConstructor.setClickOpenFileAction(result, value);
 
         case OPEN_URL: {
           if (!componentConstructor.doesSupport(ConstructorFeature.OPEN_URL_ACTION)) {
             interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The click-action open-url is not supported on this platform");
-            return;
+            return null;
           }
 
-          componentConstructor.setClickOpenUrlAction(result, value);
-          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
-          return;
+          return result -> {
+            ConstructorWarning.clear();
+            componentConstructor.setClickOpenUrlAction(result, value);
+            ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_URL, clickNode.value.getFirstMemberPositionProvider(), interpreter.getLogger(), value);
+          };
         }
 
         default:
           GlobalLogger.log(Level.WARNING, "Encountered unknown click-action: " + clickNode.action);
       }
 
-      return;
+      return null;
     }
 
     if (nonTerminal instanceof InsertNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.INSERT_ACTION)) {
         interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The insert-action is not supported on this platform");
-        return;
+        return null;
       }
 
       InsertNode insertNode = (InsertNode) nonTerminal;
       String value = interpreter.evaluateAsString(insertNode.value);
-      componentConstructor.setInsertAction(result, value);
-      return;
+
+      return result -> componentConstructor.setInsertAction(result, value);
     }
 
     if (nonTerminal instanceof EntityHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ENTITY_ACTION)) {
         interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-entity-action is not supported on this platform");
-        return;
+        return null;
       }
 
       EntityHoverNode entityHoverNode = (EntityHoverNode) nonTerminal;
@@ -439,18 +440,20 @@ public class ComponentSequence<B, C> {
         uuid = UUID.fromString(id);
       } catch (Throwable e) {
         interpreter.getLogger().logErrorScreen(entityHoverNode.id.getFirstMemberPositionProvider(), "Encountered malformed UUID: \"" + id + "\"");
-        return;
+        return null;
       }
 
-      componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
-      ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), interpreter.getLogger(), type);
-      return;
+      return result -> {
+        ConstructorWarning.clear();
+        componentConstructor.setHoverEntityAction(result, type, uuid, nameComponent);
+        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_ENTITY_TYPE, entityHoverNode.type.getFirstMemberPositionProvider(), interpreter.getLogger(), type);
+      };
     }
 
     if (nonTerminal instanceof ItemHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_ITEM_ACTION)) {
         interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-item-action is not supported on this platform");
-        return;
+        return null;
       }
 
       ItemHoverNode itemHoverNode = (ItemHoverNode) nonTerminal;
@@ -467,35 +470,39 @@ public class ComponentSequence<B, C> {
       boolean hideProperties = itemHoverNode.hideProperties != null && interpreter.evaluateAsBoolean(itemHoverNode.hideProperties);
       C nameComponent = itemHoverNode.name == null ? null : interpreter.interpretSubtree(itemHoverNode.name, SlotType.ITEM_NAME).get(0);
 
-      if (material == null)
-        material = DEFAULT_MATERIAL;
+      return result -> {
+        ConstructorWarning.clear();
 
-      componentConstructor.setHoverItemAction(result, material, count, nameComponent, loreComponents, hideProperties);
-
-      if (itemHoverNode.material != null)
-        ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), interpreter.getLogger(), material);
-      else {
-        ConstructorWarning.callIfEmitted(
-          ConstructorWarning.MALFORMED_MATERIAL,
-          () -> GlobalLogger.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
+        componentConstructor.setHoverItemAction(
+          result, material == null ? DEFAULT_MATERIAL : material,
+          count, nameComponent, loreComponents, hideProperties
         );
-      }
 
-      return;
+        if (material != null)
+          ConstructorWarning.logIfEmitted(ConstructorWarning.MALFORMED_MATERIAL, itemHoverNode.material.getFirstMemberPositionProvider(), interpreter.getLogger(), material);
+        else {
+          ConstructorWarning.callIfEmitted(
+            ConstructorWarning.MALFORMED_MATERIAL,
+            () -> GlobalLogger.log(Level.WARNING, "Encountered an invalid default material-value: \"" + DEFAULT_MATERIAL + "\"")
+          );
+        }
+      };
     }
 
     if (nonTerminal instanceof TextHoverNode) {
       if (!componentConstructor.doesSupport(ConstructorFeature.HOVER_TEXT_ACTION)) {
         interpreter.getLogger().logErrorScreen(nonTerminal.positionProvider, "The hover-text-action is not supported on this platform");
-        return;
+        return null;
       }
 
       TextHoverNode textHoverNode = (TextHoverNode) nonTerminal;
 
       C textComponent = interpreter.interpretSubtree(textHoverNode.value, SlotType.SINGLE_LINE_CHAT).get(0);
 
-      componentConstructor.setHoverTextAction(result, textComponent);
+      return result -> componentConstructor.setHoverTextAction(result, textComponent);
     }
+
+    return null;
   }
 
   public ComponentSequence<B, C> makeChildSequence(MarkupNode childNode) {
