@@ -33,9 +33,6 @@ public class ExpressionParseException extends RuntimeException implements ErrorM
   }
 
   public ExpressionParseException setRootView(InputView rootView) {
-    if (this.rootView != null)
-      throw new IllegalStateException("Root-view was already set");
-
     if (rootView == null)
       throw new IllegalStateException("Do not set a null-value");
 
