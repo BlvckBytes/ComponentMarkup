@@ -272,7 +272,10 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
 
   @Override
   public JsonObject finalizeComponent(JsonObject component) {
-    return component;
+    // Breaking the reference at this point is of utmost importance, because the exact same will
+    // happen on a real Paper server, where the builder is built - all changes to the builder beyond
+    // this point have no effect on the resulting component, and this reflects that behavior.
+    return component.deepCopy();
   }
 
   private void setFormat(JsonObject component, String formatKey, TriState value) {

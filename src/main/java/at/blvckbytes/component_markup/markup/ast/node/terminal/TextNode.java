@@ -16,4 +16,13 @@ public class TextNode extends TerminalNode {
 
     this.textValue = textValue;
   }
+
+  public static TextNode fromRawContents(RawNode rawNode) {
+    TextNode textNode = new TextNode(rawNode.positionProvider, String.valueOf(rawNode.value));
+
+    textNode.letBindings = rawNode.letBindings;
+    textNode.style = rawNode.getStyle();
+
+    return textNode;
+  }
 }

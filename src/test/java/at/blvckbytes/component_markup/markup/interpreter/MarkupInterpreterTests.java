@@ -297,6 +297,28 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldGenerateARainbowOnAnInterpolation() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow> I am {\"an amazing rainbow!\"}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
+  public void shouldGenerateARainbowOnAColoredInterpolation() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow override-colors> I am <&7>{\"an amazing rainbow!\"}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
   public void shouldGenerateATransition() {
     makeRecordedCase(
       new TextWithSubViews(

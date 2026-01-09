@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
@@ -52,23 +53,15 @@ public class ComponentSequence<B, C> {
   private final ComputedStyle parentStyle;
   private final ComputedStyle selfAndParentStyle;
 
-  public void onRaw(RawNode node) {
-    ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
+  public void onComponent(C component, StyledNode containingNode) {
+    ComputedStyle nodeStyle = ComputedStyle.computeFor(containingNode, interpreter);
 
     // Yes, this indeed is slightly hackish... That being said, we may need to modify the style
     // of- or add various events to this finalized component later on, so to unify the algorithm,
     // let's simply accept this little inefficiency as a tradeoff for increased flexibility.
-    if (componentConstructor.getComponentClass().isInstance(node.value)) {
-      B builder = componentConstructor.createTextComponent("");
-
-      //noinspection unchecked
-      componentConstructor.addChildren(builder, Collections.singletonList((C) node.value));
-
-      addMember(builder, nodeStyle);
-      return;
-    }
-
-    addBufferedText(String.valueOf(node.value), nodeStyle, null);
+    B builder = componentConstructor.createTextComponent("");
+    componentConstructor.addChildren(builder, Collections.singletonList(component));
+    addMember(builder, nodeStyle);
   }
 
   public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {

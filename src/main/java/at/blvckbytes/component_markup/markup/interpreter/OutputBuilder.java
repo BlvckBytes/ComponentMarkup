@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import at.blvckbytes.component_markup.constructor.SlotContext;
@@ -74,8 +75,8 @@ public class OutputBuilder<B, C> {
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 
-  public void onRaw(RawNode node) {
-    sequencesStack.peek().onRaw(node);
+  public void onComponent(C component, StyledNode containingNode) {
+    sequencesStack.peek().onComponent(component, containingNode);
   }
 
   private void combineAllSequencesAndResult() {

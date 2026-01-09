@@ -63,8 +63,14 @@ public class ColorizeCharsNode extends ColorizeNode {
 
       TextNode charNode = new TextNode(InputView.EMPTY, nodeContents);
 
-      if (nodeStyle != null)
-        charNode.getOrInstantiateStyle().inheritFrom(nodeStyle, null);
+      if (nodeStyle != null) {
+        NodeStyle charStyle = charNode.getOrInstantiateStyle();
+        charStyle.inheritFrom(nodeStyle, null);
+        // Block out inherited colors, seeing how we're overwriting them later. Otherwise,
+        // the rainbow-color may be overwritten at a later point in time when the component
+        // is actually finalized, which happens way after char-colorization.
+        charStyle.color = null;
+      }
 
       // No need to buffer, as all chars will be colored differently
       builder.onText(charNode, skipWhitespace && Character.isWhitespace(currentChar) ? null : state::addInjected, true);

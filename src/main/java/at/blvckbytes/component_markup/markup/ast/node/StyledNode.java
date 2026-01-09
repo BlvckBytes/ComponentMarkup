@@ -16,7 +16,7 @@ import java.util.List;
 
 public abstract class StyledNode extends MarkupNode {
 
-  private @Nullable NodeStyle style;
+  protected @Nullable NodeStyle style;
 
   public StyledNode(
     InputView positionProvider,

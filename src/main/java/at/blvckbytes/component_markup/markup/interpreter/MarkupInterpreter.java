@@ -565,8 +565,19 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       else if (node instanceof TextNode)
         builder.onText((TextNode) node, null, false);
 
-      else if (node instanceof RawNode)
-        builder.onRaw((RawNode) node);
+      else if (node instanceof RawNode) {
+        RawNode rawNode = (RawNode) node;
+        Object rawValue = rawNode.value;
+
+        if (componentConstructor.getComponentClass().isInstance(rawValue)) {
+          //noinspection unchecked
+          builder.onComponent((C) rawValue, rawNode);
+          return;
+        }
+
+        interpret(TextNode.fromRawContents(rawNode));
+        return;
+      }
 
       return;
     }
