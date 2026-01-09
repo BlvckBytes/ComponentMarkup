@@ -207,11 +207,14 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
   // ================================================================================
 
   @Override
-  public void setColor(JsonObject component, long packedColor) {
+  public void setColor(JsonObject component, long packedColor, boolean allowOverwrite) {
     if (packedColor == PackedColor.NULL_SENTINEL) {
       component.remove("color");
       return;
     }
+
+    if (!allowOverwrite && component.has("color"))
+      return;
 
     AnsiStyleColor ansiColor;
 

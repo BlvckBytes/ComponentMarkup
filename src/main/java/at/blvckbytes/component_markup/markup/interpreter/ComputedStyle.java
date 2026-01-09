@@ -360,7 +360,7 @@ public class ComputedStyle {
     ConstructorWarning.clear();
 
     if (packedColor != PackedColor.NULL_SENTINEL)
-      componentConstructor.setColor(component, packedColor);
+      componentConstructor.setColor(component, packedColor, false);
 
     if (packedShadowColor != PackedColor.NULL_SENTINEL && componentConstructor.doesSupport(ConstructorFeature.SHADOW_COLOR))
       componentConstructor.setShadowColor(component, packedShadowColor);

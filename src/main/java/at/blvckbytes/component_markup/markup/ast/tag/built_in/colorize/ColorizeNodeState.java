@@ -88,7 +88,7 @@ public abstract class ColorizeNodeState {
         // interpreter and output-builder; noting more, nothing less. They will never be perfect.
 
         //noinspection unchecked
-        componentConstructor.setColor((B) injectedComponent, color);
+        componentConstructor.setColor((B) injectedComponent, color, true);
       }
     }
 

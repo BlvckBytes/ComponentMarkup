@@ -83,7 +83,7 @@ public interface ComponentConstructor<B, C> {
   // Styling
   // ================================================================================
 
-  void setColor(B component, long packedColor);
+  void setColor(B component, long packedColor, boolean allowOverwrite);
 
   void setShadowColor(B component, long packedColor);
 
