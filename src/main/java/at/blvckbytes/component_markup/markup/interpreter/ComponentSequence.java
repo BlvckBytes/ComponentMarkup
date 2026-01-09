@@ -204,8 +204,8 @@ public class ComponentSequence<B, C> {
     bufferedTextsStyle = null;
   }
 
-  public B addSequence(ComponentSequence<B, C> sequence, @Nullable Runnable preFinalize) {
-    ExtendedBuilder<B> result = sequence.combineOrBubbleUpAndClearMembers(this, preFinalize);
+  public B addSequence(ComponentSequence<B, C> sequence) {
+    ExtendedBuilder<B> result = sequence.combineOrBubbleUpAndClearMembers(this);
 
     if (result == null)
       return componentConstructor.createTextComponent("");
@@ -242,7 +242,7 @@ public class ComponentSequence<B, C> {
     this.members.add(member);
   }
 
-  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence, @Nullable Runnable preFinalize) {
+  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
@@ -291,9 +291,6 @@ public class ComponentSequence<B, C> {
 
     else {
       result = new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
-
-      if (preFinalize != null)
-        preFinalize.run();
 
       for (ExtendedBuilder<B> member : members) {
         if (member.style != null)

@@ -57,14 +57,14 @@ public class OutputBuilder<B, C> {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public @Nullable B onNonTerminalEnd(@Nullable Runnable preFinalize) {
+  public @Nullable B onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
       GlobalLogger.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
       return null;
     }
 
     ComponentSequence<B, C> sequence = sequencesStack.pop();
-    return sequencesStack.peek().addSequence(sequence, preFinalize);
+    return sequencesStack.peek().addSequence(sequence);
   }
 
   public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
@@ -84,7 +84,7 @@ public class OutputBuilder<B, C> {
       ComponentSequence<B, C> sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        ExtendedBuilder<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null, null);
+        ExtendedBuilder<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
         if (combinationResult != null)
           result.add(combinationResult);
@@ -92,7 +92,7 @@ public class OutputBuilder<B, C> {
         break;
       }
 
-      sequencesStack.get(index - 1).addSequence(sequence, null);
+      sequencesStack.get(index - 1).addSequence(sequence);
     }
   }
 
