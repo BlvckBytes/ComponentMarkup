@@ -120,8 +120,6 @@ public abstract class InterpreterTestsBase {
     String actualJson = gsonInstance.toJson(actualArray);
 
     if (componentsFile.exists()) {
-      GlobalLogger.log(Level.INFO, "Found data for case " + testCaseName, false);
-
       String expectedJson;
 
       try (

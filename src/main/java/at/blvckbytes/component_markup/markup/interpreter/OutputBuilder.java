@@ -26,7 +26,7 @@ public class OutputBuilder<B, C> {
   private final ComponentConstructor<B, C> componentConstructor;
   private final @Nullable String breakString;
 
-  private final List<C> result;
+  private final List<ExtendedBuilder<B>> result;
 
   private final Stack<ComponentSequence<B, C>> sequencesStack;
 
@@ -49,7 +49,7 @@ public class OutputBuilder<B, C> {
       return;
     }
 
-    combineAllSequencesAndResult();
+    combineAllSequencesAndAddResult();
   }
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
@@ -79,20 +79,15 @@ public class OutputBuilder<B, C> {
     sequencesStack.peek().onComponent(component, containingNode);
   }
 
-  private void combineAllSequencesAndResult() {
+  private void combineAllSequencesAndAddResult() {
     for (int index = sequencesStack.size() - 1; index >= 0; --index) {
       ComponentSequence<B, C> sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        CombinationResult<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null, null);
+        ExtendedBuilder<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null, null);
 
-        if (combinationResult != CombinationResult.NO_OP_SENTINEL) {
-          // Apply the highest-up style manually now, without any further simplifying calculations
-          if (combinationResult.styleToApply != null)
-            combinationResult.styleToApply.applyStyles(combinationResult.component, componentConstructor, interpreter.getLogger());
-
-          result.add(componentConstructor.finalizeComponent(combinationResult.component));
-        }
+        if (combinationResult != null)
+          result.add(combinationResult);
 
         break;
       }
@@ -102,13 +97,19 @@ public class OutputBuilder<B, C> {
   }
 
   public List<C> build() {
-    combineAllSequencesAndResult();
-
-    if (result.isEmpty())
-      result.add(componentConstructor.finalizeComponent(componentConstructor.createTextComponent("")));
+    combineAllSequencesAndAddResult();
 
     sequencesStack.clear();
 
-    return result;
+    if (result.isEmpty()) {
+      result.add(new ExtendedBuilder<>(componentConstructor.createTextComponent("")));
+    }
+
+    List<C> finalizedResult = new ArrayList<>();
+
+    for (ExtendedBuilder<B> extendedBuilder : result)
+      finalizedResult.add(extendedBuilder.toFinalizedComponent(componentConstructor, interpreter.getLogger()));
+
+    return finalizedResult;
   }
 }

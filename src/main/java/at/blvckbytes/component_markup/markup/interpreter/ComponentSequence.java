@@ -16,7 +16,6 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.constructor.*;
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -35,7 +34,7 @@ public class ComponentSequence<B, C> {
   private final @Nullable MarkupNode nonTerminal;
   private final boolean isInitial;
 
-  private @Nullable List<MemberAndStyle<B>> memberEntries;
+  private @Nullable List<ExtendedBuilder<B>> members;
 
   // Style-properties which are equal amongst all members
   // E.g.: if all members are bold, that style may be hoisted up
@@ -61,7 +60,7 @@ public class ComponentSequence<B, C> {
     // let's simply accept this little inefficiency as a tradeoff for increased flexibility.
     B builder = componentConstructor.createTextComponent("");
     componentConstructor.addChildren(builder, Collections.singletonList(component));
-    addMember(builder, nodeStyle);
+    addMember(new ExtendedBuilder<>(builder).withStyle(nodeStyle));
   }
 
   public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
@@ -111,7 +110,7 @@ public class ComponentSequence<B, C> {
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
 
-    addMember(result, nodeStyle);
+    addMember(new ExtendedBuilder<>(result).withStyle(nodeStyle));
 
     if (creationHandler != null)
       creationHandler.accept(result);
@@ -123,7 +122,7 @@ public class ComponentSequence<B, C> {
     if (doNotBuffer) {
       B result = componentConstructor.createTextComponent(node.textValue);
 
-      addMember(result, nodeStyle);
+      addMember(new ExtendedBuilder<>(result).withStyle(nodeStyle));
 
       if (creationHandler != null)
         creationHandler.accept(result);
@@ -200,50 +199,50 @@ public class ComponentSequence<B, C> {
 
     bufferedTexts.clear();
 
-    addMember(result, bufferedTextsStyle);
+    addMember(new ExtendedBuilder<>(result).withStyle(bufferedTextsStyle));
 
     bufferedTextsStyle = null;
   }
 
   public B addSequence(ComponentSequence<B, C> sequence, @Nullable Runnable preFinalize) {
-    CombinationResult<B> result = sequence.combineOrBubbleUpAndClearMembers(this, preFinalize);
+    ExtendedBuilder<B> result = sequence.combineOrBubbleUpAndClearMembers(this, preFinalize);
 
-    if (result == CombinationResult.NO_OP_SENTINEL)
+    if (result == null)
       return componentConstructor.createTextComponent("");
 
-    addMember(result.component, result.styleToApply);
+    addMember(result);
 
-    return result.component;
+    return result.builder;
   }
 
-  private void addMember(B member, @Nullable ComputedStyle memberStyle) {
+  private void addMember(ExtendedBuilder<B> member) {
     concatAndInstantiateBufferedTexts();
 
-    if (this.memberEntries == null)
-      this.memberEntries = new ArrayList<>();
+    if (this.members == null)
+      this.members = new ArrayList<>();
 
-    if (memberStyle != null) {
+    if (member.style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
-      appendResetPropertiesIfApplicable(memberStyle, selfAndParentStyle);
+      appendResetPropertiesIfApplicable(member.style, selfAndParentStyle);
 
       // Don't apply styles which are already effective in this component
-      memberStyle.subtractStylesOnEquality(selfAndParentStyle, true);
+      member.style.subtractStylesOnEquality(selfAndParentStyle, true);
     }
 
     if (this.membersEqualStyle == null) {
-      this.membersEqualStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
+      this.membersEqualStyle = member.style == null ? new ComputedStyle() : member.style.copy();
     } else
-      this.membersEqualStyle.subtractStylesOnEquality(memberStyle, false);
+      this.membersEqualStyle.subtractStylesOnEquality(member.style, false);
 
     if (this.membersCommonStyle == null)
-      this.membersCommonStyle = memberStyle == null ? new ComputedStyle() : memberStyle.copy();
+      this.membersCommonStyle = member.style == null ? new ComputedStyle() : member.style.copy();
     else
-      this.membersCommonStyle.subtractStylesOnCommonality(memberStyle, false);
+      this.membersCommonStyle.subtractStylesOnCommonality(member.style, false);
 
-    this.memberEntries.add(new MemberAndStyle<>(member, memberStyle));
+    this.members.add(member);
   }
 
-  public @NotNull CombinationResult<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence, @Nullable Runnable preFinalize) {
+  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence, @Nullable Runnable preFinalize) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
@@ -255,11 +254,11 @@ public class ComponentSequence<B, C> {
         && (this.computedStyle == null || !this.computedStyle.reset)
         && (textCreationHandler == null)
     ) {
-      if (memberEntries != null) {
-        for (MemberAndStyle<B> memberAndStyle : memberEntries)
-          parentSequence.addMember(memberAndStyle.member, ComputedStyle.addMissing(memberAndStyle.style, this.computedStyle));
+      if (members != null) {
+        for (ExtendedBuilder<B> member : members)
+          parentSequence.addMember(member.withStyle(ComputedStyle.addMissing(member.style, this.computedStyle)));
 
-        this.memberEntries.clear();
+        this.members.clear();
       }
 
       if (bufferedTexts != null) {
@@ -276,47 +275,38 @@ public class ComponentSequence<B, C> {
       this.membersEqualStyle = null;
       this.membersCommonStyle = null;
 
-      //noinspection unchecked
-      return (CombinationResult<B>) CombinationResult.NO_OP_SENTINEL;
+      return null;
     }
 
     concatAndInstantiateBufferedTexts();
 
-    if (this.memberEntries == null || this.memberEntries.isEmpty())
-      return CombinationResult.empty(componentConstructor);
+    if (this.members == null || this.members.isEmpty())
+      return new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
 
-    B result;
+    ExtendedBuilder<B> result;
 
     // Apply no styles, as they're all kept in the common-style
-    if (memberEntries.size() == 1) {
-      MemberAndStyle<B> onlyMember = memberEntries.get(0);
-      result = onlyMember.member;
-    }
+    if (members.size() == 1)
+      result = members.get(0);
 
     else {
-      result = componentConstructor.createTextComponent("");
+      result = new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
 
       if (preFinalize != null)
         preFinalize.run();
 
-      List<C> members = new ArrayList<>();
+      for (ExtendedBuilder<B> member : members) {
+        if (member.style != null)
+          member.style.subtractStylesOnEquality(membersEqualStyle, true);
 
-      for (MemberAndStyle<B> memberEntry : memberEntries) {
-        if (memberEntry.style != null) {
-          memberEntry.style.subtractStylesOnEquality(membersEqualStyle, true);
-          memberEntry.style.applyStyles(memberEntry.member, componentConstructor, interpreter.getLogger());
-        }
-
-        members.add(componentConstructor.finalizeComponent(memberEntry.member));
+        result.addChild(member);
       }
-
-      componentConstructor.addChildren(result, members);
     }
 
     Consumer<B> nonTerminalClosure = getNonTerminalApplyClosure();
 
     if (nonTerminalClosure != null)
-      nonTerminalClosure.accept(result);
+      result.addNonTerminalApplyingClosure(nonTerminalClosure);
 
     ComputedStyle styleToApply;
 
@@ -332,11 +322,11 @@ public class ComponentSequence<B, C> {
       styleToApply.subtractStylesOnEquality(this.parentStyle, true);
     }
 
-    this.memberEntries.clear();
+    this.members.clear();
     this.membersEqualStyle = null;
     this.membersCommonStyle = null;
 
-    return new CombinationResult<>(result, styleToApply);
+    return result.withStyle(styleToApply);
   }
 
   private @Nullable Consumer<B> getNonTerminalApplyClosure() {
@@ -529,7 +519,7 @@ public class ComponentSequence<B, C> {
     this.parentStyle = parentStyle;
     this.slotContext = slotContext;
     this.resetContext = resetContext;
-    this.memberEntries = new ArrayList<>();
+    this.members = new ArrayList<>();
     this.componentConstructor = interpreter.getComponentConstructor();
     this.interpreter = interpreter;
     this.nonTerminal = doesNonTerminalHaveEffect(nonTerminal) ? nonTerminal : null;

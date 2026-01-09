@@ -463,6 +463,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
     boolean hasBeenRendered = false;
 
+    // TODO: Is this still necessary?
     // Interceptors may inject content, as - for example - the rainbow-colorizer does; it can only
     // know which colors to apply once its scope completed. The issue with calling #handleAfter
     // past the stage of completing the non-terminal on the OutputBuilder is that the latter will

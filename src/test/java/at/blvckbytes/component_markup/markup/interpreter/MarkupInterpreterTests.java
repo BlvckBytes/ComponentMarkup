@@ -273,6 +273,36 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldHandleMultipleEvents() {
+    makeCase(
+      new TextWithSubViews(
+        "<hover-text value={<&c>Hovered!}>",
+        "  <open-url value='https://google.com'>",
+        "    <&e>Hello, world!"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .string("color", "yellow")
+        .object("clickEvent", event -> (
+          event
+            .string("action", "open_url")
+            .string("value", "https://google.com")
+        ))
+        .object("hoverEvent", event -> (
+          event
+            .string("action", "show_text")
+            .object("contents", contents -> (
+              contents
+                .string("text", "Hovered!")
+                .string("color", "red")
+            ))
+        ))
+    );
+  }
+
+  @Test
   public void shouldGenerateAGradient() {
     TextWithSubViews text = new TextWithSubViews(
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
@@ -315,6 +345,21 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       ),
       new InterpretationEnvironment(),
       SlotType.CHAT
+    );
+  }
+
+  @Test
+  public void shouldGenerateARainbowOnMultipleLines() {
+    // TODO: The i let-binding is not updating properly on the loop... why?
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow override-colors>",
+        "  <container *for='1..3' *for-separator={<br/>}>",
+        "    <&7 *for='1..3' *for-separator={<&7>,<space/>}>Item #{1}.{2}</>",
+        "    <&e *if='loop.index % 2 eq 0'>x</>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE
     );
   }
 

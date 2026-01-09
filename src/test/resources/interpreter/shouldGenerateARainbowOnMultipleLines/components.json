@@ -1,0 +1,365 @@
+[
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "I",
+        "color": "#FF0000"
+      },
+      {
+        "text": "t",
+        "color": "#FF1300"
+      },
+      {
+        "text": "e",
+        "color": "#FF2600"
+      },
+      {
+        "text": "m ",
+        "color": "#FF3900"
+      },
+      {
+        "text": "#",
+        "color": "#FF4C00"
+      },
+      {
+        "text": "1",
+        "color": "#FF5E00"
+      },
+      {
+        "text": ".",
+        "color": "#FF7100"
+      },
+      {
+        "text": "2",
+        "color": "#FF8400"
+      },
+      {
+        "text": ",",
+        "color": "#FF9700"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "gold"
+      },
+      {
+        "text": "t",
+        "color": "#FFBD00"
+      },
+      {
+        "text": "e",
+        "color": "#FFD000"
+      },
+      {
+        "text": "m ",
+        "color": "#FFE300"
+      },
+      {
+        "text": "#",
+        "color": "#FFF600"
+      },
+      {
+        "text": "1",
+        "color": "#F6FF00"
+      },
+      {
+        "text": ".",
+        "color": "#E3FF00"
+      },
+      {
+        "text": "2",
+        "color": "#D0FF00"
+      },
+      {
+        "text": ",",
+        "color": "#BDFF00"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "#AAFF00"
+      },
+      {
+        "text": "t",
+        "color": "#97FF00"
+      },
+      {
+        "text": "e",
+        "color": "#84FF00"
+      },
+      {
+        "text": "m ",
+        "color": "#71FF00"
+      },
+      {
+        "text": "#",
+        "color": "#5EFF00"
+      },
+      {
+        "text": "1",
+        "color": "#4CFF00"
+      },
+      {
+        "text": ".",
+        "color": "#39FF00"
+      },
+      {
+        "text": "2",
+        "color": "#26FF00"
+      },
+      {
+        "text": "x",
+        "color": "#13FF00"
+      }
+    ]
+  },
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "I",
+        "color": "#00FF00"
+      },
+      {
+        "text": "t",
+        "color": "#00FF13"
+      },
+      {
+        "text": "e",
+        "color": "#00FF26"
+      },
+      {
+        "text": "m ",
+        "color": "#00FF39"
+      },
+      {
+        "text": "#",
+        "color": "#00FF4C"
+      },
+      {
+        "text": "1",
+        "color": "#00FF5E"
+      },
+      {
+        "text": ".",
+        "color": "#00FF71"
+      },
+      {
+        "text": "2",
+        "color": "#00FF84"
+      },
+      {
+        "text": ",",
+        "color": "#00FF97"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "#00FFAA"
+      },
+      {
+        "text": "t",
+        "color": "#00FFBD"
+      },
+      {
+        "text": "e",
+        "color": "#00FFD0"
+      },
+      {
+        "text": "m ",
+        "color": "#00FFE3"
+      },
+      {
+        "text": "#",
+        "color": "#00FFF6"
+      },
+      {
+        "text": "1",
+        "color": "#00F6FF"
+      },
+      {
+        "text": ".",
+        "color": "#00E3FF"
+      },
+      {
+        "text": "2",
+        "color": "#00D0FF"
+      },
+      {
+        "text": ",",
+        "color": "#00BDFF"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "#00AAFF"
+      },
+      {
+        "text": "t",
+        "color": "#0097FF"
+      },
+      {
+        "text": "e",
+        "color": "#0084FF"
+      },
+      {
+        "text": "m ",
+        "color": "#0071FF"
+      },
+      {
+        "text": "#",
+        "color": "#005EFF"
+      },
+      {
+        "text": "1",
+        "color": "#004CFF"
+      },
+      {
+        "text": ".",
+        "color": "#0039FF"
+      },
+      {
+        "text": "2",
+        "color": "#0026FF"
+      },
+      {
+        "text": "x",
+        "color": "#0013FF"
+      }
+    ]
+  },
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "I",
+        "color": "#0000FF"
+      },
+      {
+        "text": "t",
+        "color": "#1300FF"
+      },
+      {
+        "text": "e",
+        "color": "#2600FF"
+      },
+      {
+        "text": "m ",
+        "color": "#3900FF"
+      },
+      {
+        "text": "#",
+        "color": "#4C00FF"
+      },
+      {
+        "text": "1",
+        "color": "#5E00FF"
+      },
+      {
+        "text": ".",
+        "color": "#7100FF"
+      },
+      {
+        "text": "2",
+        "color": "#8400FF"
+      },
+      {
+        "text": ",",
+        "color": "#9700FF"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "#AA00FF"
+      },
+      {
+        "text": "t",
+        "color": "#BD00FF"
+      },
+      {
+        "text": "e",
+        "color": "#D000FF"
+      },
+      {
+        "text": "m ",
+        "color": "#E300FF"
+      },
+      {
+        "text": "#",
+        "color": "#F600FF"
+      },
+      {
+        "text": "1",
+        "color": "#FF00F6"
+      },
+      {
+        "text": ".",
+        "color": "#FF00E3"
+      },
+      {
+        "text": "2",
+        "color": "#FF00D0"
+      },
+      {
+        "text": ",",
+        "color": "#FF00BD"
+      },
+      {
+        "text": " ",
+        "color": "gray"
+      },
+      {
+        "text": "I",
+        "color": "#FF00AA"
+      },
+      {
+        "text": "t",
+        "color": "#FF0097"
+      },
+      {
+        "text": "e",
+        "color": "#FF0084"
+      },
+      {
+        "text": "m ",
+        "color": "#FF0071"
+      },
+      {
+        "text": "#",
+        "color": "#FF005E"
+      },
+      {
+        "text": "1",
+        "color": "#FF004C"
+      },
+      {
+        "text": ".",
+        "color": "#FF0039"
+      },
+      {
+        "text": "2",
+        "color": "#FF0026"
+      },
+      {
+        "text": "x",
+        "color": "#FF0013"
+      }
+    ]
+  }
+]
