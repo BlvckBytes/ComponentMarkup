@@ -74,6 +74,10 @@ public class OutputBuilder<B, C> {
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 
+  public void onRaw(RawNode node) {
+    sequencesStack.peek().onRaw(node);
+  }
+
   private void combineAllSequencesAndResult() {
     for (int index = sequencesStack.size() - 1; index >= 0; --index) {
       ComponentSequence<B, C> sequence = sequencesStack.get(index);

@@ -11,6 +11,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.StyledNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
+import at.blvckbytes.component_markup.markup.ast.node.terminal.RawNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TerminalNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.UnitNode;
@@ -22,7 +23,6 @@ import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpret
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.constructor.*;
-import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.OnceRunnable;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
@@ -360,7 +360,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       return;
 
     if (!(value instanceof MarkupNode)) {
-      interpret(new TextNode(InputView.EMPTY, String.valueOf(value)));
+      interpret(new RawNode(value));
       return;
     }
 
@@ -540,7 +540,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       if (interpolationValue instanceof MarkupNode)
         interpolatedNode = (MarkupNode) interpolationValue;
       else
-        interpolatedNode = new TextNode(InputView.EMPTY, environment.getValueInterpreter().asString(interpolationValue));
+        interpolatedNode = new RawNode(interpolationValue);
 
       NodeStyle nodeStyle = ((InterpolationNode) node).getStyle();
 
@@ -564,6 +564,9 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
       else if (node instanceof TextNode)
         builder.onText((TextNode) node, null, false);
+
+      else if (node instanceof RawNode)
+        builder.onRaw((RawNode) node);
 
       return;
     }

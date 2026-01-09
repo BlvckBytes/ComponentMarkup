@@ -52,6 +52,25 @@ public class ComponentSequence<B, C> {
   private final ComputedStyle parentStyle;
   private final ComputedStyle selfAndParentStyle;
 
+  public void onRaw(RawNode node) {
+    ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
+
+    // Yes, this indeed is slightly hackish... That being said, we may need to modify the style
+    // of- or add various events to this finalized component later on, so to unify the algorithm,
+    // let's simply accept this little inefficiency as a tradeoff for increased flexibility.
+    if (componentConstructor.getComponentClass().isInstance(node.value)) {
+      B builder = componentConstructor.createTextComponent("");
+
+      //noinspection unchecked
+      componentConstructor.addChildren(builder, Collections.singletonList((C) node.value));
+
+      addMember(builder, nodeStyle);
+      return;
+    }
+
+    addBufferedText(String.valueOf(node.value), nodeStyle, null);
+  }
+
   public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 

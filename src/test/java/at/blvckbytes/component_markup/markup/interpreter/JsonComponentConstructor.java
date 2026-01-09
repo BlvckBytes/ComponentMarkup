@@ -19,14 +19,19 @@ import java.util.UUID;
 
 public class JsonComponentConstructor implements ComponentConstructor<JsonObject, JsonObject> {
 
-  // ================================================================================
-  // SlotContext
-  // ================================================================================
+  @Override
+  public Class<JsonObject> getComponentClass() {
+    return JsonObject.class;
+  }
 
   @Override
   public boolean doesSupport(ConstructorFeature feature) {
     return true;
   }
+
+  // ================================================================================
+  // SlotContext
+  // ================================================================================
 
   @Override
   public SlotContext getSlotContext(SlotType slot) {

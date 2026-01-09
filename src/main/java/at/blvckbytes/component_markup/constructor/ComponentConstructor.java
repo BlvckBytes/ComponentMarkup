@@ -20,6 +20,8 @@ import java.util.UUID;
  */
 public interface ComponentConstructor<B, C> {
 
+  Class<C> getComponentClass();
+
   boolean doesSupport(ConstructorFeature feature);
 
   // ================================================================================
