@@ -381,6 +381,21 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldHandleNestedLoopIndexLetBindings() {
+    makeCase(
+      new TextWithSubViews(
+        "<container *for='1..3' *let-i='loop.index' *for-separator={;}>",
+        "  <container *for='1..3' *let-j='loop.index' *for-separator={,}>",
+        "    {i}{j}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "00,01,02;10,11,12;20,21,22")
+    );
+  }
+
+  @Test
   public void shouldGenerateAGradient() {
     TextWithSubViews text = new TextWithSubViews(
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
@@ -428,7 +443,6 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
 
   @Test
   public void shouldGenerateARainbowOnMultipleLines() {
-    // TODO: The i let-binding is not updating properly on the loop... why?
     makeRecordedCase(
       new TextWithSubViews(
         "<rainbow override-colors>",
