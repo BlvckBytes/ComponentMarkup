@@ -303,6 +303,84 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldHandleNestedHoverEventsWithMultipleContents() {
+    makeCase(
+      new TextWithSubViews(
+        "<hover-text value={<&c>Outer hover}>",
+        "  This message will show the outer-hover,",
+        "  <hover-text value={<&a>Inner hover}>",
+        "    except this part, which displays the inner-hover",
+        "  </>",
+        "  but this part will continue the outer-hover again.",
+        "</>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .object("hoverEvent", event -> (
+          event
+            .string("action", "show_text")
+            .object("contents", contents -> (
+              contents
+                .string("text", "Outer hover")
+                .string("color", "red")
+            ))
+        ))
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "This message will show the outer-hover,")
+            ))
+            .object(item -> (
+              item
+                .string("text", "except this part, which displays the inner-hover")
+                .object("hoverEvent", event -> (
+                  event
+                    .string("action", "show_text")
+                    .object("contents", contents -> (
+                      contents
+                        .string("text", "Inner hover")
+                        .string("color", "green")
+                    ))
+                ))
+            ))
+            .object(item -> (
+              item
+                .string("text", "but this part will continue the outer-hover again.")
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldHandleNestedHoverEventsWithSingleContent() {
+    makeCase(
+      new TextWithSubViews(
+        "<hover-text value={<&c>Outer hover}>",
+        "  <hover-text value={<&a>Inner hover}>",
+        "    Hello, world!",
+        "  </>",
+        "</>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .object("hoverEvent", event -> (
+          event
+            .string("action", "show_text")
+            .object("contents", contents -> (
+              contents
+                .string("text", "Inner hover")
+                .string("color", "green")
+            ))
+        ))
+    );
+  }
+
+  @Test
   public void shouldGenerateAGradient() {
     TextWithSubViews text = new TextWithSubViews(
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
