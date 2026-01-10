@@ -921,6 +921,23 @@ public class CmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldParseMultiLineStringAttributeValue() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`red´ `a´='''`this is",
+      "a multi-line",
+      "string-literal´'''>"
+    );
+
+    makeCase(
+      text,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new StringAttributeEvent(text.subView(1), text.subView(2), "a", "this is\na multi-line\nstring-literal"),
+      new TagOpenEndEvent(text.subView(0), false),
+      new InputEndEvent()
+    );
+  }
+
   private void makeMalformedAttributeValueCase(CmlParseError expectedError, String valueExpression) {
     TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 

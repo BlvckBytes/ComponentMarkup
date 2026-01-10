@@ -248,6 +248,24 @@ public class ExpressionTokenizerTests {
   }
 
   @Test
+  public void shouldTokenizeMultiLineStrings() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`'''this is a",
+      "string which ' spans",
+      "multiple '' lines!'''´",
+      "`\"\"\"this is a",
+      "string which \" spans",
+      "multiple \"\" lines!\"\"\"´"
+    );
+
+    makeCase(
+      text,
+      "'this is a\nstring which ' spans\nmultiple '' lines!'", text.subView(0),
+      "\"this is a\nstring which \" spans\nmultiple \"\" lines!\"", text.subView(1)
+    );
+  }
+
+  @Test
   public void shouldThrowOnMalformedIdentifier() {
     String[] malformedIdentifiers = {
       "my_IDEntifier",
@@ -443,7 +461,7 @@ public class ExpressionTokenizerTests {
 
         String stringContents = stringValue.substring(1, stringLength - 1);
 
-        token = new StringToken(subView, stringContents);
+        token = new StringToken(subView, InputView.of(stringContents));
       }
       else
         token = new IdentifierToken(subView, stringValue);

@@ -46,13 +46,21 @@ public class ExpressionTokenizer {
 
     int rawStartInclusive = input.getPosition();
 
+    boolean isMultiline = false;
+
+    if (quoteChar != '`' && input.peekChar(0) == quoteChar && input.peekChar(1) == quoteChar) {
+      isMultiline = true;
+      input.nextChar();
+      input.nextChar();
+    }
+
     char currentChar;
     boolean isTerminated = false;
 
     int literalStartInclusive = rawStartInclusive + 1;
 
     while ((currentChar = input.nextChar()) != 0) {
-      if (currentChar == '\n')
+      if (currentChar == '\n' && !isMultiline)
         break;
 
       if (quoteChar == '`') {
@@ -110,19 +118,30 @@ public class ExpressionTokenizer {
       if (tokenOutput != null && Character.isWhitespace(currentChar))
         tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
 
-      if (currentChar == quoteChar) {
-        if (input.priorChar(1) != '\\') {
-          isTerminated = true;
-          break;
-        }
+      if (currentChar != quoteChar)
+        continue;
 
+      if (input.priorChar(1) == '\\') {
         int backslashPosition = input.getPosition() - 1;
 
         input.addIndexToBeRemoved(backslashPosition);
 
         if (tokenOutput != null)
           tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+
+        continue;
       }
+
+      if (isMultiline) {
+        if (input.peekChar(0) != quoteChar || input.peekChar(1) != quoteChar)
+          continue;
+
+        input.nextChar();
+        input.nextChar();
+      }
+
+      isTerminated = true;
+      break;
     }
 
     if (!isTerminated)
@@ -132,8 +151,14 @@ public class ExpressionTokenizer {
 
     InputView rawContents = input.buildSubViewAbsolute(rawStartInclusive, rawEndInclusive + 1);
 
-    if (quoteChar != '`')
-      return new StringToken(rawContents, rawContents.buildSubViewRelative(1, -1).buildString());
+    if (quoteChar != '`') {
+      InputView value = rawContents.buildSubViewRelative(
+        isMultiline ? 3 : 1,
+        isMultiline ? -3 : -1
+      );
+
+      return new StringToken(rawContents, value);
+    }
 
     if (rawEndInclusive > literalStartInclusive || members.isEmpty())
       members.add(input.buildSubViewAbsolute(literalStartInclusive, rawEndInclusive));

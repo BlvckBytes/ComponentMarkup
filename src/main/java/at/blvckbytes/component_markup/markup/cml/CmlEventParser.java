@@ -211,7 +211,7 @@ public class CmlEventParser {
       tokenOutput.emitToken(TokenType.MARKUP__STRING, stringToken.raw);
 
     if (stringToken instanceof StringToken) {
-      consumer.onStringAttribute(attributeName, stringToken.raw.buildSubViewRelative(1, -1));
+      consumer.onStringAttribute(attributeName, ((StringToken) stringToken).value);
       return;
     }
 

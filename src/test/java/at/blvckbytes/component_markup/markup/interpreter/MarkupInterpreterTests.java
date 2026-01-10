@@ -396,6 +396,38 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldIterateMultiLineComplexDataStructure() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  *let-data='''",
+        "    [",
+        "      {",
+        "        a: 'first',",
+        "        b: 1",
+        "      },",
+        "      {",
+        "        a: 'second',",
+        "        b: 2",
+        "      },",
+        "      {",
+        "        a: 'third',",
+        "        b: 3",
+        "      }",
+        "    ]",
+        "  '''",
+        "  *for-entry='data'",
+        "  *for-separator={;}",
+        ">{entry.a}-{entry.b}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "first-1;second-2;third-3")
+    );
+  }
+
+  @Test
   public void shouldGenerateAGradient() {
     TextWithSubViews text = new TextWithSubViews(
       "<gradient color=\"red\" color=\"blue\">Hello, <bold>world</>!"
