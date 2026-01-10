@@ -18,15 +18,19 @@ public class ExtendedBuilder<B> {
 
   public @Nullable ComputedStyle style;
 
-  public ExtendedBuilder(B builder) {
+  public ExtendedBuilder(B builder, @Nullable ComputedStyle style) {
     this.builder = builder;
+    this.style = style;
   }
 
-  public void addChild(ExtendedBuilder<B> child) {
-    if (this.children == null)
-      this.children = new ArrayList<>();
+  public ExtendedBuilder(B builder, @Nullable ComputedStyle style, @Nullable List<ExtendedBuilder<B>> children) {
+    this.builder = builder;
+    this.style = style;
+    this.children = children;
+  }
 
-    this.children.add(child);
+  public ExtendedBuilder(B builder) {
+    this.builder = builder;
   }
 
   public void addNonTerminalApplyingClosure(@NotNull Consumer<B> nonTerminalApplyingClosure) {
@@ -34,13 +38,6 @@ public class ExtendedBuilder<B> {
       this.nonTerminalApplyingClosures = new ArrayList<>();
 
     this.nonTerminalApplyingClosures.add(nonTerminalApplyingClosure);
-  }
-
-  public ExtendedBuilder<B> withStyle(ComputedStyle style) {
-    // TODO: Set style vs add to style - this cannot possibly cover all cases... Or does it?
-    //       Either way, I'd like this to represent intent better.
-    this.style = style;
-    return this;
   }
 
   public <C> C toFinalizedComponent(ComponentConstructor<B, C> componentConstructor, InterpreterLogger logger) {

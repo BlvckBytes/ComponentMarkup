@@ -60,7 +60,7 @@ public class ComponentSequence<B, C> {
     // let's simply accept this little inefficiency as a tradeoff for increased flexibility.
     B builder = componentConstructor.createTextComponent("");
     componentConstructor.addChildren(builder, Collections.singletonList(component));
-    addMember(new ExtendedBuilder<>(builder).withStyle(nodeStyle));
+    addMember(new ExtendedBuilder<>(builder, nodeStyle));
   }
 
   public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
@@ -110,7 +110,7 @@ public class ComponentSequence<B, C> {
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
 
-    addMember(new ExtendedBuilder<>(result).withStyle(nodeStyle));
+    addMember(new ExtendedBuilder<>(result, nodeStyle));
 
     if (creationHandler != null)
       creationHandler.accept(result);
@@ -122,7 +122,7 @@ public class ComponentSequence<B, C> {
     if (doNotBuffer) {
       B result = componentConstructor.createTextComponent(node.textValue);
 
-      addMember(new ExtendedBuilder<>(result).withStyle(nodeStyle));
+      addMember(new ExtendedBuilder<>(result, nodeStyle));
 
       if (creationHandler != null)
         creationHandler.accept(result);
@@ -199,7 +199,7 @@ public class ComponentSequence<B, C> {
 
     bufferedTexts.clear();
 
-    addMember(new ExtendedBuilder<>(result).withStyle(bufferedTextsStyle));
+    addMember(new ExtendedBuilder<>(result, bufferedTextsStyle));
 
     bufferedTextsStyle = null;
   }
@@ -255,8 +255,10 @@ public class ComponentSequence<B, C> {
         && (textCreationHandler == null)
     ) {
       if (members != null) {
-        for (ExtendedBuilder<B> member : members)
-          parentSequence.addMember(member.withStyle(ComputedStyle.addMissing(member.style, this.computedStyle)));
+        for (ExtendedBuilder<B> member : members) {
+          member.style = ComputedStyle.addMissing(member.style, this.computedStyle);
+          parentSequence.addMember(member);
+        }
 
         this.members.clear();
       }
@@ -290,14 +292,28 @@ public class ComponentSequence<B, C> {
       result = members.get(0);
 
     else {
-      result = new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
+      List<ExtendedBuilder<B>> children = new ArrayList<>();
 
       for (ExtendedBuilder<B> member : members) {
         if (member.style != null)
           member.style.subtractStylesOnEquality(membersEqualStyle, true);
 
-        result.addChild(member);
+        children.add(member);
       }
+
+      // If there's an equal style on all elements, its properties prevail over the container's
+      ComputedStyle styleToApply = ComputedStyle.addMissing(membersEqualStyle, computedStyle);
+
+      if (styleToApply != null) {
+        if (membersCommonStyle != null) {
+          membersCommonStyle.subtractStylesOnEquality(membersEqualStyle, true);
+          styleToApply.subtractStylesOnCommonality(membersCommonStyle, true);
+        }
+
+        styleToApply.subtractStylesOnEquality(this.parentStyle, true);
+      }
+
+      result = new ExtendedBuilder<>(componentConstructor.createTextComponent(""), styleToApply, children);
     }
 
     Consumer<B> nonTerminalClosure = getNonTerminalApplyClosure();
@@ -305,25 +321,11 @@ public class ComponentSequence<B, C> {
     if (nonTerminalClosure != null)
       result.addNonTerminalApplyingClosure(nonTerminalClosure);
 
-    ComputedStyle styleToApply;
-
-    // If there's an equal style on all elements, its properties prevail over the container's
-    styleToApply = ComputedStyle.addMissing(membersEqualStyle, computedStyle);
-
-    if (styleToApply != null) {
-      if (membersCommonStyle != null) {
-        membersCommonStyle.subtractStylesOnEquality(membersEqualStyle, true);
-        styleToApply.subtractStylesOnCommonality(membersCommonStyle, true);
-      }
-
-      styleToApply.subtractStylesOnEquality(this.parentStyle, true);
-    }
-
     this.members.clear();
     this.membersEqualStyle = null;
     this.membersCommonStyle = null;
 
-    return result.withStyle(styleToApply);
+    return result;
   }
 
   private @Nullable Consumer<B> getNonTerminalApplyClosure() {
