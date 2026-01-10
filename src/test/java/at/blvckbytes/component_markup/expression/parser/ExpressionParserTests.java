@@ -417,6 +417,22 @@ public class ExpressionParserTests {
   }
 
   @Test
+  public void shouldParseJsonCompatibleMapSyntax() {
+    TextWithSubViews text = new TextWithSubViews("`{´\"`a´\": `'first'´, \"`b´\": `'second'´, \"`c´\": `'third'´`}´");
+
+    makeCase(
+      text,
+      map(
+        token(Punctuation.OPENING_CURLY, text.subView(0)),
+        token(Punctuation.CLOSING_CURLY, text.subView(7)),
+        token("'a'", text.subView(1)), terminal("'first'", text.subView(2)),
+        token("'b'", text.subView(3)), terminal("'second'", text.subView(4)),
+        token("'c'", text.subView(5)), terminal("'third'", text.subView(6))
+      )
+    );
+  }
+
+  @Test
   public void shouldSubscriptIntoImmediateArray() {
     TextWithSubViews text = new TextWithSubViews(
       "`[´`0´, `1´, `2´`]´`[´`0´`]´"
@@ -786,8 +802,12 @@ public class ExpressionParserTests {
     if (keyValuePairs.length % 2 != 0)
       throw new IllegalStateException("Expected there to be an even number of keys and values for 1:1 correspondence");
 
-    for (int i = 0; i < keyValuePairs.length; i += 2)
-      mapItems.put((IdentifierToken) keyValuePairs[i], (ExpressionNode) keyValuePairs[i + 1]);
+    for (int i = 0; i < keyValuePairs.length; i += 2) {
+      // Let's still keep the tokens around for now, despite the map no longer containing them. This was
+      // a hack anyway, seeing how the map has no requirement of knowing the positions of keys whatsoever.
+      TerminalToken keyToken = (TerminalToken) keyValuePairs[i];
+      mapItems.put((String) keyToken.getPlainValue(), (ExpressionNode) keyValuePairs[i + 1]);
+    }
 
     return new MapNode(openingBracket, mapItems, closingBracket);
   }

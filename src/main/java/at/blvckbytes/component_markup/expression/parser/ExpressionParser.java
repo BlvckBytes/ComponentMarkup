@@ -304,25 +304,28 @@ public class ExpressionParser {
     ExpressionNode lastMapItem;
 
     PunctuationToken delimiterToken = null;
-    IdentifierToken keyToken;
 
     while (true) {
-      if ((keyToken = tokenizer.peekToken(IdentifierToken.class)) == null) {
+      TerminalToken upcomingTerminal = tokenizer.peekToken(TerminalToken.class);
+
+      if (!(upcomingTerminal instanceof StringToken || upcomingTerminal instanceof IdentifierToken)) {
         if (mapItems.isEmpty() || delimiterToken == null)
           break;
 
         throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_MAP_KEY);
       }
 
-      tokenizer.nextToken(); // <identifier>
+      tokenizer.nextToken();
+
+      String mapKey = (String) upcomingTerminal.getPlainValue();
 
       if ((delimiterToken = peekPossibleClosingCurly()) == null)
         break;
 
       // Shorthand for equal key-name and value-identifier
       if (delimiterToken.punctuation == Punctuation.CLOSING_CURLY || delimiterToken.punctuation == Punctuation.COMMA) {
-        lastMapItem = new TerminalNode(keyToken);
-        mapItems.put(keyToken, lastMapItem);
+        lastMapItem = new TerminalNode(upcomingTerminal);
+        mapItems.put(mapKey, lastMapItem);
 
         if (delimiterToken.punctuation == Punctuation.CLOSING_CURLY)
           break;
@@ -339,7 +342,7 @@ public class ExpressionParser {
         if (lastMapItem == null)
           throw new ExpressionParseException(delimiterToken.raw.endExclusive - 1, ExpressionParserError.EXPECTED_MAP_VALUE);
 
-        mapItems.put(keyToken, lastMapItem);
+        mapItems.put(mapKey, lastMapItem);
       }
 
       delimiterToken = peekPossibleClosingCurly();
