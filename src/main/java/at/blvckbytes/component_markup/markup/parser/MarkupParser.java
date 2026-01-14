@@ -852,9 +852,9 @@ public class MarkupParser implements CmlEventConsumer {
 
       return expression;
     } catch (ExpressionTokenizeException expressionTokenizeException) {
-      throw new MarkupParseException(value.startInclusive, expressionTokenizeException);
+      throw new MarkupParseException(expressionTokenizeException);
     } catch (ExpressionParseException expressionParseException) {
-      throw new MarkupParseException(expressionParseException.position, expressionParseException);
+      throw new MarkupParseException(expressionParseException);
     }
   }
 }

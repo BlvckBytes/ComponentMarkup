@@ -80,9 +80,9 @@ public class CmlEventParser {
         try {
           interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(new ExpressionTokenizer(input, tokenOutput), tokenOutput);
         } catch (ExpressionTokenizeException expressionTokenizeException) {
-          throw new MarkupParseException(startInclusive, expressionTokenizeException);
+          throw new MarkupParseException(expressionTokenizeException);
         } catch (ExpressionParseException expressionParseException) {
-          throw new MarkupParseException(expressionParseException.position, expressionParseException);
+          throw new MarkupParseException(expressionParseException);
         }
 
         input.consumeWhitespace(tokenOutput);
@@ -199,9 +199,9 @@ public class CmlEventParser {
     try {
       stringToken = expressionTokenizer.parseStringToken();
     } catch (ExpressionTokenizeException expressionTokenizeException) {
-      throw new MarkupParseException(attributeName.startInclusive, expressionTokenizeException);
+      throw new MarkupParseException(expressionTokenizeException);
     } catch (ExpressionParseException expressionParseException) {
-      throw new MarkupParseException(expressionParseException.position, expressionParseException);
+      throw new MarkupParseException(expressionParseException);
     }
 
     if (stringToken == null)

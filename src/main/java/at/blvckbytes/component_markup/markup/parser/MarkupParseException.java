@@ -42,18 +42,18 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(int position, ExpressionParseException expressionParseException) {
+  public MarkupParseException(ExpressionParseException expressionParseException) {
     super(expressionParseException);
 
-    this.position = position;
+    this.position = expressionParseException.position;
     this.error = MarkupParseError.EXPRESSION_PARSE_ERROR;
     this.messagePlaceholders = new String[0];
   }
 
-  public MarkupParseException(int position, ExpressionTokenizeException expressionTokenizeException) {
+  public MarkupParseException(ExpressionTokenizeException expressionTokenizeException) {
     super(expressionTokenizeException);
 
-    this.position = position;
+    this.position = expressionTokenizeException.position;
     this.error = MarkupParseError.EXPRESSION_TOKENIZE_ERROR;
     this.messagePlaceholders = new String[0];
   }
