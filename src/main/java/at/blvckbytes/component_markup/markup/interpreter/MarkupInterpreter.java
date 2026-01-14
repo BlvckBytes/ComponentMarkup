@@ -563,6 +563,21 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
           return;
         }
 
+        // Let's also allow to directly render collections of components, which becomes convenient when
+        // considering the fact that the interpreter always returns lists; being this "lenient" (which
+        // has no real downsides to it) will cause users of this library to experience less frustration.
+        if (rawValue instanceof Collection) {
+          Collection<?> collection = (Collection<?>) rawValue;
+
+          if (collection.stream().allMatch(componentConstructor.getComponentClass()::isInstance)) {
+            for (Object component : collection) {
+              //noinspection unchecked
+              builder.onComponent((C) component, rawNode);
+            }
+            return;
+          }
+        }
+
         interpret(TextNode.fromRawContents(rawNode));
         return;
       }
