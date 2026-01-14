@@ -82,7 +82,7 @@ public class CmlEventParser {
         } catch (ExpressionTokenizeException expressionTokenizeException) {
           throw new MarkupParseException(startInclusive, expressionTokenizeException);
         } catch (ExpressionParseException expressionParseException) {
-          throw new MarkupParseException(startInclusive, expressionParseException);
+          throw new MarkupParseException(expressionParseException.position, expressionParseException);
         }
 
         input.consumeWhitespace(tokenOutput);
@@ -201,7 +201,7 @@ public class CmlEventParser {
     } catch (ExpressionTokenizeException expressionTokenizeException) {
       throw new MarkupParseException(attributeName.startInclusive, expressionTokenizeException);
     } catch (ExpressionParseException expressionParseException) {
-      throw new MarkupParseException(attributeName.startInclusive, expressionParseException);
+      throw new MarkupParseException(expressionParseException.position, expressionParseException);
     }
 
     if (stringToken == null)
