@@ -62,24 +62,31 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     if (value instanceof Boolean)
       return ((Boolean) value);
 
-    String stringValue;
+    if (value instanceof Collection)
+      return !((Collection<?>) value).isEmpty();
 
-    if (value instanceof String)
-      stringValue = (String) value;
-    else
-      stringValue = asStringOrNull(value);
+    if (value instanceof Map)
+      return !((Map<?, ?>) value).isEmpty();
 
-    if (stringValue == null)
-      return false;
+    if (value.getClass().isArray())
+      return Array.getLength(value) != 0;
 
-    switch (stringValue) {
-      case "true":
-        return true;
-      case "false":
-        return false;
-      default:
-        return stringValue.isEmpty();
+    if (value instanceof String) {
+      String stringValue = (String) value;
+
+      switch (stringValue) {
+        case "true":
+          return true;
+        case "false":
+          return false;
+        default:
+          return !stringValue.trim().isEmpty();
+      }
     }
+
+    // All other, not specifically accounted-for types simply evaluate to true
+    // if they're present, no matter their actual value.
+    return true;
   }
 
   private @Nullable String asStringOrNull(@Nullable Object value) {
