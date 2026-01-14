@@ -13,6 +13,12 @@ import java.util.*;
 
 public class DefaultValueInterpreter implements ValueInterpreter {
 
+  // Let's make string-valued boolean-literals be compatible with YAMLs boolean-specification, seeing how I
+  // prefer to completely avoid YAML-typing by stringify-ing all scalar values and running them through my parser.
+  // See: https://yaml.org/type/bool.html
+  private static final List<String> BOOLEAN_TRUE_LITERALS = Arrays.asList("true", "yes", "y", "on");
+  private static final List<String> BOOLEAN_FALSE_LITERALS = Arrays.asList("false", "no", "n", "off");
+
   @Override
   public long asLong(@Nullable Object value) {
     return asLongOrDouble(value).longValue();
@@ -74,11 +80,11 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     if (value instanceof String) {
       String stringValue = (String) value;
 
-      if (stringValue.equalsIgnoreCase("true"))
+      if (BOOLEAN_TRUE_LITERALS.stream().anyMatch(stringValue::equalsIgnoreCase))
         return true;
 
-      if (stringValue.equalsIgnoreCase("false"))
-        return true;
+      if (BOOLEAN_FALSE_LITERALS.stream().anyMatch(stringValue::equalsIgnoreCase))
+        return false;
 
       return !stringValue.trim().isEmpty();
     }
@@ -143,11 +149,23 @@ public class DefaultValueInterpreter implements ValueInterpreter {
   @Override
   @SuppressWarnings("unchecked")
   public @NotNull List<Object> asList(@Nullable Object value) {
+    // This language cannot mutate data - pass lists through untouched, by reference.
     if (value instanceof List<?>)
       return (List<Object>) value;
 
+    // Keep this as a fast-path for everything that can internally be mem-copied.
     if (value instanceof Collection<?>)
       return new ArrayList<>((Collection<?>) value);
+
+    // And go with element-by-element extraction, including possibly required resizing, otherwise.
+    if (value instanceof Iterable<?>) {
+      List<Object> result = new ArrayList<>();
+
+      for (Object item : (Iterable<?>) value)
+        result.add(item);
+
+      return result;
+    }
 
     if (value instanceof Map<?, ?>)
       return new ArrayList<>(((Map<?, ?>) value).keySet());
