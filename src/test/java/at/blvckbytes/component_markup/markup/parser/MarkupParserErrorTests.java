@@ -615,6 +615,19 @@ public class MarkupParserErrorTests {
         "3: />"
       )
     );
+
+    makeErrorScreenCase(
+      new TextWithSubViews(
+        "<&7 *if=\"my_value gt 55\">"
+      ),
+      new TextWithSubViews(
+        // We use > instead of gt, so the latter will be interpreted as yet another
+        // identifier, which will cause a EXPECTED_EOS to be thrown.
+        "1: <&7 *if=\"my_value gt 55\">",
+        "---------------------^",
+        "Error: Expected the input be over at this point (dangling/trailing tokens?)"
+      )
+    );
   }
 
   @Test
