@@ -74,14 +74,13 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     if (value instanceof String) {
       String stringValue = (String) value;
 
-      switch (stringValue) {
-        case "true":
-          return true;
-        case "false":
-          return false;
-        default:
-          return !stringValue.trim().isEmpty();
-      }
+      if (stringValue.equalsIgnoreCase("true"))
+        return true;
+
+      if (stringValue.equalsIgnoreCase("false"))
+        return true;
+
+      return !stringValue.trim().isEmpty();
     }
 
     // All other, not specifically accounted-for types simply evaluate to true
