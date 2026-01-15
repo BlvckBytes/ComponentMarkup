@@ -23,7 +23,7 @@ public class TranslateTag extends TagDefinition {
 
   @Override
   public boolean matchName(InputView tagName) {
-    return tagName.contentEquals("translate", true);
+    return tagName.contentEquals("translate", true) || tagName.contentEquals("tr", true);
   }
 
   @Override
