@@ -287,9 +287,12 @@ public class ComponentSequence<B, C> {
 
     ExtendedBuilder<B> result;
 
-    // Apply no styles, as they're all kept in the common-style
-    if (members.size() == 1)
+    if (members.size() == 1) {
       result = members.get(0);
+
+      // Since this is the only member, also apply all styles of the parent, as we do not wrap it.
+      result.style = ComputedStyle.addMissing(result.style, computedStyle);
+    }
 
     else {
       List<ExtendedBuilder<B>> children = new ArrayList<>();

@@ -1384,4 +1384,66 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "3")
     );
   }
+
+  @Test
+  public void shouldRenderOutsideStyleThroughEvents() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<&7>Aktuell aktives Prädikat:<space/>",
+      "  <u>",
+      "    <hover-text value={<&a>Klicke auf das Prädikat, um einen Editierungsbefehl zu erhalten.}>",
+      "      <suggest-command value=×`{set_command}×`>",
+      "        <&a>{predicate}",
+      "  </u>",
+      "<&7>, Sprache: <&a>{predicate_language}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("set_command", "/test")
+        .withVariable("predicate", "my predicate")
+        .withVariable("predicate_language", "ENGLISH_US"),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "Aktuell aktives Prädikat: ")
+                .string("color", "gray")
+            ))
+            .object(item -> (
+              item
+                .string("text", "my predicate")
+                .string("color", "green")
+                .bool("underlined", true)
+                .object("clickEvent", event -> (
+                  event
+                    .string("action", "suggest_command")
+                    .string("value", "/test")
+                ))
+                .object("hoverEvent", event -> (
+                  event
+                    .string("action", "show_text")
+                    .object("contents", contents -> (
+                      contents
+                        .string("text", "Klicke auf das Prädikat, um einen Editierungsbefehl zu erhalten.")
+                        .string("color", "green")
+                    ))
+                ))
+            ))
+            .object(item -> (
+              item
+                .string("text", ", Sprache: ")
+                .string("color", "gray")
+            ))
+            .object(item -> (
+              item
+                .string("text", "ENGLISH_US")
+                .string("color", "green")
+            ))
+        ))
+    );
+  }
 }
