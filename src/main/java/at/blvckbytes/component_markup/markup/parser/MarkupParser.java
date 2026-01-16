@@ -625,9 +625,6 @@ public class MarkupParser implements CmlEventConsumer {
 
       LetBinding binding;
 
-      if (wasFlag)
-        throw new MarkupParseException(attributeName.fullName, MarkupParseError.VALUELESS_BINDING, bindingName.buildString());
-
       if (attribute instanceof MarkupAttribute)
         binding = new MarkupLetBinding(((MarkupAttribute) attribute).value, bindingName, isCaptureMode);
       else if (attribute instanceof ExpressionAttribute)

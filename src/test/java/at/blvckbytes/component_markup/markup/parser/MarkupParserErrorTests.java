@@ -820,14 +820,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnEmptyLetBindings() {
-    makeErrorCase(
-      MarkupParseError.VALUELESS_BINDING,
-      "<red `*let-my_var´>"
-    );
-  }
-
-  @Test
   public void shouldThrowOnForAuxiliaryAttributesWithoutPriorLoop() {
     makeErrorCase(
       MarkupParseError.AUXILIARY_FOR_INTRINSIC_ATTRIBUTE,
