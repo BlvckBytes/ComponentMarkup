@@ -45,12 +45,21 @@ public class ExpressionInterpreter {
 
     if (expression instanceof PrefixOperationNode) {
       PrefixOperationNode node = (PrefixOperationNode) expression;
+      PrefixOperator prefixOperator = node.operatorToken.operator;
+
+      // Avoid has(var_name) to log a warning if var_name does not exist, seeing how
+      // its presence is the very thing we're trying to determine with this operator.
+      if (prefixOperator == PrefixOperator.HAS && node.operand instanceof TerminalNode) {
+        TerminalNode terminalOperand = (TerminalNode) node.operand;
+
+        if (terminalOperand.token instanceof IdentifierToken)
+          return environment.doesVariableExist(((IdentifierToken) terminalOperand.token).identifier);
+      }
+
       Object operandValue = interpret(node.operand, environment, logger);
 
       if (operandValue == null)
         return null;
-
-      PrefixOperator prefixOperator = node.operatorToken.operator;
 
       switch (prefixOperator) {
         case NEGATION:
@@ -141,6 +150,9 @@ public class ExpressionInterpreter {
 
           return -1;
         }
+
+        case HAS:
+          return environment.doesVariableExist(valueInterpreter.asString(operandValue));
 
         case SUM:
         case AVG: {

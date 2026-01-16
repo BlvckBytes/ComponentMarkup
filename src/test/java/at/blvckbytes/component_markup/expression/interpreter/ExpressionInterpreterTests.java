@@ -419,6 +419,23 @@ public class ExpressionInterpreterTests {
     makeCase("1..3 & 5..8", "[1, 2, 3][5, 6, 7, 8]");
   }
 
+  @Test
+  public void shouldDetectEnvironmentVariablePresenceWithHas() {
+    InterpretationEnvironment environment = new InterpretationEnvironment()
+      .withVariable("a", "I am present!")
+      .withVariable("b", null);
+
+    makeCase("has(a)", environment, true);
+    makeCase("has('a')", environment, true);
+
+    // Null-value, but still present!
+    makeCase("has(b)", environment, true);
+    makeCase("has('b')", environment, true);
+
+    makeCase("has(c)", environment, false);
+    makeCase("has('c')", environment, false);
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
