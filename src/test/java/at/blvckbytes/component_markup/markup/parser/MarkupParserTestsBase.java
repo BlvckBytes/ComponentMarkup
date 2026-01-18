@@ -137,7 +137,16 @@ public abstract class MarkupParserTestsBase {
   }
 
   protected static void makeCase(TextWithSubViews input, NodeWrapper<?> wrappedExpectedNode) {
-    MarkupNode actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
+    MarkupNode actualNode;
+
+    try {
+      actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
+    } catch (MarkupParseException e) {
+      System.out.println(String.join("\n", e.makeErrorScreen()));
+      Assertions.fail("Threw an error:", e);
+      return;
+    }
+
     Assertions.assertEquals(Jsonifier.jsonify(wrappedExpectedNode.get()), Jsonifier.jsonify(actualNode));
   }
 }
