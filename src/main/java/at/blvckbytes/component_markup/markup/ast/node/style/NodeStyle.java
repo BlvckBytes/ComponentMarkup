@@ -14,18 +14,17 @@ import org.jetbrains.annotations.Nullable;
 public class NodeStyle {
 
   private @Nullable ExpressionNode @Nullable [] formatStates;
+
   public @Nullable ExpressionNode color;
   public @Nullable ExpressionNode shadowColor;
   public @Nullable ExpressionNode shadowColorOpacity;
   public @Nullable ExpressionNode font;
   public @Nullable ExpressionNode reset;
 
-  public void inheritFrom(NodeStyle other, @Nullable ExpressionNode condition) {
+  public void inheritFrom(NodeStyle other) {
     ExpressionNode otherValue;
 
     if ((otherValue = other.color) != null) {
-      otherValue = applyCondition(otherValue, condition);
-
       if (this.color == null)
         this.color = otherValue;
       else
@@ -33,8 +32,6 @@ public class NodeStyle {
     }
 
     if ((otherValue = other.shadowColor) != null) {
-      otherValue = applyCondition(otherValue, condition);
-
       if (this.shadowColor == null)
         this.shadowColor = otherValue;
       else
@@ -42,8 +39,6 @@ public class NodeStyle {
     }
 
     if ((otherValue = other.shadowColorOpacity) != null) {
-      otherValue = applyCondition(otherValue, condition);
-
       if (this.shadowColorOpacity == null)
         this.shadowColorOpacity = otherValue;
       else
@@ -51,8 +46,6 @@ public class NodeStyle {
     }
 
     if ((otherValue = other.font) != null) {
-      otherValue = applyCondition(otherValue, condition);
-
       if (this.font == null)
         this.font = otherValue;
       else
@@ -60,8 +53,6 @@ public class NodeStyle {
     }
 
     if ((otherValue = other.reset) != null) {
-      otherValue = applyCondition(otherValue, condition);
-
       if (this.reset == null)
         this.reset = otherValue;
       else
@@ -75,8 +66,6 @@ public class NodeStyle {
         if (otherValue == null)
           continue;
 
-        otherValue = applyCondition(otherValue, condition);
-
         ExpressionNode thisFormatState = getFormat(format);
 
         if (thisFormatState == null) {
@@ -89,9 +78,12 @@ public class NodeStyle {
     }
   }
 
-  private ExpressionNode applyCondition(ExpressionNode expressionNode, @Nullable ExpressionNode condition) {
+  private @Nullable ExpressionNode applyCondition(@Nullable ExpressionNode expressionNode, @Nullable ExpressionNode condition) {
     if (condition == null)
       return expressionNode;
+
+    if (expressionNode == null)
+      return null;
 
     return new BranchingNode(condition, null, expressionNode, null, null);
   }
@@ -130,6 +122,20 @@ public class NodeStyle {
     }
 
     return false;
+  }
+
+  public void bakeUseCondition(ExpressionNode condition) {
+    if (condition == null)
+      throw new IllegalStateException("Cannot bake a null-condition");
+
+    this.color = applyCondition(this.color, condition);
+    this.shadowColor = applyCondition(this.shadowColor, condition);
+    this.shadowColorOpacity = applyCondition(this.shadowColorOpacity, condition);
+    this.font = applyCondition(this.font, condition);
+    this.reset = applyCondition(this.reset, condition);
+
+    for (Format format : Format.VALUES)
+      setFormat(format, applyCondition(getFormat(format), condition));
   }
 
   public void setFormat(Format format, ExpressionNode value) {

@@ -1448,7 +1448,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
-  public void shouldToggleColorWithUseAndApplyFallback() {
+  public void shouldToggleColorWithUseAndApplyFallbackSingleMember() {
     TextWithSubViews text = new TextWithSubViews(
       // Let's act as if there's still an open color from somewhere up above in more
       // complex input, as is often the case - the <&7> down below should override it.
@@ -1476,6 +1476,38 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .object(item -> (
           item
             .string("text", "third")
+            .string("color", "gray")
+        ))
+    );
+  }
+
+  @Test
+  public void shouldToggleColorWithUseAndApplyFallbackMultiMember() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<&c>",
+      "  <container *for-name=\"names\" *for-separator={<br/>}>",
+      "    <&7><&e *use=\"name eq 'second'\">#{loop.index + 1} {name}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("names", Arrays.asList("first", "second", "third")),
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(item -> (
+          item
+            .string("text", "#1 first")
+            .string("color", "gray")
+        ))
+        .object(item -> (
+          item
+            .string("text", "#2 second")
+            .string("color", "yellow")
+        ))
+        .object(item -> (
+          item
+            .string("text", "#3 third")
             .string("color", "gray")
         ))
     );

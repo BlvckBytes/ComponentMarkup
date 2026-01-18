@@ -277,12 +277,14 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       GlobalLogger.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     for (MarkupNode conditional : node.conditions) {
-      if (conditional.ifCondition == null) {
+      ExpressionNode ifCondition = conditional.getIfCondition();
+
+      if (ifCondition == null) {
         interpret(conditional);
         return;
       }
 
-      if (!evaluateAsBoolean(conditional.ifCondition))
+      if (!evaluateAsBoolean(ifCondition))
         continue;
 
       interpret(conditional);
@@ -443,8 +445,10 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   public boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin) {
     boolean doNotUse = false;
 
-    if (node.useCondition != null) {
-      if (!evaluateAsBoolean(node.useCondition))
+    ExpressionNode useCondition = node.getUseCondition();
+
+    if (useCondition != null) {
+      if (!evaluateAsBoolean(useCondition))
         doNotUse = true;
     }
 
@@ -462,7 +466,9 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
     boolean hasBeenRendered = false;
 
-    if (node.ifCondition == null || evaluateAsBoolean(node.ifCondition)) {
+    ExpressionNode ifCondition = node.getIfCondition();
+
+    if (ifCondition == null || evaluateAsBoolean(ifCondition)) {
       _interpret(node);
       hasBeenRendered = true;
     }
@@ -536,7 +542,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         // It is of utmost importance that we only modify style on the container down below, instead of the interpolated
         // node, seeing how we would otherwise affect it by reference, and it may be used on multiple interpolation-sites.
         interpolatedNode = new ContainerNode(interpolatedNode.positionProvider, Collections.singletonList(interpolatedNode), null);
-        ((StyledNode) interpolatedNode).getOrInstantiateStyle().inheritFrom(nodeStyle, node.useCondition);
+        ((StyledNode) interpolatedNode).getOrInstantiateStyle().inheritFrom(nodeStyle);
       }
 
       interpret(interpolatedNode);

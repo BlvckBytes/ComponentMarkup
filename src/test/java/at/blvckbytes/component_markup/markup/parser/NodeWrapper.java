@@ -41,12 +41,12 @@ public class NodeWrapper<T extends MarkupNode> {
   }
 
   public NodeWrapper<T> ifCondition(ExpressionNode condition) {
-    node.ifCondition = condition;
+    node.setIfCondition(condition);
     return this;
   }
 
   public NodeWrapper<T> useCondition(ExpressionNode condition) {
-    node.ifCondition = condition;
+    node.setUseCondition(condition);
     return this;
   }
 

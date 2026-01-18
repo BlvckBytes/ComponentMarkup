@@ -330,10 +330,10 @@ public class TagAndBuffers implements ParserChildItem {
     attributeMap.validateNoUnusedAttributes();
 
     if (ifCondition != null)
-      result.ifCondition = ifCondition;
+      result.setIfCondition(ifCondition);
 
     if (useCondition != null)
-      result.useCondition = useCondition;
+      result.setUseCondition(useCondition);
 
     if (!(result instanceof ContainerNode))
       return result;

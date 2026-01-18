@@ -65,7 +65,7 @@ public class ColorizeCharsNode extends ColorizeNode {
 
       if (nodeStyle != null) {
         NodeStyle charStyle = charNode.getOrInstantiateStyle();
-        charStyle.inheritFrom(nodeStyle, null);
+        charStyle.inheritFrom(nodeStyle);
         // Block out inherited colors, seeing how we're overwriting them later. Otherwise,
         // the rainbow-color may be overwritten at a later point in time when the component
         // is actually finalized, which happens way after char-colorization.

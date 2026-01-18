@@ -301,6 +301,22 @@ public class MarkupParserTests extends MarkupParserTestsBase {
   }
 
   @Test
+  public void shouldNotUnpackUseConditionOnMultipleMembers() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`red´ *use=\"`b´\">{`'test'´}{`5´}"
+    );
+
+    makeCase(
+      text,
+      container(text.subView(0).setLowercase())
+        .color(string(text.subView(0)))
+        .useCondition(expr(text.subView(1)))
+        .child(interpolation(text.subView(2)))
+        .child(interpolation(text.subView(3)))
+    );
+  }
+
+  @Test
   public void shouldAllowForLoopWithoutIterationVariable() {
     TextWithSubViews text = new TextWithSubViews(
       "<`red´ `*for´=\"`members´\">`Hello, world!´"

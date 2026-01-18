@@ -21,8 +21,8 @@ import java.util.List;
 
 public abstract class MarkupNode {
 
-  public @Nullable ExpressionNode ifCondition;
-  public @Nullable ExpressionNode useCondition;
+  private @Nullable ExpressionNode ifCondition;
+  private @Nullable ExpressionNode useCondition;
 
   public final InputView positionProvider;
 
@@ -37,6 +37,32 @@ public abstract class MarkupNode {
     this.positionProvider = positionProvider;
     this.children = children;
     this.letBindings = letBindings;
+  }
+
+  public @Nullable ExpressionNode getIfCondition() {
+    return ifCondition;
+  }
+
+  public void setIfCondition(@Nullable ExpressionNode ifCondition) {
+    this.ifCondition = ifCondition;
+  }
+
+  public @Nullable ExpressionNode getUseCondition() {
+    return useCondition;
+  }
+
+  public void setUseCondition(@Nullable ExpressionNode useCondition) {
+    if (this instanceof StyledNode) {
+      if (useCondition == null || this.useCondition != null)
+        throw new IllegalStateException("For style-nodes, use-condition must only be set once, to a non-null value");
+
+      NodeStyle style = ((StyledNode) this).getStyle();
+
+      if (style != null)
+        style.bakeUseCondition(useCondition);
+    }
+
+    this.useCondition = useCondition;
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -59,7 +85,7 @@ public abstract class MarkupNode {
         if (!(this instanceof StyledNode))
           return false;
 
-        ((StyledNode) this).getOrInstantiateStyle().inheritFrom(otherStyle, other.useCondition);
+        ((StyledNode) this).getOrInstantiateStyle().inheritFrom(otherStyle);
       }
     }
 
