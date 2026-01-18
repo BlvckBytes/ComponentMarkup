@@ -7,10 +7,8 @@ package at.blvckbytes.component_markup.markup.ast.node.style;
 
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
-import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
-import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
-import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeStyle {
@@ -25,59 +23,99 @@ public class NodeStyle {
   public void inheritFrom(NodeStyle other, @Nullable ExpressionNode condition) {
     ExpressionNode otherValue;
 
-    if (this.color == null && (otherValue = other.color) != null) {
-      if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, null);
+    if ((otherValue = other.color) != null) {
+      otherValue = applyCondition(otherValue, condition);
 
-      this.color = otherValue;
+      if (this.color == null)
+        this.color = otherValue;
+      else
+        trySetFalseBranch(this.color, otherValue);
     }
 
-    if (this.shadowColor == null && (otherValue = other.shadowColor) != null) {
-      if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, null);
+    if ((otherValue = other.shadowColor) != null) {
+      otherValue = applyCondition(otherValue, condition);
 
-      this.shadowColor = otherValue;
+      if (this.shadowColor == null)
+        this.shadowColor = otherValue;
+      else
+        trySetFalseBranch(this.shadowColor, otherValue);
     }
 
-    if (this.shadowColorOpacity == null && (otherValue = other.shadowColorOpacity) != null) {
-      if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, null);
+    if ((otherValue = other.shadowColorOpacity) != null) {
+      otherValue = applyCondition(otherValue, condition);
 
-      this.shadowColorOpacity = otherValue;
+      if (this.shadowColorOpacity == null)
+        this.shadowColorOpacity = otherValue;
+      else
+        trySetFalseBranch(this.shadowColorOpacity, otherValue);
     }
 
-    if (this.font == null && (otherValue = other.font) != null) {
-      if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, null);
+    if ((otherValue = other.font) != null) {
+      otherValue = applyCondition(otherValue, condition);
 
-      this.font = otherValue;
+      if (this.font == null)
+        this.font = otherValue;
+      else
+        trySetFalseBranch(this.font, otherValue);
     }
 
-    if (other.reset != null)
-      this.reset = inheritFlagWithCondition(this.reset, other.reset, condition);
+    if ((otherValue = other.reset) != null) {
+      otherValue = applyCondition(otherValue, condition);
+
+      if (this.reset == null)
+        this.reset = otherValue;
+      else
+        trySetFalseBranch(this.font, otherValue);
+    }
 
     if (other.formatStates != null) {
       for (Format format : Format.VALUES) {
         otherValue = other.getFormat(format);
 
+        if (otherValue == null)
+          continue;
+
+        otherValue = applyCondition(otherValue, condition);
+
         ExpressionNode thisFormatState = getFormat(format);
 
-        setFormat(format, inheritFlagWithCondition(thisFormatState, otherValue, condition));
+        if (thisFormatState == null) {
+          setFormat(format, otherValue);
+          continue;
+        }
+
+        trySetFalseBranch(thisFormatState, otherValue);
       }
     }
   }
 
-  private static @Nullable ExpressionNode inheritFlagWithCondition(@Nullable ExpressionNode thisValue, @Nullable ExpressionNode otherValue, @Nullable ExpressionNode otherCondition) {
-    if (otherValue == null)
-      return thisValue;
+  private ExpressionNode applyCondition(ExpressionNode expressionNode, @Nullable ExpressionNode condition) {
+    if (condition == null)
+      return expressionNode;
 
-    if (otherCondition != null)
-      otherValue = new BranchingNode(otherCondition, null, otherValue, null, null);
+    return new BranchingNode(condition, null, expressionNode, null, null);
+  }
 
-    if (thisValue == null)
-      return otherValue;
+  private void trySetFalseBranch(ExpressionNode target, ExpressionNode expressionNode) {
+    if (!(target instanceof BranchingNode))
+      return;
 
-    return new InfixOperationNode(thisValue, new InfixOperatorToken(InputView.EMPTY, InfixOperator.DISJUNCTION), otherValue, null);
+    BranchingNode branchingNode = (BranchingNode) target;
+
+    if (branchingNode.branchFalse == null) {
+      branchingNode.branchFalse = expressionNode;
+      return;
+    }
+
+    if (!(branchingNode.branchFalse instanceof TerminalNode))
+      return;
+
+    TerminalNode falseTerminal = (TerminalNode) branchingNode.branchFalse;
+
+    if (!(falseTerminal.token instanceof NullToken))
+      return;
+
+    branchingNode.branchFalse = expressionNode;
   }
 
   public boolean hasNonNullProperties() {

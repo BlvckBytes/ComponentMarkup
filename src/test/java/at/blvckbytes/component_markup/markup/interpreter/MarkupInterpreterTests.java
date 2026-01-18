@@ -1446,4 +1446,88 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         ))
     );
   }
+
+  @Test
+  public void shouldToggleColorWithUseAndApplyFallback() {
+    TextWithSubViews text = new TextWithSubViews(
+      // Let's act as if there's still an open color from somewhere up above in more
+      // complex input, as is often the case - the <&7> down below should override it.
+      "<&c>",
+      "  <container *for-name=\"names\" *for-separator={<br/>}>",
+      "    <&7><&e *use=\"name eq 'second'\">{name}"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("names", Arrays.asList("first", "second", "third")),
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(item -> (
+          item
+            .string("text", "first")
+            .string("color", "gray")
+        ))
+        .object(item -> (
+          item
+            .string("text", "second")
+            .string("color", "yellow")
+        ))
+        .object(item -> (
+          item
+            .string("text", "third")
+            .string("color", "gray")
+        ))
+    );
+  }
+
+  @Test
+  public void shouldBeAbleToBlockOutFormatting() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<u>",
+      "  I am underlined",
+      "  <!u>; I am not</>",
+      "  ; but I am again!"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "I am underlined")
+                .bool("underlined", true)
+            ))
+            .object(item -> (
+              item
+                .string("text", "; I am not")
+            ))
+            .object(item -> (
+              item
+                .string("text", "; but I am again!")
+                .bool("underlined", true)
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldBeAbleToBlockOutFormattingImmediately() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<u><!u>I am not underlined!"
+    );
+
+    makeCase(
+      text,
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "I am not underlined!")
+    );
+  }
 }
