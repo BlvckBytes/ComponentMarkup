@@ -5,7 +5,6 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.markup.ast.node.style.Format;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
@@ -293,7 +292,7 @@ public class MarkupParserTests extends MarkupParserTestsBase {
             null,
             string(text.subView(0).setLowercase()),
             null,
-            ImmediateExpression.ofNull()
+            null
           )
         )
         .ifCondition(expr(text.subView(1)))

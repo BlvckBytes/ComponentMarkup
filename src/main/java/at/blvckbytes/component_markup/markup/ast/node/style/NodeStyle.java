@@ -5,7 +5,6 @@
 
 package at.blvckbytes.component_markup.markup.ast.node.style;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
@@ -28,28 +27,28 @@ public class NodeStyle {
 
     if (this.color == null && (otherValue = other.color) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, null);
 
       this.color = otherValue;
     }
 
     if (this.shadowColor == null && (otherValue = other.shadowColor) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, null);
 
       this.shadowColor = otherValue;
     }
 
     if (this.shadowColorOpacity == null && (otherValue = other.shadowColorOpacity) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, null);
 
       this.shadowColorOpacity = otherValue;
     }
 
     if (this.font == null && (otherValue = other.font) != null) {
       if (condition != null)
-        otherValue = new BranchingNode(condition, null, otherValue, null, ImmediateExpression.ofNull());
+        otherValue = new BranchingNode(condition, null, otherValue, null, null);
 
       this.font = otherValue;
     }
@@ -73,7 +72,7 @@ public class NodeStyle {
       return thisValue;
 
     if (otherCondition != null)
-      otherValue = new BranchingNode(otherCondition, null, otherValue, null, ImmediateExpression.ofNull());
+      otherValue = new BranchingNode(otherCondition, null, otherValue, null, null);
 
     if (thisValue == null)
       return otherValue;
