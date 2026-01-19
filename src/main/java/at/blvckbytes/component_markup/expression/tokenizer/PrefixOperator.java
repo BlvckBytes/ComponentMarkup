@@ -34,6 +34,7 @@ public enum PrefixOperator implements EnumToken {
   SUM        ("sum",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   LEN        ("len",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   HAS        ("has",     OperatorFlag.NAMED, OperatorFlag.PARENS),
+  ENV        ("env",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   ;
 
   public static final Set<String> RESERVED_NAMES;

@@ -436,6 +436,27 @@ public class ExpressionInterpreterTests {
     makeCase("has('c')", environment, false);
   }
 
+  @Test
+  public void shouldAccessEnvironmentVariableWithEnv() {
+    InterpretationEnvironment environment = new InterpretationEnvironment()
+      .withVariable("first", "I am #1")
+      .withVariable("second", "I am #2")
+      .withVariable("third", "I am #3");
+
+    makeCase("env('first')", environment, "I am #1");
+    makeCase("env('second')", environment, "I am #2");
+    makeCase("env('third')", environment, "I am #3");
+  }
+
+  @Test
+  public void shouldSanitizeNamesForBothHasAndEnv() {
+    InterpretationEnvironment environment = new InterpretationEnvironment()
+      .withVariable("this_is_a_test2", "Hello, world!");
+
+    makeCase("env('32_tHis-iS_a-teSt2')", environment, "Hello, world!");
+    makeCase("has('32_tHis-iS_a-teSt2')", environment, true);
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }

@@ -152,7 +152,10 @@ public class ExpressionInterpreter {
         }
 
         case HAS:
-          return environment.doesVariableExist(valueInterpreter.asString(operandValue));
+          return environment.doesVariableExist(sanitizeVariableName(valueInterpreter.asString(operandValue)));
+
+        case ENV:
+          return environment.getVariableValue(sanitizeVariableName(valueInterpreter.asString(operandValue)));
 
         case SUM:
         case AVG: {
@@ -366,6 +369,33 @@ public class ExpressionInterpreter {
 
     GlobalLogger.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
+  }
+
+  private static String sanitizeVariableName(String input) {
+    StringBuilder result = new StringBuilder(input.length());
+
+    for (int charIndex = 0; charIndex < input.length(); ++charIndex) {
+      char currentCharLower = Character.toLowerCase(input.charAt(charIndex));
+
+      if (currentCharLower >= 'a' && currentCharLower <= 'z') {
+        result.append(currentCharLower);
+        continue;
+      }
+
+      if (currentCharLower >= '0' && currentCharLower <= '9') {
+        if (result.length() > 0)
+          result.append(currentCharLower);
+
+        continue;
+      }
+
+      if (currentCharLower == '_' || currentCharLower == '-') {
+        if (result.length() > 0)
+          result.append('_');
+      }
+    }
+
+    return result.toString();
   }
 
   private static int compareNumbers(Number a, Number b) {
