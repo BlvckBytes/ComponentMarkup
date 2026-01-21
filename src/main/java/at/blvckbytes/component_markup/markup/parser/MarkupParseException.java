@@ -5,18 +5,15 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.util.ErrorMessage;
+import at.blvckbytes.component_markup.util.*;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.markup.cml.CmlParseException;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.MessagePlaceholders;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class MarkupParseException extends RuntimeException implements ErrorMessage {
+public class MarkupParseException extends RuntimeException implements ErrorProvider {
 
   private @Nullable InputView rootView;
 
@@ -103,5 +100,10 @@ public class MarkupParseException extends RuntimeException implements ErrorMessa
       throw new IllegalStateException("Have not been provided with a reference to the root-view");
 
     return ErrorScreen.make(rootView, getCharIndex(), getErrorMessage());
+  }
+
+  @Override
+  public int getErrorPosition() {
+    return getCharIndex();
   }
 }

@@ -5,10 +5,10 @@
 
 package at.blvckbytes.component_markup.expression.tokenizer;
 
-import at.blvckbytes.component_markup.util.ErrorMessage;
+import at.blvckbytes.component_markup.util.ErrorProvider;
 import at.blvckbytes.component_markup.util.MessagePlaceholders;
 
-public class ExpressionTokenizeException extends RuntimeException implements ErrorMessage {
+public class ExpressionTokenizeException extends RuntimeException implements ErrorProvider {
 
   public final int position;
   public final ExpressionTokenizeError error;
@@ -23,5 +23,10 @@ public class ExpressionTokenizeException extends RuntimeException implements Err
   @Override
   public String getErrorMessage() {
     return error.messageBuilder.apply(new MessagePlaceholders(messagePlaceholders));
+  }
+
+  @Override
+  public int getErrorPosition() {
+    return position;
   }
 }

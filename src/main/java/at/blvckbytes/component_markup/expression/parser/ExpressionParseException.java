@@ -5,15 +5,12 @@
 
 package at.blvckbytes.component_markup.expression.parser;
 
-import at.blvckbytes.component_markup.util.ErrorMessage;
-import at.blvckbytes.component_markup.util.ErrorScreen;
-import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.MessagePlaceholders;
+import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ExpressionParseException extends RuntimeException implements ErrorMessage {
+public class ExpressionParseException extends RuntimeException implements ErrorProvider {
 
   private @Nullable InputView rootView;
 
@@ -45,5 +42,10 @@ public class ExpressionParseException extends RuntimeException implements ErrorM
       throw new IllegalStateException("Have not been provided with a reference to the root-view");
 
     return ErrorScreen.make(rootView, position, getErrorMessage());
+  }
+
+  @Override
+  public int getErrorPosition() {
+    return position;
   }
 }
