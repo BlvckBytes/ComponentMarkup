@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.markup.parser.token;
 
 import at.blvckbytes.component_markup.util.InputView;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -58,24 +59,7 @@ public class TokenOutput {
     hasEnded = true;
 
     for (int currentBeginIndex = 0; currentBeginIndex < tokenByCharIndex.length; ++currentBeginIndex) {
-      HierarchicalToken currentToken = tokenByCharIndex[currentBeginIndex];
-
-      if (currentToken == null) {
-        int lineCounter = 1;
-        int columnCounter = 1;
-
-        for (int i = 0; i < currentBeginIndex; ++i) {
-          if (input.contents.charAt(i) == '\n') {
-            ++lineCounter;
-            columnCounter = 0;
-          }
-
-          ++columnCounter;
-        }
-
-        throw new IllegalStateException("Missing token on line " + lineCounter + " column " + columnCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + "; char '" + input.contents.charAt(currentBeginIndex) + "')");
-      }
-
+      HierarchicalToken currentToken = getTokenAtIndex(currentBeginIndex);
       currentBeginIndex = collectChildrenAndGetNextIndex(currentToken);
       result.add(currentToken);
     }
@@ -98,22 +82,22 @@ public class TokenOutput {
     if (priorToken != null && priorToken.type != type) {
       HierarchicalToken longerToken, shorterToken;
 
+      // If the length equals exactly, then we assigned another type for the very same underlying
+      // token at a later point in time, due to having access to more information; simply override.
+      if (priorToken.value.length() == newToken.value.length()) {
+        // Whitespace always wins out, since I also want it to visualize within markup, strings and the like.
+        if (priorToken.type == TokenType.ANY__WHITESPACE)
+          return;
+
+        tokenByCharIndex[value.startInclusive] = newToken;
+        return;
+      }
+
       // The longer token always persists
       if (priorToken.value.length() > newToken.value.length()) {
         longerToken = priorToken;
         shorterToken = newToken;
-      }
-      // Special case: equal lengths, then whitespace looses
-      else if (priorToken.value.length() == newToken.value.length()) {
-        if (priorToken.type == TokenType.ANY__WHITESPACE) {
-          longerToken = newToken;
-          shorterToken = priorToken;
-        } else {
-          longerToken = priorToken;
-          shorterToken = newToken;
-        }
-      }
-      else {
+      } else {
         longerToken = newToken;
         shorterToken = priorToken;
       }
@@ -139,5 +123,27 @@ public class TokenOutput {
 
     if (value.length() == 0)
       throw new IllegalStateException("Encountered empty token \"" + type + "\" at start-inclusive " + value.startInclusive);
+  }
+
+  private @NotNull HierarchicalToken getTokenAtIndex(int currentBeginIndex) {
+    HierarchicalToken currentToken = tokenByCharIndex[currentBeginIndex];
+
+    if (currentToken == null) {
+      int lineCounter = 1;
+      int columnCounter = 1;
+
+      for (int i = 0; i < currentBeginIndex; ++i) {
+        if (input.contents.charAt(i) == '\n') {
+          ++lineCounter;
+          columnCounter = 0;
+        }
+
+        ++columnCounter;
+      }
+
+      throw new IllegalStateException("Missing token on line " + lineCounter + " column " + columnCounter + " (" + currentBeginIndex + "/" + (tokenByCharIndex.length - 1) + "; char '" + input.contents.charAt(currentBeginIndex) + "')");
+    }
+
+    return currentToken;
   }
 }

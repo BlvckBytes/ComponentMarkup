@@ -61,6 +61,30 @@ public class TokenOutputTests {
   }
 
   @Test
+  public void shouldNotYieldDuplicateTokens() {
+    // The >env< token is both an identifier and a prefix-operator. Prior to the changes which
+    // this case covers, tokens have been emitted twice (an identifier with a child of a prefix-op),
+    // which is entirely undesirable for when highlighting within less forgiving systems like IDEA;
+    // it barely worked on the web-highlighter because there, we simply overwrote the token-type.
+
+    TextWithSubViews text = new TextWithSubViews(
+      "`{`env´`(´`'test'´`)´}´"
+    );
+
+    makeHierarchicalCase(
+      InputView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(
+          new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(0))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, text.subView(1)))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__PUNCTUATION__ANY, text.subView(2)))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__STRING, text.subView(3)))
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__PUNCTUATION__ANY, text.subView(4)))
+        )
+    );
+  }
+
+  @Test
   public void shouldTokenizeNestedInterpolations() {
     TextWithSubViews text = new TextWithSubViews(
       "`pre` ´´`{`a´` ´`+´` ´`×`hello` ´`{`×``{`a´}´` ´`{`b´}´×`´}´` ´world×`´}´`` ´post´"
@@ -261,8 +285,7 @@ public class TokenOutputTests {
             .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(90))) // "position_number"
         )
         .add(
-          new HierarchicalToken(TokenType.MARKUP__PLAIN_TEXT, text.subView(92).setBuildFlags(SubstringFlag.INNER_TEXT))
-            .addChild(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(92).buildSubViewRelative(0, 1)))
+          new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(92))
         ) // " "
         .add(
           new HierarchicalToken(TokenType.ANY__INTERPOLATION, text.subView(93)) // "{  player_name }
