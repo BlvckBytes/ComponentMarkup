@@ -50,6 +50,13 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
   }
 
   @Override
+  public boolean setText(JsonObject component, String text) {
+    component.remove("text");
+    component.addProperty("text", text);
+    return true;
+  }
+
+  @Override
   public JsonObject createKeyComponent(String key) {
     JsonObject component = new JsonObject();
     component.addProperty("keybind", key);

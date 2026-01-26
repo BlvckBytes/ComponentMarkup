@@ -30,7 +30,7 @@ public class SlotContext {
     ' ',
     applyCommonDefaults(() -> {
       ComputedStyle style = new ComputedStyle();
-      style.packedColor = AnsiStyleColor.DARK_GRAY.packedColor;
+      style.setPackedColor(AnsiStyleColor.DARK_GRAY.packedColor, true);
       return style;
     })
   );
@@ -49,7 +49,7 @@ public class SlotContext {
     applyCommonDefaults(() -> {
       ComputedStyle style = new ComputedStyle();
       style.formats = TriStateBitFlags.write(style.formats, Format.ITALIC.ordinal(), TriState.TRUE);
-      style.packedColor = AnsiStyleColor.DARK_PURPLE.packedColor;
+      style.setPackedColor(AnsiStyleColor.DARK_PURPLE.packedColor, true);
       return style;
     })
   );
@@ -89,8 +89,8 @@ public class SlotContext {
   private static ComputedStyle applyCommonDefaults(Supplier<ComputedStyle> inputSupplier) {
     ComputedStyle input = inputSupplier.get();
 
-    if (input.packedColor == PackedColor.NULL_SENTINEL)
-      input.packedColor = DEFAULT_COLOR;
+    if (input.getPackedColor() == PackedColor.NULL_SENTINEL)
+      input.setPackedColor(DEFAULT_COLOR, true);
 
     if (input.packedShadowColor == PackedColor.NULL_SENTINEL) {
       input.packedShadowColor = DEFAULT_SHADOW_COLOR;

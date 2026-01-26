@@ -1,0 +1,88 @@
+[
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "T",
+        "color": "#FF0000",
+        "extra": [
+          {
+            "text": "h",
+            "color": "#FF5100"
+          },
+          {
+            "text": "e ",
+            "color": "#FFA100"
+          },
+          {
+            "text": "f",
+            "color": "#FFF200"
+          },
+          {
+            "text": "o",
+            "color": "#BCFF00"
+          },
+          {
+            "text": "l",
+            "color": "#6BFF00"
+          },
+          {
+            "text": "l",
+            "color": "#1BFF00"
+          },
+          {
+            "text": "o",
+            "color": "#00FF36"
+          },
+          {
+            "text": "w",
+            "color": "#00FF86"
+          },
+          {
+            "text": "i",
+            "color": "#00FFD7"
+          },
+          {
+            "text": "n",
+            "color": "#00D7FF"
+          },
+          {
+            "text": "g ",
+            "color": "#0086FF"
+          },
+          {
+            "text": "i",
+            "color": "#0036FF"
+          },
+          {
+            "text": "s ",
+            "color": "#1B00FF"
+          },
+          {
+            "text": "a ",
+            "color": "#6B00FF"
+          },
+          {
+            "text": "k",
+            "color": "#BC00FF"
+          },
+          {
+            "text": "e",
+            "color": "#FF00F2"
+          },
+          {
+            "text": "y",
+            "color": "#FF00A1"
+          },
+          {
+            "text": ": ",
+            "color": "#FF0051"
+          }
+        ]
+      },
+      {
+        "keybind": "my.key"
+      }
+    ]
+  }
+]

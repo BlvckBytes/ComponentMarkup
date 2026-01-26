@@ -1,0 +1,113 @@
+[
+  {
+    "text": "I ",
+    "color": "#FF0000",
+    "extra": [
+      {
+        "text": "a",
+        "color": "#FF3900"
+      },
+      {
+        "text": "m ",
+        "color": "#FF7100"
+      },
+      {
+        "text": "t",
+        "color": "gold"
+      },
+      {
+        "text": "h",
+        "color": "#FFE300"
+      },
+      {
+        "text": "e ",
+        "color": "#E3FF00"
+      },
+      {
+        "text": "c",
+        "color": "#AAFF00"
+      },
+      {
+        "text": "o",
+        "color": "#71FF00"
+      },
+      {
+        "text": "o",
+        "color": "#39FF00"
+      },
+      {
+        "text": "l",
+        "color": "#00FF00"
+      },
+      {
+        "text": "e",
+        "color": "#00FF39"
+      },
+      {
+        "text": "s",
+        "color": "#00FF71"
+      },
+      {
+        "text": "t ",
+        "color": "#00FFAA"
+      },
+      {
+        "text": "r",
+        "color": "#00FFE3"
+      },
+      {
+        "text": "a",
+        "color": "#00E3FF"
+      },
+      {
+        "text": "i",
+        "color": "#00AAFF"
+      },
+      {
+        "text": "n",
+        "color": "#0071FF"
+      },
+      {
+        "text": "b",
+        "color": "#0039FF"
+      },
+      {
+        "text": "o",
+        "color": "#0000FF"
+      },
+      {
+        "text": "w ",
+        "color": "#3900FF"
+      },
+      {
+        "text": "o",
+        "color": "#7100FF"
+      },
+      {
+        "text": "n ",
+        "color": "#AA00FF"
+      },
+      {
+        "text": "e",
+        "color": "#E300FF"
+      },
+      {
+        "text": "a",
+        "color": "#FF00E3"
+      },
+      {
+        "text": "r",
+        "color": "#FF00AA"
+      },
+      {
+        "text": "t",
+        "color": "#FF0071"
+      },
+      {
+        "text": "h",
+        "color": "#FF0039"
+      }
+    ],
+    "bold": true
+  }
+]

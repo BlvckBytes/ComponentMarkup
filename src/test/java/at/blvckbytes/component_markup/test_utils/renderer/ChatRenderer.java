@@ -113,10 +113,10 @@ public class ChatRenderer {
   }
 
   private static ChatComponent translateJsonComponent(JsonObject component, @Nullable ChatComponent parent) {
-    JsonElement textElement = component.get("text");
+    String text = extractText(component);
 
-    if (!(textElement instanceof JsonPrimitive))
-      throw new IllegalStateException("Expected \"text\" to be a string on: " + component);
+    if (text == null)
+      throw new IllegalStateException("Could not extract any renderable text from: " + component);
 
     JsonElement colorElement = component.get("color");
     Color color = null;
@@ -148,7 +148,7 @@ public class ChatRenderer {
       shadowColor = colorFromPacked(packedColor);
     }
 
-    ChatComponent result = new ChatComponent(textElement.getAsString(), color, shadowColor, parent);
+    ChatComponent result = new ChatComponent(text, color, shadowColor, parent);
 
     for (Format format : Format.VALUES) {
       String formatName = format.name().toLowerCase();
@@ -182,6 +182,25 @@ public class ChatRenderer {
     }
 
     return result;
+  }
+
+  private static String extractText(JsonObject component) {
+    JsonElement textElement = component.get("text");
+
+    if (textElement instanceof JsonPrimitive)
+      return textElement.getAsString();
+
+    JsonElement translateElement = component.get("translate");
+
+    if (translateElement instanceof JsonPrimitive)
+      return "<translate:" + translateElement.getAsString() + ">";
+
+    JsonElement keyElement = component.get("keybind");
+
+    if (keyElement instanceof JsonPrimitive)
+      return "<keybind:" + keyElement.getAsString() + ">";
+
+    return null;
   }
 
   private static int measureFontHeight(ChatComponent component) throws Exception {
@@ -228,7 +247,7 @@ public class ChatRenderer {
     }
 
     if (color == null)
-      color = colorFromPacked(context.defaultStyle.packedColor);
+      color = colorFromPacked(context.defaultStyle.getPackedColor());
 
     graphics.setColor(shadowColor);
     graphics.drawString(component.text, offset.width + SHADOW_DELTA_X, offset.height + SHADOW_DELTA_Y);

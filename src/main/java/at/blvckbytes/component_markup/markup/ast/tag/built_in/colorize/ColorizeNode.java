@@ -56,9 +56,9 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
     return state;
   }
 
-  protected abstract boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
+  protected abstract void onTextEncounter(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
 
-  protected abstract boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
+  protected abstract void onUnitEncounter(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter);
 
   @Override
   public InterceptionResult interceptInterpretation(MarkupNode node, Interpreter<?, ?> interpreter) {
@@ -84,14 +84,14 @@ public abstract class ColorizeNode extends MarkupNode implements InterpreterInte
             return InterceptionResult.DO_PROCESS;
         }
 
-        if (node instanceof TextNode)
-          return handleTextAndGetIfDoProcess((TextNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+        if (node instanceof TextNode) {
+          onTextEncounter((TextNode) node, state, interpreter);
+          return InterceptionResult.DO_NOT_PROCESS;
+        }
 
         if (node instanceof UnitNode) {
-          if (state.flags.contains(ColorizeFlag.SKIP_NON_TEXT))
-            return InterceptionResult.DO_PROCESS;
-
-          return handleUnitAndGetIfDoProcess((UnitNode) node, state, interpreter) ? InterceptionResult.DO_PROCESS : InterceptionResult.DO_NOT_PROCESS;
+          onUnitEncounter((UnitNode) node, state, interpreter);
+          return InterceptionResult.DO_NOT_PROCESS;
         }
       }
     }

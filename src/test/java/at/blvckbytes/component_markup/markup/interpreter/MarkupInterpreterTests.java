@@ -452,6 +452,28 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldGenerateAFullyBoldRainbow() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow><b>I am the coolest rainbow on earth"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
+  public void shouldGenerateAFullyBoldRainbowWithPartialItalic() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow><b>I am the coolest <i>rainbow</> on earth"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
   public void shouldGenerateARainbowOnAnInterpolation() {
     makeRecordedCase(
       new TextWithSubViews(
@@ -463,10 +485,53 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldGenerateARainbowOnAUnitNode() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow>The following is a translation: <translate key='my.key'/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      "Translate"
+    );
+
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow>The following is a key: <key key='my.key'/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      "Key"
+    );
+  }
+
+  @Test
+  public void shouldSkipNonTextOnARainbow() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow skip-non-text>The following is a key: <key key='my.key'/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
   public void shouldGenerateARainbowOnAColoredInterpolation() {
     makeRecordedCase(
       new TextWithSubViews(
         "<rainbow override-colors> I am <&7>{\"an amazing rainbow!\"}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT
+    );
+  }
+
+  @Test
+  public void shouldGenerateARainbowAndSkipAColoredInterpolation() {
+    makeRecordedCase(
+      new TextWithSubViews(
+        "<rainbow> I am an amazing <&f>{\"rainbow\"}</>!"
       ),
       new InterpretationEnvironment(),
       SlotType.CHAT

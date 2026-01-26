@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class OutputBuilder<B, C> {
@@ -67,11 +66,11 @@ public class OutputBuilder<B, C> {
     return sequencesStack.peek().addSequence(sequence);
   }
 
-  public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
   }
 
-  public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 

@@ -1,0 +1,121 @@
+[
+  {
+    "text": "",
+    "extra": [
+      {
+        "text": "T",
+        "color": "#FF0000",
+        "extra": [
+          {
+            "text": "h",
+            "color": "#FF3700"
+          },
+          {
+            "text": "e ",
+            "color": "#FF6D00"
+          },
+          {
+            "text": "f",
+            "color": "#FFA400"
+          },
+          {
+            "text": "o",
+            "color": "#FFDB00"
+          },
+          {
+            "text": "l",
+            "color": "#EDFF00"
+          },
+          {
+            "text": "l",
+            "color": "#B6FF00"
+          },
+          {
+            "text": "o",
+            "color": "#80FF00"
+          },
+          {
+            "text": "w",
+            "color": "#49FF00"
+          },
+          {
+            "text": "i",
+            "color": "#12FF00"
+          },
+          {
+            "text": "n",
+            "color": "#00FF24"
+          },
+          {
+            "text": "g ",
+            "color": "#00FF5B"
+          },
+          {
+            "text": "i",
+            "color": "#00FF92"
+          },
+          {
+            "text": "s ",
+            "color": "#00FFC8"
+          },
+          {
+            "text": "a ",
+            "color": "#00FFFF"
+          },
+          {
+            "text": "t",
+            "color": "#00C8FF"
+          },
+          {
+            "text": "r",
+            "color": "#0092FF"
+          },
+          {
+            "text": "a",
+            "color": "#005BFF"
+          },
+          {
+            "text": "n",
+            "color": "#0024FF"
+          },
+          {
+            "text": "s",
+            "color": "#1200FF"
+          },
+          {
+            "text": "l",
+            "color": "#4900FF"
+          },
+          {
+            "text": "a",
+            "color": "#8000FF"
+          },
+          {
+            "text": "t",
+            "color": "#B600FF"
+          },
+          {
+            "text": "i",
+            "color": "#ED00FF"
+          },
+          {
+            "text": "o",
+            "color": "#FF00DB"
+          },
+          {
+            "text": "n",
+            "color": "#FF00A4"
+          },
+          {
+            "text": ": ",
+            "color": "#FF006D"
+          }
+        ]
+      },
+      {
+        "translate": "my.key",
+        "color": "#FF0037"
+      }
+    ]
+  }
+]

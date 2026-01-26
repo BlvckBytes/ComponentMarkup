@@ -3,41 +3,39 @@
     "text": "",
     "extra": [
       {
-        "text": " I ",
+        "text": "T",
         "color": "#FF0000",
         "extra": [
           {
-            "text": "a",
+            "text": "h",
             "color": "#FF4D00"
           },
           {
-            "text": "m ",
+            "text": "e ",
             "color": "#FF9900"
-          }
-        ]
-      },
-      {
-        "text": "a",
-        "color": "#FFE600",
-        "extra": [
+          },
           {
-            "text": "n ",
+            "text": "f",
+            "color": "#FFE600"
+          },
+          {
+            "text": "o",
             "color": "#CCFF00"
           },
           {
-            "text": "a",
+            "text": "l",
             "color": "#80FF00"
           },
           {
-            "text": "m",
+            "text": "l",
             "color": "#33FF00"
           },
           {
-            "text": "a",
+            "text": "o",
             "color": "#00FF19"
           },
           {
-            "text": "z",
+            "text": "w",
             "color": "#00FF66"
           },
           {
@@ -53,38 +51,38 @@
             "color": "#00B3FF"
           },
           {
-            "text": "r",
+            "text": "i",
             "color": "#0066FF"
           },
           {
-            "text": "a",
+            "text": "s ",
             "color": "#0019FF"
           },
           {
-            "text": "i",
+            "text": "a ",
             "color": "#3300FF"
           },
           {
-            "text": "n",
+            "text": "k",
             "color": "#8000FF"
           },
           {
-            "text": "b",
+            "text": "e",
             "color": "#CC00FF"
           },
           {
-            "text": "o",
+            "text": "y",
             "color": "#FF00E6"
           },
           {
-            "text": "w",
+            "text": ": ",
             "color": "#FF0099"
-          },
-          {
-            "text": "!",
-            "color": "#FF004D"
           }
         ]
+      },
+      {
+        "keybind": "my.key",
+        "color": "#FF004D"
       }
     ]
   }

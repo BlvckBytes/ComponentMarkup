@@ -1,6 +1,7 @@
 package at.blvckbytes.component_markup.markup.interpreter;
 
 import at.blvckbytes.component_markup.constructor.ComponentConstructor;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,8 @@ public class ExtendedBuilder<B> {
   private @Nullable List<Consumer<B>> nonTerminalApplyingClosures;
 
   public @Nullable ComputedStyle style;
+
+  public long explicitColor = PackedColor.NULL_SENTINEL;
 
   public ExtendedBuilder(B builder, @Nullable ComputedStyle style) {
     this.builder = builder;

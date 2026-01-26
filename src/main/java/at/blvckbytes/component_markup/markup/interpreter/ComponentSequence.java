@@ -15,6 +15,7 @@ import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.TextHoverNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.*;
 import at.blvckbytes.component_markup.constructor.*;
+import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,7 +47,7 @@ public class ComponentSequence<B, C> {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
-  private Consumer<B> textCreationHandler;
+  private CreationHandler<B> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
   private final ComputedStyle parentStyle;
@@ -63,7 +64,7 @@ public class ComponentSequence<B, C> {
     addMember(new ExtendedBuilder<>(builder, nodeStyle));
   }
 
-  public void onUnit(UnitNode node, @Nullable Consumer<B> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     B result = null;
@@ -110,22 +111,26 @@ public class ComponentSequence<B, C> {
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
 
-    addMember(new ExtendedBuilder<>(result, nodeStyle));
+    ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+
+    addMember(extendedBuilder);
 
     if (creationHandler != null)
-      creationHandler.accept(result);
+      creationHandler.handle(extendedBuilder);
   }
 
-  public void onText(TextNode node, @Nullable Consumer<B> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
       B result = componentConstructor.createTextComponent(node.textValue);
 
-      addMember(new ExtendedBuilder<>(result, nodeStyle));
+      ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+
+      addMember(extendedBuilder);
 
       if (creationHandler != null)
-        creationHandler.accept(result);
+        creationHandler.handle(extendedBuilder);
 
       return;
     }
@@ -133,7 +138,7 @@ public class ComponentSequence<B, C> {
     addBufferedText(node.textValue, nodeStyle, creationHandler);
   }
 
-  private void addBufferedText(String text, @Nullable ComputedStyle style, Consumer<B> creationHandler) {
+  private void addBufferedText(String text, @Nullable ComputedStyle style, CreationHandler<B> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
@@ -192,14 +197,16 @@ public class ComponentSequence<B, C> {
       result = componentConstructor.createTextComponent(accumulator.toString());
     }
 
+    ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, bufferedTextsStyle);
+
     if (textCreationHandler != null) {
-      textCreationHandler.accept(result);
+      textCreationHandler.handle(extendedBuilder);
       textCreationHandler = null;
     }
 
     bufferedTexts.clear();
 
-    addMember(new ExtendedBuilder<>(result, bufferedTextsStyle));
+    addMember(extendedBuilder);
 
     bufferedTextsStyle = null;
   }
@@ -222,6 +229,9 @@ public class ComponentSequence<B, C> {
       this.members = new ArrayList<>();
 
     if (member.style != null) {
+      if (member.style.getPackedColor() != PackedColor.NULL_SENTINEL && !member.style.isPackedColorFromSlotContext())
+        member.explicitColor = member.style.getPackedColor();
+
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(member.style, selfAndParentStyle);
 
@@ -507,7 +517,7 @@ public class ComponentSequence<B, C> {
     SlotContext resetContext,
     MarkupInterpreter<B, C> interpreter
   ) {
-    return new ComponentSequence<>(slotContext.defaultStyle, null, true, slotContext, resetContext, interpreter);
+    return new ComponentSequence<>(slotContext.defaultStyle.copy(), null, true, slotContext, resetContext, interpreter);
   }
 
   private ComponentSequence(

@@ -3,7 +3,7 @@
     "text": "",
     "extra": [
       {
-        "text": " I ",
+        "text": "I ",
         "color": "#FF0000",
         "extra": [
           {
@@ -25,13 +25,11 @@
           {
             "text": "e ",
             "color": "#E3FF00"
-          }
-        ]
-      },
-      {
-        "text": "c",
-        "color": "#AAFF00",
-        "extra": [
+          },
+          {
+            "text": "c",
+            "color": "#AAFF00"
+          },
           {
             "text": "o",
             "color": "#71FF00"
@@ -55,11 +53,13 @@
           {
             "text": "t ",
             "color": "#00FFAA"
-          },
-          {
-            "text": "r",
-            "color": "#00FFE3"
-          },
+          }
+        ]
+      },
+      {
+        "text": "r",
+        "color": "#00FFE3",
+        "extra": [
           {
             "text": "a",
             "color": "#00E3FF"
@@ -85,7 +85,7 @@
             "color": "#3900FF"
           }
         ],
-        "bold": true
+        "italic": true
       },
       {
         "text": " o",
@@ -112,11 +112,12 @@
             "color": "#FF0071"
           },
           {
-            "text": "h ",
+            "text": "h",
             "color": "#FF0039"
           }
         ]
       }
-    ]
+    ],
+    "bold": true
   }
 ]

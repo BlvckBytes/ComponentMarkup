@@ -1,11 +1,8 @@
 [
   {
-    "text": "",
+    "text": "H",
+    "color": "#FF0000",
     "extra": [
-      {
-        "text": "H",
-        "color": "#FF0000"
-      },
       {
         "text": "e",
         "color": "#FF8000"

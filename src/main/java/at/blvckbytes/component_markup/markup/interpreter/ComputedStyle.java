@@ -24,13 +24,27 @@ import java.util.logging.Level;
 
 public class ComputedStyle {
 
-  public long packedColor = PackedColor.NULL_SENTINEL;
+  private long packedColor = PackedColor.NULL_SENTINEL;
+  private boolean packedColorFromSlotContext;
   public long packedShadowColor = PackedColor.NULL_SENTINEL;
   public int packedShadowColorOpacity;
   public @Nullable String font;
   public @Nullable InputView fontPosition;
   public int formats;
   public boolean reset;
+
+  public boolean isPackedColorFromSlotContext() {
+    return packedColorFromSlotContext;
+  }
+
+  public long getPackedColor() {
+    return packedColor;
+  }
+
+  public void setPackedColor(long packedColor, boolean fromSlotContext) {
+    this.packedColor = packedColor;
+    this.packedColorFromSlotContext = fromSlotContext;
+  }
 
   public boolean doStylesEqual(@Nullable ComputedStyle other) {
     if (other == null)
@@ -81,7 +95,7 @@ public class ComputedStyle {
       return;
 
     if (this.packedColor == PackedColor.NULL_SENTINEL)
-      this.packedColor = other.packedColor;
+      this.setPackedColor(other.packedColor, other.packedColorFromSlotContext);
 
     if (this.packedShadowColor == PackedColor.NULL_SENTINEL)
       this.packedShadowColor = other.packedShadowColor;
@@ -121,7 +135,7 @@ public class ComputedStyle {
       this.font = null;
 
     if (this.packedColor != PackedColor.NULL_SENTINEL && ((this.packedColor == other.packedColor) ^ (!equal)))
-      this.packedColor = PackedColor.NULL_SENTINEL;
+      this.setPackedColor(PackedColor.NULL_SENTINEL, false);
 
     if (this.packedShadowColor != PackedColor.NULL_SENTINEL && ((this.packedShadowColor == other.packedShadowColor) ^ (!equal)))
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
@@ -154,7 +168,7 @@ public class ComputedStyle {
       this.font = null;
 
     if (this.packedColor != PackedColor.NULL_SENTINEL && ((other.packedColor == PackedColor.NULL_SENTINEL) ^ common))
-      this.packedColor = PackedColor.NULL_SENTINEL;
+      this.setPackedColor(PackedColor.NULL_SENTINEL, false);
 
     if (this.packedShadowColor != PackedColor.NULL_SENTINEL && ((other.packedShadowColor == PackedColor.NULL_SENTINEL) ^ common))
       this.packedShadowColor = PackedColor.NULL_SENTINEL;
@@ -185,9 +199,8 @@ public class ComputedStyle {
     ComputedStyle defaultStyle = slotContext.defaultStyle;
 
     if (this.packedColor == PackedColor.NULL_SENTINEL) {
-      if (mask.packedColor != PackedColor.NULL_SENTINEL && mask.packedColor != defaultStyle.packedColor) {
-        this.packedColor = defaultStyle.packedColor;
-      }
+      if (mask.packedColor != PackedColor.NULL_SENTINEL && mask.packedColor != defaultStyle.packedColor)
+        this.setPackedColor(defaultStyle.packedColor, true);
     }
 
     if (this.packedShadowColor == PackedColor.NULL_SENTINEL) {
@@ -229,6 +242,7 @@ public class ComputedStyle {
   public ComputedStyle copy() {
     ComputedStyle result = new ComputedStyle();
     result.packedColor = this.packedColor;
+    result.packedColorFromSlotContext = this.packedColorFromSlotContext;
     result.packedShadowColor = this.packedShadowColor;
     result.font = this.font;
     result.fontPosition = this.fontPosition;
@@ -258,7 +272,7 @@ public class ComputedStyle {
 
         if (packedColor != PackedColor.NULL_SENTINEL) {
           result = new ComputedStyle();
-          result.packedColor = packedColor;
+          result.setPackedColor(packedColor, false);
         }
       }
     }
@@ -267,7 +281,6 @@ public class ComputedStyle {
       // Default Minecraft shadow-behaviour: color=(foreground || #000000) opacity=25%
       long packedColor = AnsiStyleColor.BLACK.packedColor;
 
-      //noinspection ConstantValue
       if (result != null && result.packedColor != PackedColor.NULL_SENTINEL)
         packedColor = result.packedColor;
 
@@ -454,6 +467,7 @@ public class ComputedStyle {
 
   private void clearStylesButReset() {
     this.packedColor = PackedColor.NULL_SENTINEL;
+    this.packedColorFromSlotContext = false;
     this.packedShadowColor = PackedColor.NULL_SENTINEL;
     this.packedShadowColorOpacity = 0;
     this.font = null;

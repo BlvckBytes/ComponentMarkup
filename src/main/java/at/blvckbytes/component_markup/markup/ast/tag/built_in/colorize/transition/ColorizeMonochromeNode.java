@@ -32,14 +32,12 @@ public class ColorizeMonochromeNode extends ColorizeNode {
   }
 
   @Override
-  protected boolean handleTextAndGetIfDoProcess(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
-    interpreter.getCurrentBuilder().onText(node, state::addInjected, false);
-    return false;
+  protected void onTextEncounter(TextNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
+    interpreter.getCurrentBuilder().onText(node, extendedBuilder -> state.addCandidate(extendedBuilder, node), false);
   }
 
   @Override
-  protected boolean handleUnitAndGetIfDoProcess(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
-    interpreter.getCurrentBuilder().onUnit(node, state::addInjected);
-    return false;
+  protected void onUnitEncounter(UnitNode node, ColorizeNodeState state, Interpreter<?, ?> interpreter) {
+    interpreter.getCurrentBuilder().onUnit(node, extendedBuilder -> state.addCandidate(extendedBuilder, node));
   }
 }
