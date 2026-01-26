@@ -127,7 +127,7 @@ public class MarkupParser implements CmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -152,7 +152,7 @@ public class MarkupParser implements CmlEventConsumer {
     if (attributeName.has(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -181,7 +181,7 @@ public class MarkupParser implements CmlEventConsumer {
     if (attributeName.has(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -210,7 +210,7 @@ public class MarkupParser implements CmlEventConsumer {
     if (attributeName.has(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -239,7 +239,7 @@ public class MarkupParser implements CmlEventConsumer {
     if (attributeName.has(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -265,7 +265,7 @@ public class MarkupParser implements CmlEventConsumer {
       return;
     }
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -307,7 +307,7 @@ public class MarkupParser implements CmlEventConsumer {
     if (attributeName.has(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute);
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -319,33 +319,33 @@ public class MarkupParser implements CmlEventConsumer {
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
-    ExpressionAttribute attribute;
-
     if (attributeName.has(AttributeFlag.BIND_BY_NAME)) {
       if (isInvalidIdentifier(attributeName.finalName, true))
         throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_IDENTIFIER, attributeName.finalName.buildString());
 
-      attribute = new ExpressionAttribute(attributeName, parseExpression(attributeName.finalName));
+      Attribute attribute = new ExpressionAttribute(attributeName, parseExpression(attributeName.finalName));
+
+      // Do not override the expression-identifier with a markup-attribute token-type; it should prevail, in this case.
+      handleUserAttribute(attribute, false);
+      return;
     }
 
-    else {
-      attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(attributeName.finalName, true));
+    Attribute attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(attributeName.finalName, true));
 
-      if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-        handleIntrinsicAttribute(attribute, true);
-        return;
-      }
-
-      if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
-        handleIntrinsicAttribute(attribute, true);
-        return;
-      }
-
-      if (attributeName.has(AttributeFlag.BINDING_MODE))
-        throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute, true);
+      return;
     }
 
-    handleUserAttribute(attribute);
+    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+      handleIntrinsicAttribute(attribute, true);
+      return;
+    }
+
+    if (attributeName.has(AttributeFlag.BINDING_MODE))
+      throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+
+    handleUserAttribute(attribute, true);
   }
 
   @Override
@@ -809,7 +809,7 @@ public class MarkupParser implements CmlEventConsumer {
     return false;
   }
 
-  private void handleUserAttribute(Attribute attribute) {
+  private void handleUserAttribute(Attribute attribute, boolean emitToken) {
     AttributeName attributeName = attribute.attributeName;
 
     // Allow underscores, as they're part of expression-identifiers and thus the
@@ -820,7 +820,7 @@ public class MarkupParser implements CmlEventConsumer {
         throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
     }
 
-    if (tokenOutput != null)
+    if (emitToken && tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, attributeName.finalName);
 
     TagAndBuffers currentLayer = tagStack.peek();
