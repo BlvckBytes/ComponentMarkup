@@ -69,34 +69,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnBracketedIntrinsicAttributes() {
-    makeErrorCase(
-      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [`*if´]=\"\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [`+is´]=\"\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [`*let-´]=\"\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [`*let-my_var´]=\"\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE,
-      "<container [`*let´]=\"\">"
-    );
-  }
-
-  @Test
   public void shouldThrowOnMultipleIntrinsicMarkers() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS,
@@ -192,6 +164,11 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.MALFORMED_IDENTIFIER,
       "<container *for-`0abc´=\"one\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_IDENTIFIER,
+      "<container &`hello-world´ />"
     );
   }
 
@@ -290,6 +267,26 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
       "<container `[´...]=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container `&´=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container `*´=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container `+´=\"world\">"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
+      "<container `[´]=\"world\">"
     );
   }
 
@@ -875,6 +872,30 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
       "<`container´ value={<red>Hello, world!}><green>Actual content!"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMultipleBindByNameOperators() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_ATTRIBUTE_BIND_BY_NAME_OPERATORS,
+      "<container &`&´test />"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnCombinedBindByNameOperator() {
+    makeErrorCase(
+      MarkupParseError.COMBINED_ATTRIBUTE_BIND_BY_NAME_OPERATOR,
+      "<container [`&´test] />"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnCombinedIntrinsicOperator() {
+    makeErrorCase(
+      MarkupParseError.COMBINED_INTRINSIC_MARKER_OPERATOR,
+      "<container [`*´test] />"
     );
   }
 

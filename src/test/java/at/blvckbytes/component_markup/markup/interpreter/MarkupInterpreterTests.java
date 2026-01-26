@@ -1645,6 +1645,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
   }
 
+  @Test
+  public void shouldBindVariableAttributeByName() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  *let-asd={<red>Hello, world!}",
+        "  &asd",
+        "/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .string("color", "red")
+    );
+  }
+
   private void makeLetBindingAndConditionalCase(TextWithSubViews text) {
     makeCase(
       text,

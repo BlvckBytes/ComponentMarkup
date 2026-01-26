@@ -32,20 +32,17 @@ public class AttributeName {
     InputView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
+    InputView bindByNamePosition = null;
+    InputView intrinsicMarkerPosition = null;
+
     int nameLength;
 
     while ((nameLength = attributeName.length()) > 0) {
       char firstChar = attributeName.nthChar(0);
 
       if (firstChar == '*' || firstChar == '+') {
-        if (flags.contains(AttributeFlag.BINDING_MODE))
-          throw new MarkupParseException(attributeName, MarkupParseError.BRACKETED_INTRINSIC_ATTRIBUTE);
-
-        if (flags.contains(AttributeFlag.INTRINSIC_LITERAL) ||flags.contains(AttributeFlag.INTRINSIC_EXPRESSION))
+        if (flags.contains(AttributeFlag.INTRINSIC_LITERAL) || flags.contains(AttributeFlag.INTRINSIC_EXPRESSION))
           throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_INTRINSIC_MARKERS);
-
-        if (!flags.isEmpty())
-          throw new IllegalStateException("Due to the grammar of attribute-operators, this case should be unreachable");
 
         AttributeFlag flag = firstChar == '*' ? AttributeFlag.INTRINSIC_EXPRESSION : AttributeFlag.INTRINSIC_LITERAL;
 
@@ -60,6 +57,8 @@ public class AttributeName {
           throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(flag);
+
+        intrinsicMarkerPosition = attributeName;
         attributeName = attributeName.buildSubViewRelative(1);
         continue;
       }
@@ -111,11 +110,32 @@ public class AttributeName {
         continue;
       }
 
+      if (firstChar == '&') {
+        if (!flags.add(AttributeFlag.BIND_BY_NAME))
+          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_BIND_BY_NAME_OPERATORS);
+
+        if (nameLength == 1)
+          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+
+        if (tokenOutput != null)
+          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__BIND_BY_NAME, attributeName.buildSubViewRelative(0, 1));
+
+        bindByNamePosition = attributeName;
+        attributeName = attributeName.buildSubViewRelative(1);
+        continue;
+      }
+
       break;
     }
 
     if (nameLength == 0)
       throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
+
+    if (intrinsicMarkerPosition != null && flags.size() > 1)
+      throw new MarkupParseException(intrinsicMarkerPosition, MarkupParseError.COMBINED_INTRINSIC_MARKER_OPERATOR);
+
+    if (bindByNamePosition != null && flags.size() > 1)
+      throw new MarkupParseException(bindByNamePosition, MarkupParseError.COMBINED_ATTRIBUTE_BIND_BY_NAME_OPERATOR);
 
     attributeName.setLowercase();
 

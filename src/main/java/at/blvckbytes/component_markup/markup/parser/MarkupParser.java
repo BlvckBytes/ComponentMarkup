@@ -319,20 +319,31 @@ public class MarkupParser implements CmlEventConsumer {
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
-    ExpressionAttribute attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(attributeName.finalName, true));
+    ExpressionAttribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, true);
-      return;
+    if (attributeName.has(AttributeFlag.BIND_BY_NAME)) {
+      if (isInvalidIdentifier(attributeName.finalName, true))
+        throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_IDENTIFIER, attributeName.finalName.buildString());
+
+      attribute = new ExpressionAttribute(attributeName, parseExpression(attributeName.finalName));
     }
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
-      handleIntrinsicAttribute(attribute, true);
-      return;
-    }
+    else {
+      attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(attributeName.finalName, true));
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
-      throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+      if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
+        handleIntrinsicAttribute(attribute, true);
+        return;
+      }
+
+      if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+        handleIntrinsicAttribute(attribute, true);
+        return;
+      }
+
+      if (attributeName.has(AttributeFlag.BINDING_MODE))
+        throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
+    }
 
     handleUserAttribute(attribute);
   }
