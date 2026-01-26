@@ -32,6 +32,8 @@ public class TagAndBuffers implements ParserChildItem {
 
   private @Nullable List<ParserChildItem> children;
 
+  public boolean selfClosing;
+
   public @Nullable ExpressionNode ifCondition;
   public ConditionType ifConditionType = ConditionType.NONE;
   public @Nullable ExpressionNode useCondition;
@@ -317,7 +319,7 @@ public class TagAndBuffers implements ParserChildItem {
     MarkupNode result;
 
     try {
-      result = tag.createNode(tagName, attributeMap, bindings, getProcessedChildren());
+      result = tag.createNode(tagName, selfClosing, attributeMap, bindings, getProcessedChildren());
     } catch (Throwable thrownError) {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;

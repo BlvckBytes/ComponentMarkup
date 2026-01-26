@@ -30,6 +30,7 @@ public class TransitionTag extends ColorizeTag {
   @Override
   public @NotNull MarkupNode createNode(
     @NotNull InputView tagName,
+    boolean selfClosing,
     @NotNull AttributeMap attributes,
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children

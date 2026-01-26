@@ -346,6 +346,8 @@ public class MarkupParser implements CmlEventConsumer {
 
     TagAndBuffers currentLayer = tagStack.peek();
 
+    currentLayer.selfClosing = wasSelfClosing;
+
     assert currentLayer.tag != null;
     assert currentLayer.tagName != null;
 
