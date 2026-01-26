@@ -277,18 +277,8 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       GlobalLogger.log(Level.WARNING, "Encountered empty " + node.getClass().getSimpleName());
 
     for (MarkupNode conditional : node.conditions) {
-      ExpressionNode ifCondition = conditional.getIfCondition();
-
-      if (ifCondition == null) {
-        interpret(conditional);
+      if (interpret(conditional))
         return;
-      }
-
-      if (!evaluateAsBoolean(ifCondition))
-        continue;
-
-      interpret(conditional);
-      return;
     }
 
     if (node.fallback == null)
@@ -395,8 +385,6 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   }
 
   private void interpretForLoop(ForLoopNode node) {
-    introduceLetBindings(node.letBindingsBeforeForAttribute);
-
     Object iterable = evaluateAsPlainObject(node.iterable);
     List<Object> items = environment.getValueInterpreter().asList(iterable);
 
@@ -445,6 +433,24 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   public boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin) {
     boolean doNotUse = false;
 
+    environment.beginScope();
+
+    if (afterScopeBegin != null)
+      afterScopeBegin.run();
+
+    Collection<LetBinding> bindingsToIntroduce;
+
+    if (node instanceof ForLoopNode)
+      bindingsToIntroduce = ((ForLoopNode) node).letBindingsBeforeForAttribute;
+
+    // Seeing how neither *if nor *use introduce variables, I don't see a single reason to
+    // enforce having to declare let-bindings prior to their usage - keeping it convenient.
+    else
+      bindingsToIntroduce = node.letBindings;
+
+    // Introduce bindings early, as to enable their evaluation in *if and *use on the very same node.
+    introduceLetBindings(bindingsToIntroduce);
+
     ExpressionNode useCondition = node.getUseCondition();
 
     if (useCondition != null) {
@@ -453,16 +459,14 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     }
 
     // Interceptors are what establish additional behaviour, thus do not invoke all
-    // of their call-sites in this method if the current node itself is not to be used
+    // of their call-sites in this method if the current node itself is not to be used.
+    // Next to that, use-conditions also control styles - see the NodeStyle.
     if (!doNotUse) {
-      if (interceptors.handleBeforeAndGetIfSkip(node))
+      if (interceptors.handleBeforeAndGetIfSkip(node)) {
+        environment.endScope();
         return true;
+      }
     }
-
-    environment.beginScope();
-
-    if (afterScopeBegin != null)
-      afterScopeBegin.run();
 
     boolean hasBeenRendered = false;
 
@@ -492,8 +496,6 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
       interpretForLoop((ForLoopNode) node);
       return;
     }
-
-    introduceLetBindings(node.letBindings);
 
     if (node instanceof IfElseIfElseNode) {
       interpretIfElseIfElse((IfElseIfElseNode) node);

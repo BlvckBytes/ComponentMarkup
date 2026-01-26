@@ -1562,4 +1562,48 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "I am not underlined!")
     );
   }
+
+  @Test
+  public void shouldAllowToUseLetBindingsImmediatelyInAConditional() {
+    makeLetBindingAndConditionalCase(new TextWithSubViews(
+      "<container",
+      "  *let-b='a + 5'",
+      "  *if='b eq 6'",
+      ">Hello, world!"
+    ));
+
+    makeLetBindingAndConditionalCase(new TextWithSubViews(
+      "<container",
+      "  *if='b eq 6'",
+      "  *let-b='a + 5'",
+      ">Hello, world!"
+    ));
+
+    makeLetBindingAndConditionalCase(new TextWithSubViews(
+      "<container",
+      "  *let-b='a + 5'",
+      "  *if='b eq 6'",
+      ">Hello, world!</container>",
+      "<container *else>Bye, world!"
+    ));
+
+    makeLetBindingAndConditionalCase(new TextWithSubViews(
+      "<container",
+      "  *if='b eq 6'",
+      "  *let-b='a + 5'",
+      ">Hello, world!</container>",
+      "<container *else>Bye, world!"
+    ));
+  }
+
+  private void makeLetBindingAndConditionalCase(TextWithSubViews text) {
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("a", 1),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+    );
+  }
 }
