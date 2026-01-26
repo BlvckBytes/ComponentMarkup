@@ -31,7 +31,7 @@ public class InternalAttributeMap implements AttributeMap {
 
   public void add(Attribute attribute) {
     this.attributeMap
-      .computeIfAbsent(attribute.attributeName.finalName.buildString(), k -> new ArrayList<>())
+      .computeIfAbsent(getPossiblyTransformedAttributeName(attribute), k -> new ArrayList<>())
       .add(attribute);
   }
 
@@ -39,7 +39,7 @@ public class InternalAttributeMap implements AttributeMap {
     for (List<Attribute> attributeBucket : attributeMap.values()) {
       for (Attribute attribute : attributeBucket) {
         if (!attribute.hasBeenUsed)
-          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), attribute.attributeName.finalName.buildString());
+          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.UNSUPPORTED_ATTRIBUTE, tagName.buildString(), getPossiblyTransformedAttributeName(attribute));
       }
     }
   }
@@ -278,5 +278,14 @@ public class InternalAttributeMap implements AttributeMap {
     }
 
     return result;
+  }
+
+  private String getPossiblyTransformedAttributeName(Attribute attribute) {
+    String name = attribute.attributeName.finalName.buildString();
+
+    if (attribute.attributeName.has(AttributeFlag.BIND_BY_NAME))
+      return name.replace('_', '-');
+
+    return name;
   }
 }

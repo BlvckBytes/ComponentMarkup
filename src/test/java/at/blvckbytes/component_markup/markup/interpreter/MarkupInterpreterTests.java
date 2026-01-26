@@ -1662,6 +1662,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
   }
 
+  @Test
+  public void shouldConvertUnderscoresToHyphensOnAttributesBoundByName() {
+    makeCase(
+      new TextWithSubViews(
+        "<style",
+        "  *let-shadow_opacity=50",
+        "  &shadow_opacity",
+        ">Hello, world!"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .string("shadow_color", "#00000080")
+    );
+  }
+
   private void makeLetBindingAndConditionalCase(TextWithSubViews text) {
     makeCase(
       text,

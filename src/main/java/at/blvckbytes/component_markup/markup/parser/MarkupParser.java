@@ -812,8 +812,13 @@ public class MarkupParser implements CmlEventConsumer {
   private void handleUserAttribute(Attribute attribute) {
     AttributeName attributeName = attribute.attributeName;
 
-    if (isInvalidIdentifier(attributeName.finalName, false))
-      throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
+    // Allow underscores, as they're part of expression-identifiers and thus the
+    // variable-names which may be bound by name; they're transformed automatically
+    // later, when actually adding the attribute to the attribute-map.
+    if (!attributeName.has(AttributeFlag.BIND_BY_NAME)) {
+      if (isInvalidIdentifier(attributeName.finalName, false))
+        throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
+    }
 
     if (tokenOutput != null)
       tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, attributeName.finalName);
