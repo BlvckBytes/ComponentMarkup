@@ -61,6 +61,7 @@ public enum MarkupParseError {
   MULTIPLE_LOOPS(args -> "There has already been a prior loop on this tag, and loops may only occur once"),
   MISSING_PRECEDING_IF_SIBLING(args -> "Cannot use branching (else-if, else) without having specified a preceding if-sibling"),
   SPREAD_DISALLOWED_ON_NON_BINDING(args -> "The spread-operator ... is only allowed on bound attributes: [" + args.get(0) + "]=\"<expression>\""),
+  CONTAINER_ATTRIBUTES_ON_SELF_CLOSING(args -> "The container-tag only accepts children via attributes when self-closing: <container />"),
   CML_PARSE_ERROR(args -> "Encountered malformed component-markup"),
   EXPRESSION_PARSE_ERROR(args -> "Encountered a malformed expression"),
   EXPRESSION_TOKENIZE_ERROR(args -> "Encountered a malformed expression"),

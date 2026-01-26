@@ -158,6 +158,37 @@ public class InternalAttributeMap implements AttributeMap {
     return unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false, aliases));
   }
 
+  @Override
+  public @NotNull MarkupList getRemainingValuesInOrderAsMarkup() {
+    List<Attribute> remainingValues = new ArrayList<>();
+
+    for (List<Attribute> bucket : attributeMap.values()) {
+      for (Attribute attribute : bucket) {
+        if (attribute.hasBeenUsed)
+          continue;
+
+        attribute.hasBeenUsed = true;
+        remainingValues.add(attribute);
+      }
+    }
+
+    remainingValues.sort(Comparator.comparingInt(attribute -> attribute.attributeName.fullName.startInclusive));
+
+    return new MarkupList(remainingValues);
+  }
+
+  @Override
+  public boolean hasUnusedValues() {
+    for (List<Attribute> bucket : attributeMap.values()) {
+      for (Attribute attribute : bucket) {
+        if (!attribute.hasBeenUsed)
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   private @Nullable List<Attribute> selectMultiAttributeOrNull(String name, boolean expression, String... aliases) {
     List<Attribute> attributes = getAttributes(name, aliases);
 

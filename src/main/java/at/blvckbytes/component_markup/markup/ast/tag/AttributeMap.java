@@ -28,4 +28,8 @@ public interface AttributeMap {
 
   @NotNull MarkupList getOptionalMarkupList(String name, String... aliases);
 
+  @NotNull MarkupList getRemainingValuesInOrderAsMarkup();
+
+  boolean hasUnusedValues();
+
 }

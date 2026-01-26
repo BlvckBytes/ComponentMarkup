@@ -1596,6 +1596,55 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     ));
   }
 
+  @Test
+  public void shouldRenderValueOnSelfClosingContainerTag() {
+    makeCase(
+      new TextWithSubViews(
+        "<container value={<red>Hello, world!} />"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, world!")
+        .string("color", "red")
+    );
+  }
+
+  @Test
+  public void shouldRenderMultipleArbitraryValuesOnSelfClosingContainerTag() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  asd={<red>First}",
+        "  bda={<green>Second}",
+        "  aue={<blue>Third}",
+        "/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "First")
+                .string("color", "red")
+            ))
+            .object(item -> (
+              item
+                .string("text", "Second")
+                .string("color", "green")
+            ))
+            .object(item -> (
+              item
+                .string("text", "Third")
+                .string("color", "blue")
+            ))
+        ))
+    );
+  }
+
   private void makeLetBindingAndConditionalCase(TextWithSubViews text) {
     makeCase(
       text,

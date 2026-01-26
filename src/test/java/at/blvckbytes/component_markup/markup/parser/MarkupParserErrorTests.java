@@ -860,6 +860,24 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnAttributeUsedWithNonSelfClosingContainer() {
+    makeErrorCase(
+      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
+      "<`container´ asd={<red>Hello, world!}>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
+      "<`container´ value={<red>Hello, world!}>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
+      "<`container´ value={<red>Hello, world!}><green>Actual content!"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
