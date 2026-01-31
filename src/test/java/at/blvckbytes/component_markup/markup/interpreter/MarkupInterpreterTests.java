@@ -1728,6 +1728,20 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldBindMemberAccessExpressionByInnermostName() {
+    makeCase(
+      new TextWithSubViews(
+        "<key &keys.first.key />"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("keys", Collections.singletonMap("first", Collections.singletonMap("key", "my.key"))),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("keybind", "my.key")
+    );
+  }
+
+  @Test
   public void shouldConvertUnderscoresToHyphensOnAttributesBoundByName() {
     makeCase(
       new TextWithSubViews(

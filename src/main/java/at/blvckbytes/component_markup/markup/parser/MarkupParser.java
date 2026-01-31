@@ -6,9 +6,12 @@
 package at.blvckbytes.component_markup.markup.parser;
 
 import at.blvckbytes.component_markup.expression.ImmediateExpression;
+import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.PrefixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.token.IdentifierToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.InterpolationNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
@@ -320,10 +323,8 @@ public class MarkupParser implements CmlEventConsumer {
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
     if (attributeName.has(AttributeFlag.BIND_BY_NAME)) {
-      if (isInvalidIdentifier(attributeName.finalName, true))
-        throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_IDENTIFIER, attributeName.finalName.buildString());
-
-      Attribute attribute = new ExpressionAttribute(attributeName, parseExpression(attributeName.finalName));
+      ExpressionNode expression = parseExpression(attributeName.finalName);
+      Attribute attribute = new ExpressionAttribute(decideBoundAttributeName(attributeName, expression), expression);
 
       // Do not override the expression-identifier with a markup-attribute token-type; it should prevail, in this case.
       handleUserAttribute(attribute, false);
@@ -538,6 +539,46 @@ public class MarkupParser implements CmlEventConsumer {
   // ================================================================================
   // Utilities
   // ================================================================================
+
+  private @Nullable IdentifierToken getInnermostIdentifierOfMemberAccessChain(ExpressionNode expressionNode) {
+    if (!(expressionNode instanceof InfixOperationNode))
+      return null;
+
+    InfixOperationNode infixNode = (InfixOperationNode) expressionNode;
+
+    if (infixNode.operatorToken.operator != InfixOperator.MEMBER)
+      return null;
+
+    if (infixNode.rhs instanceof TerminalNode) {
+      TerminalNode terminalNode = (TerminalNode) infixNode.rhs;
+
+      if (terminalNode.token instanceof IdentifierToken)
+        return (IdentifierToken) terminalNode.token;
+
+      return null;
+    }
+
+    return getInnermostIdentifierOfMemberAccessChain(infixNode.rhs);
+  }
+
+  private AttributeName decideBoundAttributeName(AttributeName specifiedName, ExpressionNode expressionNode) {
+    if (expressionNode instanceof TerminalNode) {
+      TerminalToken token = ((TerminalNode) expressionNode).token;
+
+      if (!(token instanceof IdentifierToken))
+        throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION);
+
+      // The whole specified name is equal to the identifier, so use it as-is.
+      return specifiedName;
+    }
+
+    IdentifierToken innermostIdentifier = getInnermostIdentifierOfMemberAccessChain(expressionNode);
+
+    if (innermostIdentifier == null)
+      throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION);
+
+    return new AttributeName(innermostIdentifier.raw, innermostIdentifier.raw, specifiedName.getFlags());
+  }
 
   private void handleIntrinsicAttribute(Attribute attribute, boolean wasFlag) {
     TagAndBuffers currentLayer = tagStack.peek();

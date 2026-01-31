@@ -18,10 +18,14 @@ public class AttributeName {
   public final InputView fullName;
   private final EnumSet<AttributeFlag> flags;
 
-  private AttributeName(InputView finalName, InputView fullName, EnumSet<AttributeFlag> flags) {
+  public AttributeName(InputView finalName, InputView fullName, EnumSet<AttributeFlag> flags) {
     this.finalName = finalName;
     this.fullName = fullName;
     this.flags = flags;
+  }
+
+  public EnumSet<AttributeFlag> getFlags() {
+    return EnumSet.copyOf(flags);
   }
 
   public boolean has(AttributeFlag flag) {

@@ -165,10 +165,17 @@ public class MarkupParserErrorTests {
       MarkupParseError.MALFORMED_IDENTIFIER,
       "<container *for-`0abc´=\"one\">"
     );
+  }
 
+  @Test
+  public void shouldThrowOnUnsupportedBindByNameExpression() {
     makeErrorCase(
-      MarkupParseError.MALFORMED_IDENTIFIER,
-      "<container &`hello-world´ />"
+      MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION,
+      "<container &`a+b´ />"
+    );
+    makeErrorCase(
+      MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION,
+      "<container &`true´ />"
     );
   }
 
