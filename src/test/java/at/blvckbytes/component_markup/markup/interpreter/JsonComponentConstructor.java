@@ -12,10 +12,12 @@ import at.blvckbytes.component_markup.util.color.PackedColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class JsonComponentConstructor implements ComponentConstructor<JsonObject, JsonObject> {
 
@@ -286,6 +288,24 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
     // happen on a real Paper server, where the builder is built - all changes to the builder beyond
     // this point have no effect on the resulting component, and this reflects that behavior.
     return component.deepCopy();
+  }
+
+  @Override
+  public void forEachTextOf(JsonObject component, Consumer<String> handler) {
+    JsonElement textElement = component.get("text");
+
+    if (textElement instanceof JsonPrimitive)
+      handler.accept(textElement.getAsString());
+
+    JsonElement childrenElement = component.get("extra");
+
+    if (!(childrenElement instanceof JsonArray))
+      return;
+
+    for (JsonElement child : (JsonArray) childrenElement) {
+      if (child instanceof JsonObject)
+        forEachTextOf((JsonObject) child, handler);
+    }
   }
 
   private void setFormat(JsonObject component, String formatKey, TriState value) {

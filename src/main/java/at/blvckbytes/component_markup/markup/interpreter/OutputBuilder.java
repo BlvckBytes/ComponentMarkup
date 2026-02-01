@@ -29,6 +29,8 @@ public class OutputBuilder<B, C> {
 
   private final Stack<ComponentSequence<B, C>> sequencesStack;
 
+  private int totalTextLength;
+
   public OutputBuilder(
     MarkupInterpreter<B, C> interpreter,
     SlotContext slotContext,
@@ -40,6 +42,10 @@ public class OutputBuilder<B, C> {
     this.sequencesStack = new Stack<>();
     this.sequencesStack.push(ComponentSequence.initial(slotContext, resetContext, interpreter));
     this.result = new ArrayList<>();
+  }
+
+  public int getTotalTextLength() {
+    return totalTextLength;
   }
 
   public void onBreak() {
@@ -67,6 +73,7 @@ public class OutputBuilder<B, C> {
   }
 
   public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
+    totalTextLength += node.textValue.length();
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
   }
 
@@ -75,6 +82,7 @@ public class OutputBuilder<B, C> {
   }
 
   public void onComponent(C component, StyledNode containingNode) {
+    componentConstructor.forEachTextOf(component, text -> totalTextLength += text.length());
     sequencesStack.peek().onComponent(component, containingNode);
   }
 

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * @param <B> Component(B)uilder - Useful as an intermediate if components are immutable, seeing how
@@ -108,6 +109,12 @@ public interface ComponentConstructor<B, C> {
   // Children
   // ================================================================================
 
+  void addChildren(B component, List<C> children);
+
+  // ================================================================================
+  // Miscellaneous
+  // ================================================================================
+
   /**
    * Called once a component has been fully constructed and no more changes are to be
    * made. Since Adventure is deeply immutable and thereby enforces builders, this stage
@@ -117,5 +124,10 @@ public interface ComponentConstructor<B, C> {
    */
   C finalizeComponent(B component);
 
-  void addChildren(B component, List<C> children);
+  /**
+   * Recursively walks the provided finalized component and invokes the callback once
+   * for each occurrence of a text-component, which includes the self.
+   */
+  void forEachTextOf(C component, Consumer<String> handler);
+
 }
