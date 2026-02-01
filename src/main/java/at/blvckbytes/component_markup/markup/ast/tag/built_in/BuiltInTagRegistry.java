@@ -47,5 +47,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new NumberTag());
     register(new DateTag());
     register(new DurationTag());
+    register(new WordWrapTag());
   }
 }
