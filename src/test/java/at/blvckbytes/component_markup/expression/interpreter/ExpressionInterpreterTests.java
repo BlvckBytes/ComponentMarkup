@@ -337,6 +337,25 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldCastToBoolean() {
+    makeCase("bool(0)", null, false);
+    makeCase("bool(1)", null, true);
+    makeCase("bool([])", null, false);
+    makeCase("bool([5.5])", null, true);
+    makeCase("bool('')", null, false);
+    makeCase("bool('hello, world!')", null, true);
+  }
+
+  @Test
+  public void shouldCastToString() {
+    makeCase("str(0)", null, "0");
+    makeCase("str(.5)", null, "0.5");
+    makeCase("str(true)", null, "true");
+    makeCase("str([0, 1, 2])", null, "[0, 1, 2]");
+    makeCase("str({a: 1, b: 2})", null, "[a=1, b=2]");
+  }
+
+  @Test
   public void shouldFloorCeilAndRoundDouble() {
     makeCase("floor(2.6)", null, 2.0);
     makeCase("ceil(2.3)", null, 3.0);

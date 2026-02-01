@@ -98,6 +98,12 @@ public class ExpressionInterpreter {
         case DOUBLE:
           return valueInterpreter.asDouble(operandValue);
 
+        case BOOL:
+          return valueInterpreter.asBoolean(operandValue);
+
+        case STR:
+          return valueInterpreter.asString(operandValue);
+
         case ROUND:
         case CEIL:
         case FLOOR: {

@@ -25,6 +25,8 @@ public enum PrefixOperator implements EnumToken {
   REVERSE    ("reverse", OperatorFlag.NAMED, OperatorFlag.PARENS),
   LONG       ("long",    OperatorFlag.NAMED, OperatorFlag.PARENS),
   DOUBLE     ("double",  OperatorFlag.NAMED, OperatorFlag.PARENS),
+  BOOL       ("bool",    OperatorFlag.NAMED, OperatorFlag.PARENS),
+  STR        ("str",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   FLOOR      ("floor",   OperatorFlag.NAMED, OperatorFlag.PARENS),
   CEIL       ("ceil",    OperatorFlag.NAMED, OperatorFlag.PARENS),
   ROUND      ("round",   OperatorFlag.NAMED, OperatorFlag.PARENS),
