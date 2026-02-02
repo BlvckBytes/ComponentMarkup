@@ -27,25 +27,8 @@ public class TerminalNode extends ExpressionNode {
   }
 
   public @Nullable Object getValue(InterpretationEnvironment environment, InterpreterLogger logger) {
-    if (token instanceof IdentifierToken) {
-      String variableName = (String) token.getPlainValue();
-
-      if (!environment.doesVariableExist(variableName)) {
-        StringBuilder knownNames = new StringBuilder();
-
-        environment.forEachKnownName(name -> {
-          if (knownNames.length() != 0)
-            knownNames.append(", ");
-
-          knownNames.append(name);
-        });
-
-        logger.logErrorScreen(token.raw, "Could not locate variable \"" + variableName + "\"; choose one of: " + knownNames);
-        return null;
-      }
-
-      return environment.getVariableValue(variableName);
-    }
+    if (token instanceof IdentifierToken)
+      return ExpressionInterpreter.accessVariableOrLog(environment, (String) token.getPlainValue(), token.raw, logger);
 
     if (token instanceof TemplateLiteralToken) {
       StringBuilder result = new StringBuilder();

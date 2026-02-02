@@ -14,6 +14,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
 import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import at.blvckbytes.component_markup.util.DeepIterator;
+import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.TriState;
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
@@ -161,7 +162,7 @@ public class ExpressionInterpreter {
           return environment.doesVariableExist(sanitizeVariableName(valueInterpreter.asString(operandValue)));
 
         case ENV:
-          return environment.getVariableValue(sanitizeVariableName(valueInterpreter.asString(operandValue)));
+          return accessVariableOrLog(environment, valueInterpreter.asString(operandValue), node.getFirstMemberPositionProvider(), logger);
 
         case SUM:
         case AVG: {
@@ -375,6 +376,31 @@ public class ExpressionInterpreter {
 
     GlobalLogger.log(Level.WARNING, "Unimplemented node: " + expression.getClass());
     return null;
+  }
+
+  public static @Nullable Object accessVariableOrLog(
+    InterpretationEnvironment environment,
+    String variableName,
+    InputView positionProvider,
+    InterpreterLogger logger
+  ) {
+    String sanitizedName = sanitizeVariableName(variableName);
+
+    if (!environment.doesVariableExist(sanitizedName)) {
+      StringBuilder knownNames = new StringBuilder();
+
+      environment.forEachKnownName(name -> {
+        if (knownNames.length() != 0)
+          knownNames.append(", ");
+
+        knownNames.append(name);
+      });
+
+      logger.logErrorScreen(positionProvider, "Could not locate variable \"" + sanitizedName + "\"; choose one of: " + knownNames);
+      return null;
+    }
+
+    return environment.getVariableValue(sanitizedName);
   }
 
   private static String sanitizeVariableName(String input) {
