@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.expression.ast;
 
+import at.blvckbytes.component_markup.expression.tokenizer.OperatorFlag;
 import at.blvckbytes.component_markup.expression.tokenizer.token.PrefixOperatorToken;
 import at.blvckbytes.component_markup.util.InputView;
 
@@ -30,6 +31,11 @@ public class PrefixOperationNode extends ExpressionNode {
 
   @Override
   public String toExpression() {
-    return parenthesise(operatorToken.operator + operand.toExpression());
+    String operandExpression = operand.toExpression();
+
+    if (operatorToken.operator.flags.contains(OperatorFlag.PARENS))
+      operandExpression = "(" + operandExpression + ")";
+
+    return parenthesise(operatorToken.operator + operandExpression);
   }
 }
