@@ -11,9 +11,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 public class ForLoopNode extends MarkupNode {
 
@@ -25,8 +23,8 @@ public class ForLoopNode extends MarkupNode {
   public final @Nullable MarkupNode empty;
   public final @Nullable ExpressionNode reversed;
 
-  public @Nullable List<LetBinding> letBindingsBeforeForAttribute;
-  public @Nullable List<LetBinding> letBindingsAfterForAttribute;
+  public @Nullable LinkedHashSet<LetBinding> letBindingsBeforeForAttribute;
+  public @Nullable LinkedHashSet<LetBinding> letBindingsAfterForAttribute;
 
   public ForLoopNode(
     InputView forAttribute,
@@ -58,16 +56,30 @@ public class ForLoopNode extends MarkupNode {
 
       if (bindingPosition < forAttributePosition) {
         if (letBindingsBeforeForAttribute == null)
-          letBindingsBeforeForAttribute = new ArrayList<>();
+          letBindingsBeforeForAttribute = new LinkedHashSet<>();
 
         letBindingsBeforeForAttribute.add(letBinding);
         continue;
       }
 
       if (letBindingsAfterForAttribute == null)
-        letBindingsAfterForAttribute = new ArrayList<>();
+        letBindingsAfterForAttribute = new LinkedHashSet<>();
 
       letBindingsAfterForAttribute.add(letBinding);
     }
+  }
+
+  @Override
+  protected void inheritLetBindings(LinkedHashSet<LetBinding> letBindings) {
+    if (this.letBindingsBeforeForAttribute == null) {
+      this.letBindingsBeforeForAttribute = letBindings;
+      return;
+    }
+
+    LinkedHashSet<LetBinding> totalBindings = new LinkedHashSet<>();
+    totalBindings.addAll(letBindings);
+    totalBindings.addAll(this.letBindingsBeforeForAttribute);
+
+    this.letBindingsBeforeForAttribute = totalBindings;
   }
 }

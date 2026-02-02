@@ -96,18 +96,22 @@ public abstract class MarkupNode {
         this.ifCondition = new InfixOperationNode(this.ifCondition, new InfixOperatorToken(InputView.EMPTY, InfixOperator.CONJUNCTION), other.ifCondition, null);
     }
 
-    if (other.letBindings != null && !other.letBindings.isEmpty()) {
-      if (this.letBindings == null)
-        this.letBindings = other.letBindings;
-      else {
-        // Sadly, Java 8 does not support reverse iteration
-        LinkedHashSet<LetBinding> totalBindings = new LinkedHashSet<>();
-        totalBindings.addAll(other.letBindings);
-        totalBindings.addAll(this.letBindings);
-        this.letBindings = totalBindings;
-      }
-    }
+    if (other.letBindings != null && !other.letBindings.isEmpty())
+      inheritLetBindings(other.letBindings);
 
     return true;
+  }
+
+  protected void inheritLetBindings(LinkedHashSet<LetBinding> letBindings) {
+    if (this.letBindings == null) {
+      this.letBindings = letBindings;
+      return;
+    }
+
+    LinkedHashSet<LetBinding> totalBindings = new LinkedHashSet<>();
+    totalBindings.addAll(letBindings);
+    totalBindings.addAll(this.letBindings);
+
+    this.letBindings = totalBindings;
   }
 }

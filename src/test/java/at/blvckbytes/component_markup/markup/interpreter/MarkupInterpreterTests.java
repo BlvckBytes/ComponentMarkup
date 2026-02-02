@@ -1758,6 +1758,46 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
   }
 
+  @Test
+  public void shouldIntroduceLetBindingsInheritedToAForLoopNode() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  +let-name_a='Notch'",
+        "  +let-color_a='red'",
+        "  +let-name_b='Steve'",
+        "  +let-color_b='green'",
+        "  +let-name_c='Alex'",
+        "  +let-color_c='blue'",
+        ">",
+        "  <style",
+        "    *for-x=\"['a', 'b', 'c']\"",
+        "    *for-separator={<br/>}",
+        "    [color]='env(×`color_{x}×`)'",
+        "  >",
+        "    {env(×`name_{x}×`)}"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE,
+      new JsonArrayBuilder()
+        .object(item -> (
+          item
+            .string("text", "Notch")
+            .string("color", "red")
+        ))
+        .object(item -> (
+          item
+            .string("text", "Steve")
+            .string("color", "green")
+        ))
+        .object(item -> (
+          item
+            .string("text", "Alex")
+            .string("color", "blue")
+        ))
+    );
+  }
+
   private void makeLetBindingAndConditionalCase(TextWithSubViews text) {
     makeCase(
       text,
