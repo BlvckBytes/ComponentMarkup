@@ -10,6 +10,8 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface AttributeMap {
 
   @NotNull ExpressionNode getMandatoryExpressionNode(String name, String... aliases);
@@ -29,6 +31,8 @@ public interface AttributeMap {
   @NotNull MarkupList getOptionalMarkupList(String name, String... aliases);
 
   @NotNull MarkupList getRemainingValuesInOrderAsMarkup();
+
+  List<String> getUnusedNamesInOrder();
 
   boolean hasUnusedValues();
 

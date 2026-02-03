@@ -158,9 +158,8 @@ public class InternalAttributeMap implements AttributeMap {
     return unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false, aliases));
   }
 
-  @Override
-  public @NotNull MarkupList getRemainingValuesInOrderAsMarkup() {
-    List<Attribute> remainingValues = new ArrayList<>();
+  private List<Attribute> getUnusedAttributesInOrder() {
+    List<Attribute> unusedAttributes = null;
 
     for (List<Attribute> bucket : attributeMap.values()) {
       for (Attribute attribute : bucket) {
@@ -168,13 +167,25 @@ public class InternalAttributeMap implements AttributeMap {
           continue;
 
         attribute.hasBeenUsed = true;
-        remainingValues.add(attribute);
+
+        if (unusedAttributes == null)
+          unusedAttributes = new ArrayList<>();
+
+        unusedAttributes.add(attribute);
       }
     }
 
-    remainingValues.sort(Comparator.comparingInt(attribute -> attribute.attributeName.fullName.startInclusive));
+    if (unusedAttributes == null)
+      return Collections.emptyList();
 
-    return new MarkupList(remainingValues);
+    unusedAttributes.sort(Comparator.comparingInt(attribute -> attribute.attributeName.fullName.startInclusive));
+
+    return unusedAttributes;
+  }
+
+  @Override
+  public @NotNull MarkupList getRemainingValuesInOrderAsMarkup() {
+    return new MarkupList(getUnusedAttributesInOrder());
   }
 
   @Override
@@ -187,6 +198,21 @@ public class InternalAttributeMap implements AttributeMap {
     }
 
     return false;
+  }
+
+  @Override
+  public List<String> getUnusedNamesInOrder() {
+    List<Attribute> unusedAttributes = getUnusedAttributesInOrder();
+
+    if (unusedAttributes.isEmpty())
+      return Collections.emptyList();
+
+    List<String> unusedNames = new ArrayList<>(unusedAttributes.size());
+
+    for (Attribute unusedAttribute : unusedAttributes)
+      unusedNames.add(getPossiblyTransformedAttributeName(unusedAttribute));
+
+    return unusedNames;
   }
 
   private @Nullable List<Attribute> selectMultiAttributeOrNull(String name, boolean expression, String... aliases) {
