@@ -273,7 +273,7 @@ public class MarkupParserErrorTests {
 
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container `[´...]=\"world\">"
+      "<container `[´@]=\"world\">"
     );
 
     makeErrorCase(
@@ -296,25 +296,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnMultipleAttributeSpreads() {
     makeErrorCase(
       MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS,
-      "<container [...`...´hello]=\"world\">"
-    );
-  }
-
-  @Test
-  public void shouldThrowOnMalformedSpreadOperators() {
-    makeErrorCase(
-      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [`.´hello]=\"world\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [`..´hello]=\"world\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.MALFORMED_SPREAD_OPERATOR,
-      "<container [...`..´hello]=\"world\">"
+      "<container [@`@´hello]=\"world\">"
     );
   }
 
@@ -641,17 +623,17 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonExpressionSpreadOperator() {
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient `...´color=\"red\">"
+      "<gradient `@´color=\"red\">"
     );
 
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient `...´color=5.5>"
+      "<gradient `@´color=5.5>"
     );
 
     makeErrorCase(
       MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING,
-      "<gradient `...´color=5>"
+      "<gradient `@´color=5>"
     );
   }
 
@@ -798,7 +780,7 @@ public class MarkupParserErrorTests {
   public void shouldThrowOnNonMultiAttributeWithSpreadOperator() {
     makeErrorCase(
       MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE,
-      "<key [...`key´]=\"['first', 'second']\"/>"
+      "<key [@`key´]=\"['first', 'second']\"/>"
     );
   }
 

@@ -84,10 +84,7 @@ public class AttributeName {
         continue;
       }
 
-      if (firstChar == '.') {
-        if (attributeName.length() < 3 || attributeName.nthChar(1) != '.' || attributeName.nthChar(2) != '.')
-          throw new MarkupParseException(attributeName, MarkupParseError.MALFORMED_SPREAD_OPERATOR);
-
+      if (firstChar == '@') {
         if (flags.contains(AttributeFlag.SPREAD_MODE))
           throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_SPREADS);
 
@@ -95,13 +92,13 @@ public class AttributeName {
           throw new MarkupParseException(attributeName, MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING, attributeName.buildString());
 
         if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 3));
+          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 1));
 
-        if (nameLength == 3)
+        if (nameLength == 1)
           throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
 
         flags.add(AttributeFlag.SPREAD_MODE);
-        attributeName = attributeName.buildSubViewRelative(3);
+        attributeName = attributeName.buildSubViewRelative(1);
         continue;
       }
 

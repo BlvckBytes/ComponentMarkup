@@ -960,7 +960,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
     );
 
     text = new TextWithSubViews(
-      "<translate key=\"my.key\" [...with]=\"[first_node, second_node]\"/>"
+      "<translate key=\"my.key\" [@with]=\"[first_node, second_node]\"/>"
     );
 
     makeCase(

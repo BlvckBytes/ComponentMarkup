@@ -27,7 +27,7 @@ public class WordWrapTagTests extends InterpreterTestsBase {
         "  width=35",
         "  value-separator={<&7>,<space/>}",
         "  token-renderer={<&6>{token}}",
-        "  [...value]='values'",
+        "  [@value]='values'",
         "/>"
       ),
       new InterpretationEnvironment()
