@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.InsertNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -34,8 +35,10 @@ public class InsertTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+
     return new InsertNode(
-      attributes.getMandatoryExpressionNode("value"),
+      flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue,
       tagName, children, letBindings
     );
   }

@@ -16,16 +16,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ExpressionList {
 
-  public static final ExpressionList EMPTY = new ExpressionList(0);
+  public static final ExpressionList EMPTY = new ExpressionList(Collections.emptyList());
 
   private final List<ExpressionAttribute> attributes;
 
-  public ExpressionList(int size) {
-    this.attributes = new ArrayList<>(size);
+  public ExpressionList(List<ExpressionAttribute> attributes) {
+    this.attributes = attributes;
   }
 
   public boolean isEmpty() {

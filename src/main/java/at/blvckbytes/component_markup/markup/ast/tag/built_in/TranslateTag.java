@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TranslateNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -34,8 +35,10 @@ public class TranslateTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
+    ExpressionNode flagKey = attributes.getOptionalBoundFlagExpressionNode();
+
     return new TranslateNode(
-      attributes.getMandatoryExpressionNode("key"),
+      flagKey == null ? attributes.getMandatoryExpressionNode("key") : flagKey,
       attributes.getOptionalMarkupList("with"),
       attributes.getOptionalExpressionNode("fallback"),
       tagName, letBindings

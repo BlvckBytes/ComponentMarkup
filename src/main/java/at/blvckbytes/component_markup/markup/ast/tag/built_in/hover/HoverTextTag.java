@@ -29,8 +29,10 @@ public class HoverTextTag extends HoverTag {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
+    MarkupNode flagValue = attributes.getOptionalBoundFlagMarkupNode();
+
     return new TextHoverNode(
-      attributes.getMandatoryMarkupNode("value"),
+      flagValue == null ? attributes.getMandatoryMarkupNode("value") : flagValue,
       tagName, children, letBindings
     );
   }

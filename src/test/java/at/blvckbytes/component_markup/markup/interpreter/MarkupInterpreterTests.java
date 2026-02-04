@@ -1662,27 +1662,13 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
-  public void shouldRenderValueOnSelfClosingContainerTag() {
-    makeCase(
-      new TextWithSubViews(
-        "<container value={<red>Hello, world!} />"
-      ),
-      new InterpretationEnvironment(),
-      SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "Hello, world!")
-        .string("color", "red")
-    );
-  }
-
-  @Test
-  public void shouldRenderMultipleArbitraryValuesOnSelfClosingContainerTag() {
+  public void shouldRenderBoundFlagStyleAttributesOnSelfClosingContainer() {
     makeCase(
       new TextWithSubViews(
         "<container",
-        "  asd={<red>First}",
-        "  bda={<green>Second}",
-        "  aue={<blue>Third}",
+        "  *let-first={<red>Hello, world!}",
+        "  *let-second={<aqua>Bye, world!}",
+        "  [first] [second]",
         "/>"
       ),
       new InterpretationEnvironment(),
@@ -1693,37 +1679,15 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
           extra
             .object(item -> (
               item
-                .string("text", "First")
+                .string("text", "Hello, world!")
                 .string("color", "red")
             ))
             .object(item -> (
               item
-                .string("text", "Second")
-                .string("color", "green")
-            ))
-            .object(item -> (
-              item
-                .string("text", "Third")
-                .string("color", "blue")
+                .string("text", "Bye, world!")
+                .string("color", "aqua")
             ))
         ))
-    );
-  }
-
-  @Test
-  public void shouldBindVariableAttributeByName() {
-    makeCase(
-      new TextWithSubViews(
-        "<container",
-        "  *let-asd={<red>Hello, world!}",
-        "  [asd]",
-        "/>"
-      ),
-      new InterpretationEnvironment(),
-      SlotType.CHAT,
-      new JsonObjectBuilder()
-        .string("text", "Hello, world!")
-        .string("color", "red")
     );
   }
 

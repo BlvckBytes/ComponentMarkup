@@ -37,17 +37,21 @@ public class ContainerTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    if (!attributes.hasUnusedValues())
-      return new ContainerNode(tagName, children, letBindings);
+    MarkupList valueList = attributes.getOptionalBoundFlagMarkupList();
 
-    if (!selfClosing)
-      throw new MarkupParseException(tagName, MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING);
+    if (!valueList.isEmpty()) {
+      if (!selfClosing)
+        throw new MarkupParseException(tagName, MarkupParseError.CONTAINER_HAS_BOUND_FLAG_ATTRIBUTES_WHEN_NON_SELF_CLOSING);
 
-    MarkupList valueList = attributes.getRemainingValuesInOrderAsMarkup();
+      return new FunctionDrivenNode(tagName, interpreter -> {
+        List<MarkupNode> valueChildren = valueList.get(interpreter);
+        return new ContainerNode(tagName, valueChildren, letBindings);
+      });
+    }
 
-    return new FunctionDrivenNode(tagName, interpreter -> {
-      List<MarkupNode> valueChildren = valueList.get(interpreter);
-      return new ContainerNode(tagName, valueChildren, letBindings);
-    });
+    if (selfClosing)
+      throw new MarkupParseException(tagName, MarkupParseError.CONTAINER_MISSING_BOUND_FLAG_ATTRIBUTES_WHEN_SELF_CLOSING);
+
+    return new ContainerNode(tagName, children, letBindings);
   }
 }

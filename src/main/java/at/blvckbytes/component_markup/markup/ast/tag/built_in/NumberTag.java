@@ -35,7 +35,9 @@ public class NumberTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ExpressionNode value = attributes.getMandatoryExpressionNode("value");
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+    ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
+
     ExpressionNode absolute = attributes.getOptionalExpressionNode("absolute", "abs");
     ExpressionNode integer = attributes.getOptionalExpressionNode("integer", "int");
     ExpressionNode format = attributes.getOptionalExpressionNode("format");

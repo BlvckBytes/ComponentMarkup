@@ -32,18 +32,9 @@ public class ColorTag extends TagDefinition {
   ) {
     ContainerNode wrapper = new ContainerNode(tagName, children, letBindings);
 
-    ExpressionNode valueNode = attributes.getOptionalExpressionNode("value");
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
 
-    if (valueNode == null) {
-      List<String> unusedNames = attributes.getUnusedNamesInOrder();
-
-      if (!unusedNames.isEmpty())
-        valueNode = attributes.getMandatoryExpressionNode(unusedNames.get(0));
-      else
-        valueNode = attributes.getMandatoryExpressionNode("value");
-    }
-
-    wrapper.getOrInstantiateStyle().color = valueNode;
+    wrapper.getOrInstantiateStyle().color = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
 
     return wrapper;
   }

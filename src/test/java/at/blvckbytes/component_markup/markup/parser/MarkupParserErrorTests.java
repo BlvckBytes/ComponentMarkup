@@ -842,20 +842,18 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnAttributeUsedWithNonSelfClosingContainer() {
+  public void shouldThrowOnBoundFlagAttributeUsedWithNonSelfClosingContainer() {
     makeErrorCase(
-      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
-      "<`container´ asd={<red>Hello, world!}>"
+      MarkupParseError.CONTAINER_HAS_BOUND_FLAG_ATTRIBUTES_WHEN_NON_SELF_CLOSING,
+      "<`container´ [asd]>"
     );
+  }
 
+  @Test
+  public void shouldThrowOnMissingBoundFlagAttributeOnSelfClosingContainer() {
     makeErrorCase(
-      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
-      "<`container´ value={<red>Hello, world!}>"
-    );
-
-    makeErrorCase(
-      MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
-      "<`container´ value={<red>Hello, world!}><green>Actual content!"
+      MarkupParseError.CONTAINER_MISSING_BOUND_FLAG_ATTRIBUTES_WHEN_SELF_CLOSING,
+      "<`container´ />"
     );
   }
 

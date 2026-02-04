@@ -84,6 +84,19 @@ public class InternalAttributeMap implements AttributeMap {
   }
 
   @Override
+  public @Nullable ExpressionNode getOptionalBoundFlagExpressionNode() {
+    List<ExpressionAttribute> attributes = selectUnusedBoundFlagAttributesInOrder();
+
+    if (attributes.isEmpty())
+      return null;
+
+    if (attributes.size() > 1)
+      throw new MarkupParseException(attributes.get(1).attributeName.fullName, MarkupParseError.MULTIPLE_BOUND_FLAG_ATTRIBUTES, tagName.buildString());
+
+    return attributes.get(0).value;
+  }
+
+  @Override
   public @NotNull MarkupNode getMandatoryMarkupNode(String name, String... aliases) {
     MarkupNode result = getOptionalMarkupNode(name, aliases);
 
@@ -101,6 +114,19 @@ public class InternalAttributeMap implements AttributeMap {
       return null;
 
     return attribute.asMarkupNode();
+  }
+
+  @Override
+  public @Nullable MarkupNode getOptionalBoundFlagMarkupNode() {
+    List<ExpressionAttribute> attributes = selectUnusedBoundFlagAttributesInOrder();
+
+    if (attributes.isEmpty())
+      return null;
+
+    if (attributes.size() > 1)
+      throw new MarkupParseException(attributes.get(1).attributeName.fullName, MarkupParseError.MULTIPLE_BOUND_FLAG_ATTRIBUTES, tagName.buildString());
+
+    return attributes.get(0).asMarkupNode();
   }
 
   private @Nullable Attribute selectNonMultiAttributeOrNull(String name, String... aliases) {
@@ -130,7 +156,7 @@ public class InternalAttributeMap implements AttributeMap {
 
   @Override
   public @NotNull ExpressionList getMandatoryExpressionList(String name, String... aliases) {
-    ExpressionList result = unwrapExpressionAttributes(selectMultiAttributeOrNull(name, true, aliases));
+    ExpressionList result = getOptionalExpressionList(name, aliases);
 
     if (result.isEmpty())
       throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
@@ -140,12 +166,30 @@ public class InternalAttributeMap implements AttributeMap {
 
   @Override
   public @NotNull ExpressionList getOptionalExpressionList(String name, String... aliases) {
-    return unwrapExpressionAttributes(selectMultiAttributeOrNull(name, true, aliases));
+    List<Attribute> attributes = getAttributes(name, aliases);
+
+    if (attributes == null)
+      return ExpressionList.EMPTY;
+
+    for (Attribute attribute : attributes) {
+      if (!(attribute instanceof ExpressionAttribute))
+        throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+
+      attribute.hasBeenUsed = true;
+    }
+
+    //noinspection unchecked
+    return new ExpressionList((List<ExpressionAttribute>) (List<?>) attributes);
+  }
+
+  @Override
+  public @NotNull ExpressionList getOptionalBoundFlagExpressionList() {
+    return new ExpressionList(selectUnusedBoundFlagAttributesInOrder());
   }
 
   @Override
   public @NotNull MarkupList getMandatoryMarkupList(String name, String... aliases) {
-    MarkupList result = unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false, aliases));
+    MarkupList result = getOptionalMarkupList(name, aliases);
 
     if (result.isEmpty())
       throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
@@ -155,23 +199,45 @@ public class InternalAttributeMap implements AttributeMap {
 
   @Override
   public @NotNull MarkupList getOptionalMarkupList(String name, String... aliases) {
-    return unwrapMarkupAttributes(selectMultiAttributeOrNull(name, false, aliases));
+    List<Attribute> attributes = getAttributes(name, aliases);
+
+    if (attributes == null)
+      return MarkupList.EMPTY;
+
+    attributes.forEach(attribute -> attribute.hasBeenUsed = true);
+
+    return new MarkupList(attributes);
   }
 
-  private List<Attribute> getUnusedAttributesInOrder() {
-    List<Attribute> unusedAttributes = null;
+  @Override
+  public @NotNull MarkupList getOptionalBoundFlagMarkupList() {
+    return new MarkupList(selectUnusedBoundFlagAttributesInOrder());
+  }
+
+  private List<ExpressionAttribute> selectUnusedBoundFlagAttributesInOrder() {
+    List<ExpressionAttribute> unusedAttributes = null;
 
     for (List<Attribute> bucket : attributeMap.values()) {
       for (Attribute attribute : bucket) {
         if (attribute.hasBeenUsed)
           continue;
 
-        attribute.hasBeenUsed = true;
+        if (!attribute.attributeName.flags.contains(AttributeFlag.BINDING_MODE))
+          continue;
+
+        if (!attribute.attributeName.flags.contains(AttributeFlag.FLAG_STYLE))
+          continue;
+
+        // By definition, an expression is bound to an attribute, so we cannot encounter any other type at this point.
+        if (!(attribute instanceof ExpressionAttribute))
+          throw new IllegalStateException();
 
         if (unusedAttributes == null)
           unusedAttributes = new ArrayList<>();
 
-        unusedAttributes.add(attribute);
+        attribute.hasBeenUsed = true;
+
+        unusedAttributes.add((ExpressionAttribute) attribute);
       }
     }
 
@@ -181,78 +247,6 @@ public class InternalAttributeMap implements AttributeMap {
     unusedAttributes.sort(Comparator.comparingInt(attribute -> attribute.attributeName.fullName.startInclusive));
 
     return unusedAttributes;
-  }
-
-  @Override
-  public @NotNull MarkupList getRemainingValuesInOrderAsMarkup() {
-    return new MarkupList(getUnusedAttributesInOrder());
-  }
-
-  @Override
-  public boolean hasUnusedValues() {
-    for (List<Attribute> bucket : attributeMap.values()) {
-      for (Attribute attribute : bucket) {
-        if (!attribute.hasBeenUsed)
-          return true;
-      }
-    }
-
-    return false;
-  }
-
-  @Override
-  public List<String> getUnusedNamesInOrder() {
-    List<Attribute> unusedAttributes = getUnusedAttributesInOrder();
-
-    if (unusedAttributes.isEmpty())
-      return Collections.emptyList();
-
-    List<String> unusedNames = new ArrayList<>(unusedAttributes.size());
-
-    for (Attribute unusedAttribute : unusedAttributes)
-      unusedNames.add(getPossiblyTransformedAttributeName(unusedAttribute));
-
-    return unusedNames;
-  }
-
-  private @Nullable List<Attribute> selectMultiAttributeOrNull(String name, boolean expression, String... aliases) {
-    List<Attribute> attributes = getAttributes(name, aliases);
-
-    if (attributes == null)
-      return null;
-
-    for (Attribute attribute : attributes) {
-      if (expression) {
-        if (!(attribute instanceof ExpressionAttribute))
-          throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
-
-        attribute.hasBeenUsed = true;
-        continue;
-      }
-
-      attribute.hasBeenUsed = true;
-    }
-
-    return attributes;
-  }
-
-  private MarkupList unwrapMarkupAttributes(@Nullable List<Attribute> attributes) {
-    if (attributes == null)
-      return MarkupList.EMPTY;
-
-    return new MarkupList(attributes);
-  }
-
-  private ExpressionList unwrapExpressionAttributes(@Nullable List<Attribute> attributes) {
-    if (attributes == null)
-      return ExpressionList.EMPTY;
-
-    ExpressionList result = new ExpressionList(attributes.size());
-
-    for (Attribute attribute : attributes)
-      result.add((ExpressionAttribute) attribute);
-
-    return result;
   }
 
   private String formatNames(String name, String... aliases) {

@@ -34,10 +34,11 @@ public class WordWrapTag extends TagDefinition {
     @Nullable List<MarkupNode> children
   ) {
     ExpressionNode widthAttribute = attributes.getMandatoryExpressionNode("width");
-    ExpressionList valueList = attributes.getMandatoryExpressionList("value");
-
     MarkupNode valueSeparator = attributes.getOptionalMarkupNode("value-separator");
     MarkupNode tokenRenderer = attributes.getOptionalMarkupNode("token-renderer");
+
+    ExpressionList flagValueList = attributes.getOptionalBoundFlagExpressionList();
+    ExpressionList valueList = flagValueList.isEmpty() ? attributes.getMandatoryExpressionList("value") : flagValueList;
 
     return new FunctionDrivenNode(tagName, interpreter -> {
       List<String> values = new ArrayList<>();

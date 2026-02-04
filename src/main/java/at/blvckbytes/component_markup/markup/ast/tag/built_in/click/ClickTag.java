@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag.built_in.click;
 
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.click.ClickNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
@@ -40,9 +41,11 @@ public abstract class ClickTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+
     return new ClickNode(
       action,
-      attributes.getMandatoryExpressionNode("value"),
+      flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue,
       tagName, children, letBindings
     );
   }

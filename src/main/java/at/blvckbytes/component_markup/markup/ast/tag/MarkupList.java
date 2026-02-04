@@ -23,18 +23,14 @@ public class MarkupList {
 
   public static final MarkupList EMPTY = new MarkupList(Collections.emptyList());
 
-  private final List<Attribute> attributes;
+  private final List<? extends Attribute> attributes;
 
-  public MarkupList(List<Attribute> attributes) {
+  public MarkupList(List<? extends Attribute> attributes) {
     this.attributes = attributes;
   }
 
   public boolean isEmpty() {
     return attributes.isEmpty();
-  }
-
-  public void add(Attribute attribute) {
-    this.attributes.add(attribute);
   }
 
   public List<MarkupNode> get(Interpreter<?, ?> interpreter) {
