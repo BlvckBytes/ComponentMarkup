@@ -328,7 +328,7 @@ public class ExpressionTokenizerTests {
   @Test
   public void shouldThrowOnUnterminatedInterpolation() {
     TextWithSubViews text = new TextWithSubViews(
-      "×`hello `{´ a + b world ×`"
+      "×`hello `{´ a + b ×`"
     );
 
     makeErrorCase(
@@ -336,14 +336,27 @@ public class ExpressionTokenizerTests {
       ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION,
       text.subView(0).startInclusive
     );
+  }
 
-    text = new TextWithSubViews(
-      "×`hello `{´ a + b { world ×`"
+  @Test
+  public void shouldThrowOnTrailingInterpolationTokens() {
+    TextWithSubViews text = new TextWithSubViews(
+      "×`hello { a + b `world´ ×`"
     );
 
     makeErrorCase(
       text,
-      ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION,
+      ExpressionTokenizeError.TRAILING_TEMPLATE_LITERAL_INTERPOLATION_TOKEN,
+      text.subView(0).startInclusive
+    );
+
+    text = new TextWithSubViews(
+      "×`hello { a + b `{´ world ×`"
+    );
+
+    makeErrorCase(
+      text,
+      ExpressionTokenizeError.TRAILING_TEMPLATE_LITERAL_INTERPOLATION_TOKEN,
       text.subView(0).startInclusive
     );
   }

@@ -6,7 +6,9 @@
 package at.blvckbytes.component_markup.expression.tokenizer;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParserError;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
@@ -23,7 +25,7 @@ public class ExpressionTokenizer {
   private boolean isNextPendingPeek;
 
   public final InputView input;
-  private final @Nullable TokenOutput tokenOutput;
+  public final @Nullable TokenOutput tokenOutput;
   private boolean dashIsPrefix;
 
   public boolean allowPeekingClosingCurly;
@@ -81,7 +83,26 @@ public class ExpressionTokenizer {
           if (openingCurlyPosition > literalStartInclusive)
             members.add(input.buildSubViewAbsolute(literalStartInclusive, openingCurlyPosition));
 
-          ExpressionNode interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(this, tokenOutput);
+          ExpressionNode interpolationExpression;
+
+          try {
+            interpolationExpression = ExpressionParser.parse(this);
+          } catch (ExpressionTokenizeException expressionTokenizeException) {
+            char errorChar = input.contents.charAt(expressionTokenizeException.position);
+
+            // Don't interpret the backtick as yet another beginning of a string, but rather as the end to the template-literal
+            // we're currently in, from which follows that the current interpolation has not been terminated. This may be
+            // a bit hackish, but it should certainly provide better feedback to the user.
+            if (expressionTokenizeException.error == ExpressionTokenizeError.UNTERMINATED_STRING && errorChar == '`')
+              throw new ExpressionTokenizeException(openingCurlyPosition, ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION);
+
+            throw expressionTokenizeException;
+          } catch (ExpressionParseException expressionParseException) {
+            if (expressionParseException.error == ExpressionParserError.EXPECTED_EOS)
+              throw new ExpressionTokenizeException(expressionParseException.position, ExpressionTokenizeError.TRAILING_TEMPLATE_LITERAL_INTERPOLATION_TOKEN);
+
+            throw expressionParseException;
+          }
 
           input.consumeWhitespace(tokenOutput);
 

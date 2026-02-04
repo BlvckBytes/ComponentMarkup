@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.util.MessagePlaceholders;
 import java.util.function.Function;
 
 public enum ExpressionTokenizeError {
+  TRAILING_TEMPLATE_LITERAL_INTERPOLATION_TOKEN(args -> "Trailing expression-token in template-literal interpolation"),
   UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION(args -> "This template-literal placeholder misses its closing-bracket: }"),
   UNESCAPED_TEMPLATE_LITERAL_CURLY(args -> "Plain curly-brackets within template-literals need to be escaped: \\{ or \\}"),
   EMPTY_TEMPLATE_LITERAL_INTERPOLATION(args -> "This template-literal placeholder must contain an expression"),

@@ -18,26 +18,18 @@ import java.util.*;
 public class ExpressionParser {
 
   private final ExpressionTokenizer tokenizer;
-  private final @Nullable TokenOutput tokenOutput;
 
-  private ExpressionParser(ExpressionTokenizer tokenizer, @Nullable TokenOutput tokenOutput) {
+  private ExpressionParser(ExpressionTokenizer tokenizer) {
     this.tokenizer = tokenizer;
-    this.tokenOutput = tokenOutput;
   }
 
-  public static @Nullable ExpressionNode parseWithoutTrailingCheck(ExpressionTokenizer tokenizer, @Nullable TokenOutput tokenOutput) {
-    try {
-      ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
-      return parser.parseExpression(null);
-    } catch (ExpressionParseException e) {
-      throw e.setRootView(tokenizer.input);
-    }
+  public static @Nullable ExpressionNode parse(InputView input, @Nullable TokenOutput tokenOutput) {
+    return parse(new ExpressionTokenizer(input, tokenOutput));
   }
 
-  public static @Nullable ExpressionNode parse(InputView value, @Nullable TokenOutput tokenOutput) {
+  public static @Nullable ExpressionNode parse(ExpressionTokenizer tokenizer) {
     try {
-      ExpressionTokenizer tokenizer = new ExpressionTokenizer(value, tokenOutput);
-      ExpressionParser parser = new ExpressionParser(tokenizer, tokenOutput);
+      ExpressionParser parser = new ExpressionParser(tokenizer);
       ExpressionNode result = parser.parseExpression(null);
 
       Token trailingToken;
@@ -47,7 +39,7 @@ public class ExpressionParser {
 
       return result;
     } catch (ExpressionParseException e) {
-      throw e.setRootView(value);
+      throw e.setRootView(tokenizer.input);
     }
   }
 
@@ -171,8 +163,8 @@ public class ExpressionParser {
       throw new ExpressionParseException(terminationToken.raw.startInclusive, ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET);
 
     // For visual consistency, it's considered a two-part operator
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, terminationToken.raw);
+    if (tokenizer.tokenOutput != null)
+      tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, terminationToken.raw);
 
     return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
@@ -186,8 +178,8 @@ public class ExpressionParser {
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET) {
         // For visual consistency, it's considered a two-part operator
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, delimiterToken.raw);
+        if (tokenizer.tokenOutput != null)
+          tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, delimiterToken.raw);
 
         return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
       }
@@ -233,8 +225,8 @@ public class ExpressionParser {
       return parseMapExpression();
 
     // In this context, it's not really an operator
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.EXPRESSION__PUNCTUATION__ANY, introductionToken.raw);
+    if (tokenizer.tokenOutput != null)
+      tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__PUNCTUATION__ANY, introductionToken.raw);
 
     tokenizer.nextToken();
 
@@ -402,8 +394,8 @@ public class ExpressionParser {
 
       tokenizer.nextToken();
 
-      if (tokenOutput != null)
-        tokenOutput.emitToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, upcomingToken.raw);
+      if (tokenizer.tokenOutput != null)
+        tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, upcomingToken.raw);
 
       operatorToken = new PrefixOperatorToken(upcomingToken.raw, namedOperator);
       openingParenthesisToken = punctuationToken;
