@@ -400,6 +400,11 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldHandleChainedMemberAccessOfAbsentProperties() {
+    makeCase("a.b.c", null, null);
+  }
+
+  @Test
   public void shouldCalculateLength() {
     makeCase("len(\"\")", 0);
     makeCase("len(\"Hello, world!\")", 13);
