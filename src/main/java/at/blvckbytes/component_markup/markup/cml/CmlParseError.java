@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.util.ErrorMessage;
 
 public enum CmlParseError implements ErrorMessage {
   UNTERMINATED_INTERPOLATION("This placeholder misses its closing-bracket: }"),
+  TRAILING_INTERPOLATION_TOKEN("Trailing expression-token in interpolation"),
   EMPTY_INTERPOLATION("This placeholder must contain an expression"),
   UNTERMINATED_MARKUP_VALUE("This markup-value misses its closing-bracket: }"),
   UNTERMINATED_TAG("This tag misses its closing-bracket: >"),

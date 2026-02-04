@@ -693,30 +693,6 @@ public class CmlEventParserTests {
       new TagOpenBeginEvent(text.subView(0), "red"),
       new TagOpenEndEvent(text.subView(0), false)
     );
-
-    text = new TextWithSubViews(
-      "<`red´>`{´user.name{"
-    );
-
-    makeCase(
-      text,
-      CmlParseError.UNTERMINATED_INTERPOLATION,
-      text.subView(1).startInclusive,
-      new TagOpenBeginEvent(text.subView(0), "red"),
-      new TagOpenEndEvent(text.subView(0), false)
-    );
-
-    text = new TextWithSubViews(
-      "<`red´>`{´a{"
-    );
-
-    makeCase(
-      text,
-      CmlParseError.UNTERMINATED_INTERPOLATION,
-      text.subView(1).startInclusive,
-      new TagOpenBeginEvent(text.subView(0), "red"),
-      new TagOpenEndEvent(text.subView(0), false)
-    );
   }
 
   @Test
@@ -938,6 +914,37 @@ public class CmlEventParserTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnTrailingTokenInInterpolation() {
+    TextWithSubViews text = new TextWithSubViews("{a.b.c `d´}");
+
+    makeCase(text, CmlParseError.TRAILING_INTERPOLATION_TOKEN, text.subView(0).startInclusive);
+
+    text = new TextWithSubViews(
+      "<`red´>{user.name`{´"
+    );
+
+    makeCase(
+      text,
+      CmlParseError.TRAILING_INTERPOLATION_TOKEN,
+      text.subView(1).startInclusive,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
+    );
+
+    text = new TextWithSubViews(
+      "<`red´>{a`{´"
+    );
+
+    makeCase(
+      text,
+      CmlParseError.TRAILING_INTERPOLATION_TOKEN,
+      text.subView(1).startInclusive,
+      new TagOpenBeginEvent(text.subView(0), "red"),
+      new TagOpenEndEvent(text.subView(0), false)
+    );
+  }
+
   private void makeMalformedAttributeValueCase(CmlParseError expectedError, String valueExpression) {
     TextWithSubViews text = new TextWithSubViews("<`red´ a=`" + valueExpression + "´");
 
@@ -972,7 +979,7 @@ public class CmlEventParserTests {
 
     if (expectedError != null) {
       assertEquals(expectedError, thrownException.error, "Encountered mismatch on thrown error-types");
-      assertEquals(expectedPosition, thrownException.position, "Encountered mismatch on thrown error-types");
+      assertEquals(expectedPosition, thrownException.position, "Encountered mismatch on thrown error-positions");
     }
 
     StringBuilder expectedEventsString = new StringBuilder();

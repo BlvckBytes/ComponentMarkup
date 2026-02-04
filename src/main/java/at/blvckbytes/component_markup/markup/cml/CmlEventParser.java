@@ -9,11 +9,10 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.TerminalNode;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParserError;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
-import at.blvckbytes.component_markup.expression.tokenizer.token.StringToken;
-import at.blvckbytes.component_markup.expression.tokenizer.token.TemplateLiteralToken;
-import at.blvckbytes.component_markup.expression.tokenizer.token.TerminalToken;
+import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
@@ -78,10 +77,13 @@ public class CmlEventParser {
         ExpressionNode interpolationExpression;
 
         try {
-          interpolationExpression = ExpressionParser.parseWithoutTrailingCheck(new ExpressionTokenizer(input, tokenOutput), tokenOutput);
+          interpolationExpression = ExpressionParser.parse(input, tokenOutput);
         } catch (ExpressionTokenizeException expressionTokenizeException) {
           throw new MarkupParseException(expressionTokenizeException);
         } catch (ExpressionParseException expressionParseException) {
+          if (expressionParseException.error == ExpressionParserError.EXPECTED_EOS)
+            throw new CmlParseException(CmlParseError.TRAILING_INTERPOLATION_TOKEN, expressionParseException.position);
+
           throw new MarkupParseException(expressionParseException);
         }
 
