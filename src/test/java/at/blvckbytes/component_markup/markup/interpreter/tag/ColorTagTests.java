@@ -44,7 +44,7 @@ public class ColorTagTests extends InterpreterTestsBase {
   public void shouldUseDynamicColorShorthand() {
     makeCase(
       new TextWithSubViews(
-        "<color &lut.main>Hello, world"
+        "<color [lut.main]>Hello, world"
       ),
       new InterpretationEnvironment()
         .withVariable("lut", Collections.singletonMap("main", "light_purple")),
@@ -59,7 +59,7 @@ public class ColorTagTests extends InterpreterTestsBase {
   public void shouldUseDynamicColorShorthandWithUnderscore() {
     makeCase(
       new TextWithSubViews(
-        "<color &main_color>Hello, world"
+        "<color [main_color]>Hello, world"
       ),
       new InterpretationEnvironment()
         .withVariable("main_color", "light_purple"),

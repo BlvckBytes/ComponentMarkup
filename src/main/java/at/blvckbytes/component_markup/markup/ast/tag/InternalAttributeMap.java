@@ -77,7 +77,7 @@ public class InternalAttributeMap implements AttributeMap {
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
-    if (expressionAttribute.attributeName.has(AttributeFlag.SPREAD_MODE))
+    if (expressionAttribute.attributeName.flags.contains(AttributeFlag.SPREAD_MODE))
       throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.SPREAD_ON_NON_MULTI_ATTRIBUTE, formatNames(name, aliases), tagName.buildString());
 
     return expressionAttribute.value;
@@ -309,7 +309,7 @@ public class InternalAttributeMap implements AttributeMap {
   private String getPossiblyTransformedAttributeName(Attribute attribute) {
     String name = attribute.attributeName.finalName.buildString();
 
-    if (attribute.attributeName.has(AttributeFlag.BIND_BY_NAME))
+    if (attribute.attributeName.flags.contains(AttributeFlag.BINDING_MODE) && attribute.attributeName.flags.contains(AttributeFlag.FLAG_STYLE))
       return name.replace('_', '-');
 
     return name;

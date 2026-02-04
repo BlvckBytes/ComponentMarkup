@@ -16,7 +16,7 @@ public class AttributeName {
 
   public final InputView finalName;
   public final InputView fullName;
-  private final EnumSet<AttributeFlag> flags;
+  public final EnumSet<AttributeFlag> flags;
 
   public AttributeName(InputView finalName, InputView fullName, EnumSet<AttributeFlag> flags) {
     this.finalName = finalName;
@@ -24,19 +24,10 @@ public class AttributeName {
     this.flags = flags;
   }
 
-  public EnumSet<AttributeFlag> getFlags() {
-    return EnumSet.copyOf(flags);
-  }
-
-  public boolean has(AttributeFlag flag) {
-    return flags.contains(flag);
-  }
-
   public static AttributeName parse(InputView attributeName, @Nullable TokenOutput tokenOutput) {
     InputView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
-    InputView bindByNamePosition = null;
     InputView intrinsicMarkerPosition = null;
 
     int nameLength;
@@ -114,21 +105,6 @@ public class AttributeName {
         continue;
       }
 
-      if (firstChar == '&') {
-        if (!flags.add(AttributeFlag.BIND_BY_NAME))
-          throw new MarkupParseException(attributeName, MarkupParseError.MULTIPLE_ATTRIBUTE_BIND_BY_NAME_OPERATORS);
-
-        if (nameLength == 1)
-          throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);
-
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__BIND_BY_NAME, attributeName.buildSubViewRelative(0, 1));
-
-        bindByNamePosition = attributeName;
-        attributeName = attributeName.buildSubViewRelative(1);
-        continue;
-      }
-
       break;
     }
 
@@ -137,9 +113,6 @@ public class AttributeName {
 
     if (intrinsicMarkerPosition != null && flags.size() > 1)
       throw new MarkupParseException(intrinsicMarkerPosition, MarkupParseError.COMBINED_INTRINSIC_MARKER_OPERATOR);
-
-    if (bindByNamePosition != null && flags.size() > 1)
-      throw new MarkupParseException(bindByNamePosition, MarkupParseError.COMBINED_ATTRIBUTE_BIND_BY_NAME_OPERATOR);
 
     attributeName.setLowercase();
 

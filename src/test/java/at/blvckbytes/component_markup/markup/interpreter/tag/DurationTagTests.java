@@ -69,7 +69,7 @@ public class DurationTagTests extends InterpreterTestsBase {
       "  units='ms'",
       "  unit-renderer={",
       "    <number *if='is_fractional' [value]='value' format='0.00' locale='de_DE' />",
-      "    <container *else &value />",
+      "    <container *else [value] />",
       "    {unit}",
       "  }",
       "/>"

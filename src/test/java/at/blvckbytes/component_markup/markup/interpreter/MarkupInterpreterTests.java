@@ -1716,7 +1716,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       new TextWithSubViews(
         "<container",
         "  *let-asd={<red>Hello, world!}",
-        "  &asd",
+        "  [asd]",
         "/>"
       ),
       new InterpretationEnvironment(),
@@ -1731,7 +1731,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   public void shouldBindMemberAccessExpressionByInnermostName() {
     makeCase(
       new TextWithSubViews(
-        "<key &keys.first.key />"
+        "<key [keys.first.key] />"
       ),
       new InterpretationEnvironment()
         .withVariable("keys", Collections.singletonMap("first", Collections.singletonMap("key", "my.key"))),
@@ -1747,7 +1747,7 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       new TextWithSubViews(
         "<style",
         "  *let-shadow_opacity=50",
-        "  &shadow_opacity",
+        "  [shadow_opacity]",
         ">Hello, world!"
       ),
       new InterpretationEnvironment(),

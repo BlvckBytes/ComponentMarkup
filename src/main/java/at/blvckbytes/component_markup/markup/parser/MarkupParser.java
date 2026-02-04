@@ -115,22 +115,22 @@ public class MarkupParser implements CmlEventConsumer {
 
     Attribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION) || attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION) || attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       attribute = new ExpressionAttribute(attributeName, parseExpression(value));
     else
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(value, value.buildString()));
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -142,20 +142,20 @@ public class MarkupParser implements CmlEventConsumer {
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL))
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL))
       throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_TEMPLATE_LITERAL_ATTRIBUTE);
 
     Attribute attribute = new ExpressionAttribute(attributeName, value);
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -168,23 +168,23 @@ public class MarkupParser implements CmlEventConsumer {
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
     Attribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(raw, raw.buildString()));
-      handleIntrinsicAttribute(attribute, false);
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
     attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofLong(raw, value));
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -197,23 +197,23 @@ public class MarkupParser implements CmlEventConsumer {
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
     Attribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(raw, raw.buildString()));
-      handleIntrinsicAttribute(attribute, false);
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
     attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofDouble(raw, value));
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -226,23 +226,23 @@ public class MarkupParser implements CmlEventConsumer {
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
     Attribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(raw, raw.buildString()));
-      handleIntrinsicAttribute(attribute, false);
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
     attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(raw, value));
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -255,20 +255,20 @@ public class MarkupParser implements CmlEventConsumer {
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
     Attribute attribute;
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(raw, raw.buildString()));
-      handleIntrinsicAttribute(attribute, false);
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
     attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofNull());
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -297,20 +297,20 @@ public class MarkupParser implements CmlEventConsumer {
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL))
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL))
       throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
 
     Attribute attribute = new MarkupAttribute(attributeName, subtree);
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, false);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE))
       throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
 
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -322,31 +322,29 @@ public class MarkupParser implements CmlEventConsumer {
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
 
-    if (attributeName.has(AttributeFlag.BIND_BY_NAME)) {
+    attributeName.flags.add(AttributeFlag.FLAG_STYLE);
+
+    if (attributeName.flags.contains(AttributeFlag.BINDING_MODE)) {
       ExpressionNode expression = parseExpression(attributeName.finalName);
       Attribute attribute = new ExpressionAttribute(decideBoundAttributeName(attributeName, expression), expression);
 
-      // Do not override the expression-identifier with a markup-attribute token-type; it should prevail, in this case.
-      handleUserAttribute(attribute, false);
+      handleUserAttribute(attribute);
       return;
     }
 
     Attribute attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofBoolean(attributeName.finalName, true));
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_EXPRESSION)) {
-      handleIntrinsicAttribute(attribute, true);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.INTRINSIC_LITERAL)) {
-      handleIntrinsicAttribute(attribute, true);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
+      handleIntrinsicAttribute(attribute);
       return;
     }
 
-    if (attributeName.has(AttributeFlag.BINDING_MODE))
-      throw new MarkupParseException(attributeName.finalName, MarkupParseError.NON_STRING_EXPRESSION_ATTRIBUTE);
-
-    handleUserAttribute(attribute, true);
+    handleUserAttribute(attribute);
   }
 
   @Override
@@ -566,7 +564,7 @@ public class MarkupParser implements CmlEventConsumer {
       TerminalToken token = ((TerminalNode) expressionNode).token;
 
       if (!(token instanceof IdentifierToken))
-        throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION);
+        throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BINDING_NAME_EXPRESSION);
 
       // The whole specified name is equal to the identifier, so use it as-is.
       return specifiedName;
@@ -575,16 +573,16 @@ public class MarkupParser implements CmlEventConsumer {
     IdentifierToken innermostIdentifier = getInnermostIdentifierOfMemberAccessChain(expressionNode);
 
     if (innermostIdentifier == null)
-      throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION);
+      throw new MarkupParseException(specifiedName.finalName, MarkupParseError.UNSUPPORTED_BINDING_NAME_EXPRESSION);
 
-    return new AttributeName(innermostIdentifier.raw, innermostIdentifier.raw, specifiedName.getFlags());
+    return new AttributeName(innermostIdentifier.raw, innermostIdentifier.raw, specifiedName.flags);
   }
 
-  private void handleIntrinsicAttribute(Attribute attribute, boolean wasFlag) {
+  private void handleIntrinsicAttribute(Attribute attribute) {
     TagAndBuffers currentLayer = tagStack.peek();
     AttributeName attributeName = attribute.attributeName;
 
-    if (handleStaticallyNamedIntrinsicAttribute(attribute, wasFlag)) {
+    if (handleStaticallyNamedIntrinsicAttribute(attribute)) {
       if (tokenOutput != null)
         tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_INTRINSIC, attributeName.finalName);
 
@@ -595,7 +593,7 @@ public class MarkupParser implements CmlEventConsumer {
       if (!(attribute instanceof ExpressionAttribute))
         throw new MarkupParseException(attributeName.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
 
-      if (wasFlag)
+      if (attributeName.flags.contains(AttributeFlag.FLAG_STYLE))
         throw new MarkupParseException(attributeName.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG, attributeName.fullName.buildString());
 
       if (tokenOutput != null)
@@ -695,7 +693,7 @@ public class MarkupParser implements CmlEventConsumer {
     throw new MarkupParseException(attributeName.fullName, MarkupParseError.UNKNOWN_INTRINSIC_ATTRIBUTE, attributeName.fullName.buildString());
   }
 
-  private boolean handleStaticallyNamedIntrinsicAttribute(Attribute attribute, boolean wasFlag) {
+  private boolean handleStaticallyNamedIntrinsicAttribute(Attribute attribute) {
     TagAndBuffers currentLayer = tagStack.peek();
 
     assert currentLayer.tagName != null;
@@ -707,7 +705,7 @@ public class MarkupParser implements CmlEventConsumer {
         if (!(attribute instanceof ExpressionAttribute))
           throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
-        if (wasFlag)
+        if (name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG, name.fullName.buildString());
 
         if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
@@ -725,7 +723,7 @@ public class MarkupParser implements CmlEventConsumer {
         if (!(attribute instanceof ExpressionAttribute))
           throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
-        if (wasFlag)
+        if (name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG, name.fullName.buildString());
 
         if (currentLayer.parent != null && currentLayer.parent.whenInput != null)
@@ -743,7 +741,7 @@ public class MarkupParser implements CmlEventConsumer {
         if (!(attribute instanceof ExpressionAttribute))
           throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
-        if (wasFlag)
+        if (name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG, name.fullName.buildString());
 
         if (currentLayer.useCondition != null)
@@ -754,7 +752,7 @@ public class MarkupParser implements CmlEventConsumer {
       }
 
       case "other": {
-        if (!wasFlag)
+        if (!name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
@@ -768,7 +766,7 @@ public class MarkupParser implements CmlEventConsumer {
       }
 
       case "else": {
-        if (!wasFlag)
+        if (!name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_FLAG, name.fullName.buildString());
 
         if (currentLayer.ifConditionType != ConditionType.NONE)
@@ -782,7 +780,7 @@ public class MarkupParser implements CmlEventConsumer {
         if (!(attribute instanceof ExpressionAttribute))
           throw new MarkupParseException(name.fullName, MarkupParseError.NON_EXPRESSION_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
-        if (wasFlag)
+        if (name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG, name.fullName.buildString());
 
         if (currentLayer.whenInput != null)
@@ -793,7 +791,7 @@ public class MarkupParser implements CmlEventConsumer {
       }
 
       case "is": {
-        if (!attribute.attributeName.has(AttributeFlag.INTRINSIC_LITERAL) || wasFlag)
+        if (!name.flags.contains(AttributeFlag.INTRINSIC_LITERAL) || name.flags.contains(AttributeFlag.FLAG_STYLE))
           throw new MarkupParseException(name.fullName, MarkupParseError.NON_LITERAL_INTRINSIC_ATTRIBUTE, name.fullName.buildString());
 
         if (currentLayer.parent == null || currentLayer.parent.whenInput == null)
@@ -850,19 +848,20 @@ public class MarkupParser implements CmlEventConsumer {
     return false;
   }
 
-  private void handleUserAttribute(Attribute attribute, boolean emitToken) {
+  private void handleUserAttribute(Attribute attribute) {
     AttributeName attributeName = attribute.attributeName;
 
     // Allow underscores, as they're part of expression-identifiers and thus the
     // variable-names which may be bound by name; they're transformed automatically
     // later, when actually adding the attribute to the attribute-map.
-    if (!attributeName.has(AttributeFlag.BIND_BY_NAME)) {
+    if (!(attributeName.flags.contains(AttributeFlag.BINDING_MODE) && attributeName.flags.contains(AttributeFlag.FLAG_STYLE))) {
       if (isInvalidIdentifier(attributeName.finalName, false))
         throw new MarkupParseException(attributeName.finalName, MarkupParseError.MALFORMED_ATTRIBUTE_NAME, attributeName.finalName.buildString());
-    }
 
-    if (emitToken && tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, attributeName.finalName);
+      // Do not override the expression-identifier with a markup-attribute token-type; it should prevail, in this case.
+      if (tokenOutput != null)
+        tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, attributeName.finalName);
+    }
 
     TagAndBuffers currentLayer = tagStack.peek();
 

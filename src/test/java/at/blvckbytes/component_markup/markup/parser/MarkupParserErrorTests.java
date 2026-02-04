@@ -170,12 +170,12 @@ public class MarkupParserErrorTests {
   @Test
   public void shouldThrowOnUnsupportedBindByNameExpression() {
     makeErrorCase(
-      MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION,
-      "<container &`a+b´ />"
+      MarkupParseError.UNSUPPORTED_BINDING_NAME_EXPRESSION,
+      "<container [`a+b´] />"
     );
     makeErrorCase(
-      MarkupParseError.UNSUPPORTED_BIND_BY_NAME_EXPRESSION,
-      "<container &`true´ />"
+      MarkupParseError.UNSUPPORTED_BINDING_NAME_EXPRESSION,
+      "<container [`true´] />"
     );
   }
 
@@ -274,11 +274,6 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.EMPTY_ATTRIBUTE_NAME,
       "<container `[´...]=\"world\">"
-    );
-
-    makeErrorCase(
-      MarkupParseError.EMPTY_ATTRIBUTE_NAME,
-      "<container `&´=\"world\">"
     );
 
     makeErrorCase(
@@ -879,22 +874,6 @@ public class MarkupParserErrorTests {
     makeErrorCase(
       MarkupParseError.CONTAINER_ATTRIBUTES_ON_SELF_CLOSING,
       "<`container´ value={<red>Hello, world!}><green>Actual content!"
-    );
-  }
-
-  @Test
-  public void shouldThrowOnMultipleBindByNameOperators() {
-    makeErrorCase(
-      MarkupParseError.MULTIPLE_ATTRIBUTE_BIND_BY_NAME_OPERATORS,
-      "<container &`&´test />"
-    );
-  }
-
-  @Test
-  public void shouldThrowOnCombinedBindByNameOperator() {
-    makeErrorCase(
-      MarkupParseError.COMBINED_ATTRIBUTE_BIND_BY_NAME_OPERATOR,
-      "<container [`&´test] />"
     );
   }
 
