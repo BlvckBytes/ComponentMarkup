@@ -35,14 +35,14 @@ public class NumberTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
-    ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
-
     ExpressionNode absolute = attributes.getOptionalExpressionNode("absolute", "abs");
     ExpressionNode integer = attributes.getOptionalExpressionNode("integer", "int");
     ExpressionNode format = attributes.getOptionalExpressionNode("format");
     ExpressionNode rounding = format == null ? null : attributes.getOptionalExpressionNode("rounding");
     ExpressionNode locale = format == null ? null : attributes.getOptionalExpressionNode("locale");
+
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+    ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
 
     return new FunctionDrivenNode(tagName, interpreter -> {
       Number number = interpreter.evaluateAsLongOrDouble(value);

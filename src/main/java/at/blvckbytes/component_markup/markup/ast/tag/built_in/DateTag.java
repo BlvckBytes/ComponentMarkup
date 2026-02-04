@@ -39,12 +39,12 @@ public class DateTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
-    ExpressionNode value = flagValue == null ? attributes.getOptionalExpressionNode("value") : flagValue;
-
     ExpressionNode zone = attributes.getOptionalExpressionNode("zone");
     ExpressionNode format = attributes.getOptionalExpressionNode("format");
     ExpressionNode locale = attributes.getOptionalExpressionNode("locale");
+
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+    ExpressionNode value = flagValue == null ? attributes.getOptionalExpressionNode("value") : flagValue;
 
     return new FunctionDrivenNode(tagName, interpreter -> {
       String evaluatedFormat = format == null ? null : interpreter.evaluateAsStringOrNull(format);

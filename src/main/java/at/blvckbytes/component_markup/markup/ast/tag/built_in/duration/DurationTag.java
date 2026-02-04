@@ -37,13 +37,13 @@ public class DurationTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
-    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
-    ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
-
     ExpressionNode units = attributes.getMandatoryExpressionNode("units");
     MarkupNode unitRenderer = attributes.getOptionalMarkupNode("unit-renderer");
     MarkupNode separator = attributes.getOptionalMarkupNode("separator");
     ExpressionNode zeroes = attributes.getOptionalExpressionNode("zeroes");
+
+    ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
+    ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
 
     return new FunctionDrivenNode(tagName, interpreter -> {
       TemporaryMemberEnvironment environment = interpreter.getEnvironment();

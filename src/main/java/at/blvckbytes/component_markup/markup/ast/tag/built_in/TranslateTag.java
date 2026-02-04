@@ -35,12 +35,14 @@ public class TranslateTag extends TagDefinition {
     @Nullable LinkedHashSet<LetBinding> letBindings,
     @Nullable List<MarkupNode> children
   ) {
+    MarkupList with = attributes.getOptionalMarkupList("with");
+    ExpressionNode fallback = attributes.getOptionalExpressionNode("fallback");
+
     ExpressionNode flagKey = attributes.getOptionalBoundFlagExpressionNode();
+    ExpressionNode key = flagKey == null ? attributes.getMandatoryExpressionNode("key") : flagKey;
 
     return new TranslateNode(
-      flagKey == null ? attributes.getMandatoryExpressionNode("key") : flagKey,
-      attributes.getOptionalMarkupList("with"),
-      attributes.getOptionalExpressionNode("fallback"),
+      key, with, fallback,
       tagName, letBindings
     );
   }
