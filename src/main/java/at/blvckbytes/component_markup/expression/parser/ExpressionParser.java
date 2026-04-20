@@ -8,7 +8,7 @@ package at.blvckbytes.component_markup.expression.parser;
 import at.blvckbytes.component_markup.expression.ast.*;
 import at.blvckbytes.component_markup.expression.tokenizer.*;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
@@ -23,8 +23,8 @@ public class ExpressionParser {
     this.tokenizer = tokenizer;
   }
 
-  public static @Nullable ExpressionNode parse(InputView input, @Nullable TokenOutput tokenOutput) {
-    return parse(new ExpressionTokenizer(input, tokenOutput));
+  public static @Nullable ExpressionNode parse(InputView input, @Nullable TokenEmitter tokenEmitter) {
+    return parse(new ExpressionTokenizer(input, tokenEmitter));
   }
 
   public static @Nullable ExpressionNode parse(ExpressionTokenizer tokenizer) {
@@ -163,8 +163,8 @@ public class ExpressionParser {
       throw new ExpressionParseException(terminationToken.raw.startInclusive, ExpressionParserError.EXPECTED_SUBSTRING_CLOSING_BRACKET);
 
     // For visual consistency, it's considered a two-part operator
-    if (tokenizer.tokenOutput != null)
-      tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, terminationToken.raw);
+    if (tokenizer.tokenEmitter != null)
+      tokenizer.tokenEmitter.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, terminationToken.raw);
 
     return new SubstringNode(operand, operatorToken, lowerBound, colonToken, upperBound, terminationToken);
   }
@@ -178,8 +178,8 @@ public class ExpressionParser {
 
       if (delimiterToken.punctuation == Punctuation.CLOSING_BRACKET) {
         // For visual consistency, it's considered a two-part operator
-        if (tokenizer.tokenOutput != null)
-          tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, delimiterToken.raw);
+        if (tokenizer.tokenEmitter != null)
+          tokenizer.tokenEmitter.emitToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, delimiterToken.raw);
 
         return new InfixOperationNode(lhs, operatorToken, rhs, delimiterToken);
       }
@@ -225,8 +225,8 @@ public class ExpressionParser {
       return parseMapExpression();
 
     // In this context, it's not really an operator
-    if (tokenizer.tokenOutput != null)
-      tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__PUNCTUATION__ANY, introductionToken.raw);
+    if (tokenizer.tokenEmitter != null)
+      tokenizer.tokenEmitter.emitToken(TokenType.EXPRESSION__PUNCTUATION__ANY, introductionToken.raw);
 
     tokenizer.nextToken();
 
@@ -394,8 +394,8 @@ public class ExpressionParser {
 
       tokenizer.nextToken();
 
-      if (tokenizer.tokenOutput != null)
-        tokenizer.tokenOutput.emitToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, upcomingToken.raw);
+      if (tokenizer.tokenEmitter != null)
+        tokenizer.tokenEmitter.emitToken(TokenType.EXPRESSION__NAMED_PREFIX_OPERATOR, upcomingToken.raw);
 
       operatorToken = new PrefixOperatorToken(upcomingToken.raw, namedOperator);
       openingParenthesisToken = punctuationToken;

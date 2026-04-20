@@ -5,7 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.parser;
 
-import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +24,7 @@ public class AttributeName {
     this.flags = flags;
   }
 
-  public static AttributeName parse(InputView attributeName, @Nullable TokenOutput tokenOutput) {
+  public static AttributeName parse(InputView attributeName, @Nullable TokenEmitter tokenEmitter) {
     InputView fullName = attributeName;
     EnumSet<AttributeFlag> flags = EnumSet.noneOf(AttributeFlag.class);
 
@@ -41,11 +41,11 @@ public class AttributeName {
 
         AttributeFlag flag = firstChar == '*' ? AttributeFlag.INTRINSIC_EXPRESSION : AttributeFlag.INTRINSIC_LITERAL;
 
-        if (tokenOutput != null) {
+        if (tokenEmitter != null) {
           if (flag == AttributeFlag.INTRINSIC_EXPRESSION)
-            tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, attributeName.buildSubViewRelative(0, 1));
+            tokenEmitter.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_EXPRESSION, attributeName.buildSubViewRelative(0, 1));
           else
-            tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL, attributeName.buildSubViewRelative(0, 1));
+            tokenEmitter.emitToken(TokenType.MARKUP__OPERATOR__INTRINSIC_LITERAL, attributeName.buildSubViewRelative(0, 1));
         }
 
         if (nameLength == 1)
@@ -71,9 +71,9 @@ public class AttributeName {
         if (!flags.isEmpty())
           throw new MarkupParseException(attributeName, MarkupParseError.LATE_ATTRIBUTE_BRACKETS);
 
-        if (tokenOutput != null) {
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(0, 1));
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(-1));
+        if (tokenEmitter != null) {
+          tokenEmitter.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(0, 1));
+          tokenEmitter.emitToken(TokenType.MARKUP__OPERATOR__DYNAMIC_ATTRIBUTE, attributeName.buildSubViewRelative(-1));
         }
 
         if (nameLength == 2)
@@ -91,8 +91,8 @@ public class AttributeName {
         if (!flags.contains(AttributeFlag.BINDING_MODE))
           throw new MarkupParseException(attributeName, MarkupParseError.SPREAD_DISALLOWED_ON_NON_BINDING, attributeName.buildString());
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 1));
+        if (tokenEmitter != null)
+          tokenEmitter.emitToken(TokenType.MARKUP__OPERATOR__SPREAD, attributeName.buildSubViewRelative(0, 1));
 
         if (nameLength == 1)
           throw new MarkupParseException(fullName, MarkupParseError.EMPTY_ATTRIBUTE_NAME);

@@ -14,7 +14,7 @@ import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeExc
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizer;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
-import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
@@ -24,23 +24,23 @@ import java.util.EnumSet;
 public class CmlEventParser {
 
   private final CmlEventConsumer consumer;
-  private final TokenOutput tokenOutput;
+  private final TokenEmitter tokenEmitter;
   private final InputView input;
   private final ExpressionTokenizer expressionTokenizer;
 
-  private CmlEventParser(InputView input, CmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
+  private CmlEventParser(InputView input, CmlEventConsumer consumer, @Nullable TokenEmitter tokenEmitter) {
     this.consumer = consumer;
-    this.tokenOutput = tokenOutput;
+    this.tokenEmitter = tokenEmitter;
     this.input = input;
-    this.expressionTokenizer = new ExpressionTokenizer(input, tokenOutput);
+    this.expressionTokenizer = new ExpressionTokenizer(input, tokenEmitter);
   }
 
   public static void parse(InputView input, CmlEventConsumer consumer) {
     new CmlEventParser(input, consumer, null).parseInput(false);
   }
 
-  public static void parse(InputView input, CmlEventConsumer consumer, @Nullable TokenOutput tokenOutput) {
-    new CmlEventParser(input, consumer, tokenOutput).parseInput(false);
+  public static void parse(InputView input, CmlEventConsumer consumer, @Nullable TokenEmitter tokenEmitter) {
+    new CmlEventParser(input, consumer, tokenEmitter).parseInput(false);
   }
 
   private void parseInput(boolean isWithinCurlyBrackets) {
@@ -77,7 +77,7 @@ public class CmlEventParser {
         ExpressionNode interpolationExpression;
 
         try {
-          interpolationExpression = ExpressionParser.parse(input, tokenOutput);
+          interpolationExpression = ExpressionParser.parse(input, tokenEmitter);
         } catch (ExpressionTokenizeException expressionTokenizeException) {
           throw new MarkupParseException(expressionTokenizeException);
         } catch (ExpressionParseException expressionParseException) {
@@ -87,7 +87,7 @@ public class CmlEventParser {
           throw new MarkupParseException(expressionParseException);
         }
 
-        input.consumeWhitespace(tokenOutput);
+        input.consumeWhitespace(tokenEmitter);
 
         if (input.nextChar() != '}')
           throw new CmlParseException(CmlParseError.UNTERMINATED_INTERPOLATION, startInclusive);
@@ -97,8 +97,8 @@ public class CmlEventParser {
 
         InputView rawInterpolation = input.buildSubViewRelative(startInclusive, input.getPosition() + 1);
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
+        if (tokenEmitter != null)
+          tokenEmitter.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
 
         consumer.onInterpolation(interpolationExpression, rawInterpolation);
 
@@ -124,12 +124,12 @@ public class CmlEventParser {
 
       char currentChar = input.nextChar();
 
-      if (Character.isWhitespace(currentChar) && tokenOutput != null)
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
+      if (Character.isWhitespace(currentChar) && tokenEmitter != null)
+        tokenEmitter.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
 
       if (textStartInclusive == -1) {
         if (currentChar == '\n') {
-          input.consumeWhitespace(tokenOutput);
+          input.consumeWhitespace(tokenEmitter);
           continue;
         }
 
@@ -141,13 +141,13 @@ public class CmlEventParser {
 
         input.addIndexToBeRemoved(backslashPosition);
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+        if (tokenEmitter != null)
+          tokenEmitter.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
 
         input.nextChar();
       }
 
-      input.consumeWhitespace(tokenOutput);
+      input.consumeWhitespace(tokenEmitter);
     }
 
     if (textStartInclusive != -1) {
@@ -174,8 +174,8 @@ public class CmlEventParser {
 
     consumer.onText(text);
 
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__PLAIN_TEXT, text);
+    if (tokenEmitter != null)
+      tokenEmitter.emitToken(TokenType.MARKUP__PLAIN_TEXT, text);
   }
 
   private @Nullable InputView tryParseIdentifier() {
@@ -209,8 +209,8 @@ public class CmlEventParser {
     if (stringToken == null)
       throw new IllegalStateException("Expected to always receive a value");
 
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__STRING, stringToken.raw);
+    if (tokenEmitter != null)
+      tokenEmitter.emitToken(TokenType.MARKUP__STRING, stringToken.raw);
 
     if (stringToken instanceof StringToken) {
       consumer.onStringAttribute(attributeName, ((StringToken) stringToken).value);
@@ -282,8 +282,8 @@ public class CmlEventParser {
 
     InputView value = input.buildSubViewAbsolute(startInclusive, input.getPosition() + 1);
 
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__NUMBER, value);
+    if (tokenEmitter != null)
+      tokenEmitter.emitToken(TokenType.MARKUP__NUMBER, value);
 
     if (encounteredDecimalPoint) {
       try {
@@ -302,7 +302,7 @@ public class CmlEventParser {
   }
 
   private boolean tryParseAttribute() {
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     // Attribute-name tokens are emitted by the markup-parser, which knows more about the details
     InputView attributeName = tryParseIdentifier();
@@ -321,7 +321,7 @@ public class CmlEventParser {
     if (Character.isDigit(attributeName.nthChar(0)))
       throw new CmlParseException(CmlParseError.EXPECTED_ATTRIBUTE_KEY, attributeName.startInclusive);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     if (input.peekChar(0) != '=') {
       consumer.onFlagAttribute(attributeName);
@@ -330,10 +330,10 @@ public class CmlEventParser {
 
     input.nextChar();
 
-    if (tokenOutput != null)
-      tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__EQUALS);
+    if (tokenEmitter != null)
+      tokenEmitter.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__EQUALS);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     switch (input.peekChar(0)) {
       case '\'':
@@ -347,8 +347,8 @@ public class CmlEventParser {
 
         int openingCurlyPosition = input.getPosition();
 
-        if (tokenOutput != null)
-          tokenOutput.emitCharToken(openingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
+        if (tokenEmitter != null)
+          tokenEmitter.emitCharToken(openingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
         consumer.onTagAttributeBegin(attributeName, openingCurlyPosition);
 
@@ -361,8 +361,8 @@ public class CmlEventParser {
 
         int closingCurlyPosition = input.getPosition();
 
-        if (tokenOutput != null)
-          tokenOutput.emitCharToken(closingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
+        if (tokenEmitter != null)
+          tokenEmitter.emitCharToken(closingCurlyPosition, TokenType.MARKUP__PUNCTUATION__SUBTREE);
 
         consumer.onTagAttributeEnd(attributeName);
         return true;
@@ -402,8 +402,8 @@ public class CmlEventParser {
             throw new CmlParseException(CmlParseError.UNSUPPORTED_ATTRIBUTE_VALUE, beginPosition);
         }
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.MARKUP__LITERAL, valueIdentifier);
+        if (tokenEmitter != null)
+          tokenEmitter.emitToken(TokenType.MARKUP__LITERAL, valueIdentifier);
 
         return true;
       }
@@ -421,8 +421,8 @@ public class CmlEventParser {
         continue;
 
       if (currentChar == '-' && input.nextChar() == '-' && input.nextChar() == '>') {
-        if (tokenOutput != null) {
-          tokenOutput.emitToken(
+        if (tokenEmitter != null) {
+          tokenEmitter.emitToken(
             TokenType.MARKUP__COMMENT,
             input.buildSubViewAbsolute(openingPosition, input.getPosition() + 1)
           );
@@ -444,23 +444,23 @@ public class CmlEventParser {
     if (tryConsumeAndEmitCommentTag(openingPosition))
       return;
 
-    if (tokenOutput != null)
-      tokenOutput.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
+    if (tokenEmitter != null)
+      tokenEmitter.emitCharToken(openingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     boolean wasClosingTag = false;
 
     if (input.peekChar(0) == '/') {
       input.nextChar();
 
-      if (tokenOutput != null)
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
+      if (tokenEmitter != null)
+        tokenEmitter.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
 
       wasClosingTag = true;
     }
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     InputView tagName = tryParseIdentifier();
 
@@ -468,11 +468,11 @@ public class CmlEventParser {
       if (input.nextChar() != '>')
         throw new CmlParseException(CmlParseError.UNTERMINATED_TAG, openingPosition);
 
-      if (tokenOutput != null) {
+      if (tokenEmitter != null) {
         if (tagName != null)
-          tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+          tokenEmitter.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
+        tokenEmitter.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
       }
 
       consumer.onTagClose(tagName, openingPosition);
@@ -482,8 +482,8 @@ public class CmlEventParser {
     if (tagName == null)
       throw new CmlParseException(CmlParseError.MISSING_TAG_NAME, openingPosition);
 
-    if (tokenOutput != null)
-      tokenOutput.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
+    if (tokenEmitter != null)
+      tokenEmitter.emitToken(TokenType.MARKUP__IDENTIFIER__TAG, tagName);
 
     consumer.onTagOpenBegin(tagName);
 
@@ -498,19 +498,19 @@ public class CmlEventParser {
       input.nextChar();
       wasSelfClosing = true;
 
-      if (tokenOutput != null)
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
+      if (tokenEmitter != null)
+        tokenEmitter.emitCharToken(input.getPosition(), TokenType.MARKUP__PUNCTUATION__TAG);
     }
 
-    input.consumeWhitespace(tokenOutput);
+    input.consumeWhitespace(tokenEmitter);
 
     if (input.nextChar() != '>')
       throw new CmlParseException(CmlParseError.UNTERMINATED_TAG, openingPosition);
 
     int closingPosition = input.getPosition();
 
-    if (tokenOutput != null)
-      tokenOutput.emitCharToken(closingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
+    if (tokenEmitter != null)
+      tokenEmitter.emitCharToken(closingPosition, TokenType.MARKUP__PUNCTUATION__TAG);
 
     consumer.onTagOpenEnd(tagName, wasSelfClosing);
   }

@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParseException
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParserError;
 import at.blvckbytes.component_markup.expression.tokenizer.token.*;
-import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.util.*;
 import org.jetbrains.annotations.Nullable;
@@ -25,14 +25,14 @@ public class ExpressionTokenizer {
   private boolean isNextPendingPeek;
 
   public final InputView input;
-  public final @Nullable TokenOutput tokenOutput;
+  public final @Nullable TokenEmitter tokenEmitter;
   private boolean dashIsPrefix;
 
   public boolean allowPeekingClosingCurly;
 
-  public ExpressionTokenizer(InputView input, @Nullable TokenOutput tokenOutput) {
+  public ExpressionTokenizer(InputView input, @Nullable TokenEmitter tokenEmitter) {
     this.input = input;
-    this.tokenOutput = tokenOutput;
+    this.tokenEmitter = tokenEmitter;
 
     // The only purpose of a dash at the very beginning is to flip a sign
     this.dashIsPrefix = true;
@@ -72,8 +72,8 @@ public class ExpressionTokenizer {
 
             input.addIndexToBeRemoved(backslashPosition);
 
-            if (tokenOutput != null)
-              tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+            if (tokenEmitter != null)
+              tokenEmitter.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
 
             continue;
           }
@@ -104,7 +104,7 @@ public class ExpressionTokenizer {
             throw expressionParseException;
           }
 
-          input.consumeWhitespace(tokenOutput);
+          input.consumeWhitespace(tokenEmitter);
 
           if (input.nextChar() != '}')
             throw new ExpressionTokenizeException(openingCurlyPosition, ExpressionTokenizeError.UNTERMINATED_TEMPLATE_LITERAL_INTERPOLATION);
@@ -114,9 +114,9 @@ public class ExpressionTokenizer {
 
           members.add(interpolationExpression);
 
-          if (tokenOutput != null) {
+          if (tokenEmitter != null) {
             InputView rawInterpolation = input.buildSubViewAbsolute(openingCurlyPosition, input.getPosition() + 1);
-            tokenOutput.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
+            tokenEmitter.emitToken(TokenType.ANY__INTERPOLATION, rawInterpolation);
           }
 
           literalStartInclusive = input.getPosition() + 1;
@@ -131,13 +131,13 @@ public class ExpressionTokenizer {
 
           input.addIndexToBeRemoved(backslashPosition);
 
-          if (tokenOutput != null)
-            tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+          if (tokenEmitter != null)
+            tokenEmitter.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
         }
       }
 
-      if (tokenOutput != null && Character.isWhitespace(currentChar))
-        tokenOutput.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
+      if (tokenEmitter != null && Character.isWhitespace(currentChar))
+        tokenEmitter.emitCharToken(input.getPosition(), TokenType.ANY__WHITESPACE);
 
       if (currentChar != quoteChar)
         continue;
@@ -147,8 +147,8 @@ public class ExpressionTokenizer {
 
         input.addIndexToBeRemoved(backslashPosition);
 
-        if (tokenOutput != null)
-          tokenOutput.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
+        if (tokenEmitter != null)
+          tokenEmitter.emitToken(TokenType.ANY__ESCAPE_SEQUENCE, input.buildSubViewAbsolute(backslashPosition, backslashPosition + 2));
 
         continue;
       }
@@ -504,7 +504,7 @@ public class ExpressionTokenizer {
     }
 
     else {
-      input.consumeWhitespace(tokenOutput);
+      input.consumeWhitespace(tokenEmitter);
 
       char upcomingChar = _peekChar(0);
 
@@ -548,10 +548,10 @@ public class ExpressionTokenizer {
   }
 
   private void emitTokenToOutput(Token token) {
-    if (tokenOutput == null)
+    if (tokenEmitter == null)
       return;
 
-    tokenOutput.emitToken(token.getType(), token.raw);
+    tokenEmitter.emitToken(token.getType(), token.raw);
   }
 
   private char _peekChar(int offset) {

@@ -6,7 +6,7 @@
 package at.blvckbytes.component_markup.util;
 
 import at.blvckbytes.component_markup.expression.tokenizer.InterpolationMember;
-import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -219,12 +219,12 @@ public class InputView implements InterpolationMember {
     return buildStringCache = new String(result, 0, nextResultIndex);
   }
 
-  public void consumeWhitespace(@Nullable TokenOutput tokenOutput) {
+  public void consumeWhitespace(@Nullable TokenEmitter tokenEmitter) {
     while (Character.isWhitespace(peekChar(0))) {
       nextChar();
 
-      if (tokenOutput != null)
-        tokenOutput.emitCharToken(charIndex, TokenType.ANY__WHITESPACE);
+      if (tokenEmitter != null)
+        tokenEmitter.emitCharToken(charIndex, TokenType.ANY__WHITESPACE);
     }
   }
 
