@@ -427,10 +427,8 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   private void interpretASTSubstitution(ASTSubstitutionNode node) {
     Object substitutionValue = evaluateAsPlainObject(node.substitutionExpression);
 
-    if (!(substitutionValue instanceof MarkupNode)) {
-      logger.logErrorScreen(node.substitutionExpression.getFirstMemberPositionProvider(), "Substitution-value wasn't of type MarkupNode: " + (substitutionValue == null ? "null" : substitutionValue.getClass()));
-      return;
-    }
+    if (!(substitutionValue instanceof MarkupNode))
+      substitutionValue = new TextNode(node.substitutionExpression.getFirstMemberPositionProvider(), String.valueOf(substitutionValue));
 
     MarkupNode substitutionNode = (MarkupNode) substitutionValue;
 
