@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,8 @@ public class WordWrapTag extends TagDefinition {
     ExpressionNode widthAttribute = attributes.getMandatoryExpressionNode("width");
     MarkupNode valueSeparator = attributes.getOptionalMarkupNode("value-separator");
     MarkupNode tokenRenderer = attributes.getOptionalMarkupNode("token-renderer");
+    MarkupNode prefix = attributes.getOptionalMarkupNode("prefix");
+    MarkupNode subsequentPrefix = attributes.getOptionalMarkupNode("subsequent-prefix");
 
     ExpressionList flagValueList = attributes.getOptionalBoundFlagExpressionList();
     ExpressionList valueList = flagValueList.isEmpty() ? attributes.getMandatoryExpressionList("value") : flagValueList;
@@ -52,15 +55,14 @@ public class WordWrapTag extends TagDefinition {
       int maxWidth = (int) interpreter.evaluateAsLong(widthAttribute);
       int currentWidth = 0;
 
+      if (prefix != null)
+        currentWidth += interpretAndGetLength(interpreter, prefix);
+
       for (int valueIndex = 0; valueIndex < values.size(); ++valueIndex) {
         String[] tokens = values.get(valueIndex).split(" ");
 
-        if (valueIndex != 0 && valueSeparator != null) {
-          int lengthBefore = interpreter.getCurrentBuilder().getTotalTextLength();
-          interpreter.interpret(valueSeparator);
-          int lengthAfter = interpreter.getCurrentBuilder().getTotalTextLength();
-          currentWidth += lengthAfter - lengthBefore;
-        }
+        if (valueIndex != 0 && valueSeparator != null)
+          currentWidth += interpretAndGetLength(interpreter, valueSeparator);
 
         for (int tokenIndex = 0; tokenIndex < tokens.length; ++tokenIndex) {
           String token = tokens[tokenIndex];
@@ -79,6 +81,9 @@ public class WordWrapTag extends TagDefinition {
 
             if (currentWidth > 0)
               interpreter.interpret(new BreakNode(tagName));
+
+            if (subsequentPrefix != null)
+              currentWidth += interpretAndGetLength(interpreter, subsequentPrefix);
           }
 
           // By prepending the space to the current token, we allow the output to buffer
@@ -103,5 +108,12 @@ public class WordWrapTag extends TagDefinition {
 
       return null;
     });
+  }
+
+  private int interpretAndGetLength(Interpreter<?, ?> interpreter, MarkupNode node) {
+    int lengthBefore = interpreter.getCurrentBuilder().getTotalTextLength();
+    interpreter.interpret(node);
+    int lengthAfter = interpreter.getCurrentBuilder().getTotalTextLength();
+    return lengthAfter - lengthBefore;
   }
 }
