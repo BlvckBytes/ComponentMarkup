@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026, BlvckBytes
+ * SPDX-License-Identifier: MIT
+ */
+
 package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
