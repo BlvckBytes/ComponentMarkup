@@ -499,4 +499,17 @@ public class MarkupParserTests extends MarkupParserTestsBase {
         .format(Format.ITALIC, bool(text.subView(1).setLowercase(), true))
     );
   }
+
+  @Test
+  public void shouldParseASTSubstitution() {
+    TextWithSubViews text = new TextWithSubViews(
+      "<`$`my.expr´´>`hello, world´"
+    );
+
+    makeCase(
+      text,
+      astSubstitution(text.subView(0).setLowercase(), text.subView(1).setLowercase())
+        .child(text(text.subView(2).setBuildFlags(SubstringFlag.LAST_TEXT)))
+    );
+  }
 }

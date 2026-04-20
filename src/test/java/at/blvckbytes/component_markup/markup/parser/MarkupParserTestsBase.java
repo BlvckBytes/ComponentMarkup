@@ -136,6 +136,10 @@ public abstract class MarkupParserTestsBase {
     return new NodeWrapper<>(new TextNode(value, value.buildString()));
   }
 
+  protected static NodeWrapper<ASTSubstitutionNode> astSubstitution(InputView positionProvider, InputView substitutionExpression) {
+    return new NodeWrapper<>(new ASTSubstitutionNode(expr(substitutionExpression), positionProvider, null, null));
+  }
+
   protected static void makeCase(TextWithSubViews input, NodeWrapper<?> wrappedExpectedNode) {
     MarkupNode actualNode;
 

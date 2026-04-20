@@ -27,6 +27,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
 import at.blvckbytes.component_markup.markup.parser.token.OutputFlag;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.markup.parser.token.TokenOutput;
 import at.blvckbytes.component_markup.markup.parser.token.TokenType;
 import at.blvckbytes.component_markup.markup.cml.CmlEventConsumer;
@@ -116,7 +117,7 @@ public class MarkupParser implements CmlEventConsumer {
     Attribute attribute;
 
     if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION) || attributeName.flags.contains(AttributeFlag.BINDING_MODE))
-      attribute = new ExpressionAttribute(attributeName, parseExpression(value));
+      attribute = new ExpressionAttribute(attributeName, parseExpression(value, tokenOutput));
     else
       attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofString(value, value.buildString()));
 
@@ -325,7 +326,7 @@ public class MarkupParser implements CmlEventConsumer {
     attributeName.flags.add(AttributeFlag.FLAG_STYLE);
 
     if (attributeName.flags.contains(AttributeFlag.BINDING_MODE)) {
-      ExpressionNode expression = parseExpression(attributeName.finalName);
+      ExpressionNode expression = parseExpression(attributeName.finalName, tokenOutput);
       Attribute attribute = new ExpressionAttribute(decideBoundAttributeName(attributeName, expression), expression);
 
       handleUserAttribute(attribute);
@@ -480,9 +481,6 @@ public class MarkupParser implements CmlEventConsumer {
       return;
     }
 
-    if (tokenOutput != null && !isSubParser)
-      tokenOutput.onInputEnd();
-
     while (true) {
       TagAndBuffers currentLayer = tagStack.pop();
 
@@ -504,6 +502,9 @@ public class MarkupParser implements CmlEventConsumer {
 
       tagStack.peek().addChild(currentLayer);
     }
+
+    if (tokenOutput != null && !isSubParser)
+      tokenOutput.onInputEnd();
   }
 
   // ================================================================================
@@ -898,9 +899,9 @@ public class MarkupParser implements CmlEventConsumer {
     return false;
   }
 
-  private ExpressionNode parseExpression(InputView value) {
+  public static ExpressionNode parseExpression(InputView value, TokenEmitter tokenEmitter) {
     try {
-      ExpressionNode expression = ExpressionParser.parse(value, tokenOutput);
+      ExpressionNode expression = ExpressionParser.parse(value, tokenEmitter);
 
       if (expression == null)
         throw new MarkupParseException(value, MarkupParseError.EMPTY_EXPRESSION);

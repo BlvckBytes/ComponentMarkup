@@ -24,6 +24,7 @@ public enum MarkupParseError {
   VALUELESS_BINDING(args -> "Let-bindings always require a value to be bound"),
   EMPTY_ATTRIBUTE_NAME(args -> "This attribute-name is empty"),
   EMPTY_BINDING_NAME(args -> "This binding-name is empty"),
+  MISSING_AST_SUBSTITUTION_EXPRESSION(args -> "This substitution misses its value-expression"),
   MALFORMED_ATTRIBUTE_NAME(args -> "The attribute-name " + args.get(0) + " is malformed: cannot start with digits or hyphens, may only contain a-z, 0-9 and hyphens"),
   MALFORMED_IDENTIFIER(args -> "The variable-name " + args.get(0) + " is malformed: cannot start with digits or underscores, may only contain a-z, 0-9 and underscores"),
   RESERVED_IDENTIFIER(args -> "The variable-name " + args.get(0) + " is reserved by an operator or a literal and thus inaccessible within expressions"),

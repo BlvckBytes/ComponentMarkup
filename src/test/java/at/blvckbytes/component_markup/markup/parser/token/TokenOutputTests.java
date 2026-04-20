@@ -162,6 +162,28 @@ public class TokenOutputTests {
   }
 
   @Test
+  public void shouldTokenizeASTSubstitution() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`<´``$´`my´`.´`expr´´`/´`>´"
+    );
+
+    makeHierarchicalCase(
+      InputView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0))) // "<"
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase()) // "$my.expr"
+            .addChild(new HierarchicalToken(TokenType.MARKUP__OPERATOR__SUBSTITUTION, text.subView(2))) // "$"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(3).setLowercase())) // "my"
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__SYMBOLIC_OPERATOR__ANY, text.subView(4).setLowercase())) // "."
+            .addChild(new HierarchicalToken(TokenType.EXPRESSION__IDENTIFIER_ANY, text.subView(5).setLowercase())) // "expr"
+        )
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(6))) // "/"
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(7))) // ">"
+    );
+  }
+
+  @Test
   public void shouldTokenizeComplexInputHierarchicallyAndSequentially() {
     TextWithSubViews text = new TextWithSubViews(
       //  v- First subview-index within this line

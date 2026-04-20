@@ -865,6 +865,22 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnMissingASTSubstitutionExpression() {
+    makeErrorCase(
+      MarkupParseError.MISSING_AST_SUBSTITUTION_EXPRESSION,
+      "<`$´>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedASTSubstitutionExpression() {
+    makeErrorCase(
+      MarkupParseError.EXPRESSION_PARSE_ERROR,
+      "<$my`+´>"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,
