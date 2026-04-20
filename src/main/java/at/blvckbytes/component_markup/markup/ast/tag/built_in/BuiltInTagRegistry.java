@@ -50,5 +50,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new WordWrapTag());
     register(new ColorTag());
     register(new ASTSubstitutionTag());
+    register(new ContentTag());
   }
 }

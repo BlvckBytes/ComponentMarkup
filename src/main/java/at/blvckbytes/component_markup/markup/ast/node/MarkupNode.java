@@ -18,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class MarkupNode {
 
@@ -49,6 +51,18 @@ public abstract class MarkupNode {
 
   public @Nullable ExpressionNode getUseCondition() {
     return useCondition;
+  }
+
+  public void forEachChildRecursively(Predicate<MarkupNode> handler) {
+    if (children == null)
+      return;
+
+    for (MarkupNode child : children) {
+      if (!handler.test(child))
+        continue;
+
+      child.forEachChildRecursively(handler);
+    }
   }
 
   public void setUseCondition(@Nullable ExpressionNode useCondition) {

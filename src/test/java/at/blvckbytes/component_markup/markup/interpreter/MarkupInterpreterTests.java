@@ -1772,4 +1772,107 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "Hello, world!")
     );
   }
+
+  @Test
+  public void shouldInterpretASTSubstitutionWithoutChildren() {
+    makeCase(
+      new TextWithSubViews(
+        "Pre <$test/> Post"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("test", MarkupParser.parse(InputView.of("<red>Hello, world!"), BuiltInTagRegistry.INSTANCE)),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+                item
+                  .string("text", "Pre ")
+              ))
+            .object(item -> (
+              item
+                .string("text", "Hello, world!")
+                .string("color", "red")
+            ))
+            .object(item -> (
+              item
+                .string("text", " Post")
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldInterpretASTSubstitutionWithContentNonLayered() {
+    makeASTSubstitutionWithContentCase(new TextWithSubViews(
+      "<$base>This base text contains a <$highlight>highlighted section</>, which is very cool! :)"
+    ));
+  }
+
+  @Test
+  public void shouldInterpretASTSubstitutionWithContentLayered() {
+    makeASTSubstitutionWithContentCase(new TextWithSubViews(
+      "<$base>This base text contains a <$highlight>highlighted section<$base>, which is very cool! :)"
+    ));
+  }
+
+  private void makeASTSubstitutionWithContentCase(TextWithSubViews text) {
+    makeCase(
+      text,
+      new InterpretationEnvironment()
+        .withVariable("base", MarkupParser.parse(InputView.of("<gray><content/>"), BuiltInTagRegistry.INSTANCE))
+        .withVariable("highlight", MarkupParser.parse(InputView.of("<green><content/>"), BuiltInTagRegistry.INSTANCE)),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> (
+              item
+                .string("text", "This base text contains a ")
+                .string("color", "gray")
+            ))
+            .object(item -> (
+              item
+                .string("text", "highlighted section")
+                .string("color", "green")
+            ))
+            .object(item -> (
+              item
+                .string("text", ", which is very cool! :)")
+                .string("color", "gray")
+            ))
+        ))
+    );
+  }
+
+  @Test
+  public void shouldInterpretASTSubstitutionWithContentMultipleTimes() {
+    makeCase(
+      new TextWithSubViews(
+        "Hello, <$duplicate>world</>!"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("duplicate", MarkupParser.parse(InputView.of("<content/><content/>"), BuiltInTagRegistry.INSTANCE)),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, worldworld!")
+    );
+  }
+
+  @Test
+  public void shouldInterpretASTSubstitutionWithContentDeep() {
+    makeCase(
+      new TextWithSubViews(
+        "Hello, <$first>world</>!"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("first", MarkupParser.parse(InputView.of("<$second>A<content/>"), BuiltInTagRegistry.INSTANCE))
+        .withVariable("second", MarkupParser.parse(InputView.of("B<content/>"), BuiltInTagRegistry.INSTANCE)),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "Hello, BAworld!")
+    );
+  }
 }

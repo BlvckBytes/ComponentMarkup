@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public class ASTSubstitutionNode extends MarkupNode {
+public class ASTSubstitutionNode extends MarkupNode implements ContentProvider {
 
   public final ExpressionNode substitutionExpression;
 
@@ -27,5 +27,10 @@ public class ASTSubstitutionNode extends MarkupNode {
     super(positionProvider, children, letBindings);
 
     this.substitutionExpression = substitutionExpression;
+  }
+
+  @Override
+  public @Nullable List<MarkupNode> getContent() {
+    return children;
   }
 }

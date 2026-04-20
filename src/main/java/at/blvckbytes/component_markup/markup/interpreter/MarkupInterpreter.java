@@ -424,6 +424,44 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     }
   }
 
+  private void interpretASTSubstitution(ASTSubstitutionNode node) {
+    Object substitutionValue = evaluateAsPlainObject(node.substitutionExpression);
+
+    if (!(substitutionValue instanceof MarkupNode)) {
+      logger.logErrorScreen(node.substitutionExpression.getFirstMemberPositionProvider(), "Substitution-value wasn't of type MarkupNode: " + (substitutionValue == null ? "null" : substitutionValue.getClass()));
+      return;
+    }
+
+    MarkupNode substitutionNode = (MarkupNode) substitutionValue;
+
+    // Let's use thread-local state on the content-node itself to temporarily "bake"
+    // its content-provider, in contrast to cloning subtrees - this avoids having to make
+    // each node-type clonable and reduces allocation; sounds like a good tradeoff.
+
+    List<ContentNode> modifiedNodes = new ArrayList<>();
+
+    substitutionNode.forEachChildRecursively(child -> {
+      // Do not dive into the children of substitutions, as their content-nodes
+      // would be overridden by their own value later anyway.
+      if (child instanceof ASTSubstitutionNode)
+        return false;
+
+      if (!(child instanceof ContentNode))
+        return true;
+
+      ContentNode contentNode = (ContentNode) child;
+
+      contentNode.contentProvider.set(node);
+      modifiedNodes.add(contentNode);
+      return true;
+    });
+
+    interpret(substitutionNode);
+
+    for (ContentNode modifiedNode : modifiedNodes)
+      modifiedNode.contentProvider.remove();
+  }
+
   @Override
   public boolean interpret(MarkupNode node) {
     return interpret(node, null);
@@ -514,6 +552,16 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
     if (node instanceof FunctionDrivenNode) {
       interpretFunctionDriven((FunctionDrivenNode) node);
+      return;
+    }
+
+    if (node instanceof ASTSubstitutionNode) {
+      interpretASTSubstitution((ASTSubstitutionNode) node);
+      return;
+    }
+
+    if (node instanceof ContentNode) {
+      ((ContentNode) node).forEachContentNode(this::interpret);
       return;
     }
 
