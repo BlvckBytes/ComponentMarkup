@@ -75,7 +75,7 @@ public class MarkupParser implements CmlEventConsumer {
     this.isSubParser = isSubParser;
     this.result = new TextNode(InputView.EMPTY, "");
 
-    this.tagStack.push(new TagAndBuffers(rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(initialPosition, initialPosition)));
+    this.tagStack.push(new TagAndBuffers(tokenOutput, rootView.endExclusive == 0 ? rootView : rootView.buildSubViewAbsolute(initialPosition, initialPosition)));
   }
 
   // ================================================================================
@@ -101,7 +101,7 @@ public class MarkupParser implements CmlEventConsumer {
     }
 
     TagAndBuffers parent = tagStack.isEmpty() ? null : tagStack.peek();
-    tagStack.push(new TagAndBuffers(tag, tagName, parent));
+    tagStack.push(new TagAndBuffers(tokenOutput, tag, tagName, parent));
   }
 
   @Override

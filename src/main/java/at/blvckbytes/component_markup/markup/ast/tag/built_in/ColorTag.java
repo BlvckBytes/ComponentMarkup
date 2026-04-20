@@ -4,6 +4,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.ContainerNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,7 @@ public class ColorTag extends TagDefinition {
 
   @Override
   public @NotNull MarkupNode createNode(
+    @Nullable TokenEmitter tokenEmitter,
     @NotNull InputView tagName,
     boolean selfClosing,
     @NotNull AttributeMap attributes,

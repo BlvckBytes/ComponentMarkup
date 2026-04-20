@@ -10,6 +10,7 @@ import at.blvckbytes.component_markup.markup.ast.node.control.*;
 import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +25,8 @@ public class TagAndBuffers implements ParserChildItem {
   public final @Nullable InputView tagName;
   public final @Nullable TagAndBuffers parent;
   public final @Nullable InputView positionProvider;
+
+  private final @Nullable TokenEmitter tokenEmitter;
 
   private @Nullable LinkedHashSet<LetBinding> bindings;
   private @Nullable Set<String> bindingNames;
@@ -49,7 +52,11 @@ public class TagAndBuffers implements ParserChildItem {
   public @Nullable InputView whenIsValue;
   public boolean isWhenOther;
 
-  public TagAndBuffers(@NotNull InputView positionProvider) {
+  public TagAndBuffers(
+    @Nullable TokenEmitter tokenEmitter,
+    @NotNull InputView positionProvider
+  ) {
+    this.tokenEmitter = tokenEmitter;
     this.tag = null;
     this.tagName = null;
     this.parent = null;
@@ -57,7 +64,13 @@ public class TagAndBuffers implements ParserChildItem {
     this.positionProvider = positionProvider;
   }
 
-  public TagAndBuffers(@NotNull TagDefinition tag, @NotNull InputView tagName, @Nullable TagAndBuffers parent) {
+  public TagAndBuffers(
+    @Nullable TokenEmitter tokenEmitter,
+    @NotNull TagDefinition tag,
+    @NotNull InputView tagName,
+    @Nullable TagAndBuffers parent
+  ) {
+    this.tokenEmitter = tokenEmitter;
     this.tag = tag;
     this.tagName = tagName;
     this.parent = parent;
@@ -319,7 +332,7 @@ public class TagAndBuffers implements ParserChildItem {
     MarkupNode result;
 
     try {
-      result = tag.createNode(tagName, selfClosing, attributeMap, bindings, getProcessedChildren());
+      result = tag.createNode(tokenEmitter, tagName, selfClosing, attributeMap, bindings, getProcessedChildren());
     } catch (Throwable thrownError) {
       if (thrownError instanceof MarkupParseException)
         throw thrownError;

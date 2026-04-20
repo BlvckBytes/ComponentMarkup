@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in.hover;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.hover.ItemHoverNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ public class HoverItemTag extends HoverTag {
 
   @Override
   public @NotNull MarkupNode createNode(
+    @Nullable TokenEmitter tokenEmitter,
     @NotNull InputView tagName,
     boolean selfClosing,
     @NotNull AttributeMap attributes,

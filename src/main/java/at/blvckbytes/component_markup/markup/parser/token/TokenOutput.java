@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public class TokenOutput {
+public class TokenOutput implements TokenEmitter {
 
   private @Nullable HierarchicalToken[] tokenByCharIndex;
   private InputView input;
@@ -69,10 +69,12 @@ public class TokenOutput {
     return result;
   }
 
+  @Override
   public void emitCharToken(int position, TokenType type) {
     emitToken(type, input.buildSubViewAbsolute(position, position + 1));
   }
 
+  @Override
   public void emitToken(TokenType type, InputView value) {
     validateTokenIndex(type, value);
 

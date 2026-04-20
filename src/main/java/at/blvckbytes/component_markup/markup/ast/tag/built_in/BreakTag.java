@@ -8,6 +8,7 @@ package at.blvckbytes.component_markup.markup.ast.tag.built_in;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.node.control.BreakNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ public class BreakTag extends TagDefinition {
 
   @Override
   public @NotNull MarkupNode createNode(
+    @Nullable TokenEmitter tokenEmitter,
     @NotNull InputView tagName,
     boolean selfClosing,
     @NotNull AttributeMap attributes,

@@ -12,6 +12,7 @@ import at.blvckbytes.component_markup.markup.ast.node.terminal.TextNode;
 import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.interpreter.TemporaryMemberEnvironment;
+import at.blvckbytes.component_markup.markup.parser.token.TokenEmitter;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +32,7 @@ public class DurationTag extends TagDefinition {
 
   @Override
   public @NotNull MarkupNode createNode(
+    @Nullable TokenEmitter tokenEmitter,
     @NotNull InputView tagName,
     boolean selfClosing,
     @NotNull AttributeMap attributes,
