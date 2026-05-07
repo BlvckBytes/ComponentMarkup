@@ -223,10 +223,10 @@ public class ChatRenderer {
 
   private static Color colorFromPacked(long packedColor) {
     return new Color(
-      (int) PackedColor.getR(packedColor),
-      (int) PackedColor.getG(packedColor),
-      (int) PackedColor.getB(packedColor),
-      (int) PackedColor.getA(packedColor)
+      PackedColor.getR(packedColor),
+      PackedColor.getG(packedColor),
+      PackedColor.getB(packedColor),
+      PackedColor.getA(packedColor)
     );
   }
 

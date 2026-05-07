@@ -19,20 +19,20 @@ public class PackedColor {
     return of((int) (r * 255 + .5), (int) (g * 255 + .5), (int) (b * 255 + .5), 255);
   }
 
-  public static long getA(long packedColor) {
-    return (packedColor >> 24) & 0xFF;
+  public static int getA(long packedColor) {
+    return (int) ((packedColor >> 24) & 0xFF);
   }
 
-  public static long getR(long packedColor) {
-    return (packedColor >> 16) & 0xFF;
+  public static int getR(long packedColor) {
+    return (int) ((packedColor >> 16) & 0xFF);
   }
 
-  public static long getG(long packedColor) {
-    return (packedColor >> 8) & 0xFF;
+  public static int getG(long packedColor) {
+    return (int) ((packedColor >> 8) & 0xFF);
   }
 
-  public static long getB(long packedColor) {
-    return packedColor & 0xFF;
+  public static int getB(long packedColor) {
+    return (int) (packedColor & 0xFF);
   }
 
   public static long setClampedA(long packedColor, int a) {
@@ -140,9 +140,9 @@ public class PackedColor {
     return result;
   }
 
-  private static void toHex(char[] output, int offset, long input) {
-    long firstDigit = (input >> 4) & 0xF;
-    long secondDigit = input & 0xF;
+  private static void toHex(char[] output, int offset, int input) {
+    int firstDigit = (input >> 4) & 0xF;
+    int secondDigit = input & 0xF;
 
     output[offset] = firstDigit < 10 ? (char) ('0' + firstDigit) : (char) ('A' + (firstDigit - 10));
     output[offset + 1] = secondDigit < 10 ? (char) ('0' + secondDigit) : (char) ('A' + (secondDigit - 10));
