@@ -42,6 +42,43 @@ public class PackedColor {
     return (packedColor & 0xFFFFFF) | ((long) (a & 0xFF) << 24);
   }
 
+  public static long lighten(long packedColor, float amount) {
+    amount = Math.max(0f, Math.min(1f, amount));
+
+    int r = getR(packedColor);
+    int g = getG(packedColor);
+    int b = getB(packedColor);
+
+    return PackedColor.of(
+      r + (int) ((255 - r) * amount),
+      g + (int) ((255 - g) * amount),
+      b + (int) ((255 - b) * amount),
+      PackedColor.getA(packedColor)
+    );
+  }
+
+  public static long darken(long packedColor, float amount) {
+    amount = Math.max(0f, Math.min(1f, amount));
+
+    int r = getR(packedColor);
+    int g = getG(packedColor);
+    int b = getB(packedColor);
+
+    return PackedColor.of(
+      (int) (r * (1f - amount)),
+      (int) (g * (1f - amount)),
+      (int) (b * (1f - amount)),
+      PackedColor.getA(packedColor)
+    );
+  }
+
+  public static String asShortestHex(long packedColor) {
+    if (getA(packedColor) == 255)
+      return asNonAlphaHex(packedColor);
+
+    return asAlphaHex(packedColor);
+  }
+
   public static String asNonAlphaHex(long packedColor) {
     char[] result = new char[7];
 
