@@ -41,7 +41,7 @@ public class ExpressionInterpreter {
 
     if (expression instanceof TransformerNode) {
       TransformerNode node = (TransformerNode) expression;
-      return node.transformer.transform(interpret(node.wrapped, environment, logger), environment);
+      return node.transformer.transform(interpret(node.wrapped, environment, logger), environment, logger);
     }
 
     if (expression instanceof PrefixOperationNode) {

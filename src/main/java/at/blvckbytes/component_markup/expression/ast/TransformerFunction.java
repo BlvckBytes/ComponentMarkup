@@ -6,6 +6,7 @@
 package at.blvckbytes.component_markup.expression.ast;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
 @FunctionalInterface
@@ -14,8 +15,9 @@ public interface TransformerFunction {
   /**
    * @param input The resulting value of interpreting the wrapped node
    * @param environment Current environment used to interpret
+   * @param logger Current interpreter-logger
    * @return Result of transforming the input-value
    */
-  @Nullable Object transform(@Nullable Object input, InterpretationEnvironment environment);
+  @Nullable Object transform(@Nullable Object input, InterpretationEnvironment environment, InterpreterLogger logger);
 
 }
