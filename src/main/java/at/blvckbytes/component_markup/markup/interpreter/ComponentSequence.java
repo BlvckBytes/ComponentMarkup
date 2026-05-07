@@ -252,13 +252,14 @@ public class ComponentSequence<B, C> {
     this.members.add(member);
   }
 
-  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(ComponentSequence<B, C> parentSequence) {
+  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(@Nullable ComponentSequence<B, C> parentSequence) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
     // all elements to the parent-sequence, effectively making this instance invisible.
     if (
-      !isInitial
+      parentSequence != null
+        && !isInitial
         && this.nonTerminal == null
         && (this.membersEqualStyle == null || this.membersEqualStyle.hasNoEffect())
         && (this.computedStyle == null || !this.computedStyle.reset)
