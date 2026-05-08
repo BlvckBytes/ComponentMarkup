@@ -46,7 +46,7 @@ public class NumberTag extends TagDefinition {
     ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
     ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
 
-    return new FunctionDrivenNode(tagName, interpreter -> {
+    return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
       Number number = interpreter.evaluateAsLongOrDouble(value);
 
       if (integer != null && interpreter.evaluateAsBoolean(integer))

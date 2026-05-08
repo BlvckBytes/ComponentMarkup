@@ -45,7 +45,7 @@ public class WordWrapTag extends TagDefinition {
     ExpressionList flagValueList = attributes.getOptionalBoundFlagExpressionList();
     ExpressionList valueList = flagValueList.isEmpty() ? attributes.getMandatoryExpressionList("value") : flagValueList;
 
-    return new FunctionDrivenNode(tagName, interpreter -> {
+    return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
       List<String> values = new ArrayList<>();
 
       for (ExpressionNode value : valueList.get(interpreter))

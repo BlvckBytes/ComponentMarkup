@@ -48,7 +48,7 @@ public class DateTag extends TagDefinition {
     ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
     ExpressionNode value = flagValue == null ? attributes.getOptionalExpressionNode("value") : flagValue;
 
-    return new FunctionDrivenNode(tagName, interpreter -> {
+    return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
       String evaluatedFormat = format == null ? null : interpreter.evaluateAsStringOrNull(format);
 
       String formatString = evaluatedFormat == null ? DEFAULT_FORMAT : evaluatedFormat;

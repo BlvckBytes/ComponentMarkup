@@ -45,7 +45,7 @@ public class ContainerTag extends TagDefinition {
       if (!selfClosing)
         throw new MarkupParseException(tagName, MarkupParseError.CONTAINER_HAS_BOUND_FLAG_ATTRIBUTES_WHEN_NON_SELF_CLOSING);
 
-      return new FunctionDrivenNode(tagName, interpreter -> {
+      return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
         List<MarkupNode> valueChildren = valueList.get(interpreter);
         return new ContainerNode(tagName, valueChildren, letBindings);
       });

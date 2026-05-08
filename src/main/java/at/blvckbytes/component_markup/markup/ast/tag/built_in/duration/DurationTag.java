@@ -47,7 +47,7 @@ public class DurationTag extends TagDefinition {
     ExpressionNode flagValue = attributes.getOptionalBoundFlagExpressionNode();
     ExpressionNode value = flagValue == null ? attributes.getMandatoryExpressionNode("value") : flagValue;
 
-    return new FunctionDrivenNode(tagName, interpreter -> {
+    return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
       TemporaryMemberEnvironment environment = interpreter.getEnvironment();
 
       double duration = interpreter.evaluateAsDouble(value);
