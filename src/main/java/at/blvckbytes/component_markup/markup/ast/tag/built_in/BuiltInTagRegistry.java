@@ -51,5 +51,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new ColorTag());
     register(new ASTSubstitutionTag());
     register(new ContentTag());
+    register(new SeparateTag());
   }
 }
