@@ -30,6 +30,7 @@ public class OutputBuilder<B, C> {
   private final Stack<ComponentSequence<B, C>> sequencesStack;
 
   private int totalTextLength;
+  private int totalUnitCount;
 
   public OutputBuilder(
     MarkupInterpreter<B, C> interpreter,
@@ -46,6 +47,14 @@ public class OutputBuilder<B, C> {
 
   public int getTotalTextLength() {
     return totalTextLength;
+  }
+
+  public int getTotalUnitCount() {
+    return totalUnitCount;
+  }
+
+  public boolean hasContent() {
+    return totalTextLength > 0 || totalUnitCount > 0;
   }
 
   public void onBreak() {
@@ -78,11 +87,13 @@ public class OutputBuilder<B, C> {
   }
 
   public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
+    ++totalUnitCount;
     sequencesStack.peek().onUnit(node, creationHandler);
   }
 
   public void onComponent(C component, StyledNode containingNode) {
     componentConstructor.forEachTextOf(component, text -> totalTextLength += text.length());
+    componentConstructor.forEachNonTextUnitOf(component, unit -> ++totalUnitCount);
     sequencesStack.peek().onComponent(component, containingNode);
   }
 

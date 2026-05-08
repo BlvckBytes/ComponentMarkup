@@ -308,6 +308,22 @@ public class JsonComponentConstructor implements ComponentConstructor<JsonObject
     }
   }
 
+  @Override
+  public void forEachNonTextUnitOf(JsonObject component, Consumer<JsonObject> handler) {
+    if (component.get("keybind") instanceof JsonPrimitive || component.get("translate") instanceof JsonPrimitive)
+      handler.accept(component);
+
+    JsonElement childrenElement = component.get("extra");
+
+    if (!(childrenElement instanceof JsonArray))
+      return;
+
+    for (JsonElement child : (JsonArray) childrenElement) {
+      if (child instanceof JsonObject)
+        forEachNonTextUnitOf((JsonObject) child, handler);
+    }
+  }
+
   private void setFormat(JsonObject component, String formatKey, TriState value) {
     if (value == TriState.NULL) {
       component.remove(formatKey);

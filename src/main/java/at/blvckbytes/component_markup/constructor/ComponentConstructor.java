@@ -130,4 +130,11 @@ public interface ComponentConstructor<B, C> {
    */
   void forEachTextOf(C component, Consumer<String> handler);
 
+  /**
+   * Recursively walks the provided finalized component and invokes the callback once
+   * for each occurrence of a non-text unit-component (e.g. key, translate, etc.),
+   * which includes the self.
+   */
+  void forEachNonTextUnitOf(C component, Consumer<C> handler);
+
 }
