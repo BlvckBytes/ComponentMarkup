@@ -47,7 +47,7 @@ public class ComponentSequence<B, C> {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
-  private CreationHandler<B> textCreationHandler;
+  private @Nullable CreationHandler<B> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
   private final ComputedStyle parentStyle;
@@ -138,7 +138,7 @@ public class ComponentSequence<B, C> {
     addBufferedText(node.textValue, nodeStyle, creationHandler);
   }
 
-  private void addBufferedText(String text, @Nullable ComputedStyle style, CreationHandler<B> creationHandler) {
+  private void addBufferedText(String text, @Nullable ComputedStyle style, @Nullable CreationHandler<B> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
@@ -155,7 +155,9 @@ public class ComponentSequence<B, C> {
 
     this.bufferedTexts.add(text);
     bufferedTextsStyle = style;
-    this.textCreationHandler = creationHandler;
+
+    if (creationHandler != null)
+      this.textCreationHandler = creationHandler;
   }
 
   private boolean areStylesEffectivelyEqual(@Nullable ComputedStyle a, @Nullable ComputedStyle b) {
