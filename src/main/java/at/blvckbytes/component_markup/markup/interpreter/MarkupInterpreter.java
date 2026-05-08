@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
@@ -229,6 +230,27 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     builderStack.push(new OutputBuilder<>(this, componentConstructor.getSlotContext(slotType), resetContext));
     interpret(node);
     return builderStack.pop().build();
+  }
+
+  @Override
+  public boolean interpretIsolated(MarkupNode node, @Nullable Consumer<OutputBuilder<B, C>> postPopPreAppendHandler) {
+    OutputBuilder<B, C> parentBuilder = builderStack.peek();
+    OutputBuilder<B, C> temporaryBuilder = new OutputBuilder<>(this, parentBuilder.getSlotContext(), resetContext);
+
+    builderStack.push(temporaryBuilder);
+
+    if (!interpret(node)) {
+      builderStack.pop();
+      return false;
+    }
+
+    builderStack.pop();
+
+    if (postPopPreAppendHandler != null)
+      postPopPreAppendHandler.accept(temporaryBuilder);
+
+    parentBuilder.appendBuilder(temporaryBuilder);
+    return true;
   }
 
   @Override

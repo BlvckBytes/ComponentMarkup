@@ -13,6 +13,8 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 public interface Interpreter<B, C> {
 
   TemporaryMemberEnvironment getEnvironment();
@@ -42,6 +44,8 @@ public interface Interpreter<B, C> {
   boolean interpret(MarkupNode node);
 
   boolean interpret(MarkupNode node, @Nullable Runnable afterScopeBegin);
+
+  boolean interpretIsolated(MarkupNode node, @Nullable Consumer<OutputBuilder<B, C>> preAppendHandler);
 
   OutputBuilder<B, C> getCurrentBuilder();
 

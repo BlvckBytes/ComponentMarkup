@@ -22,6 +22,7 @@ import java.util.logging.Level;
 public class OutputBuilder<B, C> {
 
   private final MarkupInterpreter<B, C> interpreter;
+  private final SlotContext slotContext;
   private final ComponentConstructor<B, C> componentConstructor;
   private final @Nullable String breakString;
 
@@ -32,12 +33,15 @@ public class OutputBuilder<B, C> {
   private int totalTextLength;
   private int totalUnitCount;
 
+  private boolean hasTrailingComponentBreak;
+
   public OutputBuilder(
     MarkupInterpreter<B, C> interpreter,
     SlotContext slotContext,
     SlotContext resetContext
   ) {
     this.interpreter = interpreter;
+    this.slotContext = slotContext;
     this.componentConstructor = interpreter.getComponentConstructor();
     this.breakString = slotContext.breakChar == 0 ? null : String.valueOf(slotContext.breakChar);
     this.sequencesStack = new Stack<>();
@@ -57,6 +61,10 @@ public class OutputBuilder<B, C> {
     return totalTextLength > 0 || totalUnitCount > 0;
   }
 
+  public SlotContext getSlotContext() {
+    return slotContext;
+  }
+
   public void onBreak() {
     if (breakString != null) {
       onText(new TextNode(InputView.EMPTY, breakString), null, false);
@@ -64,6 +72,7 @@ public class OutputBuilder<B, C> {
     }
 
     combineAllSequencesAndAddResult();
+    hasTrailingComponentBreak = true;
   }
 
   public void onNonTerminalBegin(MarkupNode nonTerminal) {
@@ -84,17 +93,50 @@ public class OutputBuilder<B, C> {
   public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
     totalTextLength += node.textValue.length();
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
+    hasTrailingComponentBreak = false;
   }
 
   public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
     ++totalUnitCount;
     sequencesStack.peek().onUnit(node, creationHandler);
+    hasTrailingComponentBreak = false;
   }
 
   public void onComponent(C component, StyledNode containingNode) {
     componentConstructor.forEachTextOf(component, text -> totalTextLength += text.length());
     componentConstructor.forEachNonTextUnitOf(component, unit -> ++totalUnitCount);
     sequencesStack.peek().onComponent(component, containingNode);
+    hasTrailingComponentBreak = false;
+  }
+
+  public void appendBuilder(OutputBuilder<B, C> builder) {
+    if (!builder.hasContent() && builder.hasTrailingComponentBreak) {
+      onBreak();
+      return;
+    }
+
+    this.totalUnitCount += builder.totalUnitCount;
+    this.totalTextLength += builder.totalTextLength;
+
+    if (builder.result.isEmpty() && builder.sequencesStack.size() == 1) {
+      if (sequencesStack.peek().tryAddBufferedTextFromSequence(builder.sequencesStack.peek())) {
+        builder.sequencesStack.clear();
+        return;
+      }
+    }
+
+    builder.combineAllSequencesAndAddResult();
+    builder.sequencesStack.clear();
+
+    for (int resultIndex = 0; resultIndex < builder.result.size(); ++resultIndex) {
+      if (resultIndex > 0)
+        onBreak();
+
+      if (builder.hasTrailingComponentBreak && resultIndex == builder.result.size() - 1)
+        continue;
+
+      sequencesStack.peek().addMember(builder.result.get(resultIndex));
+    }
   }
 
   private void combineAllSequencesAndAddResult() {

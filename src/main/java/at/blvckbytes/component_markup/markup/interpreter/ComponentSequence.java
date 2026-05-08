@@ -138,6 +138,36 @@ public class ComponentSequence<B, C> {
     addBufferedText(node.textValue, nodeStyle, creationHandler);
   }
 
+  public boolean tryAddBufferedTextFromSequence(ComponentSequence<B, C> sequence) {
+    if (sequence.nonTerminal != null || sequence.computedStyle != null)
+      return false;
+
+    if (sequence.members != null && !sequence.members.isEmpty())
+      return false;
+
+    if (!selfAndParentStyle.doStylesEqual(sequence.selfAndParentStyle))
+      return false;
+
+    if (sequence.bufferedTexts == null || sequence.bufferedTexts.isEmpty())
+      return true;
+
+    String accumulatedText = String.join("", sequence.bufferedTexts);
+
+    if (sequence.textCreationHandler == null || this.textCreationHandler == null) {
+      addBufferedText(accumulatedText, sequence.bufferedTextsStyle, sequence.textCreationHandler);
+      return true;
+    }
+
+    CreationHandler<B> thisTextCreationHandler = textCreationHandler;
+
+    addBufferedText(accumulatedText, sequence.bufferedTextsStyle, it -> {
+      sequence.textCreationHandler.handle(it);
+      thisTextCreationHandler.handle(it);
+    });
+
+    return true;
+  }
+
   private void addBufferedText(String text, @Nullable ComputedStyle style, @Nullable CreationHandler<B> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
@@ -224,7 +254,7 @@ public class ComponentSequence<B, C> {
     return result.builder;
   }
 
-  private void addMember(ExtendedBuilder<B> member) {
+  public void addMember(ExtendedBuilder<B> member) {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null)
