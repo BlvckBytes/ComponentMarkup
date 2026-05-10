@@ -481,6 +481,16 @@ public class ExpressionInterpreterTests {
     makeCase("has('32_tHis-iS_a-teSt2')", environment, true);
   }
 
+  @Test
+  public void shouldAddCollections() {
+    makeCase("(1..5) + (10..15)", null, Arrays.asList(1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15));
+  }
+
+  @Test
+  public void shouldSubtractCollections() {
+    makeCase("(1..15) - (5..10)", null, Arrays.asList(1, 2, 3, 4, 11, 12, 13, 14, 15));
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }

@@ -220,6 +220,20 @@ public class ExpressionInterpreter {
 
       Object rhsValue = interpret(node.rhs, environment, logger);
 
+      if (lhsValue instanceof Collection<?> && rhsValue instanceof Collection<?>) {
+        if (infixOperator == InfixOperator.SUBTRACTION || infixOperator == InfixOperator.ADDITION) {
+          List<Object> result = new ArrayList<>((Collection<?>) lhsValue);
+
+          if (infixOperator == InfixOperator.SUBTRACTION) {
+            result.removeIf(it -> ((Collection<?>) rhsValue).contains(it));
+            return result;
+          }
+
+          result.addAll(((Collection<?>) rhsValue));
+          return result;
+        }
+      }
+
       if (arithmeticOperator != null) {
         Number lhs = valueInterpreter.asLongOrDouble(lhsValue);
         Number rhs = valueInterpreter.asLongOrDouble(rhsValue);
