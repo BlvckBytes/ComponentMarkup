@@ -83,4 +83,17 @@ public class DurationTagTests extends InterpreterTestsBase {
         .string("text", "1m 30,50s")
     );
   }
+
+  @Test
+  public void shouldRenderExactUnit() {
+    makeCase(
+      new TextWithSubViews(
+        "<duration units='smhd' [value]='1 * 24 * 60 * 60 * 1000' />"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "1d")
+    );
+  }
 }

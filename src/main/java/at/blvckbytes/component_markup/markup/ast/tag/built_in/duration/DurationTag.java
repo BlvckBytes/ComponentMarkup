@@ -79,7 +79,7 @@ public class DurationTag extends TagDefinition {
             unitValue = Math.floor(unitValue);
         }
 
-        while (remaining > requestedUnit.milliseconds)
+        while (remaining >= requestedUnit.milliseconds)
           remaining -= requestedUnit.milliseconds;
 
         unitValues[requestedUnitIndex] = unitValue;
