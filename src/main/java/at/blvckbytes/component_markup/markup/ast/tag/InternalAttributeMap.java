@@ -15,8 +15,10 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class InternalAttributeMap implements AttributeMap {
 
@@ -27,6 +29,10 @@ public class InternalAttributeMap implements AttributeMap {
   public InternalAttributeMap(InputView tagName) {
     this.attributeMap = new HashMap<>();
     this.tagName = tagName;
+  }
+
+  public void forEachAttributeEntry(BiConsumer<String, @Unmodifiable List<Attribute>> handler) {
+    attributeMap.forEach((key, value) -> handler.accept(key, Collections.unmodifiableList(value)));
   }
 
   public void add(Attribute attribute) {

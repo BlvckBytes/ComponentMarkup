@@ -881,6 +881,14 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnMultipleSameNameShorthandLetBindings() {
+    makeErrorCase(
+      MarkupParseError.MULTIPLE_SAME_NAME_SHORTHAND_LET_BINDINGS,
+      "<$lut.remaining_time time=500 [`time´]=\"my_variable\" />"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

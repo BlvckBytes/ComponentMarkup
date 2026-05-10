@@ -57,6 +57,7 @@ public enum MarkupParseError {
   EXPECTED_INTRINSIC_ATTRIBUTE_NON_FLAG(args -> "The intrinsic attribute " + args.get(0) + " must be assigned to an explicit value"),
   MULTIPLE_BOUND_FLAG_ATTRIBUTES(args -> "The tag " + args.get(0) + " only supports a single occurrence of a bound flag-attribute"),
   MULTIPLE_NON_MULTI_ATTRIBUTE(args -> "The attribute " + args.get(0) + " of tag " + args.get(1) + " does not support being specified more than once"),
+  MULTIPLE_SAME_NAME_SHORTHAND_LET_BINDINGS(args -> "When using implicit let-binding syntax via attribute-notation on supporting tags, each attribute-name may only be assigned once"),
   SPREAD_ON_NON_MULTI_ATTRIBUTE(args -> "The attribute " + args.get(0) + " of tag " + args.get(1) + " does not support multiple values, and thus the spread-operator"),
   MULTIPLE_IF_ELSE_CONDITIONS(args -> "There has already been a prior *if/*else-if/*else on this tag, and said conditions may only occur once"),
   MULTIPLE_USE_CONDITIONS(args -> "There has already been a prior *use on this tag, and said condition may only occur once"),
