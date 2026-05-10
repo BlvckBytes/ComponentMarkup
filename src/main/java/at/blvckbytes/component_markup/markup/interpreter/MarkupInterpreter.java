@@ -361,6 +361,10 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         continue;
       }
 
+      // Since the substitution-tag introduces let-bindings based on attribute-names,
+      // let's just enforce proper casing at this point.
+      name = name.replace('-', '_');
+
       environment.setScopeVariable(name, value);
     }
   }

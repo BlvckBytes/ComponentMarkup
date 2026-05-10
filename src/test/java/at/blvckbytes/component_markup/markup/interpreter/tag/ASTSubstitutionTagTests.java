@@ -43,4 +43,22 @@ public class ASTSubstitutionTagTests extends InterpreterTestsBase {
           ))
     );
   }
+
+  @Test
+  public void shouldIntroduceLetBindingsWithProperCasing() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        " *let-my_component={ My number is {my_number} }",
+        ">",
+        "  <$my_component [my-number]='5' />",
+        "  ;",
+        "  <$my_component my-number=21 />"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "My number is 5;My number is 21")
+    );
+  }
 }
