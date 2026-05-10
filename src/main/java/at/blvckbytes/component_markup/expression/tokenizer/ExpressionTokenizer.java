@@ -523,12 +523,25 @@ public class ExpressionTokenizer {
       }
     }
 
-    dashIsPrefix = result instanceof PrefixOperatorToken || result instanceof InfixOperatorToken || result instanceof PunctuationToken;
+    dashIsPrefix = shouldUpcomingDashBeInterpretedAsPrefixOperator(result);
 
     if (!wasPeek)
       emitTokenToOutput(result);
 
     return result;
+  }
+
+  private boolean shouldUpcomingDashBeInterpretedAsPrefixOperator(Token result) {
+    if (result instanceof PrefixOperatorToken)
+      return true;
+
+    if (result instanceof InfixOperatorToken)
+      return true;
+
+    if (!(result instanceof PunctuationToken))
+      return false;
+
+    return !((PunctuationToken) result).punctuation.isClosing;
   }
 
   public @Nullable Token peekToken() {

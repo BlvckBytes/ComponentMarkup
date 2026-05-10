@@ -256,6 +256,24 @@ public class ExpressionParserTests {
   }
 
   @Test
+  public void shouldParseMinusSignAfterClosingParenthesis() {
+    TextWithSubViews text = new TextWithSubViews(
+      "(`a´) `-´ `b´"
+    );
+
+    makeCase(
+      text,
+      infix(
+        parenthesised(
+          terminal("a", text.subView(0))
+        ),
+        token(InfixOperator.SUBTRACTION, text.subView(1)),
+        terminal("b", text.subView(2))
+      )
+    );
+  }
+
+  @Test
   public void shouldParseSubstringOperator() {
     makeSubstringCase(null, null);
     makeSubstringCase(25, null);

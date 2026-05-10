@@ -10,19 +10,21 @@ import at.blvckbytes.component_markup.expression.tokenizer.token.Token;
 import at.blvckbytes.component_markup.util.InputView;
 
 public enum Punctuation implements EnumToken {
-  OPENING_PARENTHESIS('('),
-  CLOSING_PARENTHESIS(')'),
-  OPENING_CURLY('{'),
-  CLOSING_CURLY('}'),
-  CLOSING_BRACKET(']'),
-  COMMA(','),
-  COLON(':'),
+  OPENING_PARENTHESIS('(', false),
+  CLOSING_PARENTHESIS(')', true),
+  OPENING_CURLY('{', false),
+  CLOSING_CURLY('}', true),
+  CLOSING_BRACKET(']', true),
+  COMMA(',', false),
+  COLON(':', false),
   ;
 
   public final char representation;
+  public final boolean isClosing;
 
-  Punctuation(char representation) {
+  Punctuation(char representation, boolean isClosing) {
     this.representation = representation;
+    this.isClosing = isClosing;
   }
 
   @Override
