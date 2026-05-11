@@ -96,4 +96,27 @@ public class DurationTagTests extends InterpreterTestsBase {
         .string("text", "1d")
     );
   }
+
+  @Test
+  public void shouldKeepZeroUnitsIfSpecified() {
+    makeCase(
+      new TextWithSubViews(
+        "<duration units='smhd' [value]='1 * 60 * 1000' zeroes='s' />"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "1m 0s")
+    );
+
+    makeCase(
+      new TextWithSubViews(
+        "<duration units='smhd' [value]='1 * 60 * 1000' zeroes='sd' />"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "0d 1m 0s")
+    );
+  }
 }

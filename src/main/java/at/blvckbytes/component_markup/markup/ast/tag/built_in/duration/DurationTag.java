@@ -52,7 +52,7 @@ public class DurationTag extends TagDefinition {
 
       double duration = interpreter.evaluateAsDouble(value);
       List<DurationUnit> requestedUnits = parseUnitsString(interpreter, units);
-      boolean keepZeroes = zeroes != null && interpreter.evaluateAsBoolean(zeroes);
+      List<DurationUnit> keptZeroUnits = zeroes == null ? null : parseUnitsString(interpreter, zeroes);
 
       requestedUnits.sort((a, b) -> Long.compare(b.milliseconds, a.milliseconds));
 
@@ -91,7 +91,7 @@ public class DurationTag extends TagDefinition {
         DurationUnit requestedUnit = requestedUnits.get(requestedUnitIndex);
         double unitValue = unitValues[requestedUnitIndex];
 
-        if (unitValue == 0 && !keepZeroes)
+        if (unitValue == 0 && (keptZeroUnits == null || !keptZeroUnits.contains(requestedUnit)))
           continue;
 
         if (didEmit)
