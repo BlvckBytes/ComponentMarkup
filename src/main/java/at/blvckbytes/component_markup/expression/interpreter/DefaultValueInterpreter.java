@@ -149,6 +149,9 @@ public class DefaultValueInterpreter implements ValueInterpreter {
   @Override
   @SuppressWarnings("unchecked")
   public @NotNull List<Object> asList(@Nullable Object value) {
+    if (value == null)
+      return Collections.emptyList();
+
     // This language cannot mutate data - pass lists through untouched, by reference.
     if (value instanceof List<?>)
       return (List<Object>) value;
@@ -171,6 +174,16 @@ public class DefaultValueInterpreter implements ValueInterpreter {
       return new ArrayList<>(((Map<?, ?>) value).keySet());
 
     List<Object> result = new ArrayList<>();
+
+    if (value.getClass().isArray()) {
+      int length = Array.getLength(value);
+
+      for (int index = 0; index < length; ++index)
+        result.add(Array.get(value, index));
+
+      return result;
+    }
+
     result.add(value);
     return result;
   }

@@ -1875,4 +1875,18 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "Hello, BAworld!")
     );
   }
+
+  @Test
+  public void shouldIterateArrayWithForLoop() {
+    makeCase(
+      new TextWithSubViews(
+        "<container *for-char='my_array' [char] />"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_array", new char[] { 'a', 'b', 'c', 'd', 'e' }),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "abcde")
+    );
+  }
 }
