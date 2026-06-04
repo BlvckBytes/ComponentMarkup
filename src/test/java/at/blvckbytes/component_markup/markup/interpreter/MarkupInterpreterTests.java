@@ -1889,4 +1889,37 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "abcde")
     );
   }
+
+  @Test
+  public void shouldAllowLetBindingToRedefineVariable() {
+    makeCase(
+      new TextWithSubViews(
+        "<container *let-a='a + 5'>",
+        "  {a}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("a", 5),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "10")
+    );
+  }
+
+  @Test
+  public void shouldAllowLetBindingToRedefineVariableNested() {
+    // This case captures the fact that two nested containers which both have
+    // an equally named let-binding must not be collapsed into one.
+    makeCase(
+      new TextWithSubViews(
+        "<container *let-a='a + 5'>",
+        "  <container *let-a='a + 5'>",
+        "    {a}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("a", 5),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "15")
+    );
+  }
 }

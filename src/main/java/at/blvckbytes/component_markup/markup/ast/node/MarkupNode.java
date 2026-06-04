@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class MarkupNode {
@@ -89,6 +88,17 @@ public abstract class MarkupNode {
 
         if (letBinding instanceof ExpressionLetBinding && ((ExpressionLetBinding) letBinding).capture)
           return false;
+      }
+    }
+
+    // Do not inherit let-bindings that would shadow local bindings of the same name, as
+    // they may depend on each-other and information would otherwise be lost.
+    if (this.letBindings != null && other.letBindings != null) {
+      for (LetBinding thisLetBinding : this.letBindings) {
+        for (LetBinding otherLetBinding : other.letBindings) {
+          if (thisLetBinding.bindingName.equalsIgnoreCase(otherLetBinding.bindingName))
+            return false;
+        }
       }
     }
 
