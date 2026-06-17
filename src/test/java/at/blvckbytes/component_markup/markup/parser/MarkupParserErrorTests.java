@@ -397,14 +397,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnExpectedExpressionValue() {
-    makeErrorCase(
-      MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE,
-      "<key `key´={} />"
-    );
-  }
-
-  @Test
   public void shouldThrowOnExpectedSelfClosingTag() {
     makeErrorCase(
       MarkupParseError.EXPECTED_SELF_CLOSING_TAG,

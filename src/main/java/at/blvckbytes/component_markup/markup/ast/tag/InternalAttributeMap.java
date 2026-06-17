@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
+import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
@@ -78,8 +79,8 @@ public class InternalAttributeMap implements AttributeMap {
     if (attribute == null)
       return null;
 
-    if (!(attribute instanceof ExpressionAttribute))
-      throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+    if (attribute instanceof MarkupAttribute)
+      attribute = ((MarkupAttribute) attribute).asPlainTextExpressionAttribute();
 
     ExpressionAttribute expressionAttribute = (ExpressionAttribute) attribute;
 
@@ -177,9 +178,11 @@ public class InternalAttributeMap implements AttributeMap {
     if (attributes == null)
       return ExpressionList.EMPTY;
 
-    for (Attribute attribute : attributes) {
-      if (!(attribute instanceof ExpressionAttribute))
-        throw new MarkupParseException(attribute.attributeName.finalName, MarkupParseError.EXPECTED_EXPRESSION_ATTRIBUTE_VALUE, formatNames(name, aliases), tagName.buildString());
+    for (int index = 0; index < attributes.size(); ++index) {
+      Attribute attribute = attributes.get(index);
+
+      if (attribute instanceof MarkupAttribute)
+        attributes.set(index, ((MarkupAttribute) attribute).asPlainTextExpressionAttribute());
 
       attribute.hasBeenUsed = true;
     }

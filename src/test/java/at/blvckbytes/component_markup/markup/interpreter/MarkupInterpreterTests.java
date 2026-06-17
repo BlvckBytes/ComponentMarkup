@@ -1948,4 +1948,22 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("color", expectedColorValue)
     );
   }
+
+  @Test
+  public void shouldConvertMarkupAttributeToPlainTextExpression() {
+    makeCase(
+      new TextWithSubViews(
+        "<key",
+        "  key={",
+        "    <container *for-part='key_parts' *for-separator={.} [part] />",
+        "  }",
+        "/>"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("key_parts", Arrays.asList("this", "is", "my", "key")),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("keybind", "this.is.my.key")
+    );
+  }
 }

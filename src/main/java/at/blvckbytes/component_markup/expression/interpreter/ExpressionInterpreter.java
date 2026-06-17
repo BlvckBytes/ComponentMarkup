@@ -44,6 +44,9 @@ public class ExpressionInterpreter {
       return node.transformer.transform(interpret(node.wrapped, environment, logger), environment, logger);
     }
 
+    if (expression instanceof FunctionDrivenNode)
+      return ((FunctionDrivenNode) expression).function.apply(environment, logger);
+
     if (expression instanceof PrefixOperationNode) {
       PrefixOperationNode node = (PrefixOperationNode) expression;
       PrefixOperator prefixOperator = node.operatorToken.operator;
