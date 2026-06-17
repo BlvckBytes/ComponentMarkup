@@ -7,8 +7,10 @@ package at.blvckbytes.component_markup.markup.ast.node.style;
 
 import at.blvckbytes.component_markup.expression.ast.BranchingNode;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.ast.TerminalNode;
-import at.blvckbytes.component_markup.expression.tokenizer.token.NullToken;
+import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
+import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
+import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
+import at.blvckbytes.component_markup.util.InputView;
 import org.jetbrains.annotations.Nullable;
 
 public class NodeStyle {
@@ -22,60 +24,36 @@ public class NodeStyle {
   public @Nullable ExpressionNode reset;
 
   public void inheritFrom(NodeStyle other) {
-    ExpressionNode otherValue;
+    if (other.color != null)
+      this.color = makeFallbackExpression(this.color, other.color);
 
-    if ((otherValue = other.color) != null) {
-      if (this.color == null)
-        this.color = otherValue;
-      else
-        trySetFalseBranch(this.color, otherValue);
-    }
+    if (other.shadowColor != null)
+      this.shadowColor = makeFallbackExpression(this.shadowColor, other.shadowColor);
 
-    if ((otherValue = other.shadowColor) != null) {
-      if (this.shadowColor == null)
-        this.shadowColor = otherValue;
-      else
-        trySetFalseBranch(this.shadowColor, otherValue);
-    }
+    if (other.shadowColorOpacity != null)
+      this.shadowColorOpacity = makeFallbackExpression(this.shadowColorOpacity, other.shadowColorOpacity);
 
-    if ((otherValue = other.shadowColorOpacity) != null) {
-      if (this.shadowColorOpacity == null)
-        this.shadowColorOpacity = otherValue;
-      else
-        trySetFalseBranch(this.shadowColorOpacity, otherValue);
-    }
+    if (other.font != null)
+      this.font = makeFallbackExpression(this.font, other.font);
 
-    if ((otherValue = other.font) != null) {
-      if (this.font == null)
-        this.font = otherValue;
-      else
-        trySetFalseBranch(this.font, otherValue);
-    }
-
-    if ((otherValue = other.reset) != null) {
-      if (this.reset == null)
-        this.reset = otherValue;
-      else
-        trySetFalseBranch(this.font, otherValue);
-    }
+    if (other.reset != null)
+      this.reset = makeFallbackExpression(this.reset, other.reset);
 
     if (other.formatStates != null) {
       for (Format format : Format.VALUES) {
-        otherValue = other.getFormat(format);
+        ExpressionNode otherValue = other.getFormat(format);
 
-        if (otherValue == null)
-          continue;
-
-        ExpressionNode thisFormatState = getFormat(format);
-
-        if (thisFormatState == null) {
-          setFormat(format, otherValue);
-          continue;
-        }
-
-        trySetFalseBranch(thisFormatState, otherValue);
+        if (otherValue != null)
+          setFormat(format, makeFallbackExpression(getFormat(format), otherValue));
       }
     }
+  }
+
+  private ExpressionNode makeFallbackExpression(@Nullable ExpressionNode thisValue, ExpressionNode otherValue) {
+    if (thisValue == null)
+      return otherValue;
+
+    return new InfixOperationNode(thisValue, new InfixOperatorToken(InputView.EMPTY, InfixOperator.FALLBACK), otherValue, null);
   }
 
   private @Nullable ExpressionNode applyCondition(@Nullable ExpressionNode expressionNode, @Nullable ExpressionNode condition) {
@@ -86,28 +64,6 @@ public class NodeStyle {
       return null;
 
     return new BranchingNode(condition, null, expressionNode, null, null);
-  }
-
-  private void trySetFalseBranch(ExpressionNode target, ExpressionNode expressionNode) {
-    if (!(target instanceof BranchingNode))
-      return;
-
-    BranchingNode branchingNode = (BranchingNode) target;
-
-    if (branchingNode.branchFalse == null) {
-      branchingNode.branchFalse = expressionNode;
-      return;
-    }
-
-    if (!(branchingNode.branchFalse instanceof TerminalNode))
-      return;
-
-    TerminalNode falseTerminal = (TerminalNode) branchingNode.branchFalse;
-
-    if (!(falseTerminal.token instanceof NullToken))
-      return;
-
-    branchingNode.branchFalse = expressionNode;
   }
 
   public boolean hasNonNullProperties() {

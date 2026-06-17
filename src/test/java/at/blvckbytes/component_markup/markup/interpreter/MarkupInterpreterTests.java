@@ -1922,4 +1922,30 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "15")
     );
   }
+
+  @Test
+  public void shouldApplyClosestNonNullStyleValueWhenInheriting() {
+    makeColorInheritanceCase("red", "null", "'red'");
+    makeColorInheritanceCase("green", "'green'", "null");
+    makeColorInheritanceCase("blue", "'green'", "'blue'", "null");
+    makeColorInheritanceCase("gold", "'green'", "'blue'", "null", "'gold'");
+  }
+
+  private void makeColorInheritanceCase(String expectedColorValue, String... colorExpressions) {
+    StringBuilder markupBuilder = new StringBuilder();
+
+    for (String colorExpression : colorExpressions)
+      markupBuilder.append("<color [value]=\"").append(colorExpression).append("\">");
+
+    markupBuilder.append("text-contents");
+
+    makeCase(
+      new TextWithSubViews(markupBuilder.toString()),
+      new InterpretationEnvironment(),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "text-contents")
+        .string("color", expectedColorValue)
+    );
+  }
 }
