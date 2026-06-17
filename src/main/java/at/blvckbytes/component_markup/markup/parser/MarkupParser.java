@@ -871,7 +871,7 @@ public class MarkupParser implements CmlEventConsumer {
     currentLayer.attributeMap.add(attribute);
   }
 
-  private boolean isInvalidIdentifier(InputView identifier, boolean expression) {
+  public static boolean isInvalidIdentifier(InputView identifier, boolean expression) {
     int length = identifier.length();
 
     if (length == 0)

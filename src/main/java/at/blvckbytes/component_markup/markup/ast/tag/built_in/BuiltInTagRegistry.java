@@ -52,5 +52,6 @@ public class BuiltInTagRegistry extends TagRegistry {
     register(new ASTSubstitutionTag());
     register(new ContentTag());
     register(new SeparateTag());
+    register(new MapTag());
   }
 }

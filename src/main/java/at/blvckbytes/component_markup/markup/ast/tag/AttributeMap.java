@@ -7,10 +7,15 @@ package at.blvckbytes.component_markup.markup.ast.tag;
 
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
+import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface AttributeMap {
+
+  @Nullable Attribute getOptionalAttribute(String name, String... aliases);
+
+  @Nullable Attribute getMandatoryAttribute(String name, String... aliases);
 
   @NotNull ExpressionNode getMandatoryExpressionNode(String name, String... aliases);
 

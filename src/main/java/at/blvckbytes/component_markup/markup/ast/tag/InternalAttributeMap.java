@@ -63,6 +63,21 @@ public class InternalAttributeMap implements AttributeMap {
   // ================================================================================
 
   @Override
+  public @Nullable Attribute getOptionalAttribute(String name, String... aliases) {
+    return selectNonMultiAttributeOrNull(name, aliases);
+  }
+
+  @Override
+  public @Nullable Attribute getMandatoryAttribute(String name, String... aliases) {
+    Attribute result = selectNonMultiAttributeOrNull(name, aliases);
+
+    if (result == null)
+      throw new MarkupParseException(tagName, MarkupParseError.MISSING_MANDATORY_ATTRIBUTE, tagName.buildString(), formatNames(name, aliases));
+
+    return result;
+  }
+
+  @Override
   public @NotNull ExpressionNode getMandatoryExpressionNode(String name, String... aliases) {
     ExpressionNode result = getOptionalExpressionNode(name, aliases);
 

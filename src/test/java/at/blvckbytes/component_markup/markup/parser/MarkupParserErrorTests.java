@@ -881,6 +881,32 @@ public class MarkupParserErrorTests {
     );
   }
 
+  @Test
+  public void shouldThrowOnEmptyMapTagBindingName() {
+    makeErrorCase(
+      MarkupParseError.EMPTY_BINDING_NAME,
+      "<`map´>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.EMPTY_BINDING_NAME,
+      "<`map-´>"
+    );
+  }
+
+  @Test
+  public void shouldThrowOnMalformedMapBindingName() {
+    makeErrorCase(
+      MarkupParseError.MALFORMED_IDENTIFIER,
+      "<map-`my-identifier´>"
+    );
+
+    makeErrorCase(
+      MarkupParseError.MALFORMED_IDENTIFIER,
+      "<map-`0123´>"
+    );
+  }
+
   private void makeErrorScreenCase(TextWithSubViews input, TextWithSubViews screen) {
     MarkupParseException exception = Assertions.assertThrows(
       MarkupParseException.class,

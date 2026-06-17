@@ -131,6 +131,32 @@ public class TokenOutputTests {
     );
   }
 
+  @Test
+  public void shouldMarkMapBindingName() {
+    TextWithSubViews text = new TextWithSubViews(
+      "`<´`map-`my_identifier´´` ´`iterable´`=´`''´` ´`mapper´`=´`''´`>´"
+    );
+
+    makeHierarchicalCase(
+      InputView.of(text.text),
+      new ListBuilder<>(HierarchicalToken.class)
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(0)))
+        .add(
+          new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__TAG, text.subView(1).setLowercase())
+            .addChild(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__BINDING, text.subView(2).setLowercase()))
+        )
+        .add(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(3)))
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(4).setLowercase()))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(5)))
+        .add(new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(6)))
+        .add(new HierarchicalToken(TokenType.ANY__WHITESPACE, text.subView(7)))
+        .add(new HierarchicalToken(TokenType.MARKUP__IDENTIFIER__ATTRIBUTE_USER, text.subView(8).setLowercase()))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__EQUALS, text.subView(9)))
+        .add(new HierarchicalToken(TokenType.MARKUP__STRING, text.subView(10)))
+        .add(new HierarchicalToken(TokenType.MARKUP__PUNCTUATION__TAG, text.subView(11)))
+    );
+  }
+
   private void makeCommentCase(String... lines) {
     String[] finalLines = new String[lines.length];
 

@@ -1966,4 +1966,36 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("keybind", "this.is.my.key")
     );
   }
+
+  @Test
+  public void shouldMap() {
+    Map<String, String> myMap = new HashMap<>();
+
+    myMap.put("k1", "v1");
+    myMap.put("k2", "v2");
+    myMap.put("k3", "v3");
+
+    TextWithSubViews[] inputs = {
+      new TextWithSubViews(
+        "<map-my_results [my_map] mapper=×`{item} {my_map[item]}×`>",
+        "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
+      ),
+      // TODO: Enable case once needless wrappers have been fixed, or just create a separate case with the wrappers expected.
+//      new TextWithSubViews(
+//        "<map-my_results [my_map] mapper={{item} {my_map[item]}}>",
+//        "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
+//      ),
+    };
+
+    for (TextWithSubViews input : inputs) {
+      makeCase(
+        input,
+        new InterpretationEnvironment()
+          .withVariable("my_map", myMap),
+          SlotType.CHAT,
+          new JsonObjectBuilder()
+            .string("text", "k1 v1, k2 v2, k3 v3")
+      );
+    }
+  }
 }
