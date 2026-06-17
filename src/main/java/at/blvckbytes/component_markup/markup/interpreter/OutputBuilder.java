@@ -79,15 +79,14 @@ public class OutputBuilder<B, C> {
     sequencesStack.push(sequencesStack.peek().makeChildSequence(nonTerminal));
   }
 
-  @SuppressWarnings("UnusedReturnValue")
-  public @Nullable B onNonTerminalEnd() {
+  public void onNonTerminalEnd() {
     if (sequencesStack.isEmpty()) {
       GlobalLogger.log(Level.WARNING, "Encountered unbalanced non-terminal-stack");
-      return null;
+      return;
     }
 
     ComponentSequence<B, C> sequence = sequencesStack.pop();
-    return sequencesStack.peek().addSequence(sequence);
+    sequencesStack.peek().addSequence(sequence);
   }
 
   public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {

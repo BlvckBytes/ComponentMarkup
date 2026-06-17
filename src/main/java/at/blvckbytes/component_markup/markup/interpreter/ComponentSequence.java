@@ -243,15 +243,13 @@ public class ComponentSequence<B, C> {
     bufferedTextsStyle = null;
   }
 
-  public B addSequence(ComponentSequence<B, C> sequence) {
+  public void addSequence(ComponentSequence<B, C> sequence) {
     ExtendedBuilder<B> result = sequence.combineOrBubbleUpAndClearMembers(this);
 
     if (result == null)
-      return componentConstructor.createTextComponent("");
+      return;
 
     addMember(result);
-
-    return result.builder;
   }
 
   public void addMember(ExtendedBuilder<B> member) {
