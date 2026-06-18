@@ -161,7 +161,7 @@ public class OutputBuilder<B, C> {
     sequencesStack.clear();
 
     if (result.isEmpty()) {
-      result.add(new ExtendedBuilder<>(componentConstructor.createTextComponent("")));
+      result.add(ExtendedBuilder.makeEmpty());
     }
 
     List<C> finalizedResult = new ArrayList<>();

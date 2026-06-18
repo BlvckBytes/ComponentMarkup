@@ -55,7 +55,7 @@ public class ComponentSequence<B, C> {
 
   public void onComponent(C component, StyledNode containingNode) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(containingNode, interpreter);
-    addMember(new ExtendedBuilder<>(nodeStyle, component));
+    addMember(ExtendedBuilder.wrapPlatformComponent(component, nodeStyle));
   }
 
   public void onUnit(UnitNode node, @Nullable CreationHandler<B, C> creationHandler) {
@@ -105,7 +105,7 @@ public class ComponentSequence<B, C> {
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
 
-    ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+    ExtendedBuilder<B, C> extendedBuilder = ExtendedBuilder.wrapPlatformBuilder(result, nodeStyle);
 
     addMember(extendedBuilder);
 
@@ -119,7 +119,7 @@ public class ComponentSequence<B, C> {
     if (doNotBuffer) {
       B result = componentConstructor.createTextComponent(node.textValue);
 
-      ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+      ExtendedBuilder<B, C> extendedBuilder = ExtendedBuilder.wrapPlatformBuilder(result, nodeStyle);
 
       addMember(extendedBuilder);
 
@@ -223,7 +223,7 @@ public class ComponentSequence<B, C> {
       result = componentConstructor.createTextComponent(accumulator.toString());
     }
 
-    ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, bufferedTextsStyle);
+    ExtendedBuilder<B, C> extendedBuilder = ExtendedBuilder.wrapPlatformBuilder(result, bufferedTextsStyle);
 
     if (textCreationHandler != null) {
       textCreationHandler.handle(extendedBuilder);
@@ -318,7 +318,7 @@ public class ComponentSequence<B, C> {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null || this.members.isEmpty())
-      return new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
+      return ExtendedBuilder.makeEmpty();
 
     ExtendedBuilder<B, C> result;
 
@@ -351,7 +351,7 @@ public class ComponentSequence<B, C> {
         styleToApply.subtractStylesOnEquality(this.parentStyle, true);
       }
 
-      result = new ExtendedBuilder<>(componentConstructor.createTextComponent(""), styleToApply, children);
+      result = ExtendedBuilder.makeContainer(children, styleToApply);
     }
 
     Consumer<B> nonTerminalClosure = getNonTerminalApplyClosure();

@@ -25,27 +25,37 @@ public class ExtendedBuilder<B, C> {
 
   public long explicitColor = PackedColor.NULL_SENTINEL;
 
-  // TODO: These constructors are super confusing when not knowing their exact backgrounds...
-  //       Maybe replace them with properly named static methods?
+  private ExtendedBuilder() {}
 
-  public ExtendedBuilder(@NotNull B builder, @Nullable ComputedStyle style) {
-    this.builder = builder;
-    this.style = style;
+  public static <B, C> ExtendedBuilder<B, C> wrapPlatformComponent(@NotNull C wrappedComponent, @Nullable ComputedStyle style) {
+    ExtendedBuilder<B, C> result = new ExtendedBuilder<>();
+
+    result.wrappedComponent = wrappedComponent;
+    result.style = style;
+
+    return result;
   }
 
-  public ExtendedBuilder(@NotNull B builder, @Nullable ComputedStyle style, @Nullable List<ExtendedBuilder<B, C>> children) {
-    this.builder = builder;
-    this.style = style;
-    this.children = children;
+  public static <B, C> ExtendedBuilder<B, C> wrapPlatformBuilder(@NotNull B builder, @Nullable ComputedStyle style) {
+    ExtendedBuilder<B, C> result = new ExtendedBuilder<>();
+
+    result.builder = builder;
+    result.style = style;
+
+    return result;
   }
 
-  public ExtendedBuilder(@NotNull B builder) {
-    this.builder = builder;
+  public static <B, C> ExtendedBuilder<B, C> makeContainer(@NotNull List<ExtendedBuilder<B, C>> children, @Nullable ComputedStyle style) {
+    ExtendedBuilder<B, C> result = new ExtendedBuilder<>();
+
+    result.children = children;
+    result.style = style;
+
+    return result;
   }
 
-  public ExtendedBuilder(@Nullable ComputedStyle style, @NotNull C wrappedComponent) {
-    this.style = style;
-    this.wrappedComponent = wrappedComponent;
+  public static <B, C> ExtendedBuilder<B, C> makeEmpty() {
+    return new ExtendedBuilder<>();
   }
 
   public void addChildren(List<B> addedChildren) {
@@ -53,7 +63,7 @@ public class ExtendedBuilder<B, C> {
       children = new ArrayList<>();
 
     for (B child : addedChildren)
-      children.add(new ExtendedBuilder<>(child, null));
+      children.add(ExtendedBuilder.wrapPlatformBuilder(child, null));
   }
 
   public @NotNull ComputedStyle getOrInstantiateStyle() {
