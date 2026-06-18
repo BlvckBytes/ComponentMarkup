@@ -252,4 +252,27 @@ public abstract class InterpreterTestsBase {
     );
   }
 
+  protected List<JsonObject> interpretMarkup(
+    String markup,
+    InterpretationEnvironment baseEnvironment,
+    SlotType slot
+  ) {
+    MarkupNode markupNode;
+
+    try {
+      markupNode = MarkupParser.parse(InputView.of(markup), BuiltInTagRegistry.INSTANCE);
+    } catch (MarkupParseException e) {
+      System.out.println(String.join("\n", e.makeErrorScreen()));
+      Assertions.fail("Threw an error:", e);
+      return null;
+    }
+
+    return MarkupInterpreter.interpret(
+      markupNode,
+      slot,
+      baseEnvironment,
+      componentConstructor,
+      NullInterpreterLogger.INSTANCE
+    );
+  }
 }

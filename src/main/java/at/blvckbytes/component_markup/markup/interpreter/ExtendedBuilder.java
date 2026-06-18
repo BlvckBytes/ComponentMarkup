@@ -95,7 +95,7 @@ public class ExtendedBuilder<B, C> {
       if (style == null && children == null && nonTerminalApplyingClosures == null)
         return wrappedComponent;
 
-      B builder = componentConstructor.createTextComponent("");
+      builder = componentConstructor.createTextComponent("");
       componentConstructor.addChildren(builder, Collections.singletonList(wrappedComponent));
     }
 

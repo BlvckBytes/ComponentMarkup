@@ -2007,4 +2007,26 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         ))
     );
   }
+
+  @Test
+  public void shouldBeAbleToAttachStyleToABuiltComponentViaAWrapper() {
+    makeCase(
+      new TextWithSubViews(
+        "<red>{my_component}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_component", interpretMarkup("<bold>Hello, world!", new InterpretationEnvironment(), SlotType.CHAT).get(0)),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .string("color", "red")
+        .array("extra", extra -> (
+          extra.object(item -> (
+            item
+              .string("text", "Hello, world!")
+              .bool("bold", true)
+            ))
+        ))
+    );
+  }
 }
