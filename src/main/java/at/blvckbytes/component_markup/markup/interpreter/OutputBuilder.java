@@ -26,7 +26,7 @@ public class OutputBuilder<B, C> {
   private final ComponentConstructor<B, C> componentConstructor;
   private final @Nullable String breakString;
 
-  private final List<ExtendedBuilder<B>> result;
+  private final List<ExtendedBuilder<B, C>> result;
 
   private final Stack<ComponentSequence<B, C>> sequencesStack;
 
@@ -89,13 +89,13 @@ public class OutputBuilder<B, C> {
     sequencesStack.peek().addSequence(sequence);
   }
 
-  public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable CreationHandler<B, C> creationHandler, boolean doNotBuffer) {
     totalTextLength += node.textValue.length();
     sequencesStack.peek().onText(node, creationHandler, doNotBuffer);
     hasTrailingComponentBreak = false;
   }
 
-  public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable CreationHandler<B, C> creationHandler) {
     ++totalUnitCount;
     sequencesStack.peek().onUnit(node, creationHandler);
     hasTrailingComponentBreak = false;
@@ -143,7 +143,7 @@ public class OutputBuilder<B, C> {
       ComponentSequence<B, C> sequence = sequencesStack.get(index);
 
       if (index == 0) {
-        ExtendedBuilder<B> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
+        ExtendedBuilder<B, C> combinationResult = sequence.combineOrBubbleUpAndClearMembers(null);
 
         if (combinationResult != null)
           result.add(combinationResult);
@@ -166,7 +166,7 @@ public class OutputBuilder<B, C> {
 
     List<C> finalizedResult = new ArrayList<>();
 
-    for (ExtendedBuilder<B> extendedBuilder : result)
+    for (ExtendedBuilder<B, C> extendedBuilder : result)
       finalizedResult.add(extendedBuilder.toFinalizedComponent(componentConstructor, interpreter.getLogger()));
 
     return finalizedResult;

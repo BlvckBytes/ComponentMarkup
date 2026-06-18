@@ -35,7 +35,7 @@ public class ComponentSequence<B, C> {
   private final @Nullable MarkupNode nonTerminal;
   private final boolean isInitial;
 
-  private @Nullable List<ExtendedBuilder<B>> members;
+  private @Nullable List<ExtendedBuilder<B, C>> members;
 
   // Style-properties which are equal amongst all members
   // E.g.: if all members are bold, that style may be hoisted up
@@ -47,7 +47,7 @@ public class ComponentSequence<B, C> {
 
   private @Nullable List<String> bufferedTexts;
   private @Nullable ComputedStyle bufferedTextsStyle;
-  private @Nullable CreationHandler<B> textCreationHandler;
+  private @Nullable CreationHandler<B, C> textCreationHandler;
 
   private final @Nullable ComputedStyle computedStyle;
   private final ComputedStyle parentStyle;
@@ -55,16 +55,10 @@ public class ComponentSequence<B, C> {
 
   public void onComponent(C component, StyledNode containingNode) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(containingNode, interpreter);
-
-    // Yes, this indeed is slightly hackish... That being said, we may need to modify the style
-    // of- or add various events to this finalized component later on, so to unify the algorithm,
-    // let's simply accept this little inefficiency as a tradeoff for increased flexibility.
-    B builder = componentConstructor.createTextComponent("");
-    componentConstructor.addChildren(builder, Collections.singletonList(component));
-    addMember(new ExtendedBuilder<>(builder, nodeStyle));
+    addMember(new ExtendedBuilder<>(nodeStyle, component));
   }
 
-  public void onUnit(UnitNode node, @Nullable CreationHandler<B> creationHandler) {
+  public void onUnit(UnitNode node, @Nullable CreationHandler<B, C> creationHandler) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     B result = null;
@@ -111,7 +105,7 @@ public class ComponentSequence<B, C> {
     if (result == null)
       result = componentConstructor.createTextComponent("<error>");
 
-    ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+    ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
 
     addMember(extendedBuilder);
 
@@ -119,13 +113,13 @@ public class ComponentSequence<B, C> {
       creationHandler.handle(extendedBuilder);
   }
 
-  public void onText(TextNode node, @Nullable CreationHandler<B> creationHandler, boolean doNotBuffer) {
+  public void onText(TextNode node, @Nullable CreationHandler<B, C> creationHandler, boolean doNotBuffer) {
     ComputedStyle nodeStyle = ComputedStyle.computeFor(node, interpreter);
 
     if (doNotBuffer) {
       B result = componentConstructor.createTextComponent(node.textValue);
 
-      ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
+      ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, nodeStyle);
 
       addMember(extendedBuilder);
 
@@ -158,7 +152,7 @@ public class ComponentSequence<B, C> {
       return true;
     }
 
-    CreationHandler<B> thisTextCreationHandler = textCreationHandler;
+    CreationHandler<B, C> thisTextCreationHandler = textCreationHandler;
 
     addBufferedText(accumulatedText, sequence.bufferedTextsStyle, it -> {
       sequence.textCreationHandler.handle(it);
@@ -168,7 +162,7 @@ public class ComponentSequence<B, C> {
     return true;
   }
 
-  private void addBufferedText(String text, @Nullable ComputedStyle style, @Nullable CreationHandler<B> creationHandler) {
+  private void addBufferedText(String text, @Nullable ComputedStyle style, @Nullable CreationHandler<B, C> creationHandler) {
     if (style != null) {
       // If the member resets, append all necessary properties to go back to the resetContext
       appendResetPropertiesIfApplicable(style, selfAndParentStyle);
@@ -229,7 +223,7 @@ public class ComponentSequence<B, C> {
       result = componentConstructor.createTextComponent(accumulator.toString());
     }
 
-    ExtendedBuilder<B> extendedBuilder = new ExtendedBuilder<>(result, bufferedTextsStyle);
+    ExtendedBuilder<B, C> extendedBuilder = new ExtendedBuilder<>(result, bufferedTextsStyle);
 
     if (textCreationHandler != null) {
       textCreationHandler.handle(extendedBuilder);
@@ -244,7 +238,7 @@ public class ComponentSequence<B, C> {
   }
 
   public void addSequence(ComponentSequence<B, C> sequence) {
-    ExtendedBuilder<B> result = sequence.combineOrBubbleUpAndClearMembers(this);
+    ExtendedBuilder<B, C> result = sequence.combineOrBubbleUpAndClearMembers(this);
 
     if (result == null)
       return;
@@ -252,7 +246,7 @@ public class ComponentSequence<B, C> {
     addMember(result);
   }
 
-  public void addMember(ExtendedBuilder<B> member) {
+  public void addMember(ExtendedBuilder<B, C> member) {
     concatAndInstantiateBufferedTexts();
 
     if (this.members == null)
@@ -282,7 +276,7 @@ public class ComponentSequence<B, C> {
     this.members.add(member);
   }
 
-  public @Nullable ExtendedBuilder<B> combineOrBubbleUpAndClearMembers(@Nullable ComponentSequence<B, C> parentSequence) {
+  public @Nullable ExtendedBuilder<B, C> combineOrBubbleUpAndClearMembers(@Nullable ComponentSequence<B, C> parentSequence) {
     // There's no reason to create a wrapper-component because we're neither at the root,
     // nor are there any equal member-styles which could be extracted, nor does the non-terminal
     // which initiated this sequence take any effect via style or interactivity. Bubble up
@@ -296,7 +290,7 @@ public class ComponentSequence<B, C> {
         && (textCreationHandler == null)
     ) {
       if (members != null) {
-        for (ExtendedBuilder<B> member : members) {
+        for (ExtendedBuilder<B, C> member : members) {
           member.style = ComputedStyle.addMissing(member.style, this.computedStyle);
           parentSequence.addMember(member);
         }
@@ -326,7 +320,7 @@ public class ComponentSequence<B, C> {
     if (this.members == null || this.members.isEmpty())
       return new ExtendedBuilder<>(componentConstructor.createTextComponent(""));
 
-    ExtendedBuilder<B> result;
+    ExtendedBuilder<B, C> result;
 
     if (members.size() == 1) {
       result = members.get(0);
@@ -336,9 +330,9 @@ public class ComponentSequence<B, C> {
     }
 
     else {
-      List<ExtendedBuilder<B>> children = new ArrayList<>();
+      List<ExtendedBuilder<B, C>> children = new ArrayList<>();
 
-      for (ExtendedBuilder<B> member : members) {
+      for (ExtendedBuilder<B, C> member : members) {
         if (member.style != null)
           member.style.subtractStylesOnEquality(membersEqualStyle, true);
 

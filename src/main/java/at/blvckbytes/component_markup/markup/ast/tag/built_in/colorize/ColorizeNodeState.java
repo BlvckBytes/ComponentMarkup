@@ -18,12 +18,12 @@ import java.util.*;
 
 public abstract class ColorizeNodeState {
 
-  private static class Candidate<B> {
-    final ExtendedBuilder<B> extendedBuilder;
+  private static class Candidate<B, C> {
+    final ExtendedBuilder<B, C> extendedBuilder;
     final MarkupNode node;
     final @Nullable String text;
 
-    Candidate(ExtendedBuilder<B>extendedBuilder, MarkupNode node) {
+    Candidate(ExtendedBuilder<B, C> extendedBuilder, MarkupNode node) {
       this.extendedBuilder = extendedBuilder;
       this.node = node;
       this.text = node instanceof TextNode ? ((TextNode) node).textValue : null;
@@ -35,7 +35,7 @@ public abstract class ColorizeNodeState {
   public final EnumSet<ColorizeFlag> flags;
   public final int initialSubtreeDepth;
 
-  private final Stack<List<Candidate<?>>> candidateStack;
+  private final Stack<List<Candidate<?, ?>>> candidateStack;
 
   public ColorizeNodeState(InputView tagName, int initialSubtreeDepth, double phase, EnumSet<ColorizeFlag> flags) {
     this.tagName = tagName;
@@ -85,17 +85,17 @@ public abstract class ColorizeNodeState {
     // is that they make public APIs friendlier and catch missing calls to finalize within the
     // interpreter and output-builder; noting more, nothing less. They will never be perfect.
     //noinspection unchecked
-    List<Candidate<B>> candidates = (List<Candidate<B>>) (List<?>) candidateStack.pop();
+    List<Candidate<B, C>> candidates = (List<Candidate<B, C>>) (List<?>) candidateStack.pop();
 
     if (candidates == null)
       return candidateStack.empty();
 
     ComponentConstructor<B, C> componentConstructor = interpreter.getComponentConstructor();
 
-    List<Candidate<B>> targets = new ArrayList<>(candidates.size());
+    List<Candidate<B, C>> targets = new ArrayList<>(candidates.size());
     int requiredColorCount = 0;
 
-    for (Candidate<B> candidate : candidates) {
+    for (Candidate<B, C> candidate : candidates) {
       if (!flags.contains(ColorizeFlag.OVERRIDE_COLORS) && candidate.extendedBuilder.explicitColor != PackedColor.NULL_SENTINEL)
         continue;
 
@@ -125,23 +125,23 @@ public abstract class ColorizeNodeState {
 
     int nextColorIndex = 0;
 
-    for (Candidate<B> target : targets) {
+    for (Candidate<B, C> target : targets) {
       if (target.text == null) {
         long color = getPackedColor(nextColorIndex++, requiredColorCount);
-        componentConstructor.setColor(target.extendedBuilder.builder, color, true);
+        target.extendedBuilder.getOrInstantiateStyle().setPackedColor(color, false);
         continue;
       }
 
       if (target.text.length() == 1) {
         if (!flags.contains(ColorizeFlag.SKIP_WHITESPACE) || !Character.isWhitespace(target.text.charAt(0))) {
           long color = getPackedColor(nextColorIndex++, requiredColorCount);
-          componentConstructor.setColor(target.extendedBuilder.builder, color, true);
+          target.extendedBuilder.getOrInstantiateStyle().setPackedColor(color, false);
         }
 
         continue;
       }
 
-      List<C> children = new ArrayList<>();
+      List<B> children = new ArrayList<>();
 
       for (int charIndex = 0; charIndex < target.text.length(); ++charIndex) {
         boolean isFirst = charIndex == 0;
@@ -182,10 +182,8 @@ public abstract class ColorizeNodeState {
         // Use the target-component to put the first char- and color into; only then make use
         // of its children as to inject the remaining parts, each with once again their own color.
         if (isFirst) {
-          if (!componentConstructor.setText(target.extendedBuilder.builder, text.toString()))
-            interpreter.getLogger().logErrorScreen(target.node.positionProvider, "Could not set the text of a component-builder during colorization");
-
-          componentConstructor.setColor(target.extendedBuilder.builder, color, true);
+          target.extendedBuilder.setText(text.toString());
+          target.extendedBuilder.getOrInstantiateStyle().setPackedColor(color, false);
           continue;
         }
 
@@ -193,17 +191,17 @@ public abstract class ColorizeNodeState {
 
         componentConstructor.setColor(charComponent, color, true);
 
-        children.add(componentConstructor.finalizeComponent(charComponent));
+        children.add(charComponent);
       }
 
       if (!children.isEmpty())
-        componentConstructor.addChildren(target.extendedBuilder.builder, children);
+        target.extendedBuilder.addChildren(children);
     }
 
     return candidateStack.empty();
   }
 
-  public void addCandidate(ExtendedBuilder<?> extendedBuilder, MarkupNode node) {
+  public void addCandidate(ExtendedBuilder<?, ?> extendedBuilder, MarkupNode node) {
     if (flags.contains(ColorizeFlag.MERGE_INNER)) {
       candidateStack.get(0).add(new Candidate<>(extendedBuilder, node));
       return;

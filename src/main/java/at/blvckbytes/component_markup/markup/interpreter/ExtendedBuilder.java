@@ -7,33 +7,64 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ExtendedBuilder<B> {
+public class ExtendedBuilder<B, C> {
 
-  public final B builder;
+  private @Nullable B builder;
+  private @Nullable C wrappedComponent;
 
-  private @Nullable List<ExtendedBuilder<B>> children;
+  private @Nullable String textOverride;
+
+  private @Nullable List<ExtendedBuilder<B, C>> children;
   private @Nullable List<Consumer<B>> nonTerminalApplyingClosures;
 
   public @Nullable ComputedStyle style;
 
   public long explicitColor = PackedColor.NULL_SENTINEL;
 
-  public ExtendedBuilder(B builder, @Nullable ComputedStyle style) {
+  // TODO: These constructors are super confusing when not knowing their exact backgrounds...
+  //       Maybe replace them with properly named static methods?
+
+  public ExtendedBuilder(@NotNull B builder, @Nullable ComputedStyle style) {
     this.builder = builder;
     this.style = style;
   }
 
-  public ExtendedBuilder(B builder, @Nullable ComputedStyle style, @Nullable List<ExtendedBuilder<B>> children) {
+  public ExtendedBuilder(@NotNull B builder, @Nullable ComputedStyle style, @Nullable List<ExtendedBuilder<B, C>> children) {
     this.builder = builder;
     this.style = style;
     this.children = children;
   }
 
-  public ExtendedBuilder(B builder) {
+  public ExtendedBuilder(@NotNull B builder) {
     this.builder = builder;
+  }
+
+  public ExtendedBuilder(@Nullable ComputedStyle style, @NotNull C wrappedComponent) {
+    this.style = style;
+    this.wrappedComponent = wrappedComponent;
+  }
+
+  public void addChildren(List<B> addedChildren) {
+    if (children == null)
+      children = new ArrayList<>();
+
+    for (B child : addedChildren)
+      children.add(new ExtendedBuilder<>(child, null));
+  }
+
+  public @NotNull ComputedStyle getOrInstantiateStyle() {
+    if (this.style == null)
+      this.style = new ComputedStyle();
+
+    return style;
+  }
+
+  public void setText(String text) {
+    textOverride = text;
   }
 
   public void addNonTerminalApplyingClosure(@NotNull Consumer<B> nonTerminalApplyingClosure) {
@@ -43,11 +74,31 @@ public class ExtendedBuilder<B> {
     this.nonTerminalApplyingClosures.add(nonTerminalApplyingClosure);
   }
 
-  public <C> C toFinalizedComponent(ComponentConstructor<B, C> componentConstructor, InterpreterLogger logger) {
+  public C toFinalizedComponent(ComponentConstructor<B, C> componentConstructor, InterpreterLogger logger) {
+    if (wrappedComponent != null) {
+      if (builder != null)
+        throw new IllegalStateException("This case should be unreachable if constructor-parameter nullability was adhered to");
+
+      // We were wrapping the component when encountering it during interpretation, as there may have been
+      // a need to modify it - since it is immutable, we would have to wrap it in a builder to do so.
+      // Seeing how no changes have been made, we can safely "unwrap" at this point, simplifying the output.
+      if (style == null && children == null && nonTerminalApplyingClosures == null)
+        return wrappedComponent;
+
+      B builder = componentConstructor.createTextComponent("");
+      componentConstructor.addChildren(builder, Collections.singletonList(wrappedComponent));
+    }
+
+    else if (builder == null)
+      builder = componentConstructor.createTextComponent("");
+
+    if (textOverride != null)
+      componentConstructor.setText(builder, textOverride);
+
     if (children != null && !children.isEmpty()) {
       List<C> childComponents = new ArrayList<>();
 
-      for (ExtendedBuilder<B> childBuilder : children)
+      for (ExtendedBuilder<B, C> childBuilder : children)
         childComponents.add(childBuilder.toFinalizedComponent(componentConstructor, logger));
 
       componentConstructor.addChildren(builder, childComponents);

@@ -1968,34 +1968,43 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
-  public void shouldMap() {
+  public void shouldMapWithAnExpressionAndAMarkupMapper() {
     Map<String, String> myMap = new HashMap<>();
 
     myMap.put("k1", "v1");
     myMap.put("k2", "v2");
     myMap.put("k3", "v3");
 
-    TextWithSubViews[] inputs = {
+    makeCase(
       new TextWithSubViews(
         "<map-my_results [my_map] mapper=×`{item} {my_map[item]}×`>",
         "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
       ),
-      // TODO: Enable case once needless wrappers have been fixed, or just create a separate case with the wrappers expected.
-//      new TextWithSubViews(
-//        "<map-my_results [my_map] mapper={{item} {my_map[item]}}>",
-//        "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
-//      ),
-    };
+      new InterpretationEnvironment()
+        .withVariable("my_map", myMap),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "k1 v1, k2 v2, k3 v3")
+    );
 
-    for (TextWithSubViews input : inputs) {
-      makeCase(
-        input,
-        new InterpretationEnvironment()
-          .withVariable("my_map", myMap),
-          SlotType.CHAT,
-          new JsonObjectBuilder()
-            .string("text", "k1 v1, k2 v2, k3 v3")
-      );
-    }
+    makeCase(
+      new TextWithSubViews(
+        "<map-my_results [my_map] mapper={{item} {my_map[item]}}>",
+        "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_map", myMap),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "")
+        .array("extra", extra -> (
+          extra
+            .object(item -> item.string("text", "k1 v1"))
+            .object(item -> item.string("text", ", "))
+            .object(item -> item.string("text", "k2 v2"))
+            .object(item -> item.string("text", ", "))
+            .object(item -> item.string("text", "k3 v3"))
+        ))
+    );
   }
 }
