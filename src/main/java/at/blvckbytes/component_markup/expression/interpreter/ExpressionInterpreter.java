@@ -37,6 +37,9 @@ public class ExpressionInterpreter {
     if (expression instanceof TerminalNode)
       return ((TerminalNode) expression).getValue(environment, logger);
 
+    if (expression instanceof RawNode)
+      return ((RawNode) expression).value;
+
     ValueInterpreter valueInterpreter = environment.getValueInterpreter();
 
     if (expression instanceof TransformerNode) {

@@ -11,8 +11,8 @@ import at.blvckbytes.component_markup.util.InputView;
 
 public class ImmediateExpression {
 
-  public static TerminalNode ofNull() {
-    return new TerminalNode(new NullToken(InputView.EMPTY));
+  public static TerminalNode ofNull(InputView raw) {
+    return new TerminalNode(new NullToken(raw));
   }
 
   public static TerminalNode ofDouble(InputView raw, double value) {

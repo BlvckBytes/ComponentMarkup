@@ -5,14 +5,11 @@
 
 package at.blvckbytes.component_markup.markup.ast.tag;
 
-import at.blvckbytes.component_markup.expression.ImmediateExpression;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
-import at.blvckbytes.component_markup.expression.ast.TerminalNode;
+import at.blvckbytes.component_markup.expression.ast.RawNode;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.interpreter.Interpreter;
 import at.blvckbytes.component_markup.markup.parser.AttributeFlag;
-import at.blvckbytes.component_markup.util.InputView;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,30 +49,14 @@ public class ExpressionList {
         Collection<?> collection = (Collection<?>) evaluatedValue;
 
         for (Object item : collection)
-          result.add(toTerminal(item));
+          result.add(new RawNode(item));
 
         continue;
       }
 
-      result.add(toTerminal(evaluatedValue));
+      result.add(new RawNode(evaluatedValue));
     }
 
     return result;
-  }
-
-  private TerminalNode toTerminal(@Nullable Object value) {
-    if (value == null)
-      return ImmediateExpression.ofNull();
-
-    if (value instanceof Double || value instanceof Float)
-      return ImmediateExpression.ofDouble(InputView.EMPTY, ((Number) value).doubleValue());
-
-    if (value instanceof Number)
-      return ImmediateExpression.ofLong(InputView.EMPTY, ((Number) value).longValue());
-
-    if (value instanceof Boolean)
-      return ImmediateExpression.ofBoolean(InputView.EMPTY, (boolean) value);
-
-    return ImmediateExpression.ofString(InputView.EMPTY, String.valueOf(value));
   }
 }

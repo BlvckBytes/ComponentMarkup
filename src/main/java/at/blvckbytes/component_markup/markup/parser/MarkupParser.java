@@ -262,7 +262,7 @@ public class MarkupParser implements CmlEventConsumer {
       return;
     }
 
-    attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofNull());
+    attribute = new ExpressionAttribute(attributeName, ImmediateExpression.ofNull(raw));
 
     if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
       handleIntrinsicAttribute(attribute);
