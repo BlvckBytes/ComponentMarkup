@@ -470,7 +470,7 @@ public class ExpressionInterpreter {
 
     if (source instanceof List<?>) {
       if (isKeyIdentifierName) {
-        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
+        logger.logErrorScreen(operatorToken.raw, "Cannot access named field \"" + key + "\" of a list-value");
         return null;
       }
 
@@ -493,7 +493,7 @@ public class ExpressionInterpreter {
 
     if (source.getClass().isArray()) {
       if (isKeyIdentifierName) {
-        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
+        logger.logErrorScreen(operatorToken.raw, "Cannot access named field \"" + key + "\" of an array-value");
         return null;
       }
 
@@ -508,7 +508,7 @@ public class ExpressionInterpreter {
 
     if (source instanceof String) {
       if (isKeyIdentifierName) {
-        logger.logErrorScreen(operatorToken.raw, "Could not locate field \"" + key + "\"");
+        logger.logErrorScreen(operatorToken.raw, "Cannot access named field \"" + key + "\" of a string-value");
         return null;
       }
 
