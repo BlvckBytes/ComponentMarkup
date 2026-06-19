@@ -51,8 +51,10 @@ public class MapTag extends TagDefinition {
 
     InputView mappingName = tagName.buildSubViewRelative(firstDashIndex + 1);
 
-    if (tokenEmitter != null)
+    if (tokenEmitter != null) {
+      tokenEmitter.emitToken(TokenType.MARKUP__PUNCTUATION__BINDING_SEPARATOR, tagName.buildSubViewRelative(3, 4));
       tokenEmitter.emitToken(TokenType.MARKUP__IDENTIFIER__BINDING, mappingName);
+    }
 
     if (MarkupParser.isInvalidIdentifier(mappingName, true))
       throw new MarkupParseException(mappingName, MarkupParseError.MALFORMED_IDENTIFIER, mappingName.buildString());
