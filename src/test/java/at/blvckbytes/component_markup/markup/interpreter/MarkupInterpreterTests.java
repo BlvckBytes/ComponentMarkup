@@ -2009,6 +2009,21 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
   }
 
   @Test
+  public void shouldIntroduceLoopVariableToMapTagMapper() {
+    makeCase(
+      new TextWithSubViews(
+        "<map-my_results [my_items] mapper=×`({item}, {loop.index}, {loop.length}, {loop.is_first}, {loop.is_last}, {loop.is_even}, {loop.is_odd})×`>",
+        "  <container *for-result='my_results' *for-separator={,<space/>} [result] />"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_items", Arrays.asList("a", "b", "c")),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "(a, 0, 3, true, false, true, false), (b, 1, 3, false, false, false, true), (c, 2, 3, false, true, true, false)")
+    );
+  }
+
+  @Test
   public void shouldBeAbleToAttachStyleToABuiltComponentViaAWrapper() {
     makeCase(
       new TextWithSubViews(

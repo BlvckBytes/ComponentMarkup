@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.markup.ast.tag.*;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.Attribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.ExpressionAttribute;
 import at.blvckbytes.component_markup.markup.ast.tag.attribute.MarkupAttribute;
+import at.blvckbytes.component_markup.markup.interpreter.LoopVariable;
 import at.blvckbytes.component_markup.markup.interpreter.MarkupInterpreter;
 import at.blvckbytes.component_markup.markup.interpreter.TemporaryMemberEnvironment;
 import at.blvckbytes.component_markup.markup.parser.MarkupParseError;
@@ -75,8 +76,12 @@ public class MapTag extends TagDefinition {
 
       environment.beginScope();
 
-      for (Object item : items) {
-        environment.setScopeVariable("item", item);
+      LoopVariable loopVariable = new LoopVariable(items.size());
+      environment.setScopeVariable("loop", loopVariable);
+
+      for (int index = 0; index < items.size(); ++index) {
+        loopVariable.setIndex(index);
+        environment.setScopeVariable("item", items.get(index));
 
         if (mapper instanceof ExpressionAttribute) {
           ExpressionNode expressionNode = ((ExpressionAttribute) mapper).value;
