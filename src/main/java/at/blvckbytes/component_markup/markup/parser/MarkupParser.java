@@ -297,11 +297,12 @@ public class MarkupParser implements CmlEventConsumer {
     subtreeParser = null;
 
     AttributeName attributeName = AttributeName.parse(name, tokenOutput);
+    MarkupAttribute attribute = new MarkupAttribute(attributeName, subtree);
 
-    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL))
-      throw new MarkupParseException(name, MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE);
-
-    Attribute attribute = new MarkupAttribute(attributeName, subtree);
+    if (attributeName.flags.contains(AttributeFlag.INTRINSIC_LITERAL)) {
+      handleIntrinsicAttribute(attribute.asPlainTextExpressionAttribute());
+      return;
+    }
 
     if (attributeName.flags.contains(AttributeFlag.INTRINSIC_EXPRESSION)) {
       handleIntrinsicAttribute(attribute);

@@ -2029,4 +2029,21 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         ))
     );
   }
+
+  @Test
+  public void shouldAllowToBuildStringsWithMarkup() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  +let-my_string={<container *for-item='my_list' *for-separator={,<space/>} [item] />}",
+        ">",
+        "  {my_string}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_list", Arrays.asList("a", "b", "c", "d")),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "a, b, c, d")
+    );
+  }
 }

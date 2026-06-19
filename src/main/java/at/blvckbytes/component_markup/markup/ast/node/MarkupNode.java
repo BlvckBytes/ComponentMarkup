@@ -5,15 +5,20 @@
 
 package at.blvckbytes.component_markup.markup.ast.node;
 
+import at.blvckbytes.component_markup.constructor.PlainTextComponentConstructor;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.ast.InfixOperationNode;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.expression.tokenizer.InfixOperator;
 import at.blvckbytes.component_markup.expression.tokenizer.token.InfixOperatorToken;
 import at.blvckbytes.component_markup.markup.ast.node.style.NodeStyle;
 import at.blvckbytes.component_markup.markup.ast.tag.ExpressionLetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.LetBinding;
 import at.blvckbytes.component_markup.markup.ast.tag.MarkupLetBinding;
+import at.blvckbytes.component_markup.markup.interpreter.MarkupInterpreter;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -124,6 +129,14 @@ public abstract class MarkupNode {
       inheritLetBindings(other.letBindings);
 
     return true;
+  }
+
+  public String asPlainText(InterpretationEnvironment environment, InterpreterLogger logger) {
+    return MarkupInterpreter.interpret(
+      this, SlotType.SINGLE_LINE_CHAT, environment,
+      PlainTextComponentConstructor.INSTANCE,
+      logger
+    ).get(0);
   }
 
   protected void inheritLetBindings(LinkedHashSet<LetBinding> letBindings) {

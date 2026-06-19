@@ -17,7 +17,6 @@ public enum MarkupParseError {
   UNNAMED_LET_BINDING(args -> "Let-bindings require a variable-name: let-<variable_name>"),
   UNNAMED_FOR_LOOP(args -> "For-loops with a dash require an iteration-variable name: *for-<iteration_variable_name>"),
   EMPTY_EXPRESSION(args -> "Expressions cannot be empty"),
-  LITERAL_INTRINSIC_MARKUP_ATTRIBUTE(args -> "Intrinsic attributes with markup-values { ... } always use the * prefix"),
   LITERAL_INTRINSIC_TEMPLATE_LITERAL_ATTRIBUTE(args -> "Intrinsic attributes with template-literal `...` always use the * prefix"),
   AUXILIARY_FOR_INTRINSIC_ATTRIBUTE(args -> "The intrinsic attribute " + args.get(0) + " may only be used after a *for loop"),
   BINDING_IN_USE(args -> "The name " + args.get(0) + " is already used in another binding"),

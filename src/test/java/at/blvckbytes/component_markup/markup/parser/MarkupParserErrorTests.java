@@ -777,14 +777,6 @@ public class MarkupParserErrorTests {
   }
 
   @Test
-  public void shouldThrowOnLiteralIntrinsicMarkupAttributes() {
-    makeErrorCase(
-      MarkupParseError.LITERAL_INTRINSIC_MARKUP_ATTRIBUTE,
-      "<red *for=\"1..5\" `+for-separator´={ test }>"
-    );
-  }
-
-  @Test
   public void shouldThrowOnLiteralIntrinsicTemplateLiteralAttributes() {
     makeErrorCase(
       MarkupParseError.LITERAL_INTRINSIC_TEMPLATE_LITERAL_ATTRIBUTE,
