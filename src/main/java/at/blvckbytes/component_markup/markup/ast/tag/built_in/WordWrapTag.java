@@ -88,12 +88,14 @@ public class WordWrapTag extends TagDefinition {
               currentWidth += interpretAndGetLength(interpreter, subsequentPrefix);
           }
 
-          // By prepending the space to the current token, we allow the output to buffer
-          // texts of equal style, which will yield a more compact component-tree; This
-          // shouldn't have any undesirable consequences - if so, we'll fix it as soon
-          // as they become a noticeable issue.
+          // The space is intentionally not prepended to the token, seeing how a token in this
+          // context by definition does not contain spaces and doing so would be confusing, as
+          // well as undesirable, as the renderer may use a regex of pattern ^...$.
           if (prependSpace)
-            token = " " + token;
+            interpreter.interpret(new TextNode(tagName, " "));
+
+          if (token.isEmpty())
+            continue;
 
           if (tokenRenderer == null) {
             interpreter.interpret(new TextNode(tagName, token));

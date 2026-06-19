@@ -3,7 +3,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Pink Terracotta",
+        "text": "Pink",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Terracotta",
         "color": "gold"
       },
       {
@@ -11,7 +18,14 @@
         "color": "gray"
       },
       {
-        "text": "Red Sand",
+        "text": "Red",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Sand",
         "color": "gold"
       },
       {
@@ -36,7 +50,14 @@
         "color": "gray"
       },
       {
-        "text": "Golden Leggings",
+        "text": "Golden",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Leggings",
         "color": "gold"
       },
       {
@@ -53,7 +74,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Emerald Ore",
+        "text": "Emerald",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -61,7 +89,14 @@
         "color": "gray"
       },
       {
-        "text": "Raw Salmon",
+        "text": "Raw",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Salmon",
         "color": "gold"
       },
       {
@@ -78,7 +113,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Nautilus Armor",
+        "text": "Nautilus",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Armor",
         "color": "gold"
       },
       {
@@ -86,7 +128,14 @@
         "color": "gray"
       },
       {
-        "text": "Raw Cod",
+        "text": "Raw",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Cod",
         "color": "gold"
       },
       {
@@ -94,7 +143,14 @@
         "color": "gray"
       },
       {
-        "text": "Wet Sponge",
+        "text": "Wet",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Sponge",
         "color": "gold"
       },
       {
@@ -107,7 +163,21 @@
     "text": "",
     "extra": [
       {
-        "text": "Deepslate Coal Ore",
+        "text": "Deepslate",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Coal",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -115,7 +185,21 @@
         "color": "gray"
       },
       {
-        "text": "Nether Gold Ore",
+        "text": "Nether",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Gold",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -128,7 +212,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Golden Axe",
+        "text": "Golden",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Axe",
         "color": "gold"
       },
       {
@@ -136,7 +227,14 @@
         "color": "gray"
       },
       {
-        "text": "Golden Spear",
+        "text": "Golden",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Spear",
         "color": "gold"
       },
       {
@@ -153,7 +251,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Gray Terracotta",
+        "text": "Gray",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Terracotta",
         "color": "gold"
       },
       {
@@ -186,7 +291,21 @@
         "color": "gray"
       },
       {
-        "text": "Iron Horse Armor",
+        "text": "Iron",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Horse",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Armor",
         "color": "gold"
       },
       {
@@ -211,7 +330,14 @@
         "color": "gray"
       },
       {
-        "text": "Golden Boots",
+        "text": "Golden",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Boots",
         "color": "gold"
       },
       {
@@ -228,7 +354,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Gold Ore",
+        "text": "Gold",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -236,7 +369,21 @@
         "color": "gray"
       },
       {
-        "text": "Deepslate Iron Ore",
+        "text": "Deepslate",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Iron",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -261,7 +408,14 @@
         "color": "gray"
       },
       {
-        "text": "Purple Terracotta",
+        "text": "Purple",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Terracotta",
         "color": "gold"
       },
       {
@@ -286,7 +440,14 @@
         "color": "gray"
       },
       {
-        "text": "Copper Ore",
+        "text": "Copper",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Ore",
         "color": "gold"
       },
       {
@@ -294,7 +455,14 @@
         "color": "gray"
       },
       {
-        "text": "Sea Pickle",
+        "text": "Sea",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Pickle",
         "color": "gold"
       },
       {
@@ -307,7 +475,14 @@
     "text": "",
     "extra": [
       {
-        "text": "Golden Sword",
+        "text": "Golden",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Sword",
         "color": "gold"
       },
       {
@@ -315,7 +490,14 @@
         "color": "gray"
       },
       {
-        "text": "Copper Sword",
+        "text": "Copper",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Sword",
         "color": "gold"
       },
       {
@@ -340,7 +522,14 @@
         "color": "gray"
       },
       {
-        "text": "Iron Sword",
+        "text": "Iron",
+        "color": "gold"
+      },
+      {
+        "text": " "
+      },
+      {
+        "text": "Sword",
         "color": "gold"
       },
       {
