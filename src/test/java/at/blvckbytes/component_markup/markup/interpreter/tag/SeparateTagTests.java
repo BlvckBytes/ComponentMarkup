@@ -238,4 +238,38 @@ public class SeparateTagTests extends InterpreterTestsBase {
         ))
     );
   }
+
+  @Test
+  public void shouldRenderEmptyAttributeOnNoContentIfProvided() {
+    makeCase(
+      new TextWithSubViews(
+        "<separate",
+        "  empty={No content rendered}",
+        "  separator={,}",
+        "  value={<container *if='false'>A}",
+        "  value={<container *if='false'>B}",
+        "  value={<container *if='false'>C}",
+        "/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE,
+      new JsonObjectBuilder()
+        .string("text", "No content rendered")
+    );
+
+    makeCase(
+      new TextWithSubViews(
+        "<separate",
+        "  separator={,}",
+        "  value={<container *if='false'>A}",
+        "  value={<container *if='false'>B}",
+        "  value={<container *if='false'>C}",
+        "/>"
+      ),
+      new InterpretationEnvironment(),
+      SlotType.ITEM_LORE,
+      new JsonObjectBuilder()
+        .string("text", "")
+    );
+  }
 }

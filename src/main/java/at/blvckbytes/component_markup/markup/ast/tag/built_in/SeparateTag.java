@@ -39,25 +39,29 @@ public class SeparateTag extends TagDefinition {
   ) {
     MarkupList valueList = attributes.getMandatoryMarkupList("value");
     MarkupNode separator = attributes.getMandatoryMarkupNode("separator");
+    MarkupNode empty = attributes.getOptionalMarkupNode("empty");
 
     return new FunctionDrivenNode(tagName, letBindings, interpreter -> {
-      AtomicBoolean doesNextContentRequirePrecedingSeparator = new AtomicBoolean(false);
+      AtomicBoolean didHaveContent = new AtomicBoolean(false);
 
       for (MarkupNode markupNode : valueList.get(interpreter)) {
         interpreter.interpretIsolated(markupNode, outputBuilder -> {
           if (!outputBuilder.hasContent())
             return;
 
-          if (doesNextContentRequirePrecedingSeparator.get()) {
-            doesNextContentRequirePrecedingSeparator.set(false);
+          if (didHaveContent.get()) {
             interpreter.interpret(separator);
+            return;
           }
 
-          doesNextContentRequirePrecedingSeparator.set(true);
+          didHaveContent.set(true);
         });
       }
 
-      return null;
+      if (didHaveContent.get())
+        return null;
+
+      return empty;
     });
   }
 }
