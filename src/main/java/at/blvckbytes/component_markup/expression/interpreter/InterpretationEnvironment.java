@@ -41,6 +41,10 @@ public class InterpretationEnvironment {
     this.context = context;
   }
 
+  public boolean isEmpty() {
+    return variables.isEmpty();
+  }
+
   public @Nullable Object getVariableValue(String name) {
     return variables.get(name);
   }

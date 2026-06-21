@@ -51,6 +51,14 @@ public class TemporaryMemberEnvironment extends InterpretationEnvironment {
   }
 
   @Override
+  public boolean isEmpty() {
+    if (!scopeStack.isEmpty())
+      return false;
+
+    return super.isEmpty();
+  }
+
+  @Override
   public void forEachKnownName(Consumer<String> handler) {
     Set<String> encounteredNames = new HashSet<>();
 
