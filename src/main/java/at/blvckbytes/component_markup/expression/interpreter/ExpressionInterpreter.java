@@ -547,6 +547,25 @@ public class ExpressionInterpreter {
       return null;
     }
 
+    if (source instanceof InterpretationEnvironment) {
+      InterpretationEnvironment sourceEnvironment = (InterpretationEnvironment) source;
+
+      if (sourceEnvironment.doesVariableExist(stringKey))
+        return sourceEnvironment.getVariableValue(stringKey);
+
+      StringJoiner knownNamesJoiner = new StringJoiner(", ");
+
+      sourceEnvironment.forEachKnownName(knownNamesJoiner::add);
+
+      String choicesString = "";
+
+      if (knownNamesJoiner.length() > 0)
+        choicesString = "; choose one of: " + knownNamesJoiner;
+
+      logger.logErrorScreen(operatorToken.raw, "Could not locate variable \"" + stringKey + "\"" + choicesString);
+      return null;
+    }
+
     GlobalLogger.log(Level.WARNING, "Don't know how to access field " + stringKey + " of " + source.getClass());
     return null;
   }

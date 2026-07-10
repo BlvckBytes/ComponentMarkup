@@ -491,6 +491,22 @@ public class ExpressionInterpreterTests {
     makeCase("(1..15) - (5..10)", null, Arrays.asList(1, 2, 3, 4, 11, 12, 13, 14, 15));
   }
 
+  @Test
+  public void shouldAccessInterpretationEnvironmentMembers() {
+    makeCase(
+      "`{my_env.a} {my_env.b} {my_env.c}`",
+      new InterpretationEnvironment()
+        .withVariable(
+          "my_env",
+          new InterpretationEnvironment()
+            .withVariable("a", 1)
+            .withVariable("b", 2)
+            .withVariable("c", 3)
+        ),
+      "1 2 3"
+    );
+  }
+
   private void makeCase(String expression, Object expectedResult) {
     makeCase(expression, new InterpretationEnvironment(), expectedResult);
   }
