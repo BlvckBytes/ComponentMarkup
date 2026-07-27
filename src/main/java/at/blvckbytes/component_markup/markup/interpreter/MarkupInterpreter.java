@@ -434,7 +434,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     for (int index = (reversed ? size - 1 : 0); (reversed ? index >= 0 : index < size); index += (reversed ? -1 : 1)) {
       Object item = items.get(index);
 
-      loopVariable.setIndex(index);
+      loopVariable.setIndex(index, items);
 
       if (node.iterationVariable != null)
         environment.setScopeVariable(node.iterationVariable, item);

@@ -2061,4 +2061,22 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "a, b, c, d")
     );
   }
+
+  @Test
+  public void shouldSetRightPriorAndNextLoopVariables() {
+    makeCase(
+      new TextWithSubViews(
+        "<container",
+        "  *for-current='my_list'",
+        "  *for-separator={<space/>}",
+        ">",
+        "  {current}-{loop.prior ?? '?'}-{loop.next ?? '?'}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_list", Arrays.asList("a", "b", "c")),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "a-?-b b-a-c c-b-?")
+    );
+  }
 }

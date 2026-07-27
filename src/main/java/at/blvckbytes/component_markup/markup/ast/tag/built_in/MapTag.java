@@ -80,7 +80,7 @@ public class MapTag extends TagDefinition {
       environment.setScopeVariable("loop", loopVariable);
 
       for (int index = 0; index < items.size(); ++index) {
-        loopVariable.setIndex(index);
+        loopVariable.setIndex(index, items);
         environment.setScopeVariable("item", items.get(index));
 
         if (mapper instanceof ExpressionAttribute) {
