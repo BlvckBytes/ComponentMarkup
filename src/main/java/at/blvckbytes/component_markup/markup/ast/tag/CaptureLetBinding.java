@@ -10,13 +10,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class CaptureLetBinding extends LetBinding {
 
-  public final String capturedName;
+  public final String bindingName;
   public final @Nullable Object capturedValue;
 
-  public CaptureLetBinding(@Nullable Object capturedValue, String capturedName, InputView captureName) {
-    super(captureName);
+  public CaptureLetBinding(InputView capturedName, @Nullable Object capturedValue) {
+    super(capturedName);
 
-    this.capturedName = capturedName;
+    this.bindingName = capturedName.buildString();
     this.capturedValue = capturedValue;
   }
 }

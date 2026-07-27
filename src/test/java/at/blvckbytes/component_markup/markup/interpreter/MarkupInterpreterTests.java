@@ -2079,4 +2079,23 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
         .string("text", "a-?-b b-a-c c-b-?")
     );
   }
+
+  @Test
+  public void shouldProperlyCaptureAllVariablesOfAnEnvironment() {
+    makeCase(
+      new TextWithSubViews(
+        "{my_capture}"
+      ),
+      new InterpretationEnvironment()
+        .withVariable("my_capture", CaptureNode.createVariableCapture(
+          MarkupParser.parse(InputView.of("{a} and {b}"), BuiltInTagRegistry.INSTANCE),
+          new InterpretationEnvironment()
+            .withVariable("a", 5)
+            .withVariable("b", 10)
+        )),
+      SlotType.CHAT,
+      new JsonObjectBuilder()
+        .string("text", "5 and 10")
+    );
+  }
 }

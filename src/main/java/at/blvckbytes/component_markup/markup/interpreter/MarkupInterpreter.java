@@ -309,21 +309,6 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     interpret(node.fallback);
   }
 
-  private MarkupNode createVariableCapture(MarkupNode node, LetBinding binding) {
-    LinkedHashSet<LetBinding> capturedBindings = new LinkedHashSet<>();
-
-    environment.forEachKnownName(name -> {
-      Object variableValue = environment.getVariableValue(name);
-
-      if (variableValue instanceof InternalCopyable)
-        variableValue = ((InternalCopyable) variableValue).copy();
-
-      capturedBindings.add(new CaptureLetBinding(variableValue, name, binding.name));
-    });
-
-    return new CaptureNode(node, capturedBindings);
-  }
-
   private void introduceLetBindings(@Nullable Collection<LetBinding> letBindings) {
     if (letBindings == null)
       return;
@@ -341,7 +326,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
           if (!(value instanceof MarkupNode))
             value = new TextNode(letBinding.name, String.valueOf(value));
 
-          value = createVariableCapture((MarkupNode) value, letBinding);
+          value = CaptureNode.createVariableCapture((MarkupNode) value, environment);
         }
       }
       else if (letBinding instanceof MarkupLetBinding) {
@@ -350,12 +335,12 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         name = markupBinding.bindingName;
 
         if (markupBinding.capture)
-          value = createVariableCapture((MarkupNode) value, letBinding);
+          value = CaptureNode.createVariableCapture((MarkupNode) value, environment);
       }
       else if (letBinding instanceof CaptureLetBinding) {
         CaptureLetBinding captureBinding = (CaptureLetBinding) letBinding;
         value = captureBinding.capturedValue;
-        name = captureBinding.capturedName;
+        name = captureBinding.bindingName;
       } else {
         GlobalLogger.log(Level.WARNING, "Encountered unknown let-binding type: " + (letBinding == null ? null : letBinding.getClass()));
         continue;
