@@ -562,14 +562,19 @@ public class ExpressionInterpreter {
       if (sourceEnvironment.doesVariableExist(stringKey))
         return sourceEnvironment.getVariableValue(stringKey);
 
-      StringJoiner knownNamesJoiner = new StringJoiner(", ");
+      StringBuilder knownNamesBuilder = new StringBuilder();
 
-      sourceEnvironment.forEachKnownName(knownNamesJoiner::add);
+      sourceEnvironment.forEachKnownName(name -> {
+        if (knownNamesBuilder.length() > 0)
+          knownNamesBuilder.append(", ");
+
+        knownNamesBuilder.append(name);
+      });
 
       String choicesString = "";
 
-      if (knownNamesJoiner.length() > 0)
-        choicesString = "; choose one of: " + knownNamesJoiner;
+      if (knownNamesBuilder.length() > 0)
+        choicesString = "; choose one of: " + knownNamesBuilder;
 
       logger.logErrorScreen(operatorToken.raw, "Could not locate variable \"" + stringKey + "\"" + choicesString);
       return null;
