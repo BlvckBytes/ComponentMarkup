@@ -34,6 +34,7 @@ public enum PrefixOperator implements EnumToken {
   MIN        ("min",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   AVG        ("avg",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
   SUM        ("sum",     OperatorFlag.NAMED, OperatorFlag.PARENS, OperatorFlag.VARIADIC),
+  ABS        ("abs",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   LEN        ("len",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   HAS        ("has",     OperatorFlag.NAMED, OperatorFlag.PARENS),
   ENV        ("env",     OperatorFlag.NAMED, OperatorFlag.PARENS),

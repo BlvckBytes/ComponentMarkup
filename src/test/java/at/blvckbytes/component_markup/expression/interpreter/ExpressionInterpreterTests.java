@@ -405,6 +405,14 @@ public class ExpressionInterpreterTests {
   }
 
   @Test
+  public void shouldCalculateAbsoluteValue() {
+    makeCase("abs(5)", 5);
+    makeCase("abs(5.5)", 5.5);
+    makeCase("abs(-2)", 2);
+    makeCase("abs(-2.2)", 2.2);
+  }
+
+  @Test
   public void shouldCalculateLength() {
     makeCase("len(\"\")", 0);
     makeCase("len(\"Hello, world!\")", 13);

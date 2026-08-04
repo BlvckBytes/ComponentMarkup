@@ -148,6 +148,15 @@ public class ExpressionInterpreter {
           return result;
         }
 
+        case ABS: {
+          Number numericValue = valueInterpreter.asLongOrDouble(operandValue);
+
+          if (numericValue instanceof Long)
+            return Math.abs(numericValue.longValue());
+
+          return Math.abs(numericValue.doubleValue());
+        }
+
         case LEN: {
           if (operandValue instanceof Map<?, ?>)
             return ((Map<?, ?>) operandValue).size();
