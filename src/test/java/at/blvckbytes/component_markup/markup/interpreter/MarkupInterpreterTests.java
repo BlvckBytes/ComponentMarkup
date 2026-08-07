@@ -14,10 +14,7 @@ import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.util.InputView;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MarkupInterpreterTests extends InterpreterTestsBase {
 
@@ -2096,6 +2093,27 @@ public class MarkupInterpreterTests extends InterpreterTestsBase {
       SlotType.CHAT,
       new JsonObjectBuilder()
         .string("text", "5 and 10")
+    );
+  }
+
+  @Test
+  public void shouldCallTheRawValueTransformer() {
+    makePlainTextCase(
+      new TextWithSubViews("Hello, {name}!"),
+      new InterpretationEnvironment()
+        .withVariable(
+          "name",
+          interpretMarkup(
+            "<&4><&l>BlvckBytes",
+            new InterpretationEnvironment(),
+            SlotType.SINGLE_LINE_CHAT
+          )
+        ),
+      SlotType.CHAT,
+      this::transformJsonComponentToText,
+      Collections.singletonList(
+        "Hello, BlvckBytes!"
+      )
     );
   }
 }

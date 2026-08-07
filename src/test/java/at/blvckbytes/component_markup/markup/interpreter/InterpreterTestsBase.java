@@ -5,6 +5,7 @@
 
 package at.blvckbytes.component_markup.markup.interpreter;
 
+import at.blvckbytes.component_markup.constructor.PlainTextComponentConstructor;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
@@ -13,7 +14,6 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.markup.cml.TextWithSubViews;
 import at.blvckbytes.component_markup.test_utils.NullInterpreterLogger;
 import at.blvckbytes.component_markup.util.color.AnsiStyleColor;
-import at.blvckbytes.component_markup.constructor.ComponentConstructor;
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.test_utils.renderer.ChatRenderer;
@@ -40,7 +40,6 @@ import java.util.logging.Level;
 public abstract class InterpreterTestsBase {
 
   private static final Gson gsonInstance = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-  private static final ComponentConstructor<JsonObject, JsonObject> componentConstructor = new JsonComponentConstructor();
 
   @SuppressWarnings("SameParameterValue")
   protected void makeRecordedCase(
@@ -108,7 +107,7 @@ public abstract class InterpreterTestsBase {
       actualNode,
       slot,
       environment,
-      componentConstructor,
+      JsonComponentConstructor.INSTANCE,
       NullInterpreterLogger.INSTANCE
     );
 
@@ -158,7 +157,7 @@ public abstract class InterpreterTestsBase {
 
     try {
       File renderFile = new File(caseFolder, "render.png");
-      BufferedImage image = ChatRenderer.render(components, componentConstructor.getSlotContext(slot));
+      BufferedImage image = ChatRenderer.render(components, JsonComponentConstructor.INSTANCE.getSlotContext(slot));
       ImageIO.write(image, "png", renderFile);
     } catch (Exception e) {
       Assertions.fail("Could not render/write image:", e);
@@ -205,21 +204,46 @@ public abstract class InterpreterTestsBase {
     throw new IllegalStateException("Unaccounted-for json-element: " + input.getClass());
   }
 
+  protected Object transformJsonComponentToText(Object value) {
+    if (!(value instanceof JsonObject))
+      return value;
+
+    StringBuilder result = new StringBuilder();
+    JsonComponentConstructor.INSTANCE.forEachTextOf((JsonObject) value, result::append);
+    return result.toString();
+  }
+
+  protected void makePlainTextCase(
+    TextWithSubViews input,
+    InterpretationEnvironment baseEnvironment,
+    SlotType slot,
+    @Nullable RawValueTransformer rawValueTransformer,
+    List<String> expectedResult
+  ) {
+    MarkupNode actualNode = parseMarkup(input.text);
+
+    List<String> actualResult = MarkupInterpreter.interpret(
+      actualNode,
+      slot,
+      baseEnvironment,
+      PlainTextComponentConstructor.INSTANCE,
+      rawValueTransformer,
+      NullInterpreterLogger.INSTANCE
+    );
+
+    Assertions.assertEquals(
+      expectedResult,
+      actualResult
+    );
+  }
+
   protected void makeCase(
     TextWithSubViews input,
     InterpretationEnvironment baseEnvironment,
     SlotType slot,
     JsonBuilder expectedResult
   ) {
-    MarkupNode actualNode;
-
-    try {
-      actualNode = MarkupParser.parse(InputView.of(input.text), BuiltInTagRegistry.INSTANCE);
-    } catch (MarkupParseException e) {
-      System.out.println(String.join("\n", e.makeErrorScreen()));
-      Assertions.fail("Threw an error:", e);
-      return;
-    }
+    MarkupNode actualNode = parseMarkup(input.text);
 
     JsonElement expectedJson;
 
@@ -237,7 +261,7 @@ public abstract class InterpreterTestsBase {
       actualNode,
       slot,
       baseEnvironment,
-      componentConstructor,
+      JsonComponentConstructor.INSTANCE,
       NullInterpreterLogger.INSTANCE
     );
 
@@ -257,22 +281,24 @@ public abstract class InterpreterTestsBase {
     InterpretationEnvironment baseEnvironment,
     SlotType slot
   ) {
-    MarkupNode markupNode;
-
-    try {
-      markupNode = MarkupParser.parse(InputView.of(markup), BuiltInTagRegistry.INSTANCE);
-    } catch (MarkupParseException e) {
-      System.out.println(String.join("\n", e.makeErrorScreen()));
-      Assertions.fail("Threw an error:", e);
-      return null;
-    }
+    MarkupNode markupNode = parseMarkup(markup);
 
     return MarkupInterpreter.interpret(
       markupNode,
       slot,
       baseEnvironment,
-      componentConstructor,
+      JsonComponentConstructor.INSTANCE,
       NullInterpreterLogger.INSTANCE
     );
+  }
+
+  protected MarkupNode parseMarkup(String markup) {
+    try {
+      return MarkupParser.parse(InputView.of(markup), BuiltInTagRegistry.INSTANCE);
+    } catch (MarkupParseException e) {
+      System.out.println(String.join("\n", e.makeErrorScreen()));
+      Assertions.fail("Threw an error:", e);
+      return null;
+    }
   }
 }

@@ -21,6 +21,10 @@ import java.util.function.Consumer;
 
 public class JsonComponentConstructor implements ComponentConstructor<JsonObject, JsonObject> {
 
+  public static final JsonComponentConstructor INSTANCE = new JsonComponentConstructor();
+
+  private JsonComponentConstructor() {}
+
   @Override
   public Class<JsonObject> getComponentClass() {
     return JsonObject.class;

@@ -37,6 +37,7 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
 
   private final ComponentConstructor<B, C> componentConstructor;
   private final TemporaryMemberEnvironment environment;
+  private final @Nullable RawValueTransformer rawValueTransformer;
   private final InterpreterLogger logger;
 
   private final InterceptorStack<B> interceptors;
@@ -46,10 +47,12 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
   private MarkupInterpreter(
     ComponentConstructor<B, C> componentConstructor,
     InterpretationEnvironment baseEnvironment,
+    @Nullable RawValueTransformer rawValueTransformer,
     InterpreterLogger logger
   ) {
     this.componentConstructor = componentConstructor;
     this.environment = new TemporaryMemberEnvironment(baseEnvironment);
+    this.rawValueTransformer = rawValueTransformer;
     this.logger = logger;
 
     this.interceptors = new InterceptorStack<>(this);
@@ -64,7 +67,19 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
     ComponentConstructor<B, C> componentConstructor,
     InterpreterLogger logger
   ) {
-    return new MarkupInterpreter<>(componentConstructor, baseEnvironment, logger)
+    return new MarkupInterpreter<>(componentConstructor, baseEnvironment, null, logger)
+      .interpretSubtree(node, slotType);
+  }
+
+  public static <B, C> List<C> interpret(
+    MarkupNode node,
+    SlotType slotType,
+    InterpretationEnvironment baseEnvironment,
+    ComponentConstructor<B, C> componentConstructor,
+    @Nullable RawValueTransformer rawValueTransformer,
+    InterpreterLogger logger
+  ) {
+    return new MarkupInterpreter<>(componentConstructor, baseEnvironment, rawValueTransformer, logger)
       .interpretSubtree(node, slotType);
   }
 
@@ -622,6 +637,9 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         RawNode rawNode = (RawNode) node;
         Object rawValue = rawNode.value;
 
+        if (rawValueTransformer != null)
+          rawValue = rawValueTransformer.transform(rawValue);
+
         if (componentConstructor.getComponentClass().isInstance(rawValue)) {
           //noinspection unchecked
           builder.onComponent((C) rawValue, rawNode);
@@ -633,6 +651,15 @@ public class MarkupInterpreter<B, C> implements Interpreter<B, C> {
         // has no real downsides to it) will cause users of this library to experience less frustration.
         if (rawValue instanceof Collection) {
           Collection<?> collection = (Collection<?>) rawValue;
+
+          if (rawValueTransformer != null) {
+            List<Object> transformedItems = new ArrayList<>(collection.size());
+
+            for (Object item : collection)
+              transformedItems.add(rawValueTransformer.transform(item));
+
+            collection = transformedItems;
+          }
 
           if (collection.stream().allMatch(componentConstructor.getComponentClass()::isInstance)) {
             for (Object component : collection) {
